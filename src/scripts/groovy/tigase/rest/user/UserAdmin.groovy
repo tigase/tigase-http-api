@@ -23,9 +23,16 @@ package tigase.rest.user
 import tigase.http.rest.Service
 import tigase.xmpp.BareJID
 
-class UserHandler extends tigase.http.rest.Handler {
+/**
+ * Class implements ability to manage users for service administrator
+ * Handles requests for /rest/user/user@domain where user@domain is jid
+ *
+ * Example format of content of request or response:
+ * <user><jid>user@domain</jid><password>Paa$$w0rd</password></jid></user>
+ */
+class UserAdminHandler extends tigase.http.rest.Handler {
 
-    public UserHandler() {
+    public UserAdminHandler() {
         regex = /\/([^@\/]+)@([^@\/]+)/
         requiredRole = "admin"
         isAsync = false

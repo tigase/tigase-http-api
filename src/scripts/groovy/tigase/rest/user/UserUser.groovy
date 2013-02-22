@@ -23,9 +23,16 @@ package tigase.rest.user
 import tigase.http.rest.Service
 import tigase.xmpp.BareJID
 
-class UserHandler extends tigase.http.rest.Handler {
+/**
+ * Class implements ability to change user password or remove account by user
+ * Handles requests for /rest/user/ and executes request for currently authenticated user
+ *
+ * Example format of content of request or response:
+ * <user><jid>user@domain</jid><password>Paa$$w0rd</password></jid></user>
+ */
+class UserUserHandler extends tigase.http.rest.Handler {
 
-    public UserHandler() {
+    public UserUserHandler() {
         regex = /\//
         requiredRole = "user"
         isAsync = false

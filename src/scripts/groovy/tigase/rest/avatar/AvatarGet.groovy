@@ -26,6 +26,10 @@ import tigase.util.Base64
 import tigase.xml.Element
 import tigase.xmpp.StanzaType
 
+/**
+ * Class implements retrieving user avatar from VCard
+ * HTTP GET request for /rest/avatar/user@domain will return avatar for jid user@domain retrived from VCard
+ */
 class AvatarHandler extends tigase.http.rest.Handler {
 
     public AvatarHandler() {

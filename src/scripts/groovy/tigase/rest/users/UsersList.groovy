@@ -23,6 +23,13 @@ package tigase.rest.users
 import tigase.http.rest.Service
 import tigase.xmpp.BareJID
 
+/**
+ * Class implements ability to retrieve by service administrator list of registered accounts
+ * Handles requests for /rest/users/
+ *
+ * Example format of content of response:
+ * <users><items><item>user1@domain</item><item>user2@domain</item></items><count>2</count></users>
+ */
 class UsersHandler extends tigase.http.rest.Handler {
 
     public UsersHandler() {
