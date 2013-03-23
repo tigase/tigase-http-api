@@ -23,9 +23,15 @@ package tigase.http;
 
 import org.eclipse.jetty.servlet.ServletContextHandler;
 
-public interface HttpRegistrator {
+public abstract class HttpRegistrator {
 
-    public void registerHttpServletContext(ServletContextHandler ctx);
-    public void unregisterContext(ServletContextHandler ctx);
+    protected String contextFilePath;
+
+    public void setContextFilePath(String contextFilePath) {
+        this.contextFilePath = contextFilePath;
+    }
+
+    public abstract void registerHttpServletContext(ServletContextHandler ctx);
+    public abstract void unregisterContext(ServletContextHandler ctx);
 
 }

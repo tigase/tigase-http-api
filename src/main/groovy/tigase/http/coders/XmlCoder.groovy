@@ -55,9 +55,10 @@ public class XmlCoder implements Coder {
                 children.each {
                     list.add(convertNodeToObject(it, false))
                 }
-                def map = [:]
+/*                def map = [:]
                 map[node.name()] = list;
-                return map;
+                return map;*/
+                return list;
             }
             else {
                 def map = [:];

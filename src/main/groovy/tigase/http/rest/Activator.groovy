@@ -61,7 +61,9 @@ class Activator implements BundleActivator, ServiceListener {
             registrator = new HttpRegistrator() {
                 @Override
                 void registerHttpServletContext(ServletContextHandler ctx) {
-                    registration = context.registerService(ContextHandler.class.getName(), ctx, new Hashtable());
+                    def props = new Hashtable()
+                    props.put("contextFilePath", "/tigase-http-context.xml");
+                    registration = context.registerService(ContextHandler.class.getName(), ctx, props);
                 }
 
                 @Override

@@ -26,6 +26,7 @@ import tigase.db.UserRepository
 import tigase.http.HttpServer
 import tigase.server.AbstractMessageReceiver
 import tigase.server.Packet
+import tigase.server.Permissions
 import tigase.xmpp.Authorization
 import tigase.xmpp.BareJID
 import tigase.xmpp.JID
@@ -84,7 +85,20 @@ class RestMessageReceiver extends AbstractMessageReceiver implements  Service {
     public void sendPacket(Packet packet, Long timeout, Closure closure) {
         String uuid = UUID.randomUUID().toString();
         JID from = getComponentId().copyWithResource(uuid);
-        packet.initVars(from, packet.getStanzaTo());
+        if (packet.getStanzaFrom() == null) {
+            packet.initVars(from, packet.getStanzaTo());
+        }
+        packet.setPacketFrom(from);
+
+        if (packet.getStanzaFrom() != null && !this.isLocalDomainOrComponent(packet.getStanzaFrom().toString())) {
+            if (this.isAdmin(packet.getStanzaFrom())) {
+                packet.setPermissions(Permissions.ADMIN);
+            }
+            else {
+                packet.setPermissions(Permissions.AUTH);
+            }
+        }
+
         String id = packet.getAttribute("id");
         String key = generateKey(uuid, id);
 
