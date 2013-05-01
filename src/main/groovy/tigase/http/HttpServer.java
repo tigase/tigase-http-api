@@ -55,7 +55,7 @@ public class HttpServer {
 
     private static int port = DEFAULT_PORT_VAL;
     private static String context = DEFAULT_CONTEXT_VAL;
-    private static String contextFilePath = DEFAULT_CONTEXT_FILE_PATH_VAL;
+    private static String contextFilePath = null;//DEFAULT_CONTEXT_FILE_PATH_VAL;
     private static boolean useLocal = true;
     private static String scriptsDir = DEFAULT_REST_SCRIPTS_DIRECTORY_VAL;
 
@@ -88,7 +88,13 @@ public class HttpServer {
         context = (String) props.get(CONTEXT_KEY);
         scriptsDir = (String) props.get(REST_SCRIPTS_DIRECTORY_KEY);
 
-        (useLocal ? localHttpRegistrator : osgiHttpRegistrator).setContextFilePath(contextFilePath);
+        HttpRegistrator registrator = useLocal ? localHttpRegistrator : osgiHttpRegistrator;
+        if (registrator != null) {
+            registrator.setContextFilePath(contextFilePath);
+        }
+        else {
+            log.warning("no HttpRegistrator instance where useLocal = " + useLocal);
+        }
     }
 
     public static void start() {
@@ -111,6 +117,10 @@ public class HttpServer {
                 }
             };
             registrator = localHttpRegistrator;
+        }
+
+        if (contextFilePath != null) {
+            registrator.setContextFilePath(contextFilePath);
         }
 
         try {

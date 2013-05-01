@@ -203,6 +203,7 @@ public class RestSerlvet extends HttpServlet {
                 else if (result instanceof Handler.Result) {
                     // send response with set type and data
                     response.setContentType(result.contentType);
+                    response.setContentLength(result.data.length);
                     response.getOutputStream().write(result.data);
                 }
                 else {

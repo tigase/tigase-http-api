@@ -60,7 +60,10 @@ class AvatarHandler extends tigase.http.rest.Handler {
                 def outResult = new tigase.http.rest.Handler.Result();
                 outResult.contentType = photo.getChildren().find { it.getName() == "TYPE" }?.getCData()
                 String contentBase64 = photo.getChildren().find { it.getName() == "BINVAL" }?.getCData();
-                outResult.data = Base64.decode(contentBase64);
+                // TODO: added workaround for bad result of Base64.decode when encoded data is wrapped
+                // It should be removed when issue https://projects.tigase.org/issues/1265 is fixed
+                // outResult.data = Base64.decode(contentBase64);
+                outResult.data = Base64.decode(contentBase64.replace('\n', '').replace('\r',''));
 
                 callback(outResult);
             });
