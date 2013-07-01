@@ -234,7 +234,7 @@ public class RestSerlvet extends HttpServlet {
         }
 
         if (type != null && request.getContentLength() > 0) {
-            if (type.endsWith("/xml") || type.endsWith("/json")) {
+            if (route.decodeContent && (type.endsWith("/xml") || type.endsWith("/json"))) {
                 requestContent = request.getReader().getText()
 
                 if (log.isLoggable(Level.FINEST)) {
@@ -259,11 +259,14 @@ public class RestSerlvet extends HttpServlet {
             }
             else {
                 // pass request if we have content but it is none of JSON or XML
+                // or handler requires not decoded content
                 params.add(request);
             }
         }
 
         params.addAll(reqParams)
+
+        log.warning("got calling with params = " + params.toString())
 
         def method = request.getMethod().toLowerCase().capitalize()
 

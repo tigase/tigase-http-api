@@ -20,6 +20,11 @@ abstract class Handler {
     def authRequired = { return requiredRole != null }
 
     /**
+     * false if handler requires plain content
+     */
+    def decodeContent = true;
+
+    /**
      * regular expression to match request
      */
     def regex = null;
