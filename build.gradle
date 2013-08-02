@@ -13,6 +13,7 @@ def localMavenRepo = 'file://' + new File(System.getProperty('user.home'), '.m2/
 
 repositories {
         mavenCentral()
+	mavenLocal()
         maven {
 		url "http://maven.tigase.org"
                 url localMavenRepo
