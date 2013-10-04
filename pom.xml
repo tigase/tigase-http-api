@@ -173,9 +173,15 @@
 		<resources>
 			<resource>
 				<directory>src/scripts/groovy/tigase/</directory>
-        <includes>
-          <include>**/*.groovy</include>
-        </includes>
+				<includes>
+					<include>**/*.groovy</include>
+				</includes>
+			</resource>
+			<resource>
+				<directory>src/main/resources/</directory>
+				<includes>
+					<include>**/*.xml</include>
+				</includes>
 			</resource>
 		</resources>
 
