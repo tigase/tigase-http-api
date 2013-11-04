@@ -203,9 +203,9 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.osgi</groupId>
+			<groupId>org.apache.felix</groupId>
 			<artifactId>org.osgi.core</artifactId>
-			<version>4.1.0</version>
+			<version>1.4.0</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
