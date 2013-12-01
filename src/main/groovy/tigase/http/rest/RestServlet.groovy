@@ -99,6 +99,13 @@ public class RestSerlvet extends HttpServlet {
 
         prefix = request.getContextPath() + prefix
 
+		def apiKey = request.getParameter("api-key");
+		def fullPath = request.getRequestURI();
+		if (!HttpServer.getService().isAllowed(apiKey, fullPath)) {
+			response.sendError(HttpServletResponse.SC_FORBIDDEN, "To access URI = '" + fullPath + "' a valid api key is required");
+			return;
+		}
+		
         String localUri = request.getRequestURI().replace(prefix, "");
 
         if (log.isLoggable(Level.FINEST)) {

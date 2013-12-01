@@ -24,6 +24,7 @@ package tigase.http.rest
 import tigase.db.AuthRepository
 import tigase.db.UserRepository
 import tigase.http.HttpServer
+import tigase.db.comp.ComponentRepository;
 import tigase.server.AbstractMessageReceiver
 import tigase.server.Packet
 import tigase.server.Permissions
@@ -44,6 +45,7 @@ class RestMessageReceiver extends AbstractMessageReceiver implements  Service {
 
     private UserRepository user_repo_impl = null;
     private AuthRepository auth_repo_impl = null;
+	private ApiKeyRepository apiKeyRepository = null;
 
     private boolean started = false;
 
@@ -123,6 +125,7 @@ class RestMessageReceiver extends AbstractMessageReceiver implements  Service {
     public void initBindings(Bindings init) {
         super.initBindings(init);
         init.put("restMessageReceiver", this);
+		init.put(ComponentRepository.COMP_REPO_BIND, apiKeyRepository);		
     }
 
     public void reloadRestHandlers() {
@@ -140,6 +143,11 @@ class RestMessageReceiver extends AbstractMessageReceiver implements  Service {
         return auth_repo_impl;
     }
 
+	@Override
+	public boolean isAllowed(String key, String path) {
+		return apiKeyRepository.isAllowed(key, path);
+	}
+	
     @Override
     public boolean isAdmin(BareJID user) {
         return isAdmin(JID.jidInstance(user));
@@ -155,6 +163,13 @@ class RestMessageReceiver extends AbstractMessageReceiver implements  Service {
     @Override
     public Map<String,Object> getDefaults(Map<String,Object> params) {
         Map<String,Object> props = super.getDefaults(params);
+		if (apiKeyRepository) {
+			apiKeyRepository.getDefaults(props, params);
+		}
+		else {
+			ApiKeyRepository apiKeyRepo = new ApiKeyRepository();
+			apiKeyRepo.getDefaults(props, params);			
+		}
         return HttpServer.getDefaults(params, props);
     }
 
@@ -167,6 +182,12 @@ class RestMessageReceiver extends AbstractMessageReceiver implements  Service {
         user_repo_impl = props.get(SHARED_USER_REPO_PROP_KEY);
         auth_repo_impl = props.get(SHARED_AUTH_REPO_PROP_KEY);
 
+		if (apiKeyRepository == null) {
+			apiKeyRepository = new ApiKeyRepository();
+		}
+		apiKeyRepository.setRepoUser(BareJID.bareJIDInstanceNS(getName()));
+		apiKeyRepository.setProperties(props);
+		
         HttpServer.setProperties(props);
         if (started) HttpServer.start();
     }

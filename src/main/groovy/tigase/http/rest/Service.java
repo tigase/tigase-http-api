@@ -33,5 +33,6 @@ public interface Service {
     UserRepository getUserRepository();
     AuthRepository getAuthRepository();
     boolean isAdmin(BareJID user);
+	boolean isAllowed(String key, String path);
 
 }
