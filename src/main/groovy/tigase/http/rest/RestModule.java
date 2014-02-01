@@ -24,14 +24,11 @@ package tigase.http.rest;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.script.Bindings;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import tigase.db.AuthRepository;
 import tigase.http.AbstractModule;
 import tigase.http.HttpServer;
 import tigase.http.security.TigasePlainLoginService;
@@ -42,8 +39,6 @@ public class RestModule extends AbstractModule {
 	
 	private static final String SCRIPTS_DIR_KEY = "rest-scripts-dir";
 
-	private static final String VHOSTS_KEY = "vhosts";
-	
 	private static final String NAME = "rest";
 	
 	private ReloadHandlersCmd reloadHandlersCmd = new ReloadHandlersCmd(this);
@@ -76,7 +71,6 @@ public class RestModule extends AbstractModule {
 			httpContext.getSecurityHandler().setLoginService(new TigasePlainLoginService());
 			httpContext.setContextPath(contextPath);
 			if (vhosts != null) {
-				System.out.println("for module = " + getName() + " setting vhosts = " + Arrays.toString(vhosts));
 				httpContext.setVirtualHosts(vhosts);
 			}
 

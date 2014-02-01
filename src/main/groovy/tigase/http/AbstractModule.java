@@ -115,8 +115,6 @@ public abstract class AbstractModule implements Module {
 	public void setProperties(Map<String, Object> props) {
 		serviceEntity = new ServiceEntity(getName(), null, getDescription(), true);
 		serviceEntity.setFeatures(getFeatures());
-				
-		loadScripts();				
 	}
 	
 	@Override
@@ -150,7 +148,4 @@ public abstract class AbstractModule implements Module {
 		return writer.getAuthRepository();
 	}
 	
-	private void loadScripts() {
-		
-	}
 }

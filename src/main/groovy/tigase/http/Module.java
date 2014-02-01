@@ -23,19 +23,18 @@ package tigase.http;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import javax.script.Bindings;
 import tigase.db.AuthRepository;
 import tigase.db.UserRepository;
 import tigase.server.Packet;
 import tigase.http.PacketWriter.Callback;
-import tigase.http.rest.ApiKeyRepository;
 import tigase.xml.Element;
 import tigase.xmpp.BareJID;
 import tigase.xmpp.JID;
 
 public interface Module {
 	
+	public static final String VHOSTS_KEY = "vhosts";
 	public static final String HTTP_SERVER_KEY = "http-server";
 	public static final String HTTP_CONTEXT_PATH_KEY = "context-path";
 	

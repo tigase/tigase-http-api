@@ -22,7 +22,6 @@
 package tigase.http;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -37,12 +36,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import tigase.db.AuthRepository;
 import tigase.db.UserRepository;
+import tigase.http.dnswebservice.DnsWebServiceModule;
 import tigase.http.rest.ApiKeyRepository;
 import tigase.http.rest.RestModule;
 import tigase.server.AbstractMessageReceiver;
 import tigase.server.Packet;
 import tigase.server.Permissions;
-import tigase.util.TigaseStringprepException;
 import tigase.xml.Element;
 import tigase.xmpp.Authorization;
 import tigase.xmpp.BareJID;
@@ -58,7 +57,7 @@ public class HttpMessageReceiver extends AbstractMessageReceiver implements Pack
     private ConcurrentHashMap<String,Request> pendingRequest = new ConcurrentHashMap<String,Request>();
 
 	private Map<String,Module> modules = new ConcurrentHashMap<String,Module>();
-	private static final Class[] ALL_MODULES = { RestModule.class };
+	private static final Class[] ALL_MODULES = { RestModule.class, DnsWebServiceModule.class };
 	
 	private HttpServer httpServer = new HttpServer();;
 	
