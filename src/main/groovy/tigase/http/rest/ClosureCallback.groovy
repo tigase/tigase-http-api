@@ -19,13 +19,23 @@
  * Last modified by $Author$
  * $Date$
  */
-package tigase.http;
 
-import org.eclipse.jetty.servlet.ServletContextHandler;
+package tigase.http.rest
 
-public abstract class HttpRegistrator {
+import tigase.http.*;
+import tigase.server.Packet
 
-    public abstract void registerContext(ServletContextHandler ctx);
-    public abstract void unregisterContext(ServletContextHandler ctx);
-
+class ClosureCallback implements PacketWriter.Callback {
+	
+	Closure closure;
+	
+	public ClosureCallback(Closure closure) {
+		this.closure = closure;
+	}
+	
+	public void onResult(Packet packet) {
+		closure.call(packet);
+	}
+	
 }
+

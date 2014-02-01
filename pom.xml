@@ -162,7 +162,7 @@
 						<Implementation-Version>${project.version}-b${gitVersion}/${buildNumber}</Implementation-Version>
 						<Implementation-Build>${gitVersion}/${buildNumber} (${maven.build.timestamp})</Implementation-Build>
 						<Tigase-Version>${project.version}-b${gitVersion}</Tigase-Version>
-						<Bundle-Activator>tigase.http.rest.Activator</Bundle-Activator>
+						<Bundle-Activator>tigase.http.Activator</Bundle-Activator>
 						<DynamicImport-Package>'*'</DynamicImport-Package>
 					</instructions>
 				</configuration>

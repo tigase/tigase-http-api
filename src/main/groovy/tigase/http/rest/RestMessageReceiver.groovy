@@ -1,6 +1,6 @@
 /*
  * Tigase HTTP API
- * Copyright (C) 2004-2013 "Tigase, Inc." <office@tigase.com>
+ * Copyright (C) 2004-2014 "Tigase, Inc." <office@tigase.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -38,8 +38,18 @@ import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 
-class RestMessageReceiver extends AbstractMessageReceiver implements  Service {
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import tigase.http.security.TigasePlainLoginService;
+import org.eclipse.jetty.servlet.ServletHolder;
 
+public class RestMessageReceiver extends AbstractMessageReceiver implements  Service {
+
+    private static final String DEFAULT_CONTEXT_VAL = "/rest";
+    private static final String DEFAULT_REST_SCRIPTS_DIRECTORY_VAL = "scripts/rest";	
+	
+    private static final String CONTEXT_KEY = "context";	
+    private static final String REST_SCRIPTS_DIRECTORY_KEY = "rest-scripts-dir";	
+	
     private ScheduledExecutorService scheduler;
     private ConcurrentHashMap pendingRequest = new ConcurrentHashMap();
 
@@ -47,7 +57,11 @@ class RestMessageReceiver extends AbstractMessageReceiver implements  Service {
     private AuthRepository auth_repo_impl = null;
 	private ApiKeyRepository apiKeyRepository = null;
 
-    private boolean started = false;
+	private HttpServer httpServer = new HttpServer();
+	private ServletContextHandler httpContext = null;
+	
+    private static String context = DEFAULT_CONTEXT_VAL;	
+    private static String scriptsDir = DEFAULT_REST_SCRIPTS_DIRECTORY_VAL;
 
     @Override
     void processPacket(Packet packet) {
@@ -71,16 +85,13 @@ class RestMessageReceiver extends AbstractMessageReceiver implements  Service {
     public void start() {
         scheduler = Executors.newScheduledThreadPool(2);
         super.start();
-        HttpServer.setService(this);
-        started = true;
     }
 
     public void stop() {
-        HttpServer.setService(null);
         scheduler.shutdown();
         super.stop();
-        HttpServer.stop();
-        started = false;
+		deinitializeContext();
+        httpServer.stop();
     }
 
     @Override
@@ -129,8 +140,9 @@ class RestMessageReceiver extends AbstractMessageReceiver implements  Service {
     }
 
     public void reloadRestHandlers() {
-        HttpServer.stop();
-        HttpServer.start();
+//        httpServer.stop();
+//        httpServer.start();
+		initializeContext(null);
     }
 
     @Override
@@ -144,8 +156,8 @@ class RestMessageReceiver extends AbstractMessageReceiver implements  Service {
     }
 
 	@Override
-	public boolean isAllowed(String key, String path) {
-		return apiKeyRepository.isAllowed(key, path);
+	public boolean isAllowed(String key, String host, String path) {
+		return apiKeyRepository.isAllowed(key, host, path);
 	}
 	
     @Override
@@ -170,7 +182,8 @@ class RestMessageReceiver extends AbstractMessageReceiver implements  Service {
 			ApiKeyRepository apiKeyRepo = new ApiKeyRepository();
 			apiKeyRepo.getDefaults(props, params);			
 		}
-        return HttpServer.getDefaults(params, props);
+		props.putAll(httpServer.getDefaults());
+        return props;
     }
 
     @Override
@@ -188,10 +201,70 @@ class RestMessageReceiver extends AbstractMessageReceiver implements  Service {
 		apiKeyRepository.setRepoUser(BareJID.bareJIDInstanceNS(getName()));
 		apiKeyRepository.setProperties(props);
 		
-        HttpServer.setProperties(props);
-        if (started) HttpServer.start();
+        httpServer.setProperties(props);
+        httpServer.start();
+		
+		initializeContext(props);
     }
 
+	private void initializeContext(Map<String,Object> props) {
+		if (props.get(CONTEXT_KEY)) {
+			context = props.get(CONTEXT_KEY);
+		}
+		
+		if (props.get(REST_SCRIPTS_DIRECTORY_KEY)) {
+			scriptsDir = props.get(REST_SCRIPTS_DIRECTORY_KEY);
+		}
+		
+		if (httpContext) {
+			deinitializeContext();
+		}
+		
+        httpContext = new ServletContextHandler(ServletContextHandler.NO_SESSIONS);
+        httpContext.setSecurityHandler(httpContext.getDefaultSecurityHandlerClass().newInstance());
+        httpContext.getSecurityHandler().setLoginService(new TigasePlainLoginService());
+        httpContext.setContextPath(context);
+
+        File scriptsDirFile = new File(scriptsDir);
+        File[] scriptDirFiles = scriptsDirFile.listFiles(new FileFilter() {
+            @Override
+            public boolean accept(File file) {
+                return file.isDirectory();
+            }
+        });
+
+        if (scriptDirFiles != null) {
+            for (File dirFile : scriptDirFiles) {
+                startRestServletForDirectory(httpContext, dirFile);
+            }
+        }
+
+        httpServer.registerContext(httpContext);		
+	}
+	
+	private void deinitializeContext() {
+		if (httpContext) {
+			httpServer.unregisterContext(httpContext);
+			httpContext = null;
+		}		
+	}
+
+    private void startRestServletForDirectory(ServletContextHandler httpContext, File scriptsDirFile) {
+        File[] scriptFiles = scriptsDirFile.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File file, String s) {
+                return s.endsWith("groovy");
+            }
+        });
+
+        if (scriptFiles != null) {
+            RestSerlvet restServlet = new RestSerlvet();
+			restServlet.setService(this);
+            httpContext.addServlet(new ServletHolder(restServlet),"/" + scriptsDirFile.getName() + "/*");
+            restServlet.loadHandlers(scriptFiles);
+        }
+    }		
+	
     /**
      * Generates key for setting use in pending requests map
      *

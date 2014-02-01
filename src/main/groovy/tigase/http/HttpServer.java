@@ -1,6 +1,6 @@
 /*
  * Tigase HTTP API
- * Copyright (C) 2004-2013 "Tigase, Inc." <office@tigase.com>
+ * Copyright (C) 2004-2014 "Tigase, Inc." <office@tigase.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -21,188 +21,94 @@
  */
 package tigase.http;
 
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import tigase.http.rest.RestMessageReceiver;
-import tigase.http.rest.RestSerlvet;
-import tigase.http.rest.Service;
-import tigase.http.security.TigasePlainLoginService;
-
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FilenameFilter;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletContextHandler;
 
 public class HttpServer {
-
-    private static final Logger log = Logger.getLogger(HttpServer.class.getCanonicalName());
-
-    private static final String PORT_KEY = "port";
-    private static final String CONTEXT_KEY = "context";
-    private static final String CONTEXT_FILE_PATH_KEY = "context-file-path";
-    private static final String USE_LOCAL_SERVER_KEY = "use-local-server";
-    private static final String REST_SCRIPTS_DIRECTORY_KEY = "rest-scripts-dir";
-
-    private static final int DEFAULT_PORT_VAL = 8080;
-    private static final String DEFAULT_CONTEXT_VAL = "/rest";
-    private static final String DEFAULT_CONTEXT_FILE_PATH_VAL = "etc/tigase-http-context.xml";
-    private static final String DEFAULT_REST_SCRIPTS_DIRECTORY_VAL = "scripts/rest";
-
-    private static Server localServer;
-
-    private static int port = DEFAULT_PORT_VAL;
-    private static String context = DEFAULT_CONTEXT_VAL;
-    private static String contextFilePath = null;//DEFAULT_CONTEXT_FILE_PATH_VAL;
-    private static boolean useLocal = true;
-    private static String scriptsDir = DEFAULT_REST_SCRIPTS_DIRECTORY_VAL;
-
-    private static boolean osgi = false;
-    private static HttpRegistrator osgiHttpRegistrator;
-    private static HttpRegistrator localHttpRegistrator;
-
-    public static void setOSGi(boolean osgi_) {
-        osgi = osgi_;
-    }
-
-    public static void setOsgiHttpRegistrator(HttpRegistrator registrator) {
-        osgiHttpRegistrator = registrator;
-    }
-
-    public static Map<String,Object> getDefaults(Map<String,Object> params, Map<String,Object> props) {
-        props.put(PORT_KEY, DEFAULT_PORT_VAL);
-        props.put(CONTEXT_KEY, DEFAULT_CONTEXT_VAL);
-        props.put(CONTEXT_FILE_PATH_KEY, DEFAULT_CONTEXT_FILE_PATH_VAL);
-        props.put(USE_LOCAL_SERVER_KEY, !osgi);
-        props.put(REST_SCRIPTS_DIRECTORY_KEY, DEFAULT_REST_SCRIPTS_DIRECTORY_VAL);
-
-        return props;
-    }
-
-    public static void setProperties(Map<String,Object> props) {
-        useLocal = (Boolean) props.get(USE_LOCAL_SERVER_KEY);
-        port = (Integer) props.get(PORT_KEY);
-        contextFilePath = (String) props.get(CONTEXT_FILE_PATH_KEY);
-        context = (String) props.get(CONTEXT_KEY);
-        scriptsDir = (String) props.get(REST_SCRIPTS_DIRECTORY_KEY);
-
-        HttpRegistrator registrator = useLocal ? localHttpRegistrator : osgiHttpRegistrator;
-        if (registrator != null) {
-            registrator.setContextFilePath(contextFilePath);
-        }
-        else {
-            log.warning("no HttpRegistrator instance where useLocal = " + useLocal);
-        }
-    }
-
-    public static void start() {
-        HttpRegistrator registrator = osgiHttpRegistrator;
-        if (useLocal) {
-            localServer = new Server(port);
-            localHttpRegistrator = new HttpRegistrator() {
-                @Override
-                public void registerHttpServletContext(ServletContextHandler ctx) {
-                    localServer.setHandler(ctx);
-                }
-
-                @Override
-                public void unregisterContext(ServletContextHandler ctx) {
-                    try {
-                        ctx.stop();
-                    } catch (Exception e) {
-                        log.log(Level.SEVERE, "Exception stopping servlet context", e);
-                    }
-                }
-            };
-            registrator = localHttpRegistrator;
-        }
-
-        if (contextFilePath != null) {
-            registrator.setContextFilePath(contextFilePath);
-        }
-
-        try {
-            start(registrator);
-        }
-        catch (Exception ex) {
-            log.log(Level.SEVERE, "Exception creating context", ex);
-        }
-
-        if (useLocal) {
-            try {
-                localServer.start();
-            } catch (Exception e) {
-                log.log(Level.SEVERE, "Exception starting http server", e);
-            }
-        }
-    }
-
-    public static void stop() {
-        stop(useLocal ? localHttpRegistrator : osgiHttpRegistrator);
-        if (useLocal) {
-            try {
-                localServer.stop();
-            } catch (Exception e) {
-                log.log(Level.SEVERE, "Exception stopping http server", e);
-            }
-            httpContext = null;
-        }
-    }
-
-    private static ServletContextHandler httpContext = null;
-
-    private static void start(HttpRegistrator registrator) throws Exception{
-        httpContext = new ServletContextHandler(ServletContextHandler.NO_SESSIONS);
-        httpContext.setSecurityHandler(httpContext.getDefaultSecurityHandlerClass().newInstance());
-        httpContext.getSecurityHandler().setLoginService(new TigasePlainLoginService());
-        httpContext.setContextPath(context);
-
-        File scriptsDirFile = new File(scriptsDir);
-        File[] scriptDirFiles = scriptsDirFile.listFiles(new FileFilter() {
-            @Override
-            public boolean accept(File file) {
-                return file.isDirectory();
-            }
-        });
-
-        if (scriptDirFiles != null) {
-            for (File dirFile : scriptDirFiles) {
-                startRestServletForDirectory(httpContext, dirFile);
-            }
-        }
-
-        registrator.registerHttpServletContext(httpContext);
-    }
-
-    private static void startRestServletForDirectory(ServletContextHandler httpContext, File scriptsDirFile) {
-        File[] scriptFiles = scriptsDirFile.listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File file, String s) {
-                return s.endsWith("groovy");
-            }
-        });
-
-        if (scriptFiles != null) {
-            RestSerlvet restServlet = new RestSerlvet();
-            httpContext.addServlet(new ServletHolder(restServlet),"/" + scriptsDirFile.getName() + "/*");
-            restServlet.loadHandlers(scriptFiles);
-        }
-    }
-
-    private static void stop(HttpRegistrator registrator) {
-        registrator.unregisterContext(httpContext);
-    }
-
-    private static RestMessageReceiver restComponent;
-
-    public static void setService(RestMessageReceiver component) {
-        restComponent = component;
-    }
-
-    public static Service getService() {
-        return restComponent;
-    }
-
+	
+	private static final Logger log = Logger.getLogger(HttpServer.class.getCanonicalName());
+	
+	private HttpRegistrator httpRegistrator;
+	private static HttpRegistrator osgiHttpRegistrator;
+	
+	protected static void setOsgiHttpRegistrator(HttpRegistrator httpRegistrator) {
+		HttpServer.osgiHttpRegistrator = httpRegistrator;
+	}
+	
+	private static final String HTTP_PORT_KEY = "port";
+	private static final String USE_LOCAL_SERVER_KEY = "use-local-server";
+	
+	private static final int DEF_HTTP_PORT_VAL = 8080;
+	
+	private int port = DEF_HTTP_PORT_VAL;
+	private Server server = null;
+	private boolean useLocal = true;
+	
+	public Map<String,Object> getDefaults() {
+		Map<String,Object> props = new HashMap<String,Object>();
+		props.put(HTTP_PORT_KEY, DEF_HTTP_PORT_VAL);
+		props.put(USE_LOCAL_SERVER_KEY, osgiHttpRegistrator == null);
+		return props;
+	}
+	
+	public void setProperties(Map<String,Object> props) {
+		if (props.containsKey(HTTP_PORT_KEY)) {
+			port = (Integer) props.get(HTTP_PORT_KEY);
+		}
+		if (props.containsKey(USE_LOCAL_SERVER_KEY)) {
+			useLocal = (Boolean) props.get(USE_LOCAL_SERVER_KEY);
+		}
+	}
+	
+	public void start() {
+		if (useLocal) {
+			if (httpRegistrator == null) {
+				server = new Server(port);
+				httpRegistrator = new HttpRegistratorInt(server);
+			}
+		}
+		else {
+			if (httpRegistrator != null && server != null) {
+				stop();
+			}
+			httpRegistrator = osgiHttpRegistrator;
+		}
+	}
+	
+	public void stop() {
+		if (server != null) {
+			httpRegistrator = null;
+			try {
+				server.stop();
+			} catch (Exception ex) {
+				log.log(Level.SEVERE, "Exception stopping internal HTTP server", ex);
+			}
+		}
+	}
+	
+	public void registerContext(ServletContextHandler context) {
+		if (log.isLoggable(Level.INFO)) {
+			String[] vhosts = context.getVirtualHosts();
+			log.log(Level.INFO, "registering context for = {0} for virtual hosts = {1} using {2}", 
+					new Object[]{context.getContextPath(), Arrays.toString(vhosts),
+						httpRegistrator.getClass().getCanonicalName()});
+		}
+		httpRegistrator.registerContext(context);
+	}
+	
+	public void unregisterContext(ServletContextHandler context) {
+		if (log.isLoggable(Level.INFO)) {
+			String[] vhosts = context.getVirtualHosts();
+			log.log(Level.INFO, "unregistering context for = {0} for virtual hosts = {1} using {2}", 
+					new Object[]{context.getContextPath(), Arrays.toString(vhosts), 
+						httpRegistrator.getClass().getCanonicalName()});
+		}
+		httpRegistrator.unregisterContext(context);
+	}
+	
 }

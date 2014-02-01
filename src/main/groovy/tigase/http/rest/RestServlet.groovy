@@ -1,6 +1,6 @@
 /*
  * Tigase HTTP API
- * Copyright (C) 2004-2013 "Tigase, Inc." <office@tigase.com>
+ * Copyright (C) 2004-2014 "Tigase, Inc." <office@tigase.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -21,7 +21,6 @@
  */
 package tigase.http.rest
 
-import tigase.http.HttpServer
 import tigase.http.coders.JsonCoder
 import tigase.http.coders.XmlCoder
 import tigase.xmpp.BareJID
@@ -43,6 +42,8 @@ public class RestSerlvet extends HttpServlet {
     def xmlCoder = new XmlCoder();
     def jsonCoder = new JsonCoder();
 
+	def service = null;
+	
     @Override
     public void init() {
         super.init()
@@ -65,6 +66,10 @@ public class RestSerlvet extends HttpServlet {
         }
     }
 
+	def setService = { Service service ->
+		this.service = service;
+	}
+	
 
     /**
      * Should return mapping of requests to methods
@@ -101,7 +106,8 @@ public class RestSerlvet extends HttpServlet {
 
 		def apiKey = request.getParameter("api-key");
 		def fullPath = request.getRequestURI();
-		if (!HttpServer.getService().isAllowed(apiKey, fullPath)) {
+		def host = request.getServerName();
+		if (!service.isAllowed(apiKey, host, fullPath)) {
 			response.sendError(HttpServletResponse.SC_FORBIDDEN, "To access URI = '" + fullPath + "' a valid api key is required");
 			return;
 		}
@@ -234,7 +240,7 @@ public class RestSerlvet extends HttpServlet {
             }
         }
 
-        def params = [HttpServer.getService(), callback];
+        def params = [service, callback];
 
         if (route.authRequired()) {
             params.add(BareJID.bareJIDInstance(request.getUserPrincipal().getName()));

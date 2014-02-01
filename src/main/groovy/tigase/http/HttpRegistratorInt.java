@@ -21,11 +21,29 @@
  */
 package tigase.http;
 
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 
-public abstract class HttpRegistrator {
+public class HttpRegistratorInt extends HttpRegistrator {
 
-    public abstract void registerContext(ServletContextHandler ctx);
-    public abstract void unregisterContext(ServletContextHandler ctx);
+	private final Server server;
+	private final ContextHandlerCollection contexts;
+	
+	public HttpRegistratorInt(Server server) {
+		this.server = server;
+		this.contexts = new ContextHandlerCollection();
+		server.setHandler(contexts);
+	}
+	
+	@Override
+	public void registerContext(ServletContextHandler ctx) {
+		contexts.addHandler(ctx);
+	}
 
+	@Override
+	public void unregisterContext(ServletContextHandler ctx) {
+		contexts.removeHandler(ctx);
+	}
+	
 }

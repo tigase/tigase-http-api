@@ -1,6 +1,23 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Tigase HTTP API
+ * Copyright (C) 2004-2014 "Tigase, Inc." <office@tigase.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. Look for COPYING file in the top folder.
+ * If not, see http://www.gnu.org/licenses/.
+ *
+ * $Rev$
+ * Last modified by $Author$
+ * $Date$
  */
 package tigase.http.rest;
 
@@ -8,10 +25,6 @@ import tigase.db.comp.RepositoryItem;
 import tigase.db.comp.UserRepoRepository;
 import tigase.xmpp.BareJID;
 
-/**
- *
- * @author andrzej
- */
 public class ApiKeyRepository extends UserRepoRepository<ApiKeyItem> {
 
 	private static final String GEN_API_KEYS = "--api-keys";
@@ -24,7 +37,7 @@ public class ApiKeyRepository extends UserRepoRepository<ApiKeyItem> {
 		return repoUserJid;
 	}
 	
-	protected void setRepoUser(BareJID repoUserJid) {
+	public void setRepoUser(BareJID repoUserJid) {
 		this.repoUserJid = repoUserJid;
 	}
 
@@ -48,7 +61,7 @@ public class ApiKeyRepository extends UserRepoRepository<ApiKeyItem> {
 		return new ApiKeyItem();
 	}
 	
-	public boolean isAllowed(String key, String path) {
+	public boolean isAllowed(String key, String domain, String path) {
 		// allow access for anyone if there is no api key defined
 		if (this.size() == 0)
 			return true;
@@ -65,6 +78,6 @@ public class ApiKeyRepository extends UserRepoRepository<ApiKeyItem> {
 		
 		// if item exists it will check if access for path is 
 		// allowed for supplied key
-		return item.isAllowed(key, path);
+		return item.isAllowed(key, domain, path);
 	}
 }

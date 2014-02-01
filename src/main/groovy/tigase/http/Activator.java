@@ -1,6 +1,6 @@
 /*
  * Tigase HTTP API
- * Copyright (C) 2004-2013 "Tigase, Inc." <office@tigase.com>
+ * Copyright (C) 2004-2014 "Tigase, Inc." <office@tigase.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -19,66 +19,31 @@
  * Last modified by $Author$
  * $Date$
  */
-package tigase.http.rest
+package tigase.http;
 
-import org.eclipse.jetty.server.Server
-import org.eclipse.jetty.server.handler.ContextHandler
-import org.eclipse.jetty.servlet.ServletContextHandler
-import org.eclipse.jetty.servlet.ServletHolder
-import org.osgi.framework.BundleActivator
-import org.osgi.framework.BundleContext
-import org.osgi.framework.ServiceEvent
-import org.osgi.framework.ServiceListener
-import org.osgi.framework.ServiceReference
-import org.osgi.framework.ServiceRegistration
-import tigase.http.HttpRegistrator
-import tigase.http.HttpServer
-import tigase.osgi.ModulesManager
+import java.util.logging.Logger;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceEvent;
+import org.osgi.framework.ServiceListener;
+import org.osgi.framework.ServiceReference;
+import tigase.osgi.ModulesManager;
 
-import java.util.logging.Logger
+import tigase.http.rest.RestMessageReceiver;
 
-class Activator implements BundleActivator, ServiceListener {
-
-    private static final Logger log = Logger.getLogger(Activator.class.getCanonicalName())
-
-    //private ServletContextHandler httpContext;
-    private ServiceRegistration registration;
+public class Activator implements BundleActivator, ServiceListener {
+	
+    private static final Logger log = Logger.getLogger(Activator.class.getCanonicalName());
 
     private BundleContext context;
     private ModulesManager serviceManager;
     private ServiceReference serviceReference;
 
-    private HttpRegistrator registrator;
-
-    @Override
-    void start(BundleContext context) throws Exception {
-        // we are inside OSGi container
-        HttpServer.setOSGi(true)
-
-        ServiceReference sRef = context.getServiceReference(Server.class.getName());
-        if (sRef != null) {
-            log.info("starting Tigase HTTP Rest API")
-            registrator = new HttpRegistrator() {
-                @Override
-                void registerHttpServletContext(ServletContextHandler ctx) {
-                    def props = new Hashtable()
-                    props.put("contextFilePath", "/tigase-http-context.xml");
-                    registration = context.registerService(ContextHandler.class.getName(), ctx, props);
-                }
-
-                @Override
-                void unregisterContext(ServletContextHandler ctx) {
-                    ctx.stop()
-                    registration.unregister();
-                    registration = null;
-                }
-            };
-
-            HttpServer.setOsgiHttpRegistrator(registrator);
-            log.info("started Tigase HTTP Rest API")
-        }
-
-        // Add ApiMessaceReceiver
+	@Override
+	public void start(BundleContext context) throws Exception {
+		HttpServer.setOsgiHttpRegistrator(new HttpRegistratorOSGi(context));
+		
+		// Add ApiMessaceReceiver
         this.context = context;
         context.addServiceListener(this, "(&(objectClass=" + ModulesManager.class.getName() + "))");
         serviceReference = context.getServiceReference(ModulesManager.class.getName());
@@ -86,22 +51,20 @@ class Activator implements BundleActivator, ServiceListener {
             serviceManager = (ModulesManager) context.getService(serviceReference);
             registerAddons();
         }
-    }
+	}
 
-    @Override
-    void stop(BundleContext context) throws Exception {
-
+	@Override
+	public void stop(BundleContext bc) throws Exception {
         if (serviceManager != null) {
             // unregister component and release Jetty HTTP Server
             unregisterAddons();
             context.ungetService(serviceReference);
             serviceManager = null;
             serviceReference = null;
-        }
-
-        // we are stopped so clear this flag
-        HttpServer.setOSGi(false)
-    }
+        }	
+		
+		HttpServer.setOsgiHttpRegistrator(null);
+	}
 
     @Override
     public void serviceChanged(ServiceEvent event) {
@@ -122,13 +85,14 @@ class Activator implements BundleActivator, ServiceListener {
             }
         }
     }
-
+	
     /**
      * Register ServerComponents
      */
     private void registerAddons() {
         if (serviceManager != null) {
-            serviceManager.registerServerComponentClass(RestMessageReceiver.class);
+            serviceManager.registerServerComponentClass(HttpMessageReceiver.class);
+			serviceManager.registerServerComponentClass(RestMessageReceiver.class);
             serviceManager.update();
         }
     }
@@ -138,9 +102,10 @@ class Activator implements BundleActivator, ServiceListener {
      */
     private void unregisterAddons() {
         if (serviceManager != null) {
-            serviceManager.unregisterServerComponentClass(RestMessageReceiver.class);
+            serviceManager.unregisterServerComponentClass(HttpMessageReceiver.class);
+			serviceManager.unregisterServerComponentClass(RestMessageReceiver.class);
             serviceManager.update();
         }
     }
-
+	
 }

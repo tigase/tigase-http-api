@@ -21,11 +21,31 @@
  */
 package tigase.http;
 
-import org.eclipse.jetty.servlet.ServletContextHandler;
+import tigase.db.AuthRepository;
+import tigase.db.UserRepository;
+import tigase.http.rest.ApiKeyRepository;
+import tigase.server.Packet;
+import tigase.util.TigaseStringprepException;
+import tigase.xmpp.JID;
 
-public abstract class HttpRegistrator {
+public interface PacketWriter {
+	
+	public static interface Callback {
+		
+		public void onResult(Packet packet);
+		
+	}
 
-    public abstract void registerContext(ServletContextHandler ctx);
-    public abstract void unregisterContext(ServletContextHandler ctx);
-
+	UserRepository getUserRepository();
+	
+	AuthRepository getAuthRepository();
+	
+	boolean isAdmin(JID user);
+	
+	public boolean write(Module module, Packet packet);
+	
+	public boolean write(Module module, Packet packet, Integer timeout, Callback callback);
+	
+	public ApiKeyRepository getApiKeyRepository();
+	
 }
