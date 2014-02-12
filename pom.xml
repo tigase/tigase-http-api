@@ -14,7 +14,7 @@
 
 	<groupId>tigase</groupId>
 	<artifactId>tigase-http-api</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1-SNAPSHOT</version>
 	<name>Tigase HTTP API component</name>
 	<description>Tigase HTTP API component</description>
 
@@ -229,7 +229,7 @@
 		<dependency>
 			<groupId>tigase</groupId>
 			<artifactId>tigase-server</artifactId>
-			<version>5.2.0</version>
+			<version>5.2.1-SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
