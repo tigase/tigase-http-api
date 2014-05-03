@@ -31,11 +31,15 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 import java.util.logging.Level
 import java.util.logging.Logger;
+import javax.servlet.ServletConfig
 
 @WebServlet(asyncSupported=true)
-public class RestSerlvet extends HttpServlet {
+public class RestServlet extends HttpServlet {
 
-    def log = Logger.getLogger(RestSerlvet.class.getCanonicalName())
+	public static String REST_MODULE_KEY = "rest-module-uuid";
+	public static String SCRIPTS_DIR_KEY = "script-dir";
+	
+    def log = Logger.getLogger(RestServlet.class.getCanonicalName())
     def methods = ["GET", "POST", "PUT", "DELETE"];
     def handlers = [:];
 
@@ -47,6 +51,13 @@ public class RestSerlvet extends HttpServlet {
     @Override
     public void init() {
         super.init()
+		ServletConfig cfg = super.getServletConfig();
+		String moduleName = cfg.getInitParameter(REST_MODULE_KEY);
+		service = new ServiceImpl(moduleName);
+		File scriptDir = new File(cfg.getInitParameter(SCRIPTS_DIR_KEY));
+		
+		File[] scriptFiles = RestModule.getGroovyFiles(scriptDir);
+		loadHandlers(scriptFiles);
     }
 
     public void loadHandlers(File[] scriptFiles) {
@@ -64,12 +75,7 @@ public class RestSerlvet extends HttpServlet {
                 log.info("loaded ${listOfHandlers.size()} handlers")
             }
         }
-    }
-
-	def setService = { Service service ->
-		this.service = service;
-	}
-	
+    }	
 
     /**
      * Should return mapping of requests to methods

@@ -24,16 +24,21 @@ package tigase.http.rest;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import tigase.http.AbstractModule;
+import tigase.http.DeploymentInfo;
 import tigase.http.HttpServer;
-import tigase.http.security.TigasePlainLoginService;
+
+import tigase.http.ServletInfo;
 
 public class RestModule extends AbstractModule {
+	
+	private static final Logger log = Logger.getLogger(RestModule.class.getCanonicalName());
 	
 	private static final String DEF_SCRIPTS_DIR_VAL = "scripts/rest";
 	
@@ -41,14 +46,22 @@ public class RestModule extends AbstractModule {
 
 	private static final String NAME = "rest";
 	
-	private ReloadHandlersCmd reloadHandlersCmd = new ReloadHandlersCmd(this);
+	private final ReloadHandlersCmd reloadHandlersCmd = new ReloadHandlersCmd(this);
 	private String contextPath = null;
 	
 	private HttpServer httpServer = null;
-	private ServletContextHandler httpContext = null;
+	private DeploymentInfo httpDeployment = null;
 
 	private String scriptsDir = DEF_SCRIPTS_DIR_VAL;
 	private String[] vhosts = null;
+	
+	private final String uuid = UUID.randomUUID().toString();
+	
+	private static final ConcurrentHashMap<String,RestModule> modules = new ConcurrentHashMap<String,RestModule>();
+	
+	public static RestModule getModuleByUUID(String uuid) {
+		return modules.get(uuid);
+	}
 	
 	@Override
 	public String getName() {
@@ -62,45 +75,42 @@ public class RestModule extends AbstractModule {
 	
 	@Override
 	public void start() {
-		if (httpContext != null) {
+		if (httpDeployment != null) {
 			stop();
 		}
-		try {
-			httpContext = new ServletContextHandler(ServletContextHandler.NO_SESSIONS);
-			httpContext.setSecurityHandler(httpContext.getDefaultSecurityHandlerClass().newInstance());
-			httpContext.getSecurityHandler().setLoginService(new TigasePlainLoginService());
-			httpContext.setContextPath(contextPath);
-			if (vhosts != null) {
-				httpContext.setVirtualHosts(vhosts);
-			}
+		modules.put(uuid, this);
 
-			File scriptsDirFile = new File(scriptsDir);
-			File[] scriptDirFiles = scriptsDirFile.listFiles(new FileFilter() {
-				@Override
-				public boolean accept(File file) {
-					return file.isDirectory();
-				}
-			});
-
-			if (scriptDirFiles != null) {
-				for (File dirFile : scriptDirFiles) {
-					startRestServletForDirectory(httpContext, dirFile);
-				}
-			}
-
-			httpServer.registerContext(httpContext);
-		} catch (InstantiationException ex) {
-			Logger.getLogger(RestModule.class.getName()).log(Level.SEVERE, null, ex);
-		} catch (IllegalAccessException ex) {
-			Logger.getLogger(RestModule.class.getName()).log(Level.SEVERE, null, ex);
+		httpDeployment = HttpServer.deployment().setClassLoader(this.getClass().getClassLoader())
+				.setContextPath(contextPath);
+		if (vhosts != null) {
+			httpDeployment.setVHosts(vhosts);
 		}
+		File scriptsDirFile = new File(scriptsDir);
+		File[] scriptDirFiles = scriptsDirFile.listFiles(new FileFilter() {
+			@Override
+			public boolean accept(File file) {
+				return file.isDirectory();
+			}
+		});
+
+		if (scriptDirFiles != null) {
+			for (File dirFile : scriptDirFiles) {
+				try {
+					startRestServletForDirectory(httpDeployment, dirFile);
+				} catch (IOException ex) {
+					log.log(Level.FINE, "Exception while scanning for scripts to load", ex);
+				}
+			}
+		}
+		httpServer.deploy(httpDeployment);
 	}
 
 	@Override
 	public void stop() {
-		if (httpContext != null) { 
-			httpServer.unregisterContext(httpContext);
-			httpContext = null;
+		if (httpDeployment != null) { 
+			httpServer.undeploy(httpDeployment);
+			httpDeployment = null;
+			modules.remove(uuid, this);
 		}
 	}
 
@@ -131,20 +141,25 @@ public class RestModule extends AbstractModule {
 		commandManager.registerCmd(reloadHandlersCmd);
 	}
 	
-    private void startRestServletForDirectory(ServletContextHandler httpContext, File scriptsDirFile) {
-        File[] scriptFiles = scriptsDirFile.listFiles(new FilenameFilter() {
+    private void startRestServletForDirectory(DeploymentInfo httpDeployment, File scriptsDirFile) 
+			throws IOException {
+        File[] scriptFiles = getGroovyFiles(scriptsDirFile);
+
+        if (scriptFiles != null) {
+			ServletInfo servletInfo = HttpServer.servlet("RestServlet", RestServlet.class);
+			servletInfo.addInitParam(RestServlet.REST_MODULE_KEY, uuid)
+					.addInitParam(RestServlet.SCRIPTS_DIR_KEY, scriptsDirFile.getCanonicalPath())
+					.addMapping("/" + scriptsDirFile.getName() + "/*");
+			httpDeployment.addServlets(servletInfo);
+        }
+    }	
+
+	public static File[] getGroovyFiles( File scriptsDirFile) {
+		return scriptsDirFile.listFiles(new FilenameFilter() {
             @Override
             public boolean accept(File file, String s) {
                 return s.endsWith("groovy");
             }
         });
-
-        if (scriptFiles != null) {
-            RestSerlvet restServlet = new RestSerlvet();
-			restServlet.setService(new ServiceImpl(this));
-            httpContext.addServlet(new ServletHolder(restServlet),"/" + scriptsDirFile.getName() + "/*");
-            restServlet.loadHandlers(scriptFiles);
-        }
-    }	
-
+	}
 }

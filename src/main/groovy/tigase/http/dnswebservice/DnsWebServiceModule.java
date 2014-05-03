@@ -23,23 +23,16 @@ package tigase.http.dnswebservice;
 
 import java.util.Arrays;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import tigase.http.AbstractModule;
+import tigase.http.DeploymentInfo;
 import tigase.http.HttpServer;
 import static tigase.http.Module.HTTP_CONTEXT_PATH_KEY;
 import static tigase.http.Module.HTTP_SERVER_KEY;
-import tigase.http.rest.RestModule;
-import tigase.http.security.TigasePlainLoginService;
 
 public class DnsWebServiceModule extends AbstractModule {
 	
-	private ServletContextHandler httpContext;
-
 	private HttpServer httpServer = null;
-	
+	private DeploymentInfo deployment = null;
 	private String contextPath = null;
 	private String[] vhosts = null;
 	
@@ -80,35 +73,27 @@ public class DnsWebServiceModule extends AbstractModule {
 	
 	@Override
 	public void start() {
-		if (httpContext != null) {
+		if (deployment != null) {
 			stop();
 		}
-		try {
-			httpContext = new ServletContextHandler(ServletContextHandler.NO_SESSIONS);
-			httpContext.setSecurityHandler(httpContext.getDefaultSecurityHandlerClass().newInstance());
-			httpContext.getSecurityHandler().setLoginService(new TigasePlainLoginService());
-			httpContext.setContextPath(contextPath);
-			if (vhosts != null) {
-				System.out.println("for module = " + getName() + " setting vhosts = " + Arrays.toString(vhosts));
-				httpContext.setVirtualHosts(vhosts);
-			}
-			
-			JsonServlet jsonServlet = new JsonServlet();
-			httpContext.addServlet(new ServletHolder(jsonServlet), "/*");
-			
-			httpServer.registerContext(httpContext);
-		} catch (InstantiationException ex) {
-			Logger.getLogger(RestModule.class.getName()).log(Level.SEVERE, null, ex);
-		} catch (IllegalAccessException ex) {
-			Logger.getLogger(RestModule.class.getName()).log(Level.SEVERE, null, ex);
+
+		deployment = HttpServer.deployment()
+				.setClassLoader(this.getClass().getClassLoader())
+				.setContextPath(contextPath)
+				.setDeploymentName("DnsWebService")
+				.addServlets(HttpServer.servlet("JsonServlet", JsonServlet.class).addMapping("/*"));
+		if (vhosts != null) {
+			deployment.setVHosts(vhosts);
 		}
+
+		httpServer.deploy(deployment);
 	}
 
 	@Override
 	public void stop() {
-		if (httpContext != null) {
-			httpServer.unregisterContext(httpContext);
-			httpContext = null;
+		if (deployment != null) {
+			httpServer.undeploy(deployment);
+			deployment = null;
 		}
 	}
 	

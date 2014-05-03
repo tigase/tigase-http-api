@@ -15,35 +15,25 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://www.gnu.org/licenses/.
  *
- * $Rev$
- * Last modified by $Author$
- * $Date$
  */
-package tigase.http;
+package tigase.http.api;
 
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.ContextHandlerCollection;
-import org.eclipse.jetty.servlet.ServletContextHandler;
+import java.util.Map;
+import tigase.http.DeploymentInfo;
 
-public class HttpRegistratorInt extends HttpRegistrator {
+/**
+ *
+ * @author andrzej
+ */
+public interface HttpServerIfc {
 
-	private final Server server;
-	private final ContextHandlerCollection contexts;
+	public static final String HTTP_PORT_KEY = "port";
+	public static final int DEF_HTTP_PORT_VAL = 8080;
 	
-	public HttpRegistratorInt(Server server) {
-		this.server = server;
-		this.contexts = new ContextHandlerCollection();
-		server.setHandler(contexts);
-	}
-	
-	@Override
-	public void registerContext(ServletContextHandler ctx) {
-		contexts.addHandler(ctx);
-	}
-
-	@Override
-	public void unregisterContext(ServletContextHandler ctx) {
-		contexts.removeHandler(ctx);
-	}
+	void start();
+	void stop();
+	void deploy(DeploymentInfo deployment);
+	void undeploy(DeploymentInfo deployment);
+	void setProperties(Map<String,Object> props);
 	
 }

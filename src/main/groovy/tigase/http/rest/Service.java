@@ -21,18 +21,6 @@
  */
 package tigase.http.rest;
 
-import groovy.lang.Closure;
-import tigase.db.AuthRepository;
-import tigase.db.UserRepository;
-import tigase.server.Packet;
-import tigase.xmpp.BareJID;
-
-public interface Service {
-
-    void sendPacket(Packet packet, Long timeout, Closure closure);
-    UserRepository getUserRepository();
-    AuthRepository getAuthRepository();
-    boolean isAdmin(BareJID user);
-	boolean isAllowed(String key, String domain, String path);
+public interface Service extends tigase.http.api.Service {
 
 }

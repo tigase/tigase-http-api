@@ -19,13 +19,20 @@
  * Last modified by $Author$
  * $Date$
  */
-package tigase.http;
+package tigase.http.api;
 
-import org.eclipse.jetty.servlet.ServletContextHandler;
+import groovy.lang.Closure;
+import tigase.db.AuthRepository;
+import tigase.db.UserRepository;
+import tigase.server.Packet;
+import tigase.xmpp.BareJID;
 
-public abstract class HttpRegistrator {
+public interface Service {
 
-    public abstract void registerContext(ServletContextHandler ctx);
-    public abstract void unregisterContext(ServletContextHandler ctx);
+    void sendPacket(Packet packet, Long timeout, Closure closure);
+    UserRepository getUserRepository();
+    AuthRepository getAuthRepository();
+    boolean isAdmin(BareJID user);
+	boolean isAllowed(String key, String domain, String path);
 
 }

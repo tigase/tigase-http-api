@@ -15,13 +15,11 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://www.gnu.org/licenses/.
  *
- * $Rev$
- * Last modified by $Author$
- * $Date$
  */
-package tigase.http;
+package tigase.http.jetty;
 
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -29,36 +27,40 @@ import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import tigase.http.Activator;
 
-public class HttpRegistratorOSGi extends HttpRegistrator {
+/**
+ *
+ * @author andrzej
+ */
+public class JettyOSGiHttpServer extends AbstractJettyHttpServer {
 
-	private static final Logger log = Logger.getLogger(HttpRegistratorOSGi.class.getCanonicalName());
+	private static final Logger log = Logger.getLogger(JettyOSGiHttpServer.class.getCanonicalName());
 	
 	private final BundleContext context;
 	private final ConcurrentHashMap<String,ServiceRegistration> registeredContexts = new ConcurrentHashMap<String,ServiceRegistration>();
-	
-	public HttpRegistratorOSGi(BundleContext context) {
-		this.context = context;
+
+	public JettyOSGiHttpServer() {
+		context = Activator.getContext();
 	}
 	
 	@Override
-	public void registerContext(ServletContextHandler ctx) {
+	protected void deploy(ServletContextHandler ctx) {
 		String contextPath = ctx.getContextPath();
 		
 		Hashtable props = new Hashtable();
 		props.put("contextFilePath", "/tigase-http-context.xml");
 		ServiceRegistration registration = context.registerService(ContextHandler.class.getName(), ctx, props);
 		if (registration == null) {
-			log.severe("registration failed for "  + contextPath);
+			log.log(Level.SEVERE, "registration failed for {0}", contextPath);
 		}
 		registeredContexts.put(contextPath, registration);
 	}
 
 	@Override
-	public void unregisterContext(ServletContextHandler ctx) {
+	protected void undeploy(ServletContextHandler ctx) {
 		String contextPath = ctx.getContextPath();
 		try {		
-			//ctx.stop();
 			ServiceRegistration registration = registeredContexts.get(contextPath);
 			if (registration != null) {
 				registration.unregister();
@@ -66,7 +68,18 @@ public class HttpRegistratorOSGi extends HttpRegistrator {
 		}
 		catch (Exception ex) {
 			log.log(Level.SEVERE, "exception during unregistration of context = " + contextPath, ctx);
-		}
+		}	}
+
+	@Override
+	public void start() {
+	}
+
+	@Override
+	public void stop() {
+	}
+
+	@Override
+	public void setProperties(Map<String, Object> props) {
 	}
 	
 }

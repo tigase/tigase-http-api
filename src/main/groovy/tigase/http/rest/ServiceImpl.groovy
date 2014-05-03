@@ -31,6 +31,10 @@ class ServiceImpl implements Service {
 
 	private final RestModule module;
 	
+	public ServiceImpl(String moduleUUID) {
+		this(RestModule.getModuleByUUID(moduleUUID));
+	}
+	
 	public ServiceImpl(RestModule module) {
 		this.module = module;
 	}
@@ -49,7 +53,7 @@ class ServiceImpl implements Service {
 	}
 	
     boolean isAdmin(BareJID user) {
-		return true;
+		return module.isAdmin(user);
 	}
 	
 	boolean isAllowed(String key, String domain, String path) {

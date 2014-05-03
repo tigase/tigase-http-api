@@ -29,22 +29,22 @@ import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import tigase.osgi.ModulesManager;
 
-import tigase.http.rest.RestMessageReceiver;
-
 public class Activator implements BundleActivator, ServiceListener {
 	
     private static final Logger log = Logger.getLogger(Activator.class.getCanonicalName());
 
-    private BundleContext context;
+    private static BundleContext context;
     private ModulesManager serviceManager;
     private ServiceReference serviceReference;
 
+	public static BundleContext getContext() {
+		return context;
+	}
+	
 	@Override
 	public void start(BundleContext context) throws Exception {
-		HttpServer.setOsgiHttpRegistrator(new HttpRegistratorOSGi(context));
-		
 		// Add ApiMessaceReceiver
-        this.context = context;
+		Activator.context = context;
         context.addServiceListener(this, "(&(objectClass=" + ModulesManager.class.getName() + "))");
         serviceReference = context.getServiceReference(ModulesManager.class.getName());
         if (serviceReference != null) {
@@ -62,8 +62,6 @@ public class Activator implements BundleActivator, ServiceListener {
             serviceManager = null;
             serviceReference = null;
         }	
-		
-		HttpServer.setOsgiHttpRegistrator(null);
 	}
 
     @Override
@@ -92,7 +90,6 @@ public class Activator implements BundleActivator, ServiceListener {
     private void registerAddons() {
         if (serviceManager != null) {
             serviceManager.registerServerComponentClass(HttpMessageReceiver.class);
-			serviceManager.registerServerComponentClass(RestMessageReceiver.class);
             serviceManager.update();
         }
     }
@@ -103,7 +100,6 @@ public class Activator implements BundleActivator, ServiceListener {
     private void unregisterAddons() {
         if (serviceManager != null) {
             serviceManager.unregisterServerComponentClass(HttpMessageReceiver.class);
-			serviceManager.unregisterServerComponentClass(RestMessageReceiver.class);
             serviceManager.update();
         }
     }

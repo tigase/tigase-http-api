@@ -26,89 +26,68 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
+import javax.servlet.http.HttpServlet;
+import tigase.http.api.HttpServerIfc;
+import tigase.http.jetty.JettyOSGiHttpServer;
+import tigase.http.jetty.JettyStandaloneHttpServer;
 
 public class HttpServer {
 	
 	private static final Logger log = Logger.getLogger(HttpServer.class.getCanonicalName());
 	
-	private HttpRegistrator httpRegistrator;
-	private static HttpRegistrator osgiHttpRegistrator;
-	
-	protected static void setOsgiHttpRegistrator(HttpRegistrator httpRegistrator) {
-		HttpServer.osgiHttpRegistrator = httpRegistrator;
-	}
-	
-	private static final String HTTP_PORT_KEY = "port";
-	private static final String USE_LOCAL_SERVER_KEY = "use-local-server";
-	
-	private static final int DEF_HTTP_PORT_VAL = 8080;
-	
-	private int port = DEF_HTTP_PORT_VAL;
-	private Server server = null;
-	private boolean useLocal = true;
+	private String serverClass = DEF_HTTP_SERVER_CLASS_VAL;
+	private HttpServerIfc server = null;
+
+	private static final String HTTP_SERVER_CLASS_KEY = "server-class";
+	private static final String DEF_HTTP_SERVER_CLASS_VAL = JettyStandaloneHttpServer.class.getCanonicalName();
 	
 	public Map<String,Object> getDefaults() {
 		Map<String,Object> props = new HashMap<String,Object>();
-		props.put(HTTP_PORT_KEY, DEF_HTTP_PORT_VAL);
-		props.put(USE_LOCAL_SERVER_KEY, osgiHttpRegistrator == null);
+		props.put(HTTP_SERVER_CLASS_KEY, DEF_HTTP_SERVER_CLASS_VAL);
 		return props;
 	}
 	
 	public void setProperties(Map<String,Object> props) {
-		if (props.containsKey(HTTP_PORT_KEY)) {
-			port = (Integer) props.get(HTTP_PORT_KEY);
+		if (props.containsKey(HTTP_SERVER_CLASS_KEY)) {
+			serverClass = (String) props.get(HTTP_SERVER_CLASS_KEY);
 		}
-		if (props.containsKey(USE_LOCAL_SERVER_KEY)) {
-			useLocal = (Boolean) props.get(USE_LOCAL_SERVER_KEY);
+		try {
+			server = (HttpServerIfc) this.getClass().getClassLoader().loadClass(serverClass).newInstance();
+			server.setProperties(props);
+		} catch (Exception ex) {
+			Logger.getLogger(HttpServer.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
 	
 	public void start() {
-		if (useLocal) {
-			if (httpRegistrator == null) {
-				server = new Server(port);
-				httpRegistrator = new HttpRegistratorInt(server);
+		if (server != null) {
+			try {
+				server.start();
+			} catch (Exception ex) {
+				Logger.getLogger(HttpServer.class.getName()).log(Level.SEVERE, null, ex);
 			}
-		}
-		else {
-			if (httpRegistrator != null && server != null) {
-				stop();
-			}
-			httpRegistrator = osgiHttpRegistrator;
-		}
+		}	
 	}
 	
 	public void stop() {
 		if (server != null) {
-			httpRegistrator = null;
-			try {
-				server.stop();
-			} catch (Exception ex) {
-				log.log(Level.SEVERE, "Exception stopping internal HTTP server", ex);
-			}
+			server.stop();
 		}
 	}
-	
-	public void registerContext(ServletContextHandler context) {
-		if (log.isLoggable(Level.INFO)) {
-			String[] vhosts = context.getVirtualHosts();
-			log.log(Level.INFO, "registering context for = {0} for virtual hosts = {1} using {2}", 
-					new Object[]{context.getContextPath(), Arrays.toString(vhosts),
-						httpRegistrator.getClass().getCanonicalName()});
-		}
-		httpRegistrator.registerContext(context);
+
+	public void deploy(DeploymentInfo deployment) {
+		server.deploy(deployment);
 	}
 	
-	public void unregisterContext(ServletContextHandler context) {
-		if (log.isLoggable(Level.INFO)) {
-			String[] vhosts = context.getVirtualHosts();
-			log.log(Level.INFO, "unregistering context for = {0} for virtual hosts = {1} using {2}", 
-					new Object[]{context.getContextPath(), Arrays.toString(vhosts), 
-						httpRegistrator.getClass().getCanonicalName()});
-		}
-		httpRegistrator.unregisterContext(context);
+	public void undeploy(DeploymentInfo deployment) {
+		server.undeploy(deployment);
 	}
 	
+	public static DeploymentInfo deployment() {
+		return new DeploymentInfo();
+	}
+	
+	public static ServletInfo servlet(String name, Class<? extends HttpServlet> servletClass) {
+		return new ServletInfo(name, servletClass);
+	}
 }

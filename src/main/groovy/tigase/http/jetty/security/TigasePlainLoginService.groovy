@@ -19,7 +19,7 @@
  * Last modified by $Author$
  * $Date$
  */
-package tigase.http.security
+package tigase.http.jetty.security
 
 import org.eclipse.jetty.security.DefaultIdentityService
 import org.eclipse.jetty.security.IdentityService
@@ -28,7 +28,7 @@ import org.eclipse.jetty.security.MappedLoginService
 import org.eclipse.jetty.server.UserIdentity
 import org.eclipse.jetty.util.security.Password
 import tigase.http.HttpServer
-import tigase.http.rest.Service
+import tigase.http.api.Service
 import tigase.xmpp.BareJID
 
 import javax.security.auth.Subject
@@ -36,12 +36,18 @@ import java.security.Principal
 import java.util.logging.Level
 import java.util.logging.Logger
 
-class TigasePlainLoginService implements LoginService {
+public class TigasePlainLoginService implements LoginService {
 
     private static final Logger log = Logger.getLogger(TigasePlainLoginService.class.getCanonicalName());
 
     def identityService = new DefaultIdentityService();
 
+	Service service = null;
+	
+	public TigasePlainLoginService(Service service) {
+		this.service = service;
+	}
+	
     @Override
     String getName() {
         return "TigasePlain";
@@ -101,8 +107,8 @@ class TigasePlainLoginService implements LoginService {
     void logout(UserIdentity userIdentity) {
     }
 
-    static Service getService() {
-        return HttpServer.getService();
+    Service getService() {
+        return service;
     }
 
 }
