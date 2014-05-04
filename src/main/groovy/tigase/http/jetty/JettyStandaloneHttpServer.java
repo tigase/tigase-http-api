@@ -29,7 +29,9 @@ import static tigase.http.api.HttpServerIfc.DEF_HTTP_PORT_VAL;
 import static tigase.http.api.HttpServerIfc.HTTP_PORT_KEY;
 
 /**
- *
+ * This implementation embeds Jetty HTTP Server by starting separate instance
+ * which is configured and managed by Tigase.
+ * 
  * @author andrzej
  */
 public class JettyStandaloneHttpServer extends AbstractJettyHttpServer {

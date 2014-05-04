@@ -30,6 +30,8 @@ import org.osgi.framework.ServiceRegistration;
 import tigase.http.Activator;
 
 /**
+ * This implementation uses Jetty HTTP Server instance exising in OSGi environment
+ * to deploy Tigase HTTP API web apps on it.
  *
  * @author andrzej
  */

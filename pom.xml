@@ -164,6 +164,7 @@
 						<Tigase-Version>${project.version}-b${gitVersion}</Tigase-Version>
 						<Bundle-Activator>tigase.http.Activator</Bundle-Activator>
 						<DynamicImport-Package>'*'</DynamicImport-Package>
+						<Import-Package>!junit.*,!sun.*,!com.sun.*,*</Import-Package>
 					</instructions>
 				</configuration>
 			</plugin>

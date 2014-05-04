@@ -28,6 +28,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServlet;
 import tigase.http.api.HttpServerIfc;
+import tigase.http.java.JavaStandaloneHttpServer;
 import tigase.http.jetty.JettyOSGiHttpServer;
 import tigase.http.jetty.JettyStandaloneHttpServer;
 
@@ -35,11 +36,18 @@ public class HttpServer {
 	
 	private static final Logger log = Logger.getLogger(HttpServer.class.getCanonicalName());
 	
+	/**
+	 * Existing HTTP server implementations:
+	 * 
+	 * JavaStandaloneHttpServer - internal implementation based on HttpServer from JDK
+	 * JettyStandaloneHttpServer - Jetty embedded and started by Tigase in same JVM (managed by Tigase)
+	 * JettyOSGiHttpServer - existing Jetty instance from OSGi environment is used by Tigase to deploy
+	 */
+	private static final String DEF_HTTP_SERVER_CLASS_VAL = JettyStandaloneHttpServer.class.getCanonicalName();
+	private static final String HTTP_SERVER_CLASS_KEY = "server-class";
+
 	private String serverClass = DEF_HTTP_SERVER_CLASS_VAL;
 	private HttpServerIfc server = null;
-
-	private static final String HTTP_SERVER_CLASS_KEY = "server-class";
-	private static final String DEF_HTTP_SERVER_CLASS_VAL = JettyStandaloneHttpServer.class.getCanonicalName();
 	
 	public Map<String,Object> getDefaults() {
 		Map<String,Object> props = new HashMap<String,Object>();
