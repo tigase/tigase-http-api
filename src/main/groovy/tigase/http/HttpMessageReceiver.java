@@ -34,6 +34,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import tigase.conf.ConfigurationException;
 import tigase.db.AuthRepository;
 import tigase.db.UserRepository;
 import tigase.http.dnswebservice.DnsWebServiceModule;
@@ -178,7 +179,7 @@ public class HttpMessageReceiver extends AbstractMessageReceiver implements Pack
 	}	
 		
 	@Override
-	public void setProperties(Map<String, Object> props) {
+	public void setProperties(Map<String, Object> props) throws ConfigurationException {
 		super.setProperties(props);
 		
 		if (props.size() == 1) {
