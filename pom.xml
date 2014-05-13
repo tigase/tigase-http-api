@@ -180,12 +180,14 @@
 		<resources>
 			<resource>
 				<directory>src/scripts/groovy/tigase/</directory>
+				<targetPath>scripts</targetPath>
 				<includes>
 					<include>**/*.groovy</include>
 				</includes>
 			</resource>
 			<resource>
 				<directory>src/main/resources/</directory>
+				<targetPath>etc</targetPath>
 				<includes>
 					<include>**/*.xml</include>
 				</includes>
