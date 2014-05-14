@@ -38,7 +38,7 @@ import tigase.xml.SingletonFactory
 class AvatarPutNoAuthHandler extends tigase.http.rest.Handler {
 
     public AvatarPutNoAuthHandler() {
-        regex = /\/([^@\/]+)@([^@\/]+)/
+        regex = /\/(?:([^@\/]+)@){0,1}([^@\/]+)/
         isAsync = false
 		decodeContent = false
         execPut = { Service service, callback, request, localPart, domain ->
@@ -103,7 +103,7 @@ class AvatarPutNoAuthHandler extends tigase.http.rest.Handler {
 			
 			userRepo.setData(jid, "public/vcard-temp", "vCard", vCardEl.toString());
 			
-            callback([user:[jid:"$localPart@$domain"]]);
+            callback([user:[jid:(localPart != null ? "$localPart@$domain" : domain)]]);
         }
     }
 

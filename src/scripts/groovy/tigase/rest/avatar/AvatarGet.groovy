@@ -33,12 +33,12 @@ import tigase.xmpp.StanzaType
 class AvatarHandler extends tigase.http.rest.Handler {
 
     public AvatarHandler() {
-        regex = /\/([^@\/]+)@([^@\/]+)/
+        regex = /\/(?:([^@\/]+)@){0,1}([^@\/]+)/
         isAsync = true
         execGet = { Service service, callback, localPart, domain ->
 
             Element iq = new Element("iq");
-            iq.setAttribute("to", "$localPart@$domain");
+            iq.setAttribute("to", localPart != null ? "$localPart@$domain" : domain);
             iq.setAttribute("type", "get");
 
             Element vcard = new Element("vCard");

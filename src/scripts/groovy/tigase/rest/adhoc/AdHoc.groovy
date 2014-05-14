@@ -43,7 +43,7 @@ class AdHocHandler extends tigase.http.rest.Handler {
     def DISCO_ITEMS_XMLNS = "http://jabber.org/protocol/disco#items";
 
     public AdHocHandler() {
-        regex = /\/([^@\/]+)@([^@\/]+)/
+		regex = /\/(?:([^@\/]+)@){0,1}([^@\/]+)/
         requiredRole = "admin"
         isAsync = true
 
@@ -53,7 +53,7 @@ class AdHocHandler extends tigase.http.rest.Handler {
         execGet = { Service service, callback, user, localPart, domain ->
 
             Element iq = new Element("iq");
-            iq.setAttribute("to", "$localPart@$domain");
+            iq.setAttribute("to", localPart != null ? "$localPart@$domain" : domain);
             iq.setAttribute("from", user.toString());
             iq.setAttribute("type", "get");
             iq.setAttribute("id", UUID.randomUUID().toString())
@@ -94,7 +94,7 @@ class AdHocHandler extends tigase.http.rest.Handler {
             def fields = content.fields;
 
             Element iq = new Element("iq");
-            iq.setAttribute("to", "$localPart@$domain");
+            iq.setAttribute("to", localPart != null ? "$localPart@$domain" : domain);
             iq.setAttribute("from", user.toString());
             iq.setAttribute("type", "set");
             iq.setAttribute("id", UUID.randomUUID().toString())
@@ -143,7 +143,7 @@ class AdHocHandler extends tigase.http.rest.Handler {
                 def fieldElems = data.getChildren().findAll({ it.getName() == "field"});
 
                 fields = [];
-                def results = [jid: "$localPart@$domain", node: node, fields:fields];
+                def results = [jid: (localPart != null ? "$localPart@$domain" : domain), node: node, fields:fields];
 
                 def titleEl = data.getChild("title");
                 if (titleEl) results.title = titleEl.getCData();

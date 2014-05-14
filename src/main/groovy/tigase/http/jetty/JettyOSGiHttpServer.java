@@ -51,7 +51,7 @@ public class JettyOSGiHttpServer extends AbstractJettyHttpServer {
 		String contextPath = ctx.getContextPath();
 		
 		Hashtable props = new Hashtable();
-		props.put("contextFilePath", "/tigase-http-context.xml");
+		props.put("contextFilePath", "/etc/tigase-http-context.xml");
 		ServiceRegistration registration = context.registerService(ContextHandler.class.getName(), ctx, props);
 		if (registration == null) {
 			log.log(Level.SEVERE, "registration failed for {0}", contextPath);
