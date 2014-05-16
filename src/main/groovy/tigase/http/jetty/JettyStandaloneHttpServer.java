@@ -45,11 +45,21 @@ public class JettyStandaloneHttpServer extends AbstractJettyHttpServer {
 	@Override
 	protected void deploy(ServletContextHandler ctx) {
 		contexts.addHandler(ctx);
+		try {
+			ctx.start();
+		} catch (Exception ex) {
+			log.log(Level.SEVERE, "Exception deploying http context " + ctx.getContextPath(), ex);
+		}
 	}
 
 	@Override
 	protected void undeploy(ServletContextHandler ctx) {
 		contexts.removeHandler(ctx);
+		try {
+			ctx.stop();
+		} catch (Exception ex) {
+			log.log(Level.SEVERE, "Exception undeploying http context " + ctx.getContextPath(), ex);
+		}
 	}
 
 	@Override
@@ -59,6 +69,11 @@ public class JettyStandaloneHttpServer extends AbstractJettyHttpServer {
 		}
 		server = new Server(port);
 		server.setHandler(contexts);
+		try {
+			server.start();
+		} catch (Exception ex) {
+			log.log(Level.SEVERE, "Exception starting internal HTTP server", ex);
+		}
 	}
 
 	@Override
@@ -68,6 +83,7 @@ public class JettyStandaloneHttpServer extends AbstractJettyHttpServer {
 		
 		try {
 			server.stop();
+			server.destroy();
 			server = null;
 		} catch (Exception ex) {
 			log.log(Level.SEVERE, "Exception stopping internal HTTP server", ex);

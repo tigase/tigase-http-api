@@ -60,7 +60,12 @@ public class HttpServer {
 			serverClass = (String) props.get(HTTP_SERVER_CLASS_KEY);
 		}
 		try {
-			server = (HttpServerIfc) this.getClass().getClassLoader().loadClass(serverClass).newInstance();
+			if (serverClass != null && (server == null || !serverClass.equals(server.getClass().getCanonicalName()))) {
+				if (server != null) {
+					server.stop();
+				}
+				server = (HttpServerIfc) this.getClass().getClassLoader().loadClass(serverClass).newInstance();
+			}
 			server.setProperties(props);
 		} catch (Exception ex) {
 			Logger.getLogger(HttpServer.class.getName()).log(Level.SEVERE, null, ex);
