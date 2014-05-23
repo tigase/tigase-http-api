@@ -253,7 +253,7 @@ public class RestServlet extends HttpServlet {
         }
 
         if (type != null && request.getContentLength() > 0) {
-            if (route.decodeContent && (type.endsWith("/xml") || type.endsWith("/json"))) {
+					if (route.decodeContent && (type.contains("/xml") || type.contains("/json"))) {
                 requestContent = request.getReader().getText()
 
                 if (log.isLoggable(Level.FINEST)) {
