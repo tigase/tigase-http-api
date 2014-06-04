@@ -297,7 +297,8 @@ public class HttpMessageReceiver extends AbstractMessageReceiver implements Pack
 	@Override
 	public boolean write(Module module, Packet packet, Integer timeout, Callback callback) {
         String uuid = UUID.randomUUID().toString();
-        JID from = module.getJid().copyWithResourceNS(uuid);
+		// changed to comply with clustering routing
+        JID from = getComponentId().copyWithResourceNS(uuid);//module.getJid().copyWithResourceNS(uuid);
         if (packet.getStanzaFrom() == null) {
             packet.initVars(from, packet.getStanzaTo());
         }
