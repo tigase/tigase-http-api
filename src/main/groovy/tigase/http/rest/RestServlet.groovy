@@ -285,7 +285,9 @@ public class RestServlet extends HttpServlet {
 
         params.addAll(reqParams)
 
-        log.warning("got calling with params = " + params.toString())
+		if (log.isLoggable(Level.FINEST)) {
+			log.finest("got calling with params = " + params.toString())
+		}
 
         def method = request.getMethod().toLowerCase().capitalize()
 
