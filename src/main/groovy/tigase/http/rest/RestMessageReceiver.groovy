@@ -59,7 +59,11 @@ class RestMessageReceiver extends AbstractMessageReceiver implements  Service {
         def request = pendingRequest.remove(key);
         if (request) {
             request.future.cancel(false);
-            request.closure(packet);
+			try {
+				request.closure(packet);
+			} catch (IllegalStateException ex) {
+				// client closed connection - ignoring
+			}	
         }
         else {
             // we can only process response we are waiting for so return error if packet is not expected
