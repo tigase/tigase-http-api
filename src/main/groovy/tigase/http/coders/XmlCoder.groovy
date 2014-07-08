@@ -64,7 +64,7 @@ public class XmlCoder implements Coder {
             }
             else {
                 def map = [:];
-                lif (log.isLoggable(Level.FINEST))
+                if (log.isLoggable(Level.FINEST))
 					log.finest("converting map");
                 children.each {
                     map.put(it.name(), convertNodeToObject(it, false))
