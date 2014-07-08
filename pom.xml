@@ -217,12 +217,12 @@
 			<version>1.4.0</version>
 			<scope>compile</scope>
 		</dependency>
-		<dependency>
+<!--		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>
 			<version>8.1.9.v20130131</version>
 			<scope>compile</scope>
-		</dependency>
+		</dependency> -->
 		<dependency>
 			<groupId>org.codehaus.groovy</groupId>
 			<artifactId>groovy-all</artifactId>
@@ -236,11 +236,17 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>3.0.1</version>
+			<scope>compile</scope>
+		</dependency>
+<!--		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-servlet</artifactId>
 			<version>8.1.9.v20130131</version>
 			<scope>compile</scope>
-		</dependency>
+		</dependency> -->
 	</dependencies>
 
 	<repositories>

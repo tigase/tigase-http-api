@@ -27,10 +27,11 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServlet;
+import tigase.conf.ConfigurationException;
 import tigase.http.api.HttpServerIfc;
 import tigase.http.java.JavaStandaloneHttpServer;
-import tigase.http.jetty.JettyOSGiHttpServer;
-import tigase.http.jetty.JettyStandaloneHttpServer;
+import tigase.osgi.ModulesManagerImpl;
+import tigase.server.XMPPServer;
 
 public class HttpServer {
 	
@@ -43,7 +44,7 @@ public class HttpServer {
 	 * JettyStandaloneHttpServer - Jetty embedded and started by Tigase in same JVM (managed by Tigase)
 	 * JettyOSGiHttpServer - existing Jetty instance from OSGi environment is used by Tigase to deploy
 	 */
-	private static final String DEF_HTTP_SERVER_CLASS_VAL = JettyStandaloneHttpServer.class.getCanonicalName();
+	private static final String DEF_HTTP_SERVER_CLASS_VAL = JavaStandaloneHttpServer.class.getCanonicalName();
 	private static final String HTTP_SERVER_CLASS_KEY = "server-class";
 
 	private String serverClass = DEF_HTTP_SERVER_CLASS_VAL;
@@ -55,7 +56,7 @@ public class HttpServer {
 		return props;
 	}
 	
-	public void setProperties(Map<String,Object> props) {
+	public void setProperties(Map<String,Object> props) throws ConfigurationException {
 		if (props.containsKey(HTTP_SERVER_CLASS_KEY)) {
 			serverClass = (String) props.get(HTTP_SERVER_CLASS_KEY);
 		}
@@ -64,11 +65,17 @@ public class HttpServer {
 				if (server != null) {
 					server.stop();
 				}
-				server = (HttpServerIfc) this.getClass().getClassLoader().loadClass(serverClass).newInstance();
+				Class<?> cls = ModulesManagerImpl.getInstance().forName(serverClass);
+				server = (HttpServerIfc) cls.newInstance();
 			}
 			server.setProperties(props);
-		} catch (Exception ex) {
-			Logger.getLogger(HttpServer.class.getName()).log(Level.SEVERE, null, ex);
+		} catch (Exception e) {
+				if (!XMPPServer.isOSGi()) {
+					log.log(Level.SEVERE, "Cannot instantiate HTTP server implementation class: " +
+							serverClass, e);
+				}
+				throw new ConfigurationException("Can not instantiate HTTP server implementation class: " +
+					serverClass);	
 		}
 	}
 	
