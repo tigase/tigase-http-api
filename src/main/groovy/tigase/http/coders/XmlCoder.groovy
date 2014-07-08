@@ -24,6 +24,7 @@ package tigase.http.coders
 import groovy.xml.MarkupBuilder
 
 import java.util.logging.Logger
+import java.util.logging.Level
 
 public class XmlCoder implements Coder {
 
@@ -50,7 +51,8 @@ public class XmlCoder implements Coder {
             def isList = true;
             children.each { isList = isList && it.name() == 'item' }
             if (isList) {
-                log.warning("converting list");
+				if (log.isLoggable(Level.FINEST))
+					log.finest("converting list");
                 def list = [];
                 children.each {
                     list.add(convertNodeToObject(it, false))
@@ -62,12 +64,14 @@ public class XmlCoder implements Coder {
             }
             else {
                 def map = [:];
-                log.warning("converting map");
+                lif (log.isLoggable(Level.FINEST))
+					log.finest("converting map");
                 children.each {
                     map.put(it.name(), convertNodeToObject(it, false))
                 }
                 if (first) {
-                    log.warning("first node = " + node.name())
+                    if (log.isLoggable(Level.FINEST))
+						log.finest("first node = " + node.name())
                     def fmap = [:];
                     fmap.put(node.name(), map);
                     return fmap;
