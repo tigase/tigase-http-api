@@ -354,7 +354,14 @@ public class HttpMessageReceiver extends AbstractMessageReceiver implements Pack
         Request request = pendingRequest.remove(key);
         if (request != null) {
             request.future.cancel(false);
-            request.callback.onResult(packet);
+			try {
+				request.callback.onResult(packet);
+			} catch (IllegalStateException ex) {
+				if (log.isLoggable(Level.FINEST)) {
+					log.log(Level.FINEST, "exception while processing response on HTTP request,"
+							+ " is HTTP connection closed?", ex);
+				}
+			}
         }
 		
 		return (request != null);
