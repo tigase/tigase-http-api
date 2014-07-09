@@ -220,7 +220,7 @@
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>
-			<version>8.1.9.v20130131</version>
+			<version>9.2.1.v20140609</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
@@ -238,7 +238,7 @@
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-servlet</artifactId>
-			<version>8.1.9.v20130131</version>
+			<version>9.2.1.v20140609</version>
 			<scope>compile</scope>
 		</dependency>
 	</dependencies>
