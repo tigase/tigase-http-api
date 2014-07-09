@@ -33,6 +33,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletResponse;
+import javax.servlet.WriteListener;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
@@ -67,6 +68,15 @@ public class DummyServletResponse implements HttpServletResponse {
 				if (exchange.getResponseCode() == -1)
 					exchange.sendResponseHeaders(200, 0);
 				exchange.getResponseBody().write(b);
+			}
+
+			@Override
+			public boolean isReady() {
+				return true;
+			}
+
+			@Override
+			public void setWriteListener(WriteListener wl) {
 			}
 		};
 	}
@@ -268,6 +278,11 @@ public class DummyServletResponse implements HttpServletResponse {
 	@Override
 	public Collection<String> getHeaderNames() {
 		return null;
+	}
+
+	@Override
+	public void setContentLengthLong(long l) {
+		setHeader("Content-Length", String.valueOf(l));
 	}
 	
 }

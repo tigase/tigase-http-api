@@ -40,6 +40,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.AsyncContext;
 import javax.servlet.DispatcherType;
+import javax.servlet.ReadListener;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -50,6 +51,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpUpgradeHandler;
 import javax.servlet.http.Part;
 import tigase.db.AuthorizationException;
 import tigase.db.TigaseDBException;
@@ -127,6 +129,20 @@ public class DummyServletRequest implements HttpServletRequest {
 			@Override
 			public int read() throws IOException {
 				return exchange.getRequestBody().read();
+			}
+
+			@Override
+			public boolean isFinished() {
+				return false;
+			}
+
+			@Override
+			public boolean isReady() {
+				return true;
+			}
+
+			@Override
+			public void setReadListener(ReadListener rl) {
 			}
 		};
 	}
@@ -471,6 +487,21 @@ public class DummyServletRequest implements HttpServletRequest {
 	@Override
 	public Part getPart(String string) throws IOException, ServletException {
 		return null;
+	}
+
+	@Override
+	public String changeSessionId() {
+		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	@Override
+	public <T extends HttpUpgradeHandler> T upgrade(Class<T> type) throws IOException, ServletException {
+		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	@Override
+	public long getContentLengthLong() {
+		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 	}
 	
 }
