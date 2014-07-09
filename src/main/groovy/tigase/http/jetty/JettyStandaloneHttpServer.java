@@ -22,6 +22,7 @@ package tigase.http.jetty;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -64,10 +65,11 @@ public class JettyStandaloneHttpServer extends AbstractJettyHttpServer {
 
 	@Override
 	public void start() {
-		if (server != null) {
+		if (server != null && (server.isStarted() || server.isStarting())) {
 			stop();
 		}
-		server = new Server(port);
+		if (server == null)
+			server = new Server(port);
 		server.setHandler(contexts);
 		try {
 			server.start();
@@ -78,13 +80,13 @@ public class JettyStandaloneHttpServer extends AbstractJettyHttpServer {
 
 	@Override
 	public void stop() {
-		if (server == null)
+		if (server == null || !(server.isStarted() || server.isStarting()))
 			return;
 		
 		try {
 			server.stop();
-			server.destroy();
-			server = null;
+			//server.destroy();
+			//server = null;
 		} catch (Exception ex) {
 			log.log(Level.SEVERE, "Exception stopping internal HTTP server", ex);
 		}
