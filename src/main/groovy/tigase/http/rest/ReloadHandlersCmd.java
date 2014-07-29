@@ -50,9 +50,14 @@ public class ReloadHandlersCmd implements CommandIfc {
 	public String getDescription() {
 		return "Reload REST HTTP script handlers";
 	}
+	
+	@Override
+	public String getGroup() {
+		return "Configuration";
+	}
 
 	@Override
-	public void init(String id, String description) {}
+	public void init(String id, String description, String group) {}
 
 	@Override
 	public boolean isAdminOnly() {
