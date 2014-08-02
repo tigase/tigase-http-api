@@ -146,7 +146,7 @@ public class RestModule extends AbstractModule {
         File[] scriptFiles = getGroovyFiles(scriptsDirFile);
 
         if (scriptFiles != null) {
-			ServletInfo servletInfo = HttpServer.servlet("RestServlet", RestServlet.class);
+			ServletInfo servletInfo = HttpServer.servlet("RestServlet", RestExtServlet.class);
 			servletInfo.addInitParam(RestServlet.REST_MODULE_KEY, uuid)
 					.addInitParam(RestServlet.SCRIPTS_DIR_KEY, scriptsDirFile.getCanonicalPath())
 					.addMapping("/" + scriptsDirFile.getName() + "/*");

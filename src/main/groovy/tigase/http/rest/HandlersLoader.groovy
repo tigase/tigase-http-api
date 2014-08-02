@@ -39,7 +39,9 @@ public class HandlersLoader {
     public def loadHandler(GroovyClassLoader classLoader, File file) {
         Class cls = classLoader.parseClass(file);
         Object scriptInstance = cls.newInstance()
-        return  (Handler) scriptInstance;
+        Handler handler = (Handler) scriptInstance;
+		handler.pathName = file.getAbsolutePath();
+		return handler;
     }
 
     public def loadHandlers(List<File> scripts) {

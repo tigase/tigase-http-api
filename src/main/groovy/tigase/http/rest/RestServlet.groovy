@@ -226,18 +226,7 @@ public class RestServlet extends HttpServlet {
                     response.getOutputStream().write(result.data);
                 }
                 else {
-                    // send output data enconded with XML or JSON
-                    String output = null;
-                    type = request.getContentType() ?: (request.getContentType() ?: (request.getParameter("type") ?: "application/xml"));
-                    if (type.contains("application/json")) {
-                        response.setContentType("application/json");
-                        output = jsonCoder.encode(result);
-                    }
-                    else {
-                        response.setContentType("application/xml");
-                        output = xmlCoder.encode(result);
-                    }
-                    response.getWriter().write(output);
+					encodeResults(request, response, route, reqParams, result);
                 }
             }
 
@@ -295,4 +284,20 @@ public class RestServlet extends HttpServlet {
         route."exec$method".call(params);
     }
 
+	def encodeResults(HttpServletRequest request, HttpServletResponse response, Handler route, def reqParams, def result ) {
+		// send output data enconded with XML or JSON
+		String type = request.getContentType();
+		String output = null;
+		type = request.getContentType() ?: (request.getContentType() ?: (request.getParameter("type") ?: "application/xml"));
+		if (type.contains("application/json")) {
+			response.setContentType("application/json");
+			output = jsonCoder.encode(result);
+		}
+		else {
+			response.setContentType("application/xml");
+			output = xmlCoder.encode(result);
+		}
+		response.getWriter().write(output);		
+	}
+	
 }

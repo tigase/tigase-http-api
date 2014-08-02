@@ -28,6 +28,11 @@ abstract class Handler {
         public byte[] data;
     }
 
+	String pathName = null;
+	def getSourceFile = { 
+		return new File(pathName);
+	}
+	
     /**
      * true if requests require authentication
      */
