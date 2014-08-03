@@ -69,7 +69,7 @@ public class RequestHandler implements HttpHandler {
 				HttpServlet servlet = servlets.get(key);
 				if (servlet != null) {
 					try {
-						String servletPath = key.substring(contextPath.length());
+						String servletPath = key.substring(contextPath.length(), key.length()-1);
 						DummyServletRequest req = new DummyServletRequest(he, contextPath, servletPath, service);
 						DummyServletResponse resp = new DummyServletResponse(he); 
 						servlet.service(req, resp);
@@ -93,7 +93,7 @@ public class RequestHandler implements HttpHandler {
 			ServletConfig cfg = new ServletCfg(info.getInitParams());
 			servlet.init(cfg);
 			for (String mapping : info.getMappings()) {
-				servlets.put(contextPath + mapping.replace("/*", ""), servlet);
+				servlets.put(contextPath + mapping.replace("/*", "/"), servlet);
 			}
 		} catch (Exception ex) {
 			Logger.getLogger(RequestHandler.class.getName()).log(Level.SEVERE, null, ex);

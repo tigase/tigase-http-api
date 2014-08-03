@@ -98,8 +98,15 @@ class RestExtServlet extends RestServlet {
 				type = "text/html";
 			}
 		}
+		if (log.isLoggable(Level.FINEST)) {
+			log.log(Level.FINEST, "got result for request with type = " + type);
+		}
 		if (type == "text/html") {
 			def templates = handlerTemplates[route];
+			if (log.isLoggable(Level.FINEST)) {
+				log.log(Level.WARNING, "looking for template for " + route + " and method " + request.getMethod() 
+					+ " got " + (templates ? templates[request.getMethod()] : null) + " from " + handlerTemplates.size());
+			}
 			if (templates && templates[request.getMethod()]) {
 				Template template = (Template) templates[request.getMethod()];
 				def templateParams = null;
