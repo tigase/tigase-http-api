@@ -36,6 +36,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import tigase.conf.ConfigurationException;
 import tigase.db.AuthRepository;
+import tigase.db.RepositoryFactory;
 import tigase.db.UserRepository;
 import tigase.http.dnswebservice.DnsWebServiceModule;
 import tigase.http.rest.ApiKeyRepository;
@@ -64,7 +65,6 @@ public class HttpMessageReceiver extends AbstractMessageReceiver implements Pack
 	
     private UserRepository user_repo_impl = null;
     private AuthRepository auth_repo_impl = null;
-	private ApiKeyRepository apiKeyRepository = null;
 	
     @Override
     public void start() {
@@ -81,12 +81,7 @@ public class HttpMessageReceiver extends AbstractMessageReceiver implements Pack
         scheduler.shutdown();
         super.stop();
     }
-	
-	@Override
-	public ApiKeyRepository getApiKeyRepository() {
-		return this.apiKeyRepository;
-	}
-	
+		
 	@Override
 	public UserRepository getUserRepository() {
 		return this.user_repo_impl;
@@ -117,14 +112,9 @@ public class HttpMessageReceiver extends AbstractMessageReceiver implements Pack
 			props.put("http/"+e.getKey(), e.getValue());
 		}
 		
-		if (apiKeyRepository != null) {
-			apiKeyRepository.getDefaults(props, params);
-		}
-		else {
-			ApiKeyRepository apiKeyRepo = new ApiKeyRepository();
-			apiKeyRepo.getDefaults(props, params);			
-		}		
-		
+		ApiKeyRepository tmp = new ApiKeyRepository();
+		tmp.getDefaults(props, params);
+				
 		return props;
 	}
 	
@@ -200,13 +190,7 @@ public class HttpMessageReceiver extends AbstractMessageReceiver implements Pack
 		}
 		
         user_repo_impl = (UserRepository) props.get(SHARED_USER_REPO_PROP_KEY);
-        auth_repo_impl = (AuthRepository) props.get(SHARED_AUTH_REPO_PROP_KEY);
-
-		if (apiKeyRepository == null) {
-			apiKeyRepository = new ApiKeyRepository();
-		}
-		apiKeyRepository.setRepoUser(BareJID.bareJIDInstanceNS(getName()));
-		apiKeyRepository.setProperties(props);		
+        auth_repo_impl = (AuthRepository) props.get(SHARED_AUTH_REPO_PROP_KEY);;		
 		
 		JID componentJid = JID.jidInstanceNS(getName() + "." + this.getDefHostName().getDomain());
 		
@@ -216,6 +200,9 @@ public class HttpMessageReceiver extends AbstractMessageReceiver implements Pack
 				Module module = ((Class<? extends Module>) cls).newInstance();
 				String name = module.getName();
 				Map<String,Object> moduleProps = module.getDefaults();
+				moduleProps.put("componentName", getName());
+				moduleProps.put(RepositoryFactory.SHARED_USER_REPO_PROP_KEY, props.get(RepositoryFactory.SHARED_USER_REPO_PROP_KEY));
+				moduleProps.put(ApiKeyRepository.API_KEYS_KEY, props.get(ApiKeyRepository.API_KEYS_KEY));
 				
 				String modulePrefix = name + "/";
 				for (Map.Entry<String,Object> e : props.entrySet()) {
@@ -229,7 +216,15 @@ public class HttpMessageReceiver extends AbstractMessageReceiver implements Pack
 					if (oldModule != null) {
 						module = oldModule;
 					}
-					moduleProps.put(Module.HTTP_SERVER_KEY, httpServer);			
+					moduleProps.put(Module.HTTP_SERVER_KEY, httpServer);		
+					StringBuilder sb = new StringBuilder();
+					for (Map.Entry<String,Object> e : moduleProps.entrySet()) {
+						sb.append(e.getKey());
+						sb.append(" = ");
+						sb.append(e.getValue());
+						sb.append(", ");
+					}
+					log.log(Level.SEVERE, "configuring module " + name + " with parameters = [" + sb.toString() + "]");
 					module.setProperties(moduleProps);
 					module.init(componentJid, this);
 					modules.put(name, module);

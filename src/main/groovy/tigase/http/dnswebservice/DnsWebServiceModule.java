@@ -76,7 +76,9 @@ public class DnsWebServiceModule extends AbstractModule {
 		if (deployment != null) {
 			stop();
 		}
-
+		
+		super.start();
+		
 		deployment = HttpServer.deployment()
 				.setClassLoader(this.getClass().getClassLoader())
 				.setContextPath(contextPath)
@@ -95,6 +97,7 @@ public class DnsWebServiceModule extends AbstractModule {
 			httpServer.undeploy(deployment);
 			deployment = null;
 		}
+		super.stop();
 	}
 	
 }

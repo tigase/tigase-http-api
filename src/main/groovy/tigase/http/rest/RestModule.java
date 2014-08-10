@@ -80,6 +80,7 @@ public class RestModule extends AbstractModule {
 		}
 		modules.put(uuid, this);
 
+		super.start();
 		httpDeployment = HttpServer.deployment().setClassLoader(this.getClass().getClassLoader())
 				.setContextPath(contextPath).setService(new ServiceImpl(this));
 		if (vhosts != null) {
@@ -112,6 +113,7 @@ public class RestModule extends AbstractModule {
 			httpDeployment = null;
 			modules.remove(uuid, this);
 		}
+		super.stop();
 	}
 
 	@Override

@@ -48,6 +48,7 @@ public abstract class AbstractModule implements Module {
 	private PacketWriter writer;
 	
 	private ServiceEntity serviceEntity = null;
+	private ApiKeyRepository apiKeyRepository = null;
 	protected CommandManager commandManager = new CommandManager(this);
 	
 	@Override
@@ -115,6 +116,11 @@ public abstract class AbstractModule implements Module {
 	public void setProperties(Map<String, Object> props) {
 		serviceEntity = new ServiceEntity(getName(), null, getDescription(), true);
 		serviceEntity.setFeatures(getFeatures());
+		if (apiKeyRepository == null) {
+			apiKeyRepository = new ApiKeyRepository();
+		}
+		apiKeyRepository.setRepoUser(BareJID.bareJIDInstanceNS(getName(), (String) props.get("componentName")));
+		apiKeyRepository.setProperties(props);				
 	}
 	
 	@Override
@@ -135,7 +141,7 @@ public abstract class AbstractModule implements Module {
 	
 	@Override
 	public boolean isRequestAllowed(String key, String domain, String path) {
-		return writer.getApiKeyRepository().isAllowed(key, domain, path);
+		return apiKeyRepository.isAllowed(key, domain, path);
 	}
 	
 	@Override
@@ -146,6 +152,15 @@ public abstract class AbstractModule implements Module {
 	@Override
 	public AuthRepository getAuthRepository() {
 		return writer.getAuthRepository();
+	}
+	
+	@Override
+	public void start() {
+	}
+	
+	@Override
+	public void stop() {
+		apiKeyRepository.setAutoloadTimer(0);
 	}
 	
 }

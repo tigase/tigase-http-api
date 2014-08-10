@@ -110,7 +110,7 @@ public class RestServlet extends HttpServlet {
 
         prefix = request.getContextPath() + prefix
 
-		def apiKey = request.getParameter("api-key");
+		def apiKey = request.getParameter("api-key") ?: request.getHeader("Api-Key");
 		def fullPath = request.getRequestURI();
 		def host = request.getServerName();
 		if (!service.isAllowed(apiKey, host, fullPath)) {

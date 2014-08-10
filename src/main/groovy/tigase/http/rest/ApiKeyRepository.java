@@ -21,6 +21,7 @@
  */
 package tigase.http.rest;
 
+import java.util.Map;
 import tigase.db.comp.RepositoryItem;
 import tigase.db.comp.UserRepoRepository;
 import tigase.xmpp.BareJID;
@@ -28,7 +29,9 @@ import tigase.xmpp.BareJID;
 public class ApiKeyRepository extends UserRepoRepository<ApiKeyItem> {
 
 	private static final String GEN_API_KEYS = "--api-keys";
-	private static final String API_KEYS_KEY = "api-keys";
+	public static final String API_KEYS_KEY = "api-keys";
+	
+	private boolean openAccess = false;
 	
 	private BareJID repoUserJid;
 		
@@ -52,6 +55,11 @@ public class ApiKeyRepository extends UserRepoRepository<ApiKeyItem> {
 	}
 
 	@Override
+	public String getItemsListPKey() {
+		return API_KEYS_KEY;
+	}
+	
+	@Override
 	public String getPropertyKey() {
 		return GEN_API_KEYS;
 	}
@@ -63,7 +71,7 @@ public class ApiKeyRepository extends UserRepoRepository<ApiKeyItem> {
 	
 	public boolean isAllowed(String key, String domain, String path) {
 		// allow access for anyone if there is no api key defined
-		if (this.size() == 0)
+		if (openAccess)
 			return true;
 		
 		// if supplied key is null we deny access
@@ -79,5 +87,17 @@ public class ApiKeyRepository extends UserRepoRepository<ApiKeyItem> {
 		// if item exists it will check if access for path is 
 		// allowed for supplied key
 		return item.isAllowed(key, domain, path);
+	}
+	
+	@Override
+	public void setProperties(Map<String,Object> props) {
+		String[] items_arr = (String[]) props.get(getConfigKey());	
+		if (items_arr != null && items_arr.length == 1 && "open_access".equals(items_arr[0])) {
+			openAccess = true;
+		}
+		else {
+			openAccess = false;
+		}
+		super.setProperties(props);
 	}
 }

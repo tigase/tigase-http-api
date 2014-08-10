@@ -45,7 +45,5 @@ public interface PacketWriter {
 	public boolean write(Module module, Packet packet);
 	
 	public boolean write(Module module, Packet packet, Integer timeout, Callback callback);
-	
-	public ApiKeyRepository getApiKeyRepository();
-	
+		
 }
