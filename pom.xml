@@ -183,6 +183,7 @@
 				<targetPath>scripts</targetPath>
 				<includes>
 					<include>**/*.groovy</include>
+					<include>**/*.html</include>
 				</includes>
 			</resource>
 			<resource>
