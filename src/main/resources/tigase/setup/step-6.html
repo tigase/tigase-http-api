@@ -1,0 +1,73 @@
+<%  
+    def tmp = [
+		dbSuperuser : 'root',
+		dbSuperpass : '',
+		dbUser : 'tigase',
+		dbPass : 'tigase12',
+		dbName : 'tigasedb',
+		dbHost : 'localhost',
+		dbParams : ''
+	] + config;
+    def title = 'Database configuration for ' + config.dbType
+    
+	tmp.each { k,v ->
+		if (request.getParameter(k)) {
+			Object old = tmp[k];
+			if (old instanceof Boolean) {
+				tmp[k] = Boolean.parseBoolean(request.getParameter(k));
+			}
+			else {
+				tmp[k] = request.getParameter(k);
+			}
+		}
+	}
+	config.clear();
+	config.putAll(tmp);	
+%>
+${ util.include('header', [title:'Setup: ' + title]) }
+<h3>You have selected ${config.dbType} database. This database needs additional configuration parameters. Please enter all required information.</h3>
+<form method='GET' >
+<input type='hidden' name='step' value='3'/>
+
+<label for='dbSuperuser'>Super user account name:</label>
+<input type='text' size='30' name='dbSuperuser' value='${config.dbSuperuser}' />
+<br/>
+<div style='padding-top: 1em'></div>
+
+<label for='dbSuperpass'>Super user account password:</label>
+<input type='password' size='30' name='dbSuperpass' value='${config.dbSuperpass}' />
+<br/>
+<div style='padding-top: 1em'></div>
+
+<h3>${config.dbType} database details. It will be created automatically if it does not exist.</h3>
+
+<label for='dbUser'>Database account:</label>
+<input type='text' size='30' name='dbUser' value='${config.dbUser}' />
+<br/>
+<div style='padding-top: 1em'></div>
+
+<label for='dbPass'>Account password:</label>
+<input type='text' size='30' name='dbPass' value='${config.dbPass}' />
+<br/>
+<div style='padding-top: 1em'></div>
+
+<label for='dbName'>Database name:</label>
+<input type='text' size='30' name='dbName' value='${config.dbName}' />
+<br/>
+<div style='padding-top: 1em'></div>
+
+<label for='dbHost'>Database host or IP:</label>
+<input type='text' size='30' name='dbHost' value='${config.dbHost}' />
+<br/>
+<div style='padding-top: 1em'></div>
+
+<label for='dbParams'>Additional database parameters:</label>
+<input type='text' size='30' name='dbParams' value='${config.dbParams}' />
+<br/>
+<div style='padding-top: 1em'></div>
+
+<div style='padding-top: 1em'></div>
+<button type="submit">Apply</button>
+
+</form>
+${ util.include('footer') } 

@@ -1,0 +1,69 @@
+<%  
+	def defPlugins = [
+		[ key: 'jabber:iq:auth', label: 'Non-SASL Authentication', value: true ],
+		[ key: 'urn:ietf:params:xml:ns:xmpp-sasl', label: 'SASL Authentication', value: true ],
+		[ key: 'urn:ietf:params:xml:ns:xmpp-bind', label: 'Resource Bind', value: true ],
+		[ key: 'urn:ietf:params:xml:ns:xmpp-session', label: 'Session bind', value: true ],
+		[ key: 'jabber:iq:register', label: 'User registration', value: true ],
+		[ key: 'jabber:iq:roster', label: 'Roster management', value: true ],
+		[ key: 'presence', label: 'Presence management', value: true ],
+		[ key: 'basic-filter', label: 'Basic filter', value: true ],
+		[ key: 'domain-filter', label: 'Domain filter', value: true ],
+		[ key: 'jabber:iq:privacy', label: 'Privacy lists', value: true ],
+		[ key: 'jabber:iq:version', label: 'Software version', value: true ],
+		[ key: 'http://jabber.org/protocol/stats', label: 'Server statistics', value: true ],
+		[ key: 'starttls', label: 'TLS', value: true ],
+		[ key: 'msgoffline', label: 'Offline message storage (old)', value: false ],
+		[ key: 'vcard-temp', label: 'vCard', value: true ],
+		[ key: 'http://jabber.org/protocol/commands', label: 'Ad-hoc commands', value: true ],
+		[ key: 'jabber:iq:private', label: 'Private data storage', value: true ],
+		[ key: 'urn:xmpp:ping', label: 'Ping', value: true ],
+		[ key: 'pep', label: 'Personal eventing (PEP)', value: true ],
+		[ key: 'zlib', label: 'Zlib stream compression (new, experimental)', value: true ],
+		[ key: 'message-archive-xep-0136', label: 'Message archive plugin (xep 0136) required by archive component', value: true ],
+		[ key: 'amp', label: 'Advanced Message Processing (AMP with offline message store)', value: true ]
+	];
+    def tmp = [
+		plugins:defPlugins
+	] + config;
+    def title = 'Plugins selection'
+    
+	tmp.each { k,v ->
+		if (request.getParameter(k)) {
+			Object old = tmp[k];
+			if (old instanceof Boolean) {
+				tmp[k] = Boolean.parseBoolean(request.getParameter(k));
+			}
+			else {
+				tmp[k] = request.getParameter(k);
+			}
+		}
+	}
+	config.clear();
+	config.putAll(tmp);	
+	defPlugins.each { dp ->
+		def found = config.plugins.find { it.key == dp.key };
+		if (found) {
+			found.label = dp.label;
+		} else {
+			config.plugins.add(dp);
+		}
+ 	}
+%>
+${ util.include('header', [title:'Setup: ' + title]) }
+<h3>Please selected/deselect plugins to be loaded by the server.</h3>
+<form method='GET' >
+<input type='hidden' name='step' value='5'/>
+
+<% config.plugins.each { %>
+<label for='${it.key}'>${it.label}</label>
+<input name='${it.key}' type='checkbox' ${ it.value ? "checked" : "" } />
+<br/>
+<div style='padding-top: 1em'></div>
+<% } %>
+	   
+<div style='padding-top: 1em'></div>
+<button type="submit">Apply</button>
+
+</form>
+${ util.include('footer') } 

@@ -83,7 +83,7 @@ public class DummyServletRequest implements HttpServletRequest {
 			for (String part : query.split("&")) {
 				String[] val = part.split("=");
 				try {
-					params.put(URLDecoder.decode(val[0], "UTF-8"), URLDecoder.decode(val[1], "UTF-8"));
+					params.put(URLDecoder.decode(val[0], "UTF-8"), val.length == 1 ? "" : URLDecoder.decode(val[1], "UTF-8"));
 				} catch (UnsupportedEncodingException ex) {
 					Logger.getLogger(DummyServletRequest.class.getName()).log(Level.SEVERE, null, ex);
 				}
