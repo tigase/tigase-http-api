@@ -65,7 +65,7 @@ class RestExtServlet extends RestServlet {
 					
 					templates[method] = templateEngine.createTemplate(templateFile.getText());
 				} catch (Exception ex) {
-					log.log(Level.WARN, "could not load template for $srcFile for method $method", ex);
+					log.log(Level.WARNING, "could not load template for $srcFile for method $method", ex);
 				}
 			}
 			if (templates.size() > 0) {
@@ -83,7 +83,7 @@ class RestExtServlet extends RestServlet {
 			try {
 				includes[src] = templateEngine.createTemplate(f.getText());
 			} catch (Exception ex) {
-				log.log(Level.WARN, "could not load template for $src", ex);
+				log.log(Level.WARNING, "could not load template for $src", ex);
 			}
 		}
 	}
@@ -121,7 +121,7 @@ class RestExtServlet extends RestServlet {
 					def temp = includes[name];
 					if (temp == null)
 						return "";
-					def map = [:];
+					def map = [imports:[]];
 					map.putAll(templateParams);
 					if (params != null) map.putAll(params);
 					return temp.make(map);

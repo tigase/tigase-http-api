@@ -33,9 +33,9 @@ import tigase.xmpp.JID
 import tigase.xmpp.StanzaType
 
 /**
- * Class implements support for retrieving component statistics
+ * Class implements support for retrieving server statistics
  */
-class ComponentStatsHandler extends tigase.http.rest.Handler {
+class ServerStatsHandler extends tigase.http.rest.Handler {
 
     def TIMEOUT = 30 * 1000;
 
@@ -43,46 +43,69 @@ class ComponentStatsHandler extends tigase.http.rest.Handler {
     def DATA_XMLNS = "jabber:x:data";
     def DISCO_ITEMS_XMLNS = "http://jabber.org/protocol/disco#items";
 
-    public ComponentStatsHandler() {
-		regex = /\/([^@\/]+)/
+    public ServerStatsHandler() {
+		regex = /\//
         requiredRole = "admin"
         isAsync = true
 
         /**
          * Handles GET request and returns list of available ad-hoc commands
          */
-        execGet = { Service service, callback, user, compName ->
-
-			String domain = DNSResolver.getDefaultHostname();
-			String node = "stats/" + compName;
+        execGet = { Service service, callback, user ->
+			def domain = DNSResolver.getDefaultHostname();
 			
-            Element iq = new Element("iq");
+			Element iq = new Element("iq");
             iq.setAttribute("to", "stats@$domain");
             iq.setAttribute("from", user.toString());
             iq.setAttribute("type", "get");
             iq.setAttribute("id", UUID.randomUUID().toString())
-
-            Element command = new Element("command");
-            command.setXMLNS(COMMAND_XMLNS);
-            command.setAttribute("node", node);
-			iq.addChild(command);
-
-            Element x = new Element("x");
-            x.setXMLNS(DATA_XMLNS);
-            x.setAttribute("type", "submit");
-            command.addChild(x);
-            Element qfieldEl = new Element("field");
-            qfieldEl.setAttribute("var", 'Stats level');
-            x.addChild(qfieldEl);
-			qfieldEl.addChild(new Element("value", 'FINEST'));
+			Element query = new Element("query");
+			query.setXMLNS("http://jabber.org/protocol/disco#items");
+			iq.addChild(query);
 			
-            service.sendPacket(new Iq(iq), TIMEOUT, { Packet result ->
+			service.sendPacket(new Iq(iq), TIMEOUT, { Packet result ->
                 if (result == null || result.getType() == StanzaType.error) {
                     callback(null);
                     return;
                 }
+				
+				def items = result.getElement().getChild("query", "http://jabber.org/protocol/disco#items").getChildren();
+				def results = [:];
+					
+				retrieveStats(service, user, items, results, callback);
+					
+			})
+			
+		}
+	}
+		def retrieveStats = { service, user, items, allResults, callback ->
+			items.each { ditem ->
+				def domain = DNSResolver.getDefaultHostname();
+				def compName = ditem.getAttribute("node");
+				def node = "stats/" + compName;
+			
+		        Element iq = new Element("iq");
+				iq.setAttribute("to", "stats@$domain");
+			    iq.setAttribute("from", user.toString());
+		        iq.setAttribute("type", "get");
+	            iq.setAttribute("id", UUID.randomUUID().toString())
 
-                command = result.getElement().getChild("command", COMMAND_XMLNS);
+				Element commandReq = new Element("command");
+			    commandReq.setXMLNS(COMMAND_XMLNS);
+		        commandReq.setAttribute("node", node);
+				iq.addChild(commandReq);
+				
+				service.sendPacket(new Iq(iq), TIMEOUT, { Packet result ->
+					if (result == null || result.getType() == StanzaType.error) {
+						synchronized (results) {
+							allResults[compName] = [component:compName];
+							if (allResults.size() == items.size())
+								callback([stats:allResults]);
+						}
+						return;
+					}
+					
+                def command = result.getElement().getChild("command", COMMAND_XMLNS);
                 def data = command.getChild("x", DATA_XMLNS);
                 def fieldElems = data.getChildren().findAll({ it.getName() == "field"});
 
@@ -137,9 +160,14 @@ class ComponentStatsHandler extends tigase.http.rest.Handler {
                     }
                 }
 
-                callback([stats:results])					
-            });
-        }
-	}
+				synchronized (allResults) {
+					allResults[compName] = results;
+					if (allResults.size() == items.size())
+						callback([stats:allResults]);					
+				}
+					
+				});
+			}			
+		}
 
 }
