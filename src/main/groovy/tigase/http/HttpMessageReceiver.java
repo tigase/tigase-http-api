@@ -41,7 +41,7 @@ import tigase.db.UserRepository;
 import tigase.http.dnswebservice.DnsWebServiceModule;
 import tigase.http.rest.ApiKeyRepository;
 import tigase.http.rest.RestModule;
-import tigase.http.system.SystemInfoModule;
+import tigase.http.server.ServerInfoModule;
 import tigase.server.AbstractMessageReceiver;
 import tigase.server.Packet;
 import tigase.server.Permissions;
@@ -60,7 +60,7 @@ public class HttpMessageReceiver extends AbstractMessageReceiver implements Pack
     private ConcurrentHashMap<String,Request> pendingRequest = new ConcurrentHashMap<String,Request>();
 
 	private Map<String,Module> modules = new ConcurrentHashMap<String,Module>();
-	private static final Class[] ALL_MODULES = { RestModule.class, DnsWebServiceModule.class, SystemInfoModule.class };
+	private static final Class[] ALL_MODULES = { RestModule.class, DnsWebServiceModule.class, ServerInfoModule.class };
 	
 	private HttpServer httpServer = new HttpServer();;
 	

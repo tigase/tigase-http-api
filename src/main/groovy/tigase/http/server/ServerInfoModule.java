@@ -19,7 +19,7 @@
  * Last modified by $Author$
  * $Date$
  */
-package tigase.http.system;
+package tigase.http.server;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -40,7 +40,7 @@ import tigase.http.util.StaticFileServlet;
  *
  * @author andrzej
  */
-public class SystemInfoModule extends AbstractModule {
+public class ServerInfoModule extends AbstractModule {
 
 	private String contextPath = null;
 	
@@ -50,12 +50,12 @@ public class SystemInfoModule extends AbstractModule {
 	
 	@Override
 	public String getName() {
-		return "system";
+		return "server";
 	}
 
 	@Override
 	public String getDescription() {
-		return "System information module";
+		return "Server information module";
 	}
 
 	@Override
@@ -73,8 +73,8 @@ public class SystemInfoModule extends AbstractModule {
 		
 		ServletInfo servletInfo = HttpServer.servlet("StaticServlet", StaticFileServlet.class);
 		servletInfo.addInitParam(StaticFileServlet.DIRECTORY_KEY, new File("logs").getAbsolutePath())
-				.addInitParam(StaticFileServlet.INDEX_KEY, "/system-info.html")
-				.addInitParam(StaticFileServlet.ALLOWED_PATTERN_KEY, "/system-info\\.html")
+				.addInitParam(StaticFileServlet.INDEX_KEY, "/server-info.html")
+				.addInitParam(StaticFileServlet.ALLOWED_PATTERN_KEY, "/server-info\\.html")
 				.addMapping("/*");
 		httpDeployment.addServlets(servletInfo);		
 		
