@@ -1,0 +1,52 @@
+<%  
+    def tmp = [
+		dbSuperuser : 'root',
+		dbSuperpass : '',
+		dbUser : 'tigase',
+		dbPass : 'tigase12',
+		dbName : 'tigasedb',
+		dbHost : 'localhost',
+		dbParams : ''
+	] + config;
+    def title = 'Database connectivity check '
+    
+	tmp.each { k,v ->
+		if (request.getParameter(k)) {
+			Object old = tmp[k];
+			if (old instanceof Boolean) {
+				tmp[k] = Boolean.parseBoolean(request.getParameter(k));
+			}
+			else {
+				tmp[k] = request.getParameter(k);
+			}
+		}
+	}
+	config.clear();
+	config.putAll(tmp);	
+%>
+${ util.include('header', [title:'Setup: ' + title]) }
+<h3>You have selected ${config.dbType} database.</h3>
+<%
+	def dbException = null;
+	def dbUri = "jdbc:${config.dbType?.toLowerCase()}://${config.dbHost}/${config.dbName}?user=${config.dbUser}&password=${config.dbPass}".toString();
+	try {
+		def repoClass = tigase.db.RepositoryFactory.getRepoClass(tigase.db.DataRepository.class, dbUri);
+		def repo = repoClass.newInstance();
+		repo.initRepository(dbUri, [:]);
+	} catch (Exception ex) {
+		dbException = ex;
+	}
+	if (dbException) { %>
+	<h3>Could not connect to database ${dbUri} due to following error:</h3>
+	<h3 style='color:red;'>${dbException.getMessage()}</h3>
+<% } else { %>
+<h3>Connectivity to database using ${dbUri} verified.</h3>
+<% } %>
+<form method='GET' >
+<input type='hidden' name='step' value='3'/>
+
+<div style='padding-top: 1em'></div>
+<button type="submit">Apply</button>
+
+</form>
+${ util.include('footer') } 
