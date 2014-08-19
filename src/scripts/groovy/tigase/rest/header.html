@@ -32,6 +32,15 @@ font-size: 1.6em;
     text-align: center;
 }
 </style>
+<% imports.each { 
+      if (it.type == 'css' && it.src) { %>
+<link rel='stylesheet' type='text/css' href='${src}'></link>
+<%    } else if (it.type == 'css' && it.content) { %>
+<style>.test {} ${it.content}</style>
+<%    } else if (it.type == 'script') { %>
+<script src="${it.src}"></script>
+<%    } %>
+<%  } %>
 </head>
 <body>
 <div class="root">

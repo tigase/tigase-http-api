@@ -33,8 +33,8 @@ import java.util.logging.Logger;
 import tigase.http.AbstractModule;
 import tigase.http.DeploymentInfo;
 import tigase.http.HttpServer;
-
 import tigase.http.ServletInfo;
+import tigase.http.util.StaticFileServlet;
 
 public class RestModule extends AbstractModule {
 	
@@ -90,7 +90,7 @@ public class RestModule extends AbstractModule {
 		File[] scriptDirFiles = scriptsDirFile.listFiles(new FileFilter() {
 			@Override
 			public boolean accept(File file) {
-				return file.isDirectory();
+				return file.isDirectory() && !"static".equals(file.getName());
 			}
 		});
 
@@ -103,6 +103,12 @@ public class RestModule extends AbstractModule {
 				}
 			}
 		}
+		
+		ServletInfo servletInfo = HttpServer.servlet("StaticServlet", StaticFileServlet.class);
+		servletInfo.addInitParam(StaticFileServlet.DIRECTORY_KEY, new File(scriptsDirFile, "static").getAbsolutePath())
+				.addMapping("/static/*");
+		httpDeployment.addServlets(servletInfo);		
+		
 		httpServer.deploy(httpDeployment);
 	}
 
