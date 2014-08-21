@@ -53,7 +53,7 @@
 ${ util.include('header', [title:'Setup: ' + title]) }
 <h3>Please selected/deselect plugins to be loaded by the server.</h3>
 <form method='GET' >
-<input type='hidden' name='step' value='5'/>
+<input type='hidden' name='step' value='${Integer.parseInt(currentStep)+1}'/>
 
 <% config.plugins.each { %>
 <label for='${it.key}'>${it.label}</label>

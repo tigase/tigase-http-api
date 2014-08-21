@@ -84,7 +84,7 @@ public class SetupServlet extends HttpServlet {
 					return temp.make(map);
 				}				
 				];
-		templateParams = [request:request, response:response, servlet:this, util:util, config:config];
+		templateParams = [request:request, response:response, servlet:this, util:util, config:config, currentStep:i];
 		Writable w = t.make(templateParams);
 		
 		w.writeTo(response.getWriter());

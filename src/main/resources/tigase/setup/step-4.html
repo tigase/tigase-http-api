@@ -1,8 +1,22 @@
 <%  
     def tmp = [
-	test:1
+		authDB:false,
+		mucComponent: true,
+		PubSubComponent: true,
+		stunComponent: false,
+		socks5Component: false,
+		httpApiComponent: true,
+		messageArchiveComponent: true,
+		clusterMode : false,
+		acsComponent : false,
+		acsPubSubComponent : false,
+		acsMUCComponent : false,
+		serverDebug : true,
+		dbDebug : false,
+		pluginDebug : false,
+		clusterDebug : false
 	] + config;
-    def title = 'Advanced Clustering Strategy information'
+    def title = 'Advanced configuration options'
     
 	tmp.each { k,v ->
 		if (request.getParameter(k)) {
@@ -16,86 +30,77 @@
 		}
 	}
 	config.clear();
-	config.putAll(tmp);
+	config.putAll(tmp);	
 %>
 ${ util.include('header', [title:'Setup: ' + title]) }
+<h3>This panel offer advanced configuration options. Please do not change them unless you know what you are doing.</h3>
 <form method='GET' >
-<input type='hidden' name='step' value='3'/>
-<%
-	def components = [];
-	if (config.mucComponent) {
-		def cls = 'tigase.muc.MUCComponnet';
-		if (config.acsMUCComponent) {
-			cls = 'tigase.muc.cluster.MUCComponentClustered';
-		}
-		components.add([cls:cls, name:'muc']);
-	}
-	if (config.PubSubComponent) {
-		def cls = 'tigase.pubsub.PubSubComponent';
-		if (config.acsPubSubComponent) {
-			cls = 'tigase.pubsub.cluster.PubSubComponentClustered';
-		}
-		components.add([cls:cls, name:'pubsub']);
-	}
-	if (config.httpApiComponent) {
-		components.add([cls:'tigase.http.HttpMessageReceiver', name:'http']);
-	}
-	if (config.stunComponent) {
-		components.add([cls:'tigase.stun.StunComponent', name:'stun']);
-	}
-	if (config.socks5Component) {
-		components.add([cls:'tigase.socks5.Socks5Component', name:'socks5']);
-	}
-	if (config.messageArchivingComponent) {
-		components.add([cls:'tigase.archive.MessageArchiveComponent', name:'message-archiving']);
-	}
+<input type='hidden' name='step' value='${Integer.parseInt(currentStep)+1}'/>
+<div style='padding-top: 1em'></div>
+<label for='authDB'>Separate authentication database:</label>
+<input name='authDB' type='checkbox' value='${ !(!(config.authDB)) }' />
+<br/>
+<h3>Select optional components to run:</h3>
+<% [
+	[ key:'mucComponent', label:'MUC' ],
+	[ key:'PubSubComponent', label:'PubSub' ],
+	[ key:'stunComponent', label:'STUN Component' ],
+	[ key:'socks5Component', label:'Socks5 Component' ],
+	[ key:'httpApiComponent', label:'HTTP API Component' ],
+	[ key:'messageArchivingComponent', label:'Message Archiving Component' ]
+   ].each {
 %>
-<textarea rows=40 cols=80>
-config-type=${config.configType}
---virt-hosts=${config.virtualDomains}
---admins=${config.admins}
-<% 
-	def debug = "";
-	if (config.serverDebug) {
-		if (debug.length() > 0)
-			debug += ',';
-		debug += 'server';
-	}
-	if (config.pluginDebug) {
-		if (debug.length() > 0)
-			debug += ',';
-		debug += 'xmpp';
-	}
-	if (config.dbDebug) {
-		if (debug.length() > 0)
-			debug += ',';
-		debug += 'db';
-	}
-	if (config.clusterDebug) {
-		if (debug.length() > 0)
-			debug += ',';
-		debug += 'cluster';
-	}
-    if (debug.length() > 0) {
- %>
---debug=${debug}
+<label for='${it.key}'>${it.label}</label>
+<input name='${it.key}' type='checkbox' value='${ !(!(config[it.key])) }' />
+<br/>
+<div style='padding-top: 1em'></div>
 <% } %>
-<%  def plugins = "";
-    config.plugins.each {
-		if (plugins.length() > 0) plugins += ",";
-		plugins += (it.value ? '+' : '-') + it.key.replace(':', '\\:');
-	} 
-%>
---sm-plugins=${plugins}
-<% def ci = 1;
-   components.each {
- %>
---comp-name-${ci}=${it.name}
---comp-class-${ci}=${it.cls}
-<% ci++;
-   } %>
-</textarea>
+<h3>Cluster configuration</h3>
+<label for='clusterMode'>Do you want your server to run in the cluster mode?</label>
+<input name='clusterMode' type='checkbox' value='${ !(!(config.clusterMode)) }' onclick='
+document.getElementById("acsComponent").disabled = !this.checked;
+if (!this.checked) { 
+	document.getElementById("acsComponent").checked = false;
+	document.getElementById("acsPubSubComponent").checked = false;
+	document.getElementById("acsMUCComponent").checked = false;
+}
+document.getElementById("acsPubSubComponent").disabled = !document.getElementById("acsComponent").checked;
+document.getElementById("acsMUCComponent").disabled = !document.getElementById("acsComponent").checked;
+'/>
+<br/>
+<div style='padding-top: 1em'></div>
 
+<label for='acsComponent'>Tigase Advanced Clustering Strategy (ACS) Component</label>
+<input id="acsComponent" name='acsComponent' type="checkbox" ${(config.clusterMode) ? "" : "disabled"} value='${ !(!(config.acsComponent)) }' onclick='
+document.getElementById("acsPubSubComponent").disabled = !this.checked;
+document.getElementById("acsMUCComponent").disabled = !this.checked;
+if (!this.checked) { 
+	document.getElementById("acsPubSubComponent").checked = false;
+	document.getElementById("acsMUCComponent").checked = false;
+}' />
+<br/>
+<div style='padding-top: 1em'></div>
+<label for='acsPubSubComponent'>PubSub ACS</label>
+<input id="acsPubSubComponent" name='acsPubSubComponent' type="checkbox" ${(config.acsComponent && config.clusterMode) ? "" : "disabled"} value='${ !(!(config.acsPubSubComponent)) }'/>
+<br/>
+<div style='padding-top: 1em'></div>
+<label for='acsMUCComponent'>MUC ACS</label>
+<input id="acsMUCComponent" name='acsMUCComponent' type="checkbox" ${(config.acsComponent && config.clusterMode) ? "" : "disabled"} value='${ !(!(config.acsMUCComponent)) }'/>
+	   
+<h3>Debug configuration</h3>
+<% [
+	[ key:'serverDebug', label:'Base server debug' ],
+	[ key:'pluginsDebug', label:'Plugins debug' ],
+	[ key:'dbDebug', label:'Database debug' ],
+	[ key:'clusterDebug', label:'Cluster debug' ]
+   ].each {
+ %>
+<label for='${it.key}'>${it.label}</label>
+<input name='${it.key}' type='checkbox' value='${ !(!(config[it.key])) }' />
+<br/>
+<div style='padding-top: 1em'></div>
+<% } %>
+	   
 <div style='padding-top: 1em'></div>
 <button type="submit">Apply</button>
 

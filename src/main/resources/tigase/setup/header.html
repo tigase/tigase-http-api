@@ -27,11 +27,17 @@ white-space:nowrap;
 }
 .content {
     min-height: 600px;
-    padding: 0px 1em;
+    padding: 0em 0em;
 }
 .footer {
     font-size: 0.9em;
     text-align: center;
+}
+button {
+	font-size: 1.0em;
+	padding: 0.5em 1em;
+	background-color: lightgray;	
+	border: 1px solid lightgray;
 }
 </style>
 </head>
@@ -45,4 +51,25 @@ float: left;
 background: radial-gradient(white 5%, rgba(255,255,255,0) 72%);"/>
 <span style="padding-left: 20px;">${title}</style>
 </div>
+<% def i=1;
+   def steps = [
+	[ id:"${i++}", label: 'About software' ],
+	[ id:"${i++}", label: 'Licence notice' ],
+	[ id:"${i++}", label: 'Basic configuration' ],
+	[ id:"${i++}", label: 'Advanced configuration' ],
+	[ id:"${i++}", label: 'Configure features' ],
+	[ id:"${i++}", label: 'Database configuration' ],
+	[ id:"${i++}", label: 'Database schema installation' ],
+	[ id:"${i++}", label: 'Finish' ]
+   ];
+%>
 <div class="content">
+	<table style='border-spacing: 0px'>
+		<tr>
+			<td style='margin: 8px; vertical-align: top; padding-top: 20px; background-color: lightgray; width:250px;'><div class='sidebar'>
+					<% steps.each { step -> %>
+						<div style='${(step.id == currentStep) ? "background-color: whitesmoke;" : ""}padding-left: 10px;'><a href="?step=${step.id}" style='font-weight: bold; text-decoration: none; display: block; padding: 6px 0px;'>${step.label}</a></div>
+					<% } %>
+			</div>
+			<td style='min-height: 600px; padding: 1em;'>
+				

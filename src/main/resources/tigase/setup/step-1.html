@@ -1,13 +1,6 @@
 <%  
-    def tmp = [
-		configType:'--gen-config-def',
-		virtualDomains: tigase.util.DNSResolver.getDefaultHostname(),
-		admins: 'admin@' + tigase.util.DNSResolver.getDefaultHostname(),
-		adminPwd: 'tigase',
-		dbType: 'Derby',
-		advancedConfig : false
-	] + config;
-    def title = 'Basic Tigase server configuration'
+    def tmp = [test:1] + config;
+    def title = 'About software'
     
 	tmp.each { k,v ->
 		if (request.getParameter(k)) {
@@ -18,58 +11,14 @@
 	config.putAll(tmp);
 %>
 ${ util.include('header', [title:'Setup: ' + title]) }
-<h3>On this panel you can specify basic configuration settings for the Tigase server.</h3>
-<h3>Based on your selection here more configuration options might be presented later on. After the configuration is complete init.properties file will be created.</h3>
-<h3>You can optionally restart the server at the end of the process if you like.</h3>
+<h3>While the Tigase server is quite stable and well tested application the installer itself is a new addition. Take precautions especially if you upgrade the ser
+ver from earlier version. Backup old server files and the database.</h3>
+<h3>If you notice any problems please report them to address: <a href="mailto:artur.hefczyc@tigase.org">artur.hefczyc@tigase.org</a></h3>
 <form method='GET' >
-<input type='hidden' name='step' value='1'/>
-<div style='padding-top: 1em'></div>
-<label for='configType'>Configuration type:</label>
-<select name='configType'>
-<% [
-    [ value:'--gen-config-def', label:'Default installation' ],
-    [ value:'--gen-config-all', label:'Default plus extra components' ],
-    [ value:'--gen-config-sm', label:'Session Manager only' ],
-    [ value:'--gen-config-cs', label:'Network connectivity only' ]
-   ].each {
- %>
-    <option value='${it.value}' ${ it.value == config.configType ? 'selected' : '' } >${it.label}</option>
-<% } %>
-</select>
-<br/>
-<div style='padding-top: 1em'></div>
-<label for='virtualDomains'>Your XMPP (Jabber) domains</label>
-<input name='virtualDomains' type='text' size='30' value='${config.virtualDomains}' />
-<br/>
-<div style='padding-top: 1em'></div>
-<label for='admins'>Server administrators</label>
-<input name='admins' type='text' size='30' value='${config.admins}' />
-<br/>
-<div style='padding-top: 1em'></div>
-<label for='adminPwd'>Admin password</label>
-<input name='adminPwd' type='password' size='30' value='${config.adminPwd}' />
-<br/>
-<div style='padding-top: 1em'></div>
-<label for='dbType'>Select database</label>
-<select name='dbType'>
-<% [
-	[ value:'Derby', label:'Derby (built-in database)' ],
-	[ value:'MySQL', label:'MySQL' ],
-	[ value:'PostgreSQL', label:'PostgreSQL' ],
-	[ value:'SQLServer', label:'SQLServer' ],
-	[ value:'Other', label:'Other...' ]
-   ].each {
- %>
- <option value='${it.value}' ${ config.dbType == it.value ? 'selected' : '' } >${it.label}</option>
-<% } %>
-</select>
-<br/>
-<div style='padding-top: 1em'></div>
-<label for='advancedConfig'>Advanced configuration options</label>
-<input name='advancedConfig' type='checkbox' value='${ !(!(config.advancedConfig)) }' />
+<input type='hidden' name='step' value='${Integer.parseInt(currentStep)+1}'/>
 
 <div style='padding-top: 1em'></div>
-<button type="submit">Apply</button>
+<button type="submit">Next</button>
 
 </form>
 ${ util.include('footer') } 

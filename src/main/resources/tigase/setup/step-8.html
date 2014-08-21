@@ -1,0 +1,108 @@
+<%  
+    def tmp = [
+	test:1
+	] + config;
+    def title = 'Finished'
+    
+	tmp.each { k,v ->
+		if (request.getParameter(k)) {
+			Object old = tmp[k];
+			if (old instanceof Boolean) {
+				tmp[k] = Boolean.parseBoolean(request.getParameter(k));
+			}
+			else {
+				tmp[k] = request.getParameter(k);
+			}
+		}
+	}
+	config.clear();
+	config.putAll(tmp);
+%>
+${ util.include('header', [title:'Setup: ' + title]) }
+<h3>Installation of Tigase XMPP Server is finished.</h3>
+<form method='GET' >
+<input type='hidden' name='step' value='3'/>
+<%
+	def components = [];
+	if (config.mucComponent) {
+		def cls = 'tigase.muc.MUCComponnet';
+		if (config.acsMUCComponent) {
+			cls = 'tigase.muc.cluster.MUCComponentClustered';
+		}
+		components.add([cls:cls, name:'muc']);
+	}
+	if (config.PubSubComponent) {
+		def cls = 'tigase.pubsub.PubSubComponent';
+		if (config.acsPubSubComponent) {
+			cls = 'tigase.pubsub.cluster.PubSubComponentClustered';
+		}
+		components.add([cls:cls, name:'pubsub']);
+	}
+	if (config.httpApiComponent) {
+		components.add([cls:'tigase.http.HttpMessageReceiver', name:'http']);
+	}
+	if (config.stunComponent) {
+		components.add([cls:'tigase.stun.StunComponent', name:'stun']);
+	}
+	if (config.socks5Component) {
+		components.add([cls:'tigase.socks5.Socks5Component', name:'socks5']);
+	}
+	if (config.messageArchivingComponent) {
+		components.add([cls:'tigase.archive.MessageArchiveComponent', name:'message-archiving']);
+	}
+%>
+<label for='config'>Configuration created during installation:</label><br/>
+<textarea name='config' rows=40 cols=80>
+config-type=${config.configType}
+--virt-hosts=${config.virtualDomains}
+--admins=${config.admins}
+<% 
+	def debug = "";
+	if (config.serverDebug) {
+		if (debug.length() > 0)
+			debug += ',';
+		debug += 'server';
+	}
+	if (config.pluginDebug) {
+		if (debug.length() > 0)
+			debug += ',';
+		debug += 'xmpp';
+	}
+	if (config.dbDebug) {
+		if (debug.length() > 0)
+			debug += ',';
+		debug += 'db';
+	}
+	if (config.clusterDebug) {
+		if (debug.length() > 0)
+			debug += ',';
+		debug += 'cluster';
+	}
+    if (debug.length() > 0) {
+ %>
+--debug=${debug}
+<% } %><% def userDbUri = "jdbc:${config.dbType?.toLowerCase()}://${config.dbHost}/${config.dbName}?user=${config.dbUser}&password=${config.dbPass}".toString(); 
+	def authDbUri = "jdbc:${config.dbType?.toLowerCase()}://${config.dbHost}/${config.dbName}?user=${config.dbUser}&password=${config.dbPass}".toString(); %>
+--user-db-uri=${userDbUri}
+<% if (userDbUri != authDbUri) { %>--auth-db-uri=${authDbUri}<% } %>
+<%  def plugins = "";
+    config.plugins.each {
+		if (plugins.length() > 0) plugins += ",";
+		plugins += (it.value ? '+' : '-') + it.key.replace(':', '\\:');
+	} 
+%>
+--sm-plugins=${plugins}
+<% def ci = 1;
+   components.each {
+ %>
+--comp-name-${ci}=${it.name}
+--comp-class-${ci}=${it.cls}
+<% ci++;
+   } %>
+</textarea>
+
+<div style='padding-top: 1em'></div>
+<button type="submit">Apply</button>
+
+</form>
+${ util.include('footer') } 

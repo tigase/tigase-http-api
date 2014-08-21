@@ -27,7 +27,7 @@
 ${ util.include('header', [title:'Setup: ' + title]) }
 <h3>You have selected ${config.dbType} database. This database needs additional configuration parameters. Please enter all required information.</h3>
 <form method='GET' >
-<input type='hidden' name='step' value='3'/>
+<input type='hidden' name='step' value='${Integer.parseInt(currentStep)+1}'/>
 
 <label for='dbSuperuser'>Super user account name:</label>
 <input type='text' size='30' name='dbSuperuser' value='${config.dbSuperuser}' />
