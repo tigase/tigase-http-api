@@ -1,108 +1,84 @@
 <%  
     def tmp = [
-		authDB:false,
-		mucComponent: true,
-		PubSubComponent: true,
-		stunComponent: false,
-		socks5Component: false,
-		httpApiComponent: true,
-		messageArchiveComponent: true,
-		clusterMode : false,
-		acsComponent : false,
-		acsPubSubComponent : false,
-		acsMUCComponent : false,
-		serverDebug : true,
-		dbDebug : false,
-		pluginDebug : false,
-		clusterDebug : false
+		configType:'--gen-config-def',
+		virtualDomains: tigase.util.DNSResolver.getDefaultHostname(),
+		admins: 'admin@' + tigase.util.DNSResolver.getDefaultHostname(),
+		adminPwd: 'tigase',
+		dbType: 'Derby',
+		advancedConfig : false
 	] + config;
-    def title = 'Advanced configuration options'
+    def title = 'Basic Tigase server configuration'
     
 	tmp.each { k,v ->
 		if (request.getParameter(k)) {
-			Object old = tmp[k];
-			if (old instanceof Boolean) {
-				tmp[k] = Boolean.parseBoolean(request.getParameter(k));
-			}
-			else {
-				tmp[k] = request.getParameter(k);
-			}
+			tmp[k] = request.getParameter(k);
 		}
 	}
 	config.clear();
-	config.putAll(tmp);	
+	config.putAll(tmp);
 %>
 ${ util.include('header', [title:'Setup: ' + title]) }
-<h3>This panel offer advanced configuration options. Please do not change them unless you know what you are doing.</h3>
+<h3>On this panel you can specify basic configuration settings for the Tigase server.</h3>
+<h3>Based on your selection here more configuration options might be presented later on. After the configuration is complete init.properties file will be created.</h3>
+<h3>You can optionally restart the server at the end of the process if you like.</h3>
 <form method='GET' >
 <input type='hidden' name='step' value='${Integer.parseInt(currentStep)+1}'/>
 <div style='padding-top: 1em'></div>
-<label for='authDB'>Separate authentication database:</label>
-<input name='authDB' type='checkbox' value='${ !(!(config.authDB)) }' />
-<br/>
-<h3>Select optional components to run:</h3>
+<label for='configType'>Configuration type:</label>
+<select name='configType'>
 <% [
-	[ key:'mucComponent', label:'MUC' ],
-	[ key:'PubSubComponent', label:'PubSub' ],
-	[ key:'stunComponent', label:'STUN Component' ],
-	[ key:'socks5Component', label:'Socks5 Component' ],
-	[ key:'httpApiComponent', label:'HTTP API Component' ],
-	[ key:'messageArchivingComponent', label:'Message Archiving Component' ]
-   ].each {
-%>
-<label for='${it.key}'>${it.label}</label>
-<input name='${it.key}' type='checkbox' value='${ !(!(config[it.key])) }' />
-<br/>
-<div style='padding-top: 1em'></div>
-<% } %>
-<h3>Cluster configuration</h3>
-<label for='clusterMode'>Do you want your server to run in the cluster mode?</label>
-<input name='clusterMode' type='checkbox' value='${ !(!(config.clusterMode)) }' onclick='
-document.getElementById("acsComponent").disabled = !this.checked;
-if (!this.checked) { 
-	document.getElementById("acsComponent").checked = false;
-	document.getElementById("acsPubSubComponent").checked = false;
-	document.getElementById("acsMUCComponent").checked = false;
-}
-document.getElementById("acsPubSubComponent").disabled = !document.getElementById("acsComponent").checked;
-document.getElementById("acsMUCComponent").disabled = !document.getElementById("acsComponent").checked;
-'/>
-<br/>
-<div style='padding-top: 1em'></div>
-
-<label for='acsComponent'>Tigase Advanced Clustering Strategy (ACS) Component</label>
-<input id="acsComponent" name='acsComponent' type="checkbox" ${(config.clusterMode) ? "" : "disabled"} value='${ !(!(config.acsComponent)) }' onclick='
-document.getElementById("acsPubSubComponent").disabled = !this.checked;
-document.getElementById("acsMUCComponent").disabled = !this.checked;
-if (!this.checked) { 
-	document.getElementById("acsPubSubComponent").checked = false;
-	document.getElementById("acsMUCComponent").checked = false;
-}' />
-<br/>
-<div style='padding-top: 1em'></div>
-<label for='acsPubSubComponent'>PubSub ACS</label>
-<input id="acsPubSubComponent" name='acsPubSubComponent' type="checkbox" ${(config.acsComponent && config.clusterMode) ? "" : "disabled"} value='${ !(!(config.acsPubSubComponent)) }'/>
-<br/>
-<div style='padding-top: 1em'></div>
-<label for='acsMUCComponent'>MUC ACS</label>
-<input id="acsMUCComponent" name='acsMUCComponent' type="checkbox" ${(config.acsComponent && config.clusterMode) ? "" : "disabled"} value='${ !(!(config.acsMUCComponent)) }'/>
-	   
-<h3>Debug configuration</h3>
-<% [
-	[ key:'serverDebug', label:'Base server debug' ],
-	[ key:'pluginsDebug', label:'Plugins debug' ],
-	[ key:'dbDebug', label:'Database debug' ],
-	[ key:'clusterDebug', label:'Cluster debug' ]
+    [ value:'--gen-config-def', label:'Default installation' ],
+    [ value:'--gen-config-all', label:'Default plus extra components' ],
+    [ value:'--gen-config-sm', label:'Session Manager only' ],
+    [ value:'--gen-config-cs', label:'Network connectivity only' ]
    ].each {
  %>
-<label for='${it.key}'>${it.label}</label>
-<input name='${it.key}' type='checkbox' value='${ !(!(config[it.key])) }' />
+    <option value='${it.value}' ${ it.value == config.configType ? 'selected' : '' } >${it.label}</option>
+<% } %>
+</select>
 <br/>
 <div style='padding-top: 1em'></div>
-<% } %>
-	   
+<label for='virtualDomains'>Your XMPP (Jabber) domains</label>
+<input name='virtualDomains' type='text' size='30' value='${config.virtualDomains}' />
+<br/>
 <div style='padding-top: 1em'></div>
-<button type="submit">Apply</button>
+<label for='admins'>Server administrators</label>
+<input name='admins' type='text' size='30' value='${config.admins}' />
+<br/>
+<div style='padding-top: 1em'></div>
+<label for='adminPwd'>Admin password</label>
+<input name='adminPwd' type='password' size='30' value='${config.adminPwd}' />
+<br/>
+<div style='padding-top: 1em'></div>
+<label for='dbType'>Select database</label>
+<select name='dbType' id='dbType' onchange="
+	var select = document.getElementById('dbType');
+	for (var i=0; i<select.children.length; i++) {
+    var it = select.children[i];
+    if (it.value == select.value) {
+		var warn = document.getElementById('dbTypeWarning');
+		warn.innerHTML = it.getAttribute('warning') || '';
+	}
+}
+">
+<% [
+	[ value:'Derby', label:'Derby (built-in database)' ],
+	[ value:'MySQL', label:'MySQL' ],
+	[ value:'PostgreSQL', label:'PostgreSQL' ],
+	[ value:'SQLServer', label:'SQLServer', warning:'You have selected MS SQL Server as your database. While we provide you, for easy install, with open-source jTDS JDBC driver allowing to connect to MS SQL Server, we recommend using JDBC driver from Microsoft.' ],
+	[ value:'Other', label:'Other...' ]
+   ].each {
+ %>
+ <option value='${it.value}' ${ config.dbType == it.value ? 'selected' : '' } ${it.warning ? 'warning="' + it.warning + '"' : ''} >${it.label}</option>
+<% } %>
+</select><span id='dbTypeWarning' style='color: red; font-size:0.8em;'></span>
+<br/>
+<div style='padding-top: 1em'></div>
+<label for='advancedConfig'>Advanced configuration options</label>
+<input name='advancedConfig' type='checkbox' value='${ !(!(config.advancedConfig)) }' />
+
+<div style='padding-top: 1em'></div>
+<button type="submit">Next</button>
 
 </form>
 ${ util.include('footer') } 

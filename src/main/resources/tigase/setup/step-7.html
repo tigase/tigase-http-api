@@ -8,7 +8,7 @@
 		dbHost : 'localhost',
 		dbParams : ''
 	] + config;
-    def title = 'Database connectivity check '
+    def title = 'Database configuration for ' + config.dbType
     
 	tmp.each { k,v ->
 		if (request.getParameter(k)) {
@@ -23,281 +23,51 @@
 	}
 	config.clear();
 	config.putAll(tmp);	
-	def dbHelper = null;
-	dbHelper = [
-		loadSQLQueries : { resource, repo ->
-			def query = "";
-			def queries = [];
-			new java.io.File('database/'+resource+'.sql').eachLine { line ->
-				if (line.startsWith("-- QUERY START:")) {
-					query = "";
-				} else if (line.startsWith("-- QUERY END:")) {
-					query.trim();
-					if (query.endsWith(";")) query = query.substring(0, query.length()-1);
-					else if (query.endsWith("//")) query = query.substring(0, query.length()-2);
-					
-					config.each { k,v ->
-						query = query.replace('${' + k + '}', String.valueOf(v));
-					}
-					
-					queries.add(query);
-				} else {
-					if ((line.trim().startsWith("source") || line.trim().startsWith("run") || line.trim().startsWith("\\i")) && line.trim().contains("sql")) {
-                        if ((line.trim().startsWith("source") || line.trim().startsWith("run") || line.trim().startsWith("\\i"))
-                            && line.trim().contains("sql")) {
-
-                            java.util.regex.Matcher matcher = java.util.regex.Pattern.compile(repo.getDatabaseType().name() + "-(.*).sql").matcher(line);
-                            if (matcher.find()) {
-                                queries.addAll(dbHelper.loadSQLQueries(repo.getDatabaseType().name() + "-" + matcher.group(1), repo));
-							}
-                        }					
-					}
-					if (line.isEmpty() || line.trim().startsWith("--"))
-						return;
-					query += ' ' + line.trim();
-				}
-			};
-			return queries;
-		},
-		loadSchemaQueries : { repo ->
-			def queries = [];
-			['-schema-5-1-schema', '-schema-5-1-sp', '-schema-5-1-props'].each { prefix ->
-				def fullprefix = repo.getDatabaseType().name() + prefix;
-				queries.addAll(dbHelper.loadSQLQueries(fullprefix, repo));
-			}
-			return queries;
-		},
-		validataDBSchema : { repo, config ->
-			def result = [error:false];
-			def schemaVer = null;
-			def usersCount = null;
-			try {
-
-				def schemaOk = false;
-				def stmt = repo.createStatement(null);
-				def rs = stmt.executeQuery("select count(*) from tig_users");
-				while (rs.next()) {
-					usersCount = rs.getLong(1)
-					schemaVer = "Unknown";
-				}
-				def schemaVerQuery = "select TigGetDBProperty('schema-version')";
-				if (repo.getDatabaseType().name() == 'sqlserver') {
-					schemaVerQuery = "select dbo.TigGetDBProperty('schema-version')";
-				} else if (repo.getDatabaseType().name() == 'derby') {
-					schemaVerQuery = "values TigGetDBProperty('schema-version')";
-				}
-				rs = stmt.executeQuery(schemaVerQuery);
-				if (rs.next()) {
-					schemaVer = rs.getString(1);
-					if ("5.1".equals(schemaVer)) {
-						schemaOk = true;
-					}					
-				}
-				if (schemaOk) {
-					result.msg = "Schema OK, accounts number: " + usersCount;
-					return result;
-				}
-			} catch (Exception ex) {
-				result.error = ex.getMessage();
-			}
-			if (schemaVer == null) {
-				try {
-					def stmt = repo.createStatement(null);
-					// load schema from files
-					def schema = dbHelper.loadSchemaQueries(repo);
-					schema.each { query ->
-						stmt.execute(query);
-					}
-					schemaVer = '5.1';
-					result.error = false;
-					result.msg = "New schema loaded OK";
-				} catch (Exception ex) {
-					result.error = "Could not load schema: " + ex.getMessage();
-				}
-			} else {
-				result.error = true;
-				result.msg = "Old schema, users: ${usersCount} (version: ${schemaVer})";
-			}
-			return result;
-		},
-		validateDBConversion : { repo, config ->
-			def result = [error:false];
-			def schemaVer = null;
-			try {
-				def schemaOk = false;
-				def schemaVerQuery = "select TigGetDBProperty('schema-version')";
-				if (repo.getDatabaseType().name() == 'sqlserver') {
-					schemaVerQuery = "select dbo.TigGetDBProperty('schema-version')";
-				} else if (repo.getDatabaseType().name() == 'derby') {
-					schemaVerQuery = "values TigGetDBProperty('schema-version')";
-				}
-				def stmt = repo.createStatement(null);
-				def rs = stmt.executeQuery(schemaVerQuery);
-				if (rs.next()) {
-					schemaVer = rs.getString(1);
-					if ("5.1".equals(schemaVer)) {
-						schemaOk = true;
-					}					
-				}
-				if (schemaOk) {
-					result.msg = "Schema OK";
-					return result;
-				}
-			} catch (Exception ex) {
-				result.error = ex.getMessage();
-			}
-			try {
-				def stmt = repo.createStatement(null);
-				// load schema from files
-				def schema = [];
-				if (schemaVer == null) {
-					schema = dbHelper.loadSQLQueries(repo.getDatabaseType() + "-schema-upgrade-to-4", repo);
-				}
-				if ("4.0".equals(schemaVer)) {
-					schema = dbHelper.loadSQLQueries(repo.getDatabaseType() + "-schema-upgrade-to-5-1", repo);
-				}
-				schema.findAll { query -> !query.isEmpty() }.each { query ->
-					stmt.execute(query);
-				}
-				schemaVer = '5.1';
-				result.error = false;
-				result.msg = "Conversion completed";
-			} catch (Exception ex) {
-				result.error = "Could not upgrade schema: " + ex.getMessage();
-			}
-			return result;
-		},
-		addXmppAdminAccount : { repo, config ->
-			def admins = config.admins.split(",").collect { tigase.xmpp.BareJID.bareJIDInstance(it.trim()) };
-			if (admins.size() < 1)
-				return [error:"No admin users entered"];
-			if (!config.adminPwd || config.adminPwd.isEmpty()) return [error: 'No admin password enetered'];
-			
-			def authRepo = tigase.db.RepositoryFactory.getAuthRepository(null, repo.getResourceUri(), null);
-			admins.each { admin ->
-				try {
-					authRepo.addUser(admin, config.adminPwd);
-				} catch (tigase.db.UserExistsException e) {
-				} catch (Exception e) {
-					// in some cases we may got other exceptions but mostly they mean that user exists in store
-				}
-			}
-			return [msg:"All admin users added"];
-		},
-		postInstallation : { repo, config ->
-			try {
-				def queries = dbHelper.loadSQLQueries(repo.getDatabaseType().name() + "-installer-post", repo);
-				def stmt = repo.createStatement(null);
-				queries.each { query ->
-					stmt.execute(query);
-				}
-			} catch (Exception ex) {
-				return [error:ex.getMessage()];
-			}
-			return [msg:'Completed'];
-		},
-		socks5SchemaLoad : { repo, config ->
-			if (!config.socks5Component) 
-				return [msg:'Socks5 component disabled - skipping'];		
-			try {
-				def stmt = repo.createStatement(null);
-				def conn = stmt.getConnection();
-				def dbm = conn.getMetaData();
-				def tables = dbm.getTables(null, null, "tig_socks5_users", null);
-				def tablesDerby = dbm.getTables(null, null, "TIG_SOCKS5_USERS", null);
-				if (tables.next()) {
-					return [msg:"Socks5 schema exists, skipping schema load"];
-				} else if (tablesDerby.next()) {
-					return [msg:"Socks5 schema exists, skipping schema load"];
-				}
-				def queries = dbHelper.loadSQLQueries(repo.getDatabaseType().name() + "-socks5-schema", repo);
-				queries.each {	query ->
-					stmt.execute(query);
-				}
-			} catch (Exception ex) {
-				return [error:"Could not load Socks5 schema: " + ex.getMessage()];
-			}
-			return [msg:'Completed'];
-		},
-		pubsubSchemaLoad : { repo, config ->
-			if (!config.PubSubComponent) 
-				return [msg:'PubSub component disabled - skipping'];
-			try {
-				def stmt = repo.createStatement(null);
-				def conn = stmt.getConnection();
-				def dbm = conn.getMetaData();
-				def tables = dbm.getTables(null, null, "tig_pubsub_nodes", null);
-				def tablesDerby = dbm.getTables(null, null, "tig_pubsub_nodes".toUpperCase(), null);
-				if (tables.next()) {
-					return [msg:"PubSub schema exists, skipping schema load"];
-				} else if (tablesDerby.next()) {
-					return [msg:"PubSub schema exists, skipping schema load"];
-				}
-				def queries = dbHelper.loadSQLQueries(repo.getDatabaseType().name() + "-pubsub-schema", repo);
-				queries.each {	query ->
-					stmt.execute(query);
-				}
-			} catch (Exception ex) {
-				return [error:"Could not load PubSub schema: " + ex.getMessage()];
-			}
-			return [msg:'Completed'];
-		}
-	];
-	
-	def stateStyle = { state ->
-		if ('ok' == state) {
-			return "color: green;";
-		} else if ('error' == state) {
-			return "color: red;";
-		} else if ("warn" == state) {
-			return "color: orange;";
-		}
-		return "";
-	}
 %>
 ${ util.include('header', [title:'Setup: ' + title]) }
-<% def dbUri = "jdbc:${config.dbType?.toLowerCase()}://${config.dbHost}/${config.dbName}?user=${config.dbUser}&password=${config.dbPass}".toString(); %>
-<h3>You have selected ${config.dbType} database with URI = ${dbUri}</h3>
-<%
-	def dbException = null;
-	def dbSchemaVersion = null;
-	def repo = null;
-	try {
-		def repoClass = tigase.db.RepositoryFactory.getRepoClass(tigase.db.DataRepository.class, dbUri);
-		repo = repoClass.newInstance();
-		repo.initRepository(dbUri, [:]);
-	} catch (Exception ex) {
-		dbException = ex;
-	} %>
-<table>
-	<tr><td>Checking connection to database</td><td style="${stateStyle(dbException ? 'error' : 'ok')}">${dbException ? 'Fail': 'OK'}</td></tr>
-	<% if (dbException) { %><tr><td colspan='2'>${dbException.getMessage()}</td></tr><% } %>
-	
-	<tr><td>Checking if database exists</td><td style="${stateStyle(dbException ? 'error' : 'ok')}">${dbException ? 'Fail': 'OK'}</td></tr>
-	<% if (dbException) { %><tr><td colspan='2'>${dbException.getMessage()}</td></tr><% } %>	
-	
-	<% def result = (dbException) ? [error:"Connection not valid"] : dbHelper.validataDBSchema(repo, config); %>
-	<tr><td>Checking database schema</td><td style="${stateStyle(result.error ? 'error' : 'ok')}">${result.msg ?: result.error}</td></tr>
-	<% result = (dbException) ? [error:'Connection not valid'] : dbHelper.validateDBConversion(repo, config); %>
-	<tr><td>Checking whether the database needs conversion</td><td style="${stateStyle(result.error ? 'error' : 'ok')}">${result.msg ?: result.error}</td></tr>
-	
-	<% result = (dbException) ? [error:'Connection not valid'] : dbHelper.addXmppAdminAccount(repo, config); %>
-	<tr><td>Adding XMPP admin accounts</td><td style="${stateStyle(result.error ? 'error' : 'ok')}">${result.msg ?: result.error}</td></tr>
-
-	<% result = (dbException) ? [error:'Connection not valid'] : dbHelper.postInstallation(repo, config); %>
-	<tr><td>Post installation actions</td><td style="${stateStyle(result.error ? 'error' : 'ok')}">${result.msg ?: result.error}</td></tr>
-	
-	<% result = (dbException) ? [error:'Connection not valid'] : dbHelper.socks5SchemaLoad(repo, config); %>
-	<tr><td>Loading socks5 component schema</td><td style="${stateStyle(result.error ? 'error' : 'ok')}">${result.msg ?: result.error}</td></tr>	
-
-	<% result = (dbException) ? [error:'Connection not valid'] : dbHelper.pubsubSchemaLoad(repo, config); %>
-	<tr><td>Loading PubSub component schema</td><td style="${stateStyle(result.error ? 'error' : 'ok')}">${result.msg ?: result.error}</td></tr>
-</table>
+<h3>You have selected ${config.dbType} database. This database needs additional configuration parameters. Please enter all required information.</h3>
 <form method='GET' >
-<input type='hidden' name='step' value='3'/>
+<input type='hidden' name='step' value='${Integer.parseInt(currentStep)+1}'/>
+
+<label for='dbSuperuser'>Super user account name:</label>
+<input type='text' size='30' name='dbSuperuser' value='${config.dbSuperuser}' />
+<br/>
+<div style='padding-top: 1em'></div>
+
+<label for='dbSuperpass'>Super user account password:</label>
+<input type='password' size='30' name='dbSuperpass' value='${config.dbSuperpass}' />
+<br/>
+<div style='padding-top: 1em'></div>
+
+<h3>${config.dbType} database details. It will be created automatically if it does not exist.</h3>
+
+<label for='dbUser'>Database account:</label>
+<input type='text' size='30' name='dbUser' value='${config.dbUser}' />
+<br/>
+<div style='padding-top: 1em'></div>
+
+<label for='dbPass'>Account password:</label>
+<input type='text' size='30' name='dbPass' value='${config.dbPass}' />
+<br/>
+<div style='padding-top: 1em'></div>
+
+<label for='dbName'>Database name:</label>
+<input type='text' size='30' name='dbName' value='${config.dbName}' />
+<br/>
+<div style='padding-top: 1em'></div>
+
+<label for='dbHost'>Database host or IP:</label>
+<input type='text' size='30' name='dbHost' value='${config.dbHost}' />
+<br/>
+<div style='padding-top: 1em'></div>
+
+<label for='dbParams'>Additional database parameters:</label>
+<input type='text' size='30' name='dbParams' value='${config.dbParams}' />
+<br/>
+<div style='padding-top: 1em'></div>
 
 <div style='padding-top: 1em'></div>
-<button type="submit">Continue</button>
+<button type="submit">Next</button>
 
 </form>
 ${ util.include('footer') } 

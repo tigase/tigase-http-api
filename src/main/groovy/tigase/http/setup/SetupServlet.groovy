@@ -65,6 +65,9 @@ public class SetupServlet extends HttpServlet {
 		loadTemplates();
 		
 		String i = request.getParameter("step");
+		if (i == null || i.isEmpty()) {
+			i = "1";
+		}
 		Template t = templates.get("step" + i);
 		Map templateParams = null;
 		Map util = [
