@@ -134,10 +134,12 @@ public class SetupServlet extends HttpServlet {
 	
 	private String load(String prefix, Integer i, String suffix) throws IOException {
 		String path = "tigase/setup/" + prefix + (i == null ? "" : ("-" + i)) + "." + suffix;
-		InputStream is = getClass().getResourceAsStream(path);
-		if (is == null) {
-			log.log(Level.SEVERE, "trying to load file " + new File(path).getAbsolutePath());
+		File f = new File(path);
+		InputStream is = null;
+		if (f.exists()) {
 			is = new FileInputStream(new File(path));
+		} else {
+			is = getClass().getResourceAsStream("/"+path);
 		}
 		if (is == null)
 			throw new RuntimeException("Resource not found");
