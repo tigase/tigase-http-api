@@ -21,6 +21,7 @@
  */
 package tigase.http.setup;
 
+import groovy.lang.Closure;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
@@ -29,6 +30,8 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import tigase.db.AuthRepository;
+import tigase.db.UserRepository;
 import tigase.http.AbstractModule;
 import tigase.http.DeploymentInfo;
 import tigase.http.HttpServer;
@@ -36,6 +39,10 @@ import static tigase.http.Module.HTTP_CONTEXT_PATH_KEY;
 import static tigase.http.Module.HTTP_SERVER_KEY;
 import static tigase.http.Module.VHOSTS_KEY;
 import tigase.http.ServletInfo;
+import tigase.http.api.Service;
+import tigase.http.rest.RestModule;
+import tigase.server.Packet;
+import tigase.xmpp.BareJID;
 
 /**
  *
@@ -53,6 +60,14 @@ public class SetupModule extends AbstractModule {
 	private DeploymentInfo httpDeployment = null;
 
 	private String[] vhosts = null;
+	private Service service = null;
+
+	private final String uuid = UUID.randomUUID().toString();
+	private static final ConcurrentHashMap<String,AbstractModule> modules = new ConcurrentHashMap<String,AbstractModule>();
+	
+	public static AbstractModule getModuleByUUID(String uuid) {
+		return modules.get(uuid);
+	}	
 		
 	@Override
 	public String getName() {
@@ -71,12 +86,41 @@ public class SetupModule extends AbstractModule {
 		}
 	
 		super.start();
+		service = new Service() { 
+
+			@Override
+			public void sendPacket(Packet packet, Long timeout, Closure closure) {
+				throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+			}
+
+			@Override
+			public UserRepository getUserRepository() {
+				return SetupModule.this.getUserRepository();
+			}
+
+			@Override
+			public AuthRepository getAuthRepository() {
+				return SetupModule.this.getAuthRepository();
+			}
+
+			@Override
+			public boolean isAdmin(BareJID user) {
+				return SetupModule.this.isAdmin(user);
+			}
+
+			@Override
+			public boolean isAllowed(String key, String domain, String path) {
+				return SetupModule.this.isRequestAllowed(key, domain, path);
+			}
+			
+		};
+		modules.put(uuid, this);
 		httpDeployment = HttpServer.deployment().setClassLoader(this.getClass().getClassLoader())
-				.setContextPath(contextPath);
+				.setContextPath(contextPath).setService(service);
 		if (vhosts != null) {
 			httpDeployment.setVHosts(vhosts);
 		}
-		ServletInfo servletInfo = HttpServer.servlet("SetupServlet", SetupServlet.class);
+		ServletInfo servletInfo = HttpServer.servlet("SetupServlet", SetupServlet.class).addInitParam("module", uuid);
 		servletInfo.addMapping("/*");
 		httpDeployment.addServlets(servletInfo);
 		httpServer.deploy(httpDeployment);
@@ -86,6 +130,7 @@ public class SetupModule extends AbstractModule {
 	public void stop() {
 		if (httpDeployment != null) { 
 			httpServer.undeploy(httpDeployment);
+			modules.remove(uuid, this);
 			httpDeployment = null;
 		}
 		super.stop();

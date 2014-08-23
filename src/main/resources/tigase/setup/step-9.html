@@ -71,6 +71,7 @@ ${ util.include('header', [title:'Setup: ' + title]) }
 <label for='config'>Configuration created during installation:</label><br/>
 <textarea name='config' rows=40 cols=80>
 config-type=${config.configType}
+<% if (config.clusterMode) { %>--cluster-mode=true<% } %>
 --virt-hosts=${config.virtualDomains}
 --admins=${config.admins}
 <% 

@@ -46,6 +46,8 @@
 						}
 					} else if ('--debug'.equals(key)) {
 						props.get(key).split(',').collect { it + 'Debug' }.each { config[it] = true; }
+					} else if ('--cluster-mode'.equals(key)) {
+						config.clusterMode = "true".equals(props.get(key));
 					}
 				}		
 				reader.close();

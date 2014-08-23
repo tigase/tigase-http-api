@@ -32,7 +32,7 @@
 		if (request.getParameter(k)) {
 			Object old = tmp[k];
 			if (old instanceof Boolean) {
-				tmp[k] = Boolean.parseBoolean(request.getParameter(k));
+				tmp[k] = Boolean.parseBoolean(request.getParameter(k)) || 'on'.equals(request.getParameter(k));
 			}
 			else {
 				tmp[k] = request.getParameter(k);

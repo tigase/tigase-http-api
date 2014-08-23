@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.servlet.ServletConfig
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -42,9 +43,14 @@ public class SetupServlet extends HttpServlet {
 	
 	private final Map config = [test:1];
 	
+	private SetupModule setupModule;
+	
 	@Override
     public void init() throws ServletException {
 		super.init();
+		ServletConfig cfg = super.getServletConfig();
+		String moduleUUID = cfg.getInitParameter("module");
+		setupModule = (SetupModule) SetupModule.getModuleByUUID(moduleUUID);
 		loadTemplates();
 	}
 	
@@ -61,6 +67,12 @@ public class SetupServlet extends HttpServlet {
 	
 	protected void processRequest(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+		
+		if (setupModule.getAuthRepository() != null && !("localhost".equals(request.getRemoteHost()) || "127.0.0.1".equals(request.getRemoteAddr()) || !"::1".equals(request.getRemoteAddr()))) {
+			if (!request.isUserInRole('admin') && !request.authenticate(response)) {
+				return;
+			}
+		}
 		
 		loadTemplates();
 		
