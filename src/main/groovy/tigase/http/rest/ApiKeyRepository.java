@@ -22,6 +22,7 @@
 package tigase.http.rest;
 
 import java.util.Map;
+import tigase.db.DBInitException;
 import tigase.db.comp.RepositoryItem;
 import tigase.db.comp.UserRepoRepository;
 import tigase.xmpp.BareJID;
@@ -99,5 +100,15 @@ public class ApiKeyRepository extends UserRepoRepository<ApiKeyItem> {
 			openAccess = false;
 		}
 		super.setProperties(props);
+	}
+
+	@Override
+	public void destroy() {
+		// Nothing to do
+	}
+
+	@Override
+	public void initRepository(String resource_uri, Map<String, String> params) throws DBInitException {
+		// Nothing to do
 	}
 }
