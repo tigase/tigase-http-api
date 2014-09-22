@@ -258,7 +258,7 @@ public class HttpMessageReceiver extends AbstractMessageReceiver implements Pack
 			handled = processResultPacket(packet);
 		}
 		
-		if (!handled) {
+		if (!handled && packet.getStanzaTo() != null && packet.getStanzaTo().getLocalpart() != null) {
 			Module module = modules.get(packet.getStanzaTo().getLocalpart());			
 			if (module != null) {
 				handled = module.processPacket(packet);
