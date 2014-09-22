@@ -114,9 +114,9 @@ public class SetupServlet extends HttpServlet {
 				String templateSrc = load("step", i, "html");
 				Template template = templateEngine.createTemplate(templateSrc);
 				templates.put("step" + i, template);
-				log.log(Level.SEVERE, "loaded step " + i);
+				log.log(Level.FINEST, "loaded html template for step " + i);
 			} catch (Exception ex) {
-				ex.printStackTrace();
+				log.log(Level.FINEST, "resource file for index = " + i + " was not found and could not be loaded", ex);
 				loaded = false;
 			}
 			i++;
@@ -127,7 +127,7 @@ public class SetupServlet extends HttpServlet {
 				Template template = templateEngine.createTemplate(templateSrc);
 				templates.put(file, template);
 			} catch (Exception ex) {
-				ex.printStackTrace();
+				log.log(Level.FINEST, "resource " + file + " was not found and could not be loaded", ex);
 			}
 		}
 	}

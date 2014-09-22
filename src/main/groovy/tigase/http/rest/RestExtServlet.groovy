@@ -49,41 +49,43 @@ class RestExtServlet extends RestServlet {
 				}
 			}
 		}
-		File srcParent = scriptFiles[0].getParentFile();
-		allHandlers.each { Handler handler ->
-			File srcFile = handler.getSourceFile();
-			String name = srcFile.getName().replace(".groovy", "");
-			def templates = [:];
-			methods.each { method ->
-				try {
-					String methodStr = method.toLowerCase().capitalize();
-					if (handler."exec${methodStr}" == null)
+		if (scriptFiles.length > 0) {
+			File srcParent = scriptFiles[0].getParentFile();
+			allHandlers.each { Handler handler ->
+				File srcFile = handler.getSourceFile();
+				String name = srcFile.getName().replace(".groovy", "");
+				def templates = [:];
+				methods.each { method ->
+					try {
+						String methodStr = method.toLowerCase().capitalize();
+						if (handler."exec${methodStr}" == null)
 						return;
-					File templateFile = new File(name + methodStr + ".html", srcParent);
-					if (!templateFile.exists()) 
+						File templateFile = new File(name + methodStr + ".html", srcParent);
+						if (!templateFile.exists()) 
 						return;
-					
-					templates[method] = templateEngine.createTemplate(templateFile.getText());
-				} catch (Exception ex) {
-					log.log(Level.WARNING, "could not load template for $srcFile for method $method", ex);
+						
+						templates[method] = templateEngine.createTemplate(templateFile.getText());
+					} catch (Exception ex) {
+						log.log(Level.WARNING, "could not load template for $srcFile for method $method", ex);
+					}
+				}
+				if (templates.size() > 0) {
+					handlerTemplates[handler] = templates;
 				}
 			}
-			if (templates.size() > 0) {
-				handlerTemplates[handler] = templates;
-			}
-		}
-
-		
-		["header", "footer"].each { src ->
-			File f = new File(src+".html", srcParent);
-			if (!f.exists()) {
-				f = new File(src+'.html', srcParent.getParentFile());
-			}
-			if (!f.exists()) return;
-			try {
-				includes[src] = templateEngine.createTemplate(f.getText());
-			} catch (Exception ex) {
-				log.log(Level.WARNING, "could not load template for $src", ex);
+			
+			
+			["header", "footer"].each { src ->
+				File f = new File(src+".html", srcParent);
+				if (!f.exists()) {
+					f = new File(src+'.html', srcParent.getParentFile());
+				}
+				if (!f.exists()) return;
+				try {
+					includes[src] = templateEngine.createTemplate(f.getText());
+				} catch (Exception ex) {
+					log.log(Level.WARNING, "could not load template for $src", ex);
+				}
 			}
 		}
 	}

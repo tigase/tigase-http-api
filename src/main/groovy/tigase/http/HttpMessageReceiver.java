@@ -226,7 +226,9 @@ public class HttpMessageReceiver extends AbstractMessageReceiver implements Pack
 						sb.append(e.getValue());
 						sb.append(", ");
 					}
-					log.log(Level.SEVERE, "configuring module " + name + " with parameters = [" + sb.toString() + "]");
+					if (log.isLoggable(Level.FINEST)) {
+						log.log(Level.FINEST, "configuring module " + name + " with parameters = [" + sb.toString() + "]");
+					}
 					module.setProperties(moduleProps);
 					module.init(componentJid, this);
 					modules.put(name, module);
