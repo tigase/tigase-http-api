@@ -140,8 +140,10 @@ config-type=${config.configType}
     if (debug.length() > 0) {
  %>
 --debug=${debug}
-<% } %><% def userDbUri = "jdbc:${config.dbType?.toLowerCase()}://${config.dbHost}/${config.dbName}?user=${config.dbUser}&password=${config.dbPass}".toString(); 
-	def authDbUri = "jdbc:${config.dbType?.toLowerCase()}://${config.dbHost}/${config.dbName}?user=${config.dbUser}&password=${config.dbPass}".toString(); %>
+<% } %><% def dbUri = ((config.dbType?.toLowerCase()) == "derby") ? "jdbc:derby:${config.dbName};create=true"
+		: "jdbc:${config.dbType?.toLowerCase()}://${config.dbHost}/${config.dbName}?user=${config.dbUser}&password=${config.dbPass}".toString(); 
+	def userDbUri = dbUri.toString(); 
+	def authDbUri = dbUri.toString(); %>
 --user-db-uri=${userDbUri}
 <% if (userDbUri != authDbUri) { %>--auth-db-uri=${authDbUri}<% } %>
 <%  def plugins = "";
