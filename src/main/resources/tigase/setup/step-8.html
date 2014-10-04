@@ -244,15 +244,20 @@
 		}
 	];
 	
-	def stateStyle = { state ->
+	def stateStyle = { stateIn ->
+		def state = (stateIn instanceof String) ? stateIn : stateIn.name();
 		if ('ok' == state) {
 			return "color: green;";
 		} else if ('error' == state) {
 			return "color: red;";
-		} else if ("warn" == state) {
+		} else if ("warning" == state || "skipped" == state) {
 			return "color: orange;";
 		}
 		return "";
+	}
+	
+	def stateName = { state ->
+		return state.name().toUpperCase();
 	}
 %>
 ${ util.include('header', [title:'Setup: ' + title]) }
@@ -282,7 +287,7 @@ ${ util.include('header', [title:'Setup: ' + title]) }
 		if (config.admins) props.setProperty("adminJID", config.admins);
 		if (config.adminPwd) props.setProperty("adminJIDpass", config.adminPwd);
 	
-		def loader = new tigase.util.DBSchemaLoader(props);
+		def loader = tigase.util.SchemaLoader.newInstance(props);
 		def logger = java.util.logging.Logger.getLogger("tigase.util.DBSchemaLoader");
 		def handler = (logger.getHandlers() as Set).find { it.getClass().getCanonicalName() == "tigase.http.setup.SetupLogHandler" };
 		if (handler == null) {
@@ -310,42 +315,47 @@ ${ util.include('header', [title:'Setup: ' + title]) }
 		}
 	%>
 <table>
-	<% loader.validateDBConnection(props); %>
-	<tr><td>Checking connection to database</td><td style="${stateStyle(dbException ? 'error' : 'ok')}">${dbException ? 'Fail': 'OK'}</td></tr>
-	<% if (dbException) { %><tr><td colspan='2' style="padding: 5px 15px;font-size: smaller;">${getLog()}</td></tr><% } %>
-	<% loader.validateDBExists(props); %>
-	<tr><td>Checking if database exists</td><td style="${stateStyle(dbException ? 'error' : 'ok')}">${dbException ? 'Fail': 'OK'}</td></tr>
-	<% if (dbException) { %><tr><td colspan='2' style="padding: 5px 15px;font-size: smaller;">${getLog()}</td></tr><% } %>	
-	<% loader.validateDBSchema(props); %>
-	<% def result = null; /*(dbException) ? [error:"Connection not valid"] : dbHelper.validataDBSchema(repo, config);*/ %>
-	<tr><td>Checking database schema</td><td style="${stateStyle(dbException ? 'error' : 'ok')}">${dbException ? 'Fail': 'OK'}</td></tr>
-	<% if (dbException) { %><tr><td colspan='2' style="padding: 5px 15px;font-size: smaller;">${getLog()}</td></tr><% } %>	
+	<% def result = loader.validateDBConnection(props); %>
+	<tr><td>Checking connection to database</td><td style="${stateStyle(result)}">${stateName(result)}</td></tr>
+	<% if (result.name() != 'ok') { %><tr><td colspan='2' style="padding: 5px 15px;font-size: smaller;">${getLog()}</td></tr><% } %>
+	<% result = loader.validateDBExists(props); %>
+	<tr><td>Checking if database exists</td><td style="${stateStyle(result)}">${stateName(result)}</td></tr>
+	<% if (result.name() != 'ok') { %><tr><td colspan='2' style="padding: 5px 15px;font-size: smaller;">${getLog()}</td></tr><% } %>	
+	<% result = loader.validateDBSchema(props); %>
+	<% /*(dbException) ? [error:"Connection not valid"] : dbHelper.validataDBSchema(repo, config);*/ %>
+	<tr><td>Checking database schema</td><td style="${stateStyle(result)}">${stateName(result)}</td></tr>
+	<% if (result.name() != 'ok') { %><tr><td colspan='2' style="padding: 5px 15px;font-size: smaller;">${getLog()}</td></tr><% } %>	
 	<% /* result = (dbException) ? [error:'Connection not valid'] : dbHelper.validateDBConversion(repo, config); */ %>
 	<!--<tr><td>Checking whether the database needs conversion</td><td style="${stateStyle(repo ? 'error' : 'ok')}">${dbException ? 'Fail': 'OK'}</td></tr> -->
-	<% loader.addXmppAdminAccount(props); %>
+	<% result = loader.addXmppAdminAccount(props); %>
 	<% /* result = (dbException) ? [error:'Connection not valid'] : dbHelper.addXmppAdminAccount(repo, config); */ %>
-	<tr><td>Adding XMPP admin accounts</td><td style="${stateStyle(dbException ? 'error' : 'ok')}">${dbException ? 'Fail': 'OK'}</td></tr>
-	<% if (dbException) { %><tr><td colspan='2' style="padding: 5px 15px;font-size: smaller;">${getLog()}</td></tr><% } %>
+	<tr><td>Adding XMPP admin accounts</td><td style="${stateStyle(result)}">${stateName(result)}</td></tr>
+	<% if (result.name() != 'ok') { %><tr><td colspan='2' style="padding: 5px 15px;font-size: smaller;">${getLog()}</td></tr><% } %>
 
-	<% loader.postInstallation(props); %>
+	<% result = loader.postInstallation(props); %>
 	<% /* result = (dbException) ? [error:'Connection not valid'] : dbHelper.postInstallation(repo, config); */ %>
-	<tr><td>Post installation actions</td><td style="${stateStyle(dbException ? 'error' : 'ok')}">${dbException ? 'Fail': 'OK'}</td></tr>
-	<% if (dbException) { %><tr><td colspan='2' style="padding: 5px 15px;font-size: smaller;">${getLog()}</td></tr><% } %>
-	<% loader.shutdownDerby(props); %>
+	<tr><td>Post installation actions</td><td style="${stateStyle(result)}">${stateName(result)}</td></tr>
+	<% if (result.name() != 'ok') { %><tr><td colspan='2' style="padding: 5px 15px;font-size: smaller;">${getLog()}</td></tr><% } %>
 	<% 
-	try {
+/*	try {
 		def repoClass = tigase.db.RepositoryFactory.getRepoClass(tigase.db.DataRepository.class, dbUri);
 		repo = repoClass.newInstance();
 		repo.initRepository(dbUri, [:]);
 	} catch (Exception ex) {
 		dbException = ex;
-	} 	
+	} 	*/
 	%>
-	<% result = (dbException) ? [error:'Connection not valid'] : dbHelper.socks5SchemaLoad(repo, config); %>
-	<tr><td>Loading socks5 component schema</td><td style="${stateStyle(result.error ? 'error' : 'ok')}">${result.msg ?: result.error}</td></tr>	
-
-	<% result = (dbException) ? [error:'Connection not valid'] : dbHelper.pubsubSchemaLoad(repo, config); %>
-	<tr><td>Loading PubSub component schema</td><td style="${stateStyle(result.error ? 'error' : 'ok')}">${result.msg ?: result.error}</td></tr>
+	<%	props.setProperty("file, props.get("dbType")+"-socks5-schema.sql");
+		result = (!config.socks5Component) ? tigase.util.SchemaLoader.Result.skipped : loader.loadSchemaFile(props); %> 
+	<% /* result = (dbException) ? [error:'Connection not valid'] : dbHelper.socks5SchemaLoad(repo, config); */ %>
+	<tr><td>Loading socks5 component schema</td><td style="${stateStyle(result)}">${stateName(result)}</td></tr>	
+	<% if (result.name() != 'ok') { %><tr><td colspan='2' style="padding: 5px 15px;font-size: smaller;">${getLog()}</td></tr><% } %>
+	<% /* result = (dbException) ? [error:'Connection not valid'] : dbHelper.pubsubSchemaLoad(repo, config); */ %>
+	<%	props.setProperty("file, props.get("dbType")+"-pubsub-schema-3.0.0.sql");
+		result = (!config.PubSubComponent) ? tigase.util.SchemaLoader.Result.skipped : loader.loadSchemaFile(props); %> 
+	<tr><td>Loading PubSub component schema</td><td style="${stateStyle(result)}">${stateName(result)}</td></tr>
+	<% if (result.name() != 'ok') { %><tr><td colspan='2' style="padding: 5px 15px;font-size: smaller;">${getLog()}</td></tr><% } %>
+	<% result = loader.shutdown(props); %>
 </table>
 <form method='GET' >
 <input type='hidden' name='step' value='9'/>
