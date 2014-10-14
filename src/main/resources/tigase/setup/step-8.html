@@ -268,14 +268,6 @@ ${ util.include('header', [title:'Setup: ' + title]) }
 	def dbException = null;
 	def dbSchemaVersion = null;
 	def repo = null;
-	/*try {
-		def repoClass = tigase.db.RepositoryFactory.getRepoClass(tigase.db.DataRepository.class, dbUri);
-		repo = repoClass.newInstance();
-		repo.initRepository(dbUri, [:]);
-	} catch (Exception ex) {
-		dbException = ex;
-	} */ %>
-	<% 
 		def props = new java.util.Properties();
 
 		if (config.dbType) props.setProperty("dbType", config.dbType?.toLowerCase());
@@ -296,8 +288,6 @@ ${ util.include('header', [title:'Setup: ' + title]) }
 		}
 		handler.setLevel(java.util.logging.Level.FINEST);
 		logger.setLevel(java.util.logging.Level.FINEST);
-		loader.validateDBConnection(props);
-		loader.validateDBSchema(props);
 		
 		def getLog = {
 			def log = "";
@@ -309,7 +299,7 @@ ${ util.include('header', [title:'Setup: ' + title]) }
 				if (!log.isEmpty())
 					log += "<br/>";
 				dbException |= rec.getLevel().getName() == "WARNING";
-				log += String.format(rec.getMessage(), rec.getParameters());
+				log += (rec.getMessage()) ? String.format(rec.getMessage(), rec.getParameters()) : "null";
 			}
 			return log;
 		}
@@ -326,7 +316,6 @@ ${ util.include('header', [title:'Setup: ' + title]) }
 	<tr><td>Checking database schema</td><td style="${stateStyle(result)}">${stateName(result)}</td></tr>
 	<% if (result.name() != 'ok') { %><tr><td colspan='2' style="padding: 5px 15px;font-size: smaller;">${getLog()}</td></tr><% } %>	
 	<% /* result = (dbException) ? [error:'Connection not valid'] : dbHelper.validateDBConversion(repo, config); */ %>
-	<!--<tr><td>Checking whether the database needs conversion</td><td style="${stateStyle(repo ? 'error' : 'ok')}">${dbException ? 'Fail': 'OK'}</td></tr> -->
 	<% result = loader.addXmppAdminAccount(props); %>
 	<% /* result = (dbException) ? [error:'Connection not valid'] : dbHelper.addXmppAdminAccount(repo, config); */ %>
 	<tr><td>Adding XMPP admin accounts</td><td style="${stateStyle(result)}">${stateName(result)}</td></tr>
@@ -336,22 +325,14 @@ ${ util.include('header', [title:'Setup: ' + title]) }
 	<% /* result = (dbException) ? [error:'Connection not valid'] : dbHelper.postInstallation(repo, config); */ %>
 	<tr><td>Post installation actions</td><td style="${stateStyle(result)}">${stateName(result)}</td></tr>
 	<% if (result.name() != 'ok') { %><tr><td colspan='2' style="padding: 5px 15px;font-size: smaller;">${getLog()}</td></tr><% } %>
-	<% 
-/*	try {
-		def repoClass = tigase.db.RepositoryFactory.getRepoClass(tigase.db.DataRepository.class, dbUri);
-		repo = repoClass.newInstance();
-		repo.initRepository(dbUri, [:]);
-	} catch (Exception ex) {
-		dbException = ex;
-	} 	*/
-	%>
-	<%	props.setProperty("file, props.get("dbType")+"-socks5-schema.sql");
+
+	<%	props.setProperty("file", props.get("dbType").toString()+"-socks5-schema.sql");
 		result = (!config.socks5Component) ? tigase.util.SchemaLoader.Result.skipped : loader.loadSchemaFile(props); %> 
 	<% /* result = (dbException) ? [error:'Connection not valid'] : dbHelper.socks5SchemaLoad(repo, config); */ %>
 	<tr><td>Loading socks5 component schema</td><td style="${stateStyle(result)}">${stateName(result)}</td></tr>	
 	<% if (result.name() != 'ok') { %><tr><td colspan='2' style="padding: 5px 15px;font-size: smaller;">${getLog()}</td></tr><% } %>
 	<% /* result = (dbException) ? [error:'Connection not valid'] : dbHelper.pubsubSchemaLoad(repo, config); */ %>
-	<%	props.setProperty("file, props.get("dbType")+"-pubsub-schema-3.0.0.sql");
+	<%	props.setProperty("file", props.get("dbType").toString()+"-pubsub-schema-3.0.0.sql");
 		result = (!config.PubSubComponent) ? tigase.util.SchemaLoader.Result.skipped : loader.loadSchemaFile(props); %> 
 	<tr><td>Loading PubSub component schema</td><td style="${stateStyle(result)}">${stateName(result)}</td></tr>
 	<% if (result.name() != 'ok') { %><tr><td colspan='2' style="padding: 5px 15px;font-size: smaller;">${getLog()}</td></tr><% } %>
