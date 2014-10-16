@@ -273,6 +273,7 @@ ${ util.include('header', [title:'Setup: ' + title]) }
 		if (config.dbType) props.setProperty("dbType", config.dbType?.toLowerCase());
 		if (config.dbUser) props.setProperty("dbUser", config.dbUser);
 		if (config.dbPass) props.setProperty("dbPass", config.dbPass);
+		if (config.dbName) props.setProperty("dbName", config.dbName);
 		if (config.dbSuperuser) props.setProperty("rootUser", config.dbSuperuser);
 		if (config.dbSuperpass) props.setProperty("rootPass", config.dbSuperpass);
 		if (config.dbHost) props.setProperty("dbHostname", config.dbHost);
