@@ -22,10 +22,14 @@
 package tigase.http.rest;
 
 import java.util.Map;
+
 import tigase.db.DBInitException;
 import tigase.db.comp.RepositoryItem;
 import tigase.db.comp.UserRepoRepository;
+
 import tigase.xmpp.BareJID;
+
+import java.util.concurrent.ConcurrentSkipListMap;
 
 public class ApiKeyRepository extends UserRepoRepository<ApiKeyItem> {
 
@@ -35,7 +39,7 @@ public class ApiKeyRepository extends UserRepoRepository<ApiKeyItem> {
 	private boolean openAccess = false;
 	
 	private BareJID repoUserJid;
-		
+
 	@Override
 	public BareJID getRepoUser() {
 		return repoUserJid;
@@ -70,6 +74,11 @@ public class ApiKeyRepository extends UserRepoRepository<ApiKeyItem> {
 		return new ApiKeyItem();
 	}
 	
+	@Override
+	protected void initItemsMap() {
+		items = new ConcurrentSkipListMap<String, ApiKeyItem>( );
+	}
+
 	public boolean isAllowed(String key, String domain, String path) {
 		// allow access for anyone if there is no api key defined
 		if (openAccess)
