@@ -115,7 +115,10 @@ public class DummyServletRequest implements HttpServletRequest {
 
 	@Override
 	public int getContentLength() {
-		return Integer.parseInt(exchange.getRequestHeaders().getFirst("Content-Length"));
+		String contentLength = exchange.getRequestHeaders().getFirst("Content-Length");
+		if (contentLength == null || contentLength.isEmpty())
+			return 0;
+		return Integer.parseInt(contentLength);
 	}
 
 	@Override
