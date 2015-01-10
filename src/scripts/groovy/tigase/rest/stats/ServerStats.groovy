@@ -95,7 +95,11 @@ class ServerStatsHandler extends tigase.http.rest.Handler {
 		        commandReq.setAttribute("node", node);
 				iq.addChild(commandReq);
 				
-				service.sendPacket(new Iq(iq), TIMEOUT, { Packet result ->
+				Iq iqPacket = new Iq(iq);
+			
+				Command.addFieldValue(iqPacket, "Stats level", "FINEST")
+				
+				service.sendPacket(iqPacket, TIMEOUT, { Packet result ->
 					if (result == null || result.getType() == StanzaType.error) {
 						synchronized (results) {
 							allResults[compName] = [component:compName];
