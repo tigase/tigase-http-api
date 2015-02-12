@@ -34,6 +34,7 @@ class UserAdminHandler extends tigase.http.rest.Handler {
 
     public UserAdminHandler() {
         regex = /\/([^@\/]+)@([^@\/]+)/
+		authRequired = { api_key -> return api_key == null && requiredRole != null }
         requiredRole = "admin"
         isAsync = false
         execGet = { Service service, callback, user, localPart, domain ->
@@ -49,8 +50,12 @@ class UserAdminHandler extends tigase.http.rest.Handler {
         execPut = { Service service, callback, user, content, localPart, domain ->
             def jid = BareJID.bareJIDInstance(localPart, domain);
             def password = content.user.password;
-            service.getAuthRepository().addUser(jid, password)
+			def email = content.user.email;
+            service.getAuthRepository().addUser(jid, password);
             def uid = service.getUserRepository().getUserUID(jid);
+			if (uid && email) {
+				service.getUserRepository().setData(jid, "email", email);
+			}
             callback([user:[jid:"$localPart@$domain", domain:domain, uid: uid]]);
         }
         execDelete = { Service service, callback, user, localPart, domain ->

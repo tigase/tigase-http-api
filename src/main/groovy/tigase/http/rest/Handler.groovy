@@ -36,7 +36,7 @@ abstract class Handler {
     /**
      * true if requests require authentication
      */
-    def authRequired = { return requiredRole != null }
+    def authRequired = { api_key -> return requiredRole != null }
 
     /**
      * false if handler requires plain content

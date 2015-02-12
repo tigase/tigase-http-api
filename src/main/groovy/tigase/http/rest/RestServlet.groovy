@@ -145,7 +145,7 @@ public class RestServlet extends HttpServlet {
                     params.remove(0);
 
                 // if authentication is required check if user is in proper role
-                if (handler.authRequired() && (!request.isUserInRole(handler.requiredRole) && !request.authenticate(response))) {
+                if (handler.authRequired(apiKey) && (!request.isUserInRole(handler.requiredRole) && !request.authenticate(response))) {
                     handled = true;
                     return;
                 }
@@ -237,8 +237,8 @@ public class RestServlet extends HttpServlet {
 
         def params = [service, callback];
 
-        if (route.authRequired()) {
-            params.add(BareJID.bareJIDInstance(request.getUserPrincipal().getName()));
+        if (route.requiredRole != null) {
+            params.add(request.getUserPrincipal() ? BareJID.bareJIDInstance(request.getUserPrincipal().getName()) : null);
         }
 
         if (type != null && request.getContentLength() > 0) {
