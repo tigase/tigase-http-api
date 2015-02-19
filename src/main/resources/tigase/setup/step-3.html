@@ -48,10 +48,15 @@
 						props.get(key).split(',').collect { it + 'Debug' }.each { config[it] = true; }
 					} else if ('--cluster-mode'.equals(key)) {
 						config.clusterMode = "true".equals(props.get(key));
+					} else if ('http/rest/api-keys[s]'.equals(key)) {
+						config.httpRestApiKeys = props.get(key).split(',');
+						config.httpRestApiSecurity = (config.httpRestApiKeys.size() == 1 && config.httpRestApiKeys[0] == "open_access") ? "open_access" : "api_keys";
+						config.httpRestApiKeys = props.get(key);
 					}
 				}		
 				reader.close();
 			}
+			if (!config.httpRestApiKeys) config.httpRestApiSecurity = "forbidden";
 		} else if (action == 'reset') {
 			redirectUrl = request.getRequestURI() + "?" + request.getQueryString().replace('&action=reset','');
 			config.clear();
@@ -160,6 +165,11 @@ config-type=${config.configType}
 --comp-class-${ci}=${it.cls}
 <% ci++;
    } %>
+<% if (config.httpRestApiSecurity == "open_access") { %>
+http/rest/api-keys[s]=open_access
+<% } else if (config.httpRestApiSecurity == "api_keys") { %>
+http/rest/api-keys[s]=${config.httpRestApiKeys}
+<% } %>
 </textarea>
 
 <form method='GET' >
