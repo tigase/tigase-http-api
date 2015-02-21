@@ -14,7 +14,7 @@
 
 	<groupId>tigase</groupId>
 	<artifactId>tigase-http-api-jetty</artifactId>
-	<version>1.0.0</version>
+	<version>1.1.0-SNAPSHOT</version>
 	<name>Tigase HTTP API - support for Jetty HTTP Server</name>
 	<description>Tigase HTTP API - support for Jetty HTTP Server</description>
 
@@ -29,7 +29,7 @@
 		<connection>scm:git:https://repository.tigase.org/git/tigase-http-api-jetty.git</connection>
 		<developerConnection>scm:git:https://repository.tigase.org/git/tigase-http-api-jetty.git</developerConnection>
 		<url>https://projects.tigase.org/projects/tigase-http-api-jetty/repository</url>
-	  <tag>tigase-http-api-jetty-1.0.0</tag>
+	  <tag>HEAD</tag>
   </scm>
 
 	<organization>
@@ -237,7 +237,7 @@
 		<dependency>
 			<groupId>tigase</groupId>
 			<artifactId>tigase-http-api</artifactId>
-			<version>1.1.0</version>
+			<version>1.2.0-SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
