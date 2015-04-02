@@ -6,7 +6,7 @@
 		<dir>target</dir>
 		<maven.build.timestamp.format>yyyy-MM-dd/HH:mm:ss</maven.build.timestamp.format>
 		<gmavenProviderSelection>2.0</gmavenProviderSelection>
-		<groovyVersion>2.1.0</groovyVersion>
+		<groovyVersion>2.4.3</groovyVersion>
 	</properties>
 
 	<modelVersion>4.0.0</modelVersion>
