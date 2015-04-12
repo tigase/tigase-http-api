@@ -40,8 +40,12 @@ class ServiceImpl implements Service {
 	}
 	
     void sendPacket(Packet packet, Long timeout, Closure closure) {
-		module.addOutPacket(packet, (Integer) (timeout == null ? null : timeout.intValue()),
-			new ClosureCallback(closure));
+		if (closure != null) {
+			module.addOutPacket(packet, (Integer) (timeout == null ? null : timeout.intValue()),
+				new ClosureCallback(closure));
+		} else {
+			module.addOutPacket(packet);
+		}
 	}
 	
     UserRepository getUserRepository() {
