@@ -37,6 +37,7 @@ import tigase.http.rest.ApiKeyRepository;
 import tigase.server.Command;
 import tigase.server.Packet;
 import tigase.server.script.CommandIfc;
+import tigase.stats.StatisticsList;
 import tigase.util.TigaseStringprepException;
 import tigase.xml.Element;
 import tigase.xmpp.BareJID;
@@ -61,6 +62,13 @@ public abstract class AbstractModule implements Module {
 		return writer.write(this, packet, timeout, callback);
 	}
 
+	@Override
+	public void everyHour() {}
+	@Override
+	public void everyMinute() {}
+	@Override
+	public void everySecond() {}
+	
 	@Override
 	public String[] getFeatures() {
 		return new String[] { Command.XMLNS };
@@ -113,6 +121,16 @@ public abstract class AbstractModule implements Module {
 	}
 	
 	@Override
+	public void getStatistics(String compName, StatisticsList list) {
+		
+	}
+	
+	@Override
+	public void setStatisticsPrefix(String prefix) {
+		
+	}
+	
+	@Override
 	public void setProperties(Map<String, Object> props) {
 		serviceEntity = new ServiceEntity(getName(), null, getDescription(), true);
 		serviceEntity.setFeatures(getFeatures());
@@ -121,6 +139,11 @@ public abstract class AbstractModule implements Module {
 		}
 		apiKeyRepository.setRepoUser(BareJID.bareJIDInstanceNS(getName(), (String) props.get("componentName")));
 		apiKeyRepository.setProperties(props);				
+	}
+	
+	@Override
+	public void statisticExecutedIn(long executionTime) {
+		
 	}
 	
 	@Override

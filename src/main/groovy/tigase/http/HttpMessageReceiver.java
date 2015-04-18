@@ -47,6 +47,7 @@ import tigase.http.ui.WebModule;
 import tigase.server.AbstractMessageReceiver;
 import tigase.server.Packet;
 import tigase.server.Permissions;
+import tigase.stats.StatisticsList;
 import tigase.xml.Element;
 import tigase.xmpp.Authorization;
 import tigase.xmpp.BareJID;
@@ -69,6 +70,27 @@ public class HttpMessageReceiver extends AbstractMessageReceiver implements Pack
 	
     private UserRepository user_repo_impl = null;
     private AuthRepository auth_repo_impl = null;
+	
+	@Override
+	public void everyHour() {
+		for (Module m : modules.values()) {
+			m.everyHour();
+		}		
+	}
+	
+	@Override
+	public void everyMinute() {
+		for (Module m : modules.values()) {
+			m.everyMinute();
+		}		
+	}
+	
+	@Override
+	public void everySecond() {
+		for (Module m : modules.values()) {
+			m.everySecond();
+		}
+	}
 	
     @Override
     public void start() {
@@ -169,6 +191,15 @@ public class HttpMessageReceiver extends AbstractMessageReceiver implements Pack
 		}
 		else{
 			return super.getDiscoItems(node, jid, from);
+		}
+	}	
+	
+	@Override
+	public void getStatistics(StatisticsList list) {
+		super.getStatistics(list);
+		
+		for (Module m : modules.values()) {
+			m.getStatistics(getName(), list);
 		}
 	}	
 		

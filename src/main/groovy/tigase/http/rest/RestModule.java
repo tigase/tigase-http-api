@@ -35,6 +35,9 @@ import tigase.http.DeploymentInfo;
 import tigase.http.HttpServer;
 import tigase.http.ServletInfo;
 import tigase.http.util.StaticFileServlet;
+import tigase.stats.StatisticHolder;
+import tigase.stats.StatisticHolderImpl;
+import tigase.stats.StatisticsList;
 
 public class RestModule extends AbstractModule {
 	
@@ -58,10 +61,32 @@ public class RestModule extends AbstractModule {
 	private final String uuid = UUID.randomUUID().toString();
 	
 	private static final ConcurrentHashMap<String,RestModule> modules = new ConcurrentHashMap<String,RestModule>();
+	private static final ConcurrentHashMap<String,StatisticHolder> stats = new ConcurrentHashMap<String, StatisticHolder>();
 	
 	public static RestModule getModuleByUUID(String uuid) {
 		return modules.get(uuid);
 	}
+	
+	@Override
+	public void everyHour() {
+		for (StatisticHolder holder : stats.values()) {
+			holder.everyHour();
+		} 		
+	}
+	
+	@Override
+	public void everyMinute() {
+		for (StatisticHolder holder : stats.values()) {
+			holder.everyMinute();
+		} 	
+	}
+	
+	@Override
+	public void everySecond() {
+		for (StatisticHolder holder : stats.values()) {
+			holder.everySecond();
+		} 		
+	}	
 	
 	@Override
 	public String getName() {
@@ -147,6 +172,29 @@ public class RestModule extends AbstractModule {
 		vhosts = (String[]) props.get(VHOSTS_KEY);
 		
 		commandManager.registerCmd(reloadHandlersCmd);
+	}
+	
+	@Override
+	public void getStatistics(String compName, StatisticsList list) {
+		for (StatisticHolder holder : stats.values()) {
+			holder.getStatistics(compName, list);
+		} 
+	}			
+	
+	public void executedIn(String path, long executionTime) {
+		StatisticHolder holder = stats.get(path);
+		if (holder == null) {
+			StatisticHolder tmp = new StatisticHolderImpl();
+			tmp.setStatisticsPrefix(getName() + ", path=" + path);
+			holder = stats.putIfAbsent(path, tmp);
+			if (holder == null)
+				holder = tmp;
+		}
+		holder.statisticExecutedIn(executionTime);
+	}
+	
+	public void statisticExecutedIn(long executionTime) {
+		
 	}
 	
     private void startRestServletForDirectory(DeploymentInfo httpDeployment, File scriptsDirFile) 

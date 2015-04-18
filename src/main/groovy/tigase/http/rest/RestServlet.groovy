@@ -197,10 +197,16 @@ public class RestServlet extends HttpServlet {
      * @return
      */
     def execute(HttpServletRequest request, HttpServletResponse response, Handler route, def reqParams, def asyncCtx) {
+		long start = System.currentTimeMillis();
+        def prefix = request.getServletPath();
+        prefix = request.getContextPath() + prefix
+		
         String type = request.getContentType();
         String requestContent = null;
 
         def callback = { result ->
+			long end = System.currentTimeMillis();
+			executedIn(prefix + route.regex.toString(), end-start);
             if (result == null) {
                 // no response - nothing to send so there was nothing
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -229,7 +235,7 @@ public class RestServlet extends HttpServlet {
 					encodeResults(request, response, route, reqParams, result);
                 }
             }
-
+			
             if (asyncCtx) {
                 asyncCtx.complete();
             }
@@ -283,6 +289,10 @@ public class RestServlet extends HttpServlet {
         // Call exact closure
         route."exec$method".call(params);
     }
+	
+	def executedIn(String route, long executionTime) {
+		service.executedIn(route, executionTime);
+	}
 
 	def encodeResults(HttpServletRequest request, HttpServletResponse response, Handler route, def reqParams, def result ) {
 		// send output data enconded with XML or JSON
