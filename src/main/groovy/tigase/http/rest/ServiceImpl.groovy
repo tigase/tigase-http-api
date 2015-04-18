@@ -60,5 +60,9 @@ class ServiceImpl implements Service {
 		return module.isRequestAllowed(key, domain, path);
 	}
 	
+	void executedIn(String path, long executionTime) {
+		module.executedIn(path, executionTime);
+	}
+	
 }
 

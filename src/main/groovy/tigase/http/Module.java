@@ -28,11 +28,12 @@ import tigase.db.AuthRepository;
 import tigase.db.UserRepository;
 import tigase.server.Packet;
 import tigase.http.PacketWriter.Callback;
+import tigase.stats.StatisticHolder;
 import tigase.xml.Element;
 import tigase.xmpp.BareJID;
 import tigase.xmpp.JID;
 
-public interface Module {
+public interface Module extends StatisticHolder {
 	
 	public static final String VHOSTS_KEY = "vhosts";
 	public static final String HTTP_SERVER_KEY = "http-server";

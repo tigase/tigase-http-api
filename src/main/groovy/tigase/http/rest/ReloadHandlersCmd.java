@@ -27,8 +27,9 @@ import tigase.server.Command;
 import tigase.server.Iq;
 import tigase.server.Packet;
 import tigase.server.script.CommandIfc;
+import tigase.stats.StatisticHolderImpl;
 
-public class ReloadHandlersCmd implements CommandIfc {
+public class ReloadHandlersCmd extends StatisticHolderImpl implements CommandIfc {
 
 	private final RestModule module;
 	
