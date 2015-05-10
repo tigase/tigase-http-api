@@ -20,23 +20,37 @@
  * $Date$
  */
 
-package tigase.http.rest
+package tigase.http
 
 import tigase.server.Packet
 import tigase.db.UserRepository
+import groovy.transform.CompileStatic
 import tigase.db.AuthRepository
+import tigase.http.AbstractModule
+import tigase.http.PacketWriter.Callback
+import tigase.http.api.Service
 import tigase.xmpp.BareJID
 
-class ServiceImpl implements Service {
+@CompileStatic
+public class ServiceImpl implements Service {
 
-	private final RestModule module;
+	private final AbstractModule module;
 	
 	public ServiceImpl(String moduleUUID) {
-		this(RestModule.getModuleByUUID(moduleUUID));
+		this(AbstractModule.getModuleByUUID(moduleUUID));
 	}
 	
-	public ServiceImpl(RestModule module) {
+	public ServiceImpl(AbstractModule module) {
 		this.module = module;
+	}
+	
+	void sendPacket(Packet packet, Long timeout, Callback closure) {
+		if (closure != null) {
+			module.addOutPacket(packet, (Integer) (timeout == null ? null : timeout.intValue()),
+				closure);
+		} else {
+			module.addOutPacket(packet);
+		} 
 	}
 	
     void sendPacket(Packet packet, Long timeout, Closure closure) {

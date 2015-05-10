@@ -38,6 +38,7 @@ import tigase.conf.ConfigurationException;
 import tigase.db.AuthRepository;
 import tigase.db.RepositoryFactory;
 import tigase.db.UserRepository;
+import tigase.http.admin.AdminModule;
 import tigase.http.dnswebservice.DnsWebServiceModule;
 import tigase.http.rest.ApiKeyRepository;
 import tigase.http.rest.RestModule;
@@ -64,7 +65,7 @@ public class HttpMessageReceiver extends AbstractMessageReceiver implements Pack
 
 	private Map<String,Module> modules = new ConcurrentHashMap<String,Module>();
 	private static final Class[] ALL_MODULES = { RestModule.class, DnsWebServiceModule.class, 
-		ServerInfoModule.class, SetupModule.class, WebModule.class };
+		ServerInfoModule.class, SetupModule.class, WebModule.class, AdminModule.class };
 	
 	private HttpServer httpServer = new HttpServer();;
 	
@@ -322,7 +323,14 @@ public class HttpMessageReceiver extends AbstractMessageReceiver implements Pack
 		if (packet.getStanzaFrom() == null) {
 			packet.initVars(from, packet.getStanzaTo());
 		}
+        String id = packet.getAttributeStaticStr("id");
+		if (id == null) {
+			id = UUID.randomUUID().toString();
+			packet.getElement().setAttribute("id", id);
+			packet.initVars(packet.getStanzaFrom(), packet.getStanzaTo());
+		}		
 		packet.setPacketFrom(from);
+		
 		return addOutPacket(packet);
 	}
 
@@ -334,6 +342,12 @@ public class HttpMessageReceiver extends AbstractMessageReceiver implements Pack
         if (packet.getStanzaFrom() == null) {
             packet.initVars(from, packet.getStanzaTo());
         }
+        String id = packet.getAttributeStaticStr("id");
+		if (id == null) {
+			id = UUID.randomUUID().toString();
+			packet.getElement().setAttribute("id", id);
+			packet.initVars(packet.getStanzaFrom(), packet.getStanzaTo());
+		}			
         packet.setPacketFrom(from);
 
         if (packet.getStanzaFrom() != null && !this.isLocalDomainOrComponent(packet.getStanzaFrom().toString())) {
@@ -345,7 +359,6 @@ public class HttpMessageReceiver extends AbstractMessageReceiver implements Pack
             }
         }
 
-        String id = packet.getAttributeStaticStr("id");
         final String key = generateKey(uuid, id);
 
         if (callback != null) {

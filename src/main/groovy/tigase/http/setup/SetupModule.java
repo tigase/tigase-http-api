@@ -86,34 +86,7 @@ public class SetupModule extends AbstractModule {
 		}
 	
 		super.start();
-		service = new Service() { 
-
-			@Override
-			public void sendPacket(Packet packet, Long timeout, Closure closure) {
-				throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-			}
-
-			@Override
-			public UserRepository getUserRepository() {
-				return SetupModule.this.getUserRepository();
-			}
-
-			@Override
-			public AuthRepository getAuthRepository() {
-				return SetupModule.this.getAuthRepository();
-			}
-
-			@Override
-			public boolean isAdmin(BareJID user) {
-				return SetupModule.this.isAdmin(user);
-			}
-
-			@Override
-			public boolean isAllowed(String key, String domain, String path) {
-				return SetupModule.this.isRequestAllowed(key, domain, path);
-			}
-			
-		};
+		service = new tigase.http.ServiceImpl(this);
 		modules.put(uuid, this);
 		httpDeployment = HttpServer.deployment().setClassLoader(this.getClass().getClassLoader())
 				.setContextPath(contextPath).setService(service);

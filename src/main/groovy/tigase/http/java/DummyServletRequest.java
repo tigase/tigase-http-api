@@ -31,6 +31,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URLDecoder;
 import java.security.Principal;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -67,7 +68,7 @@ import tigase.xmpp.BareJID;
 public class DummyServletRequest implements HttpServletRequest {
 
 	private final HttpExchange exchange;
-	private final Map<String,String> params;
+	private final Map<String,Object> params;
 	
 	private final String servletPath;
 	private final String contextPath;
@@ -77,21 +78,48 @@ public class DummyServletRequest implements HttpServletRequest {
 	
 	public DummyServletRequest(HttpExchange exchange, String contextPath, String servletPath, Service service) {
 		this.exchange = exchange;
-		this.params = new HashMap<String,String>();
+		this.params = new HashMap<String,Object>();
 		String query = exchange.getRequestURI().getRawQuery();
 		if (query != null) {
-			for (String part : query.split("&")) {
-				String[] val = part.split("=");
-				try {
-					params.put(URLDecoder.decode(val[0], "UTF-8"), val.length == 1 ? "" : URLDecoder.decode(val[1], "UTF-8"));
-				} catch (UnsupportedEncodingException ex) {
-					Logger.getLogger(DummyServletRequest.class.getName()).log(Level.SEVERE, null, ex);
-				}
+			decodeParamsFromString(query, params);
+		}
+		if ("application/x-www-form-urlencoded".equals(getContentType())) {
+			int len = getContentLength();
+			byte[] data = new byte[len];
+			try {
+				exchange.getRequestBody().read(data);
+				decodeParamsFromString(new String(data), params);
+			} catch (IOException ex) {
+				Logger.getLogger(DummyServletRequest.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
 		this.contextPath = contextPath;
 		this.servletPath = servletPath;
 		this.service = service;
+	}
+	
+	private void decodeParamsFromString(String query, Map params) {
+		for (String part : query.split("&")) {
+			String[] val = part.split("=");
+			try {
+				String k = URLDecoder.decode(val[0], "UTF-8");
+				String v = val.length == 1 ? "" : URLDecoder.decode(val[1], "UTF-8");
+				if (params.containsKey(k)) {
+					if (params.get(k) instanceof String[]) {
+						String[] oldV = (String[]) params.get(k);
+						oldV = Arrays.copyOf(oldV, oldV.length + 1);
+						oldV[oldV.length - 1] = v;
+						params.put(k, oldV);
+					} else {
+						params.put(k, new String[] { (String)params.get(k), v });
+					}
+				} else {
+					params.put(k, v);
+				}
+			} catch (UnsupportedEncodingException ex) {
+				Logger.getLogger(DummyServletRequest.class.getName()).log(Level.SEVERE, null, ex);
+			}
+		}	
 	}
 	
 	@Override
@@ -151,8 +179,9 @@ public class DummyServletRequest implements HttpServletRequest {
 	}
 
 	@Override
-	public String getParameter(String string) {
-		return params.get(string);
+	public String getParameter(String key) {
+		Object val = params.get(key);
+		return (val instanceof String) ? ((String) val) : null; 
 	}
 
 	@Override
@@ -161,8 +190,11 @@ public class DummyServletRequest implements HttpServletRequest {
 	}
 
 	@Override
-	public String[] getParameterValues(String string) {
-		return null;
+	public String[] getParameterValues(String key) {
+		Object val = params.get(key);
+		if (val == null)
+			return null;
+		return (val instanceof String[]) ? ((String[]) val) : new String[] { (String) val }; 
 	}
 
 	@Override

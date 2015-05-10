@@ -57,15 +57,8 @@ public class RestModule extends AbstractModule {
 
 	private String scriptsDir = DEF_SCRIPTS_DIR_VAL;
 	private String[] vhosts = null;
-	
-	private final String uuid = UUID.randomUUID().toString();
-	
-	private static final ConcurrentHashMap<String,RestModule> modules = new ConcurrentHashMap<String,RestModule>();
+		
 	private static final ConcurrentHashMap<String,StatisticHolder> stats = new ConcurrentHashMap<String, StatisticHolder>();
-	
-	public static RestModule getModuleByUUID(String uuid) {
-		return modules.get(uuid);
-	}
 	
 	@Override
 	public void everyHour() {
@@ -103,11 +96,10 @@ public class RestModule extends AbstractModule {
 		if (httpDeployment != null) {
 			stop();
 		}
-		modules.put(uuid, this);
 
 		super.start();
 		httpDeployment = HttpServer.deployment().setClassLoader(this.getClass().getClassLoader())
-				.setContextPath(contextPath).setService(new ServiceImpl(this));
+				.setContextPath(contextPath).setService(new tigase.http.ServiceImpl(this));
 		if (vhosts != null) {
 			httpDeployment.setVHosts(vhosts);
 		}
@@ -142,7 +134,6 @@ public class RestModule extends AbstractModule {
 		if (httpDeployment != null) { 
 			httpServer.undeploy(httpDeployment);
 			httpDeployment = null;
-			modules.remove(uuid, this);
 		}
 		super.stop();
 	}

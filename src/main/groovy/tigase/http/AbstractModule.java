@@ -28,6 +28,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.script.Bindings;
 import tigase.db.AuthRepository;
 import tigase.db.UserRepository;
@@ -45,6 +47,8 @@ import tigase.xmpp.JID;
 
 public abstract class AbstractModule implements Module {
 
+	private static final ConcurrentHashMap<String,AbstractModule> modules = new ConcurrentHashMap<>();		
+	
 	private JID jid;
 	private PacketWriter writer;
 	
@@ -52,6 +56,12 @@ public abstract class AbstractModule implements Module {
 	private ApiKeyRepository apiKeyRepository = null;
 	protected CommandManager commandManager = new CommandManager(this);
 	
+	protected final String uuid = UUID.randomUUID().toString();
+	
+	public static <T extends AbstractModule> T getModuleByUUID(String uuid) {
+		return (T) modules.get(uuid);
+	}	
+
 	@Override
 	public boolean addOutPacket(Packet packet) {
 		return writer.write(this, packet);
@@ -179,11 +189,16 @@ public abstract class AbstractModule implements Module {
 	
 	@Override
 	public void start() {
+		modules.put(uuid, this);
 	}
 	
 	@Override
 	public void stop() {
+		modules.remove(uuid, this);
 		apiKeyRepository.setAutoloadTimer(0);
 	}
-	
+
+	public void executedIn(String path, long executionTime) {
+		
+	}
 }

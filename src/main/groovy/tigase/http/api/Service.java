@@ -24,11 +24,13 @@ package tigase.http.api;
 import groovy.lang.Closure;
 import tigase.db.AuthRepository;
 import tigase.db.UserRepository;
+import tigase.http.PacketWriter.Callback;
 import tigase.server.Packet;
 import tigase.xmpp.BareJID;
 
 public interface Service {
 
+	void sendPacket(Packet packet, Long timeout, Callback closure);
     void sendPacket(Packet packet, Long timeout, Closure closure);
     UserRepository getUserRepository();
     AuthRepository getAuthRepository();
