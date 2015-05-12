@@ -224,6 +224,7 @@ public class Servlet extends HttpServlet {
 	}
 	
 	private void retrieveComponents(Principal principal, Callback<List<JID>> callback) throws TigaseStringprepException {
+		long start = System.currentTimeMillis();
 		Element iqEl = new Element("iq");
 		iqEl.setXMLNS("jabber:client");
 		iqEl.setAttribute("from", principal.getName());
@@ -237,8 +238,11 @@ public class Servlet extends HttpServlet {
 		
 		Packet iq = Packet.packetInstance(iqEl);
 		
-		service.sendPacket(iq, null, (Packet result) -> {
+		service.sendPacket(iq, 1L, (Packet result) -> {
+			if (log.isLoggable(Level.FINEST))
+				log.log(Level.FINEST, "discovery of components took {0}ms", (System.currentTimeMillis() - start));
 			if (result == null || result.getType() != StanzaType.result) {
+				log.fine("discovery of components failed");
 				callback.call(null);
 				return;
 			}
@@ -249,6 +253,7 @@ public class Servlet extends HttpServlet {
 	}
 	
 	private void retrieveComponentCommands(Principal principal, JID componentJid, Callback<List<Map>> callback) throws TigaseStringprepException {
+		long start = System.currentTimeMillis();
 		Element iqEl = new Element("iq");
 		iqEl.setXMLNS("jabber:client");
 		iqEl.setAttribute("from", principal.getName());
@@ -262,8 +267,11 @@ public class Servlet extends HttpServlet {
 		
 		Packet iq = Packet.packetInstance(iqEl);
 		
-		service.sendPacket(iq, null, (Packet result) -> {
+		service.sendPacket(iq, 1L, (Packet result) -> {
+			if (log.isLoggable(Level.FINEST))
+				log.log(Level.FINEST, "discovery of commands of component {0} took {1}ms", new Object[]{componentJid, System.currentTimeMillis() - start});
 			if (result == null || result.getType() != StanzaType.result) {
+				log.log(Level.FINE, "discovery of component {0} adhoc commands failed", componentJid);
 				callback.call(null);
 				return;
 			}
