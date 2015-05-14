@@ -32,7 +32,7 @@ import tigase.http.api.Service
 import tigase.xmpp.BareJID
 
 @CompileStatic
-public class ServiceImpl implements Service {
+public class ServiceImpl implements Service, tigase.http.rest.Service {
 
 	private final AbstractModule module;
 	
