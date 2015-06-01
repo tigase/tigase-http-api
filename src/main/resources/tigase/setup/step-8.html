@@ -322,11 +322,6 @@ ${ util.include('header', [title:'Setup: ' + title]) }
 	<tr><td>Adding XMPP admin accounts</td><td style="${stateStyle(result)}">${stateName(result)}</td></tr>
 	<% if (result.name() != 'ok') { %><tr><td colspan='2' style="padding: 5px 15px;font-size: smaller;">${getLog()}</td></tr><% } %>
 
-	<% result = loader.postInstallation(props); %>
-	<% /* result = (dbException) ? [error:'Connection not valid'] : dbHelper.postInstallation(repo, config); */ %>
-	<tr><td>Post installation actions</td><td style="${stateStyle(result)}">${stateName(result)}</td></tr>
-	<% if (result.name() != 'ok') { %><tr><td colspan='2' style="padding: 5px 15px;font-size: smaller;">${getLog()}</td></tr><% } %>
-
 	<%	props.setProperty("file", "database/" + props.get("dbType").toString()+"-socks5-schema.sql");
 		result = (!config.socks5Component) ? tigase.util.SchemaLoader.Result.skipped : loader.loadSchemaFile(props); %> 
 	<% /* result = (dbException) ? [error:'Connection not valid'] : dbHelper.socks5SchemaLoad(repo, config); */ %>
@@ -337,6 +332,12 @@ ${ util.include('header', [title:'Setup: ' + title]) }
 		result = (!config.PubSubComponent) ? tigase.util.SchemaLoader.Result.skipped : loader.loadSchemaFile(props); %> 
 	<tr><td>Loading PubSub component schema</td><td style="${stateStyle(result)}">${stateName(result)}</td></tr>
 	<% if (result.name() != 'ok') { %><tr><td colspan='2' style="padding: 5px 15px;font-size: smaller;">${getLog()}</td></tr><% } %>
+
+	<% result = loader.postInstallation(props); %>
+	<% /* result = (dbException) ? [error:'Connection not valid'] : dbHelper.postInstallation(repo, config); */ %>
+	<tr><td>Post installation actions</td><td style="${stateStyle(result)}">${stateName(result)}</td></tr>
+	<% if (result.name() != 'ok') { %><tr><td colspan='2' style="padding: 5px 15px;font-size: smaller;">${getLog()}</td></tr><% } %>	
+	
 	<% result = loader.shutdown(props); %>
 </table>
 <form method='GET' >
