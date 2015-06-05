@@ -156,7 +156,9 @@ class RestExtServlet extends RestServlet {
 	@CompileStatic
 	def processRequest(HttpServletRequest request, HttpServletResponse response) {
 		try {
-			log.severe("comparing request URI = " + request.getRequestURI() + " with " + (request.getContextPath() + request.getServletPath() + "/"));
+			if (log.isLoggable(Level.FINEST)) {
+				log.finest("comparing request URI = " + request.getRequestURI() + " with " + (request.getContextPath() + request.getServletPath() + "/"));
+			}
 			if (request.getRequestURI().equals(request.getContextPath() + request.getServletPath() + "/")) {
 				// accessing root of REST service - we should provide info about service here
 				Template template = (Template) includes["index"];
@@ -176,7 +178,6 @@ class RestExtServlet extends RestServlet {
 			}	
 			super.processRequest(request, response);
 		} catch (Exception ex) {
-			log.setLevel(Level.FINEST);
 			log.log(Level.SEVERE, "exception processing HTTP request", ex);
 			ex.printStackTrace();
 		}
