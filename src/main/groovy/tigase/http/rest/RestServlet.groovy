@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServlet
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 import tigase.http.ServiceImpl
+import tigase.http.coders.Coder
 import java.util.logging.Level
 import java.util.logging.Logger;
 import javax.servlet.ServletConfig
@@ -44,21 +45,25 @@ public class RestServlet extends HttpServlet {
     def methods = ["GET", "POST", "PUT", "DELETE"];
     def handlers = [:];
 
-    def xmlCoder = new XmlCoder();
-    def jsonCoder = new JsonCoder();
+    Coder xmlCoder = new XmlCoder();
+    Coder jsonCoder = new JsonCoder();
 
-	def service = null;
+	Service<RestModule> service = null;
+	File scriptsDir = null;
 	
     @Override
     public void init() {
         super.init()
 		ServletConfig cfg = super.getServletConfig();
 		String moduleName = cfg.getInitParameter(REST_MODULE_KEY);
-		service = new ServiceImpl(moduleName);
-		File scriptDir = new File(cfg.getInitParameter(SCRIPTS_DIR_KEY));
+		service = new ServiceImpl<RestModule>(moduleName);
+		scriptsDir = new File(cfg.getInitParameter(SCRIPTS_DIR_KEY));
 		
-		File[] scriptFiles = RestModule.getGroovyFiles(scriptDir);
+		File[] scriptFiles = RestModule.getGroovyFiles(scriptsDir);
+		
 		loadHandlers(scriptFiles);
+		
+		service.getModule().registerRestServlet(this);
     }
 
     public void loadHandlers(File[] scriptFiles) {

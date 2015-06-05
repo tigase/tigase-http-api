@@ -40,6 +40,18 @@ import tigase.xml.SingletonFactory
 class Stream extends tigase.http.rest.Handler {
 	
 	public Stream() {
+		description = [
+			regex : "/{to_jid}",
+			POST : [ info:'Send XMPP stanza', 
+				description: """Sends passed HTTP content as XMPP stanza.
+If {to_jid} parameter is part of url then value of this parameter is used as destination address of XMPP stanza.\n\
+
+Example of content for sending a message:
+*code*<message to="user1@example.com" from="user2@example.com">
+<body>Example message</body>
+</message>*/code*
+"""]
+		]
 		regex = /\/(.*)/
 		isAsync = true
 		decodeContent = false

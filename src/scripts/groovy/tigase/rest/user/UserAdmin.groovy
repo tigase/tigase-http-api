@@ -33,6 +33,42 @@ import tigase.xmpp.BareJID
 class UserAdminHandler extends tigase.http.rest.Handler {
 
     public UserAdminHandler() {
+		description = [
+			regex : "/{user_jid}",
+			GET : [ info:'Retrieve user account details', 
+				description: """Only required parameter is part of url {user_jid} which is jid of user which account informations you want to retrieve.
+Data will be returned in form of JSON or XML depending on selected format by Accept HTTP header\n\
+
+Example response:
+\${util.formatData([user:[jid:'user@example.com', domain:'example.com', uid:10 ]])}				
+""" ],
+			PUT : [ info:'Create new user account',
+				description: """Part of url {user_jid} is parameter which is jid of user which account you want to create, ie. user@example.com.
+To create account additional data needs to be passed as content of HTTP request:
+\${util.formatData([user:[password:'some_password',email:'user@example.com']])}
+
+Data will be returned in form of JSON or XML depending on selected format by Accept HTTP header
+
+Example response:
+\${util.formatData([user:[jid:'user@example.com', domain:'example.com', uid:10 ]])}				
+""" ],
+			POST : [ info:'Update user account',
+				description: """Part of url {user_jid} is parameter which is jid of user which account you want to update, ie. user@example.com.\n\
+Additional data needs to be passed as content of HTTP request to change password for this account:
+\${util.formatData([user:[password:'some_password']])}
+Data will be returned in form of JSON or XML depending on selected format by Accept HTTP header
+
+Example response:
+\${util.formatData([user:[jid:'user@example.com', domain:'example.com', uid:10 ]])}				
+"""],
+			DELETE : [ info:'Delete user account',
+				description: """Part of url {user_jid} is parameter which is jid of user which account you want to remove, ie. user@example.com.
+Data will be returned in form of JSON or XML depending on selected format by Accept HTTP header
+
+Example response:
+\${util.formatData([user:[jid:'user@example.com', domain:'example.com', uid:10 ]])}				
+"""],
+		];
         regex = /\/([^@\/]+)@([^@\/]+)/
 		authRequired = { api_key -> return api_key == null && requiredRole != null }
         requiredRole = "admin"
@@ -60,8 +96,9 @@ class UserAdminHandler extends tigase.http.rest.Handler {
         }
         execDelete = { Service service, callback, user, localPart, domain ->
             def jid = BareJID.bareJIDInstance(localPart, domain);
+            def uid = service.getUserRepository().getUserUID(jid);
             service.getAuthRepository().removeUser(jid)
-            callback([user:[jid:"$localPart@$domain", domain:domain]]);
+            callback([user:[jid:"$localPart@$domain", domain:domain, uid:uid]]);
         }
         execPost = { Service service, callback, user, content, localPart, domain ->
             def jid = BareJID.bareJIDInstance(localPart, domain);

@@ -33,6 +33,12 @@ import tigase.xmpp.StanzaType
 class AvatarHandler extends tigase.http.rest.Handler {
 
     public AvatarHandler() {
+		description = [
+			regex : "/{user_jid}",
+			GET : [ info:'Retrieve user avatar', 
+				description: """Retrieves avatar of user passed as {user_jid} parameter of url. Avatar is returned in binary form, so this might be used to present user avatar on web pages, etc.
+"""]
+		]
         regex = /\/(?:([^@\/]+)@){0,1}([^@\/]+)/
         isAsync = true
         execGet = { Service service, callback, localPart, domain ->

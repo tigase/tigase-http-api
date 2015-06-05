@@ -25,6 +25,8 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -47,9 +49,20 @@ import tigase.http.api.Service;
  */
 public class RequestHandler implements HttpHandler {
 
+	private static final Logger log = Logger.getLogger(RequestHandler.class.getCanonicalName());
+	
 	private final String contextPath;
 	private final Map<String,HttpServlet> servlets = new ConcurrentHashMap<String,HttpServlet>();
 	private final Service service;
+	
+	private static final Comparator<String> COMPARATOR = new Comparator<String>() {
+		@Override
+		public int compare(String o1, String o2) {
+			int val1 = o1.length() - o1.replace("/", "").length(); // 3
+			int val2 = o2.length() - o2.replace("/", "").length(); // 5
+			return val2 - val1;
+		}
+	};
 	
 	public RequestHandler(DeploymentInfo info) {
 		contextPath = info.getContextPath();
@@ -64,6 +77,7 @@ public class RequestHandler implements HttpHandler {
 	public void handle(HttpExchange he) throws IOException {
 		String path = he.getRequestURI().getPath();
 		List<String> keys = new ArrayList<String>(servlets.keySet());
+		Collections.sort(keys, COMPARATOR);
 		for (String key : keys) {
 			if (path.startsWith(key)) {
 				HttpServlet servlet = servlets.get(key);

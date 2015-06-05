@@ -32,15 +32,15 @@ import tigase.http.api.Service
 import tigase.xmpp.BareJID
 
 @CompileStatic
-public class ServiceImpl implements Service, tigase.http.rest.Service {
+public class ServiceImpl<T extends AbstractModule> implements Service<T>, tigase.http.rest.Service {
 
-	private final AbstractModule module;
+	private final T module;
 	
 	public ServiceImpl(String moduleUUID) {
-		this(AbstractModule.getModuleByUUID(moduleUUID));
+		this((T) AbstractModule.getModuleByUUID(moduleUUID));
 	}
 	
-	public ServiceImpl(AbstractModule module) {
+	public ServiceImpl(T module) {
 		this.module = module;
 	}
 	
@@ -82,5 +82,8 @@ public class ServiceImpl implements Service, tigase.http.rest.Service {
 		module.executedIn(path, executionTime);
 	}
 	
+	T getModule() {
+		return module;
+	}
 }
 

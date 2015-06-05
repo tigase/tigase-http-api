@@ -44,6 +44,15 @@ class ServerStatsHandler extends tigase.http.rest.Handler {
     def DISCO_ITEMS_XMLNS = "http://jabber.org/protocol/disco#items";
 
     public ServerStatsHandler() {
+		description = [
+			regex : "/",
+			GET : [ info:'Retrieve statistics of server', 
+				description: """Retrieves statistics of a server and returns them in form of XML or JSON depending on passed Accept HTTP request header.
+
+Example partial response:
+\${util.formatData([stats:['vhost-man':[component:'vhost-man',node:'stats/vhost-man',data:[[var:'vhost-man/Number of VHosts',value:15]]],'sess-man':[component:'sess-man',node:'stats/sess-man',data:[[var:'sess-man/Registered accounts',value:292],[var:'sess-man/Open user connections',value:10]]],'message-router':[component:'message-router',node:'stats/message-router',data:[[var:'message-router/CPU usage',value:'0,1%'],[var:'message-router/Used Heap',value:'101 454 KB']]]]])}
+"""]
+		]
 		regex = /\//
         requiredRole = "admin"
         isAsync = true

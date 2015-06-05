@@ -25,6 +25,8 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -57,6 +59,7 @@ public class RestModule extends AbstractModule {
 
 	private String scriptsDir = DEF_SCRIPTS_DIR_VAL;
 	private String[] vhosts = null;
+	private List<RestServlet> restServlets = new ArrayList<RestServlet>();
 		
 	private static final ConcurrentHashMap<String,StatisticHolder> stats = new ConcurrentHashMap<String, StatisticHolder>();
 	
@@ -121,6 +124,17 @@ public class RestModule extends AbstractModule {
 			}
 		}
 		
+		try {
+			ServletInfo servletInfo = HttpServer.servlet("RestServlet", RestExtServlet.class);
+			servletInfo.addInitParam(RestServlet.REST_MODULE_KEY, uuid)
+					.addInitParam(RestServlet.SCRIPTS_DIR_KEY, scriptsDirFile.getCanonicalPath())
+					.addMapping("/");
+			httpDeployment.addServlets(servletInfo);
+		} catch (IOException ex) {
+			log.log(Level.FINE, "Exception while scanning for scripts to load", ex);
+		}
+		
+		
 		ServletInfo servletInfo = HttpServer.servlet("StaticServlet", StaticFileServlet.class);
 		servletInfo.addInitParam(StaticFileServlet.DIRECTORY_KEY, new File(scriptsDirFile, "static").getAbsolutePath())
 				.addMapping("/static/*");
@@ -135,6 +149,7 @@ public class RestModule extends AbstractModule {
 			httpServer.undeploy(httpDeployment);
 			httpDeployment = null;
 		}
+		restServlets = new ArrayList<RestServlet>();
 		super.stop();
 	}
 
@@ -188,6 +203,14 @@ public class RestModule extends AbstractModule {
 		
 	}
 	
+	protected void registerRestServlet(RestServlet servlet) {
+		restServlets.add(servlet);
+	}
+	
+	protected List<? extends RestServlet> getRestServlets() {
+		return restServlets;
+	}
+	
     private void startRestServletForDirectory(DeploymentInfo httpDeployment, File scriptsDirFile) 
 			throws IOException {
         File[] scriptFiles = getGroovyFiles(scriptsDirFile);
@@ -196,6 +219,7 @@ public class RestModule extends AbstractModule {
 			ServletInfo servletInfo = HttpServer.servlet("RestServlet", RestExtServlet.class);
 			servletInfo.addInitParam(RestServlet.REST_MODULE_KEY, uuid)
 					.addInitParam(RestServlet.SCRIPTS_DIR_KEY, scriptsDirFile.getCanonicalPath())
+					.addInitParam("mapping", "/" + scriptsDirFile.getName() + "/*")
 					.addMapping("/" + scriptsDirFile.getName() + "/*");
 			httpDeployment.addServlets(servletInfo);
         }

@@ -22,8 +22,10 @@
 package tigase.http.rest
 
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import groovy.text.GStringTemplateEngine;
 import groovy.text.Template
+import groovy.transform.CompileStatic
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
@@ -33,7 +35,9 @@ import javax.servlet.http.HttpServletResponse
  */
 class RestExtServlet extends RestServlet {
 	
-	def templateEngine = new GStringTemplateEngine();
+	Logger log = Logger.getLogger(RestExtServlet.class.getCanonicalName())
+	
+	GStringTemplateEngine templateEngine = new GStringTemplateEngine();
 	def handlerTemplates = [:];
 	
 	def includes = [:];
@@ -50,7 +54,7 @@ class RestExtServlet extends RestServlet {
 			}
 		}
 		if (scriptFiles.length > 0) {
-			File srcParent = scriptFiles[0].getParentFile();
+			//File srcParent = scriptFiles[0].getParentFile();
 			allHandlers.each { Handler handler ->
 				File srcFile = handler.getSourceFile();
 				String name = srcFile.getName().replace(".groovy", "");
@@ -60,7 +64,7 @@ class RestExtServlet extends RestServlet {
 						String methodStr = method.toLowerCase().capitalize();
 						if (handler."exec${methodStr}" == null)
 						return;
-						File templateFile = new File(name + methodStr + ".html", srcParent);
+						File templateFile = new File(name + methodStr + ".html", scriptsDir);
 						if (!templateFile.exists()) 
 						return;
 						
@@ -73,19 +77,18 @@ class RestExtServlet extends RestServlet {
 					handlerTemplates[handler] = templates;
 				}
 			}
+		}	
 			
-			
-			["header", "footer"].each { src ->
-				File f = new File(src+".html", srcParent);
-				if (!f.exists()) {
-					f = new File(src+'.html', srcParent.getParentFile());
-				}
-				if (!f.exists()) return;
-				try {
-					includes[src] = templateEngine.createTemplate(f.getText());
-				} catch (Exception ex) {
-					log.log(Level.WARNING, "could not load template for $src", ex);
-				}
+		["header", "footer", "index"].each { src ->
+			File f = new File(src+".html", scriptsDir);
+			if (!f.exists()) {
+				f = new File(src+'.html', scriptsDir.getParentFile());
+			}
+			if (!f.exists()) return;
+			try {
+				includes[src] = templateEngine.createTemplate(f.getText());
+			} catch (Exception ex) {
+				log.log(Level.WARNING, "could not load template for $src", ex);
 			}
 		}
 	}
@@ -111,33 +114,72 @@ class RestExtServlet extends RestServlet {
 			}
 			if (templates && templates[request.getMethod()]) {
 				Template template = (Template) templates[request.getMethod()];
-				def templateParams = null;
-				def util = [
-				link: { url ->
-					if (request.getParameter("api-key")) {
-						return request.getContextPath() + url + (url.contains("?") ? "&" : "?") + "api-key=" + request.getParameter("api-key");
-					} else {
-						return request.getContextPath() + url;
-					}
-				}, include: { name, params = null ->
-					def temp = includes[name];
-					if (temp == null)
-						return "";
-					def map = [imports:[]];
-					map.putAll(templateParams);
-					if (params != null) map.putAll(params);
-					return temp.make(map);
-				}				
-				];
-				templateParams = [request:request, response:response, result:result, util:util];
-				Writable writable = template.make(templateParams);
-				response.setContentType(type);
-				writable.writeTo(response.getWriter());
+				fillResponseWithTemplate(template, request, response, result);
 				return;
 			}
 		}
 		super.encodeResults(request, response, route, reqParams, result);
 	}
 	
+	def fillResponseWithTemplate(Template template, HttpServletRequest request, HttpServletResponse response, def result) {
+		def templateParams = null;
+		def util = [
+			link: { url ->
+				if (request.getParameter("api-key")) {
+					return request.getContextPath() + url + (url.contains("?") ? "&" : "?") + "api-key=" + request.getParameter("api-key");
+				} else {
+					return request.getContextPath() + url;
+				}
+			}, include: { name, params = null ->
+				def temp = includes[name];
+				if (temp == null)
+					return "";
+				def map = [imports:[]];
+				map.putAll(templateParams);
+				if (params != null) map.putAll(params);
+				return temp.make(map);
+			}				
+		];
+		templateParams = [request:request, response:response, result:result, util:util];
+		Writable writable = template.make(templateParams);
+		response.setContentType("text/html");
+		writable.writeTo(response.getWriter());		
+	}
+	
+	Map prepareParams(HttpServletRequest request, HttpServletResponse response, Map params) {
+		params.util = [
+			formatData : { data -> return "*code*"+xmlCoder.encode(data).replace(" ","&nbsp;").trim() + "*/code*"; }
+		];
+		return params;
+	}
+	
+	@CompileStatic
+	def processRequest(HttpServletRequest request, HttpServletResponse response) {
+		try {
+			log.severe("comparing request URI = " + request.getRequestURI() + " with " + (request.getContextPath() + request.getServletPath() + "/"));
+			if (request.getRequestURI().equals(request.getContextPath() + request.getServletPath() + "/")) {
+				// accessing root of REST service - we should provide info about service here
+				Template template = (Template) includes["index"];
+			
+				def result = [service:service, fillTemplate: { String templateStr, Map params = [:] ->
+					if (templateStr == null)
+						return "No description";
+					params = prepareParams(request, response, params);
+					Template t = templateEngine.createTemplate(templateStr);
+					Writable writable = t.make(params);
+					StringWriter sw = new StringWriter();
+					writable.writeTo(sw);
+					return sw.toString().replace("<", "&lt;").replace(">","&gt;").replace("\n","<br/>").replace("*code*","<div class='code'>").replace("*/code*","</div>");
+				}];
+				fillResponseWithTemplate(template, request, response, result);
+				return;
+			}	
+			super.processRequest(request, response);
+		} catch (Exception ex) {
+			log.setLevel(Level.FINEST);
+			log.log(Level.SEVERE, "exception processing HTTP request", ex);
+			ex.printStackTrace();
+		}
+	}
 }
 

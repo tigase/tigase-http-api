@@ -38,6 +38,12 @@ import tigase.xml.SingletonFactory
 class AvatarPutNoAuthHandler extends tigase.http.rest.Handler {
 
     public AvatarPutNoAuthHandler() {
+		description = [
+			regex : "/{user_jid}",
+			PUT : [ info:'Change user avatar', 
+				description: """Changes avatar of user passed as {user_jid} parameter of url. As content of request binary form of image should be passed as it will be used as new avatar of a user.
+"""]
+		]
         regex = /\/(?:([^@\/]+)@){0,1}([^@\/]+)/
         isAsync = false
 		decodeContent = false

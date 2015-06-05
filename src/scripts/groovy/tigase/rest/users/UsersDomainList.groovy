@@ -33,6 +33,15 @@ import tigase.xmpp.BareJID
 class UsersDomainHandler extends tigase.http.rest.Handler {
 
     public UsersDomainHandler() {
+		description = [
+			regex : "/{domain}",
+			GET : [ info:'Retrieve list of registered user jids for domain', 
+				description: """Request requires name of domain as parameter {domain} and returns list of all registered user accounts for this domain.
+
+Example response will look like this:
+\${util.formatData([users:[items:['user1@example.com','user2@example.com','user3@example.com'],count:3]])}
+"""]
+		];		
         regex = /\/([^@\/]+)/
         requiredRole = "admin"
         isAsync = false
