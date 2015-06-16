@@ -28,6 +28,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import tigase.http.DeploymentInfo;
@@ -47,12 +52,15 @@ public class JavaStandaloneHttpServer implements HttpServerIfc {
 	private HttpServer server = null;
 	private int port = DEF_HTTP_PORT_VAL;
 	private List<DeploymentInfo> deployments = new ArrayList<DeploymentInfo>();
+	private ExecutorWithTimeout executor = new ExecutorWithTimeout();
 	
 	@Override
 	public void start() {
 		if (server == null) {
 			try {
+				executor.start();
 				server = HttpServer.create(new InetSocketAddress(port), 100);
+				server.setExecutor(executor);
 				server.start();
 				deploy(Collections.unmodifiableList(deployments));
 			} catch (IOException ex) {
@@ -67,6 +75,7 @@ public class JavaStandaloneHttpServer implements HttpServerIfc {
 			undeploy(Collections.unmodifiableList(deployments));
 			server.stop(1);
 			server = null;
+			executor.shutdown();
 		}
 	}
 
@@ -91,6 +100,7 @@ public class JavaStandaloneHttpServer implements HttpServerIfc {
 		if (props.containsKey(HTTP_PORT_KEY)) {
 			port = (Integer) props.get(HTTP_PORT_KEY);
 		}
+		executor.setProperties(props);
 	}
 	
 	private void deploy(List<DeploymentInfo> toDeploy) {
@@ -102,6 +112,65 @@ public class JavaStandaloneHttpServer implements HttpServerIfc {
 	private void undeploy(List<DeploymentInfo> toUndeploy) {
 		for (DeploymentInfo info : toUndeploy) {
 			server.removeContext(info.getContextPath());
+		}
+	}
+	
+	private class ExecutorWithTimeout implements Executor {
+
+		private static final String THREADS_KEY = "threads";
+		private static final String REQUEST_TIMEOUT_KEY = "request-timeout";
+		
+		private ExecutorService executor = null;
+		private Timer timer = null;
+		private int timeout = 60 * 1000;
+		
+		private int threads = 4;
+		
+		public ExecutorWithTimeout() {
+		}
+		
+		@Override
+		public void execute(final Runnable command) {
+			executor.execute(new Runnable() {
+
+				@Override
+				public void run() {
+					final Thread current = Thread.currentThread();
+					TimerTask tt = new TimerTask() {
+						@Override
+						public void run() {
+							System.out.println("request processing time exceeded!");
+							current.interrupt();
+						}
+					};
+					timer.schedule(tt, timeout);
+					command.run();
+					tt.cancel();
+				}
+				
+			});
+		}
+		
+		public void start() {
+			if (executor != null) {
+				shutdown();
+			}
+			executor = Executors.newFixedThreadPool(threads);
+			timer = new Timer();
+		}
+		
+		public void shutdown() {
+			executor.shutdown();
+			timer.cancel();
+		}
+		
+		public void setProperties(Map<String,Object> props) {
+			if (props.containsKey(THREADS_KEY)) {
+				threads = (Integer) props.get(THREADS_KEY);
+			}
+			if (props.containsKey(REQUEST_TIMEOUT_KEY)) {
+				timeout = (Integer) props.get(REQUEST_TIMEOUT_KEY);
+			}
 		}
 	}
 }
