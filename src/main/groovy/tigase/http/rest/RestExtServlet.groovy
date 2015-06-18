@@ -159,7 +159,7 @@ class RestExtServlet extends RestServlet {
 			if (log.isLoggable(Level.FINEST)) {
 				log.finest("comparing request URI = " + request.getRequestURI() + " with " + (request.getContextPath() + request.getServletPath() + "/"));
 			}
-			if (request.getRequestURI().equals(request.getContextPath() + request.getServletPath() + "/")) {
+			if (request.getRequestURI().equals(request.getContextPath() + request.getServletPath() + "/") && request.getServletPath().isEmpty()) {
 				// accessing root of REST service - we should provide info about service here
 				Template template = (Template) includes["index"];
 			
