@@ -213,6 +213,7 @@ public class DummyServletResponse implements HttpServletResponse {
 
 	@Override
 	public void sendRedirect(String string) throws IOException {
+		exchange.getResponseHeaders().set("Location", string);
 		exchange.sendResponseHeaders(302, 0);
 	}
 
