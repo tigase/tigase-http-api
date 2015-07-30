@@ -87,12 +87,18 @@ Example response:
             def jid = BareJID.bareJIDInstance(localPart, domain);
             def password = content.user.password;
 			def email = content.user.email;
-            service.getAuthRepository().addUser(jid, password);
-            def uid = service.getUserRepository().getUserUID(jid);
-			if (uid && email) {
-				service.getUserRepository().setData(jid, "email", email);
+			try {
+		        service.getAuthRepository().addUser(jid, password);
+				def uid = service.getUserRepository().getUserUID(jid);
+				if (uid && email) {
+					service.getUserRepository().setData(jid, "email", email);
+				}
+				callback([user:[jid:"$localPart@$domain", domain:domain, uid: uid]]);
+			} catch (tigase.db.UserExistsException ex) {
+				callback({ req, resp -> 
+						resp.sendError(409, "User exists");
+					});
 			}
-            callback([user:[jid:"$localPart@$domain", domain:domain, uid: uid]]);
         }
         execDelete = { Service service, callback, user, localPart, domain ->
             def jid = BareJID.bareJIDInstance(localPart, domain);
