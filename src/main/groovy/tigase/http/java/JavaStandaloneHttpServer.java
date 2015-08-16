@@ -22,12 +22,18 @@
 package tigase.http.java;
 
 import com.sun.net.httpserver.HttpServer;
+import com.sun.net.httpserver.HttpsConfigurator;
+import com.sun.net.httpserver.HttpsServer;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Executor;
@@ -35,8 +41,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.net.ssl.SSLContext;
 import tigase.http.DeploymentInfo;
 import tigase.http.api.HttpServerIfc;
+import tigase.io.TLSUtil;
+import tigase.net.SocketType;
 
 /**
  * Basic implementation of HTTP server based on HttpServer implementation 
@@ -49,32 +58,44 @@ import tigase.http.api.HttpServerIfc;
  */
 public class JavaStandaloneHttpServer implements HttpServerIfc {
 
-	private HttpServer server = null;
-	private int port = DEF_HTTP_PORT_VAL;
+	private static final Logger log = Logger.getLogger(JavaStandaloneHttpServer.class.getCanonicalName());
+	
+	private final Set<HttpServer> servers = new HashSet<HttpServer>();
+	private int[] ports = { DEF_HTTP_PORT_VAL };
+	private final Map<String,Map<String,Object>> portsConfigs = new HashMap<>();
 	private List<DeploymentInfo> deployments = new ArrayList<DeploymentInfo>();
 	private ExecutorWithTimeout executor = new ExecutorWithTimeout();
 	
 	@Override
 	public void start() {
-		if (server == null) {
-			try {
-				executor.start();
-				server = HttpServer.create(new InetSocketAddress(port), 100);
-				server.setExecutor(executor);
-				server.start();
-				deploy(Collections.unmodifiableList(deployments));
-			} catch (IOException ex) {
-				Logger.getLogger(JavaStandaloneHttpServer.class.getName()).log(Level.SEVERE, null, ex);
+		synchronized (servers) {
+			if (!servers.isEmpty())
+				stop();
+			
+			executor.start();
+			for (int port : ports) {
+				try {
+					HttpServer server = createServer(port);
+					server.setExecutor(executor);
+					server.start();
+					deploy(server, Collections.unmodifiableList(deployments));
+					servers.add(server);
+				} catch (IOException ex) {
+					log.log(Level.SEVERE, "starting server on port " + port + " failed", ex);
+				}
 			}
 		}
 	}
 
 	@Override
 	public void stop() {
-		if (server != null) {
-			undeploy(Collections.unmodifiableList(deployments));
-			server.stop(1);
-			server = null;
+		synchronized (servers) {
+			HttpServer server = null;
+			for (Iterator<HttpServer> it = servers.iterator(); it.hasNext(); server = it.next()) {
+				it.remove();
+				undeploy(server,Collections.unmodifiableList(deployments));
+				server.stop(1);
+			}
 			executor.shutdown();
 		}
 	}
@@ -82,39 +103,68 @@ public class JavaStandaloneHttpServer implements HttpServerIfc {
 	@Override
 	public void deploy(DeploymentInfo deployment) {
 		deployments.add(deployment);
-		if (server != null) {
-			deploy(Collections.singletonList(deployment));
+		synchronized (servers) {
+			for (HttpServer server : servers) {
+				deploy(server, Collections.singletonList(deployment));
+			}
 		}
 	}
 
 	@Override
 	public void undeploy(DeploymentInfo deployment) {
 		deployments.remove(deployment);
-		if (server != null) {
-			undeploy(Collections.singletonList(deployment));
+		synchronized (servers) {
+			for (HttpServer server : servers) {
+				undeploy(server, Collections.singletonList(deployment));
+			}
 		}
 	}
-
+	
 	@Override
 	public void setProperties(Map<String, Object> props) {
 		if (props.containsKey(HTTP_PORT_KEY)) {
-			port = (Integer) props.get(HTTP_PORT_KEY);
+			ports = new int[] { (Integer) props.get(HTTP_PORT_KEY) };
+		}
+		if (props.containsKey(HTTP_PORTS_KEY)) {
+			ports = (int[]) props.get(HTTP_PORTS_KEY);
+		}
+		portsConfigs.clear();
+		for (int port : ports) {
+			Map<String,Object> config = new HashMap<>();
+			String socket = (String) props.get(String.valueOf(port) + "/" + PORT_SOCKET_KEY);
+			config.put(PORT_SOCKET_KEY, socket != null ? SocketType.valueOf(socket) : SocketType.plain);
+			String domain = (String) props.get(String.valueOf(port) + "/" + PORT_DOMAIN_KEY);
+			config.put(PORT_DOMAIN_KEY, domain);
+			portsConfigs.put(String.valueOf(port), config);
 		}
 		executor.setProperties(props);
 	}
 	
-	private void deploy(List<DeploymentInfo> toDeploy) {
+	private HttpServer createServer(int port) throws IOException {
+		Map<String,Object> config = portsConfigs.get(String.valueOf(port));
+		if (config == null || ((SocketType) config.get(PORT_SOCKET_KEY)) == SocketType.plain) {
+			return HttpServer.create(new InetSocketAddress(port), 100);
+		} else {	
+			HttpsServer server = HttpsServer.create(new InetSocketAddress(port), 100);
+			String domain = (String) config.get(PORT_DOMAIN_KEY);
+			SSLContext sslContext = TLSUtil.getSSLContext("TLS", domain);
+			server.setHttpsConfigurator(new HttpsConfigurator(sslContext));
+			return server;
+		}
+	}
+	
+	private void deploy(HttpServer server, List<DeploymentInfo> toDeploy) {
 		for (DeploymentInfo info : toDeploy) {
 			server.createContext(info.getContextPath(), new RequestHandler(info));
 		}
 	}
 	
-	private void undeploy(List<DeploymentInfo> toUndeploy) {
+	private void undeploy(HttpServer server, List<DeploymentInfo> toUndeploy) {
 		for (DeploymentInfo info : toUndeploy) {
 			server.removeContext(info.getContextPath());
 		}
 	}
-	
+		
 	private class ExecutorWithTimeout implements Executor {
 
 		private static final String THREADS_KEY = "threads";

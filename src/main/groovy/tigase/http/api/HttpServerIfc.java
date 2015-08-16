@@ -27,8 +27,12 @@ import tigase.http.DeploymentInfo;
  */
 public interface HttpServerIfc {
 
+	@Deprecated
 	public static final String HTTP_PORT_KEY = "port";
+	public static final String HTTP_PORTS_KEY = "ports";
 	public static final int DEF_HTTP_PORT_VAL = 8080;
+	public static final String PORT_SOCKET_KEY = "socket";
+	public static final String PORT_DOMAIN_KEY = "domain";
 	
 	void start();
 	void stop();

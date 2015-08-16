@@ -157,7 +157,7 @@ public class SetupServlet extends HttpServlet {
 			is = getClass().getResourceAsStream("/"+path);
 		}
 		if (is == null)
-			throw new RuntimeException("Resource not found");
+			throw new IOException("Resource not found");
 		
 		char[] buf = new char[1024];
 		StringBuilder sb = new StringBuilder();
