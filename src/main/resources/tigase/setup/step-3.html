@@ -89,7 +89,7 @@ ${ util.include('header', [title:'Setup: ' + title]) }
 <%
 	def components = [];
 	if (config.mucComponent) {
-		def cls = 'tigase.muc.MUCComponnet';
+		def cls = 'tigase.muc.MUCComponent';
 		if (config.acsMUCComponent) {
 			cls = 'tigase.muc.cluster.MUCComponentClustered';
 		}
