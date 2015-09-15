@@ -73,7 +73,12 @@ Example response:
         }
         execDelete = { Service service, callback, jid ->
 			def uid = service.getUserRepository().getUserUID(jid);
-            service.getAuthRepository().removeUser(jid)
+				service.getAuthRepository().removeUser(jid)
+				try {
+					service.getUserRepository().removeUser(bareJID)
+				} catch (tigase.db.UserNotFoundException ex) {
+				
+				}
             callback([user:[jid:"${jid.toString()}", domain:jid.getDomain(), uid:uid]]);
         }
         execPost = { Service service, callback, content, jid ->

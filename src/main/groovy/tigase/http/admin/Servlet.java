@@ -284,21 +284,28 @@ public class Servlet extends HttpServlet {
 	private boolean requestHasValuesForFields(List<Element> formFields, HttpServletRequest request) {
 		int contains = 0;
 		int needed = 0;
-		for (Element formField : formFields) {			
-			String type = formField.getAttributeStaticStr("type");
-			if (type == null || "boolean".equals(type))
-				continue;
-			
-			if (request.getParameter(formField.getAttributeStaticStr("var")) != null 
-					|| request.getParameterValues(formField.getAttributeStaticStr("var")) != null)
-				contains++;
-			needed++;
+		if (formFields != null) {
+			for (Element formField : formFields) {
+				String type = formField.getAttributeStaticStr("type");
+				if (type == null || "boolean".equals(type)) {
+					continue;
+				}
+
+				if (request.getParameter(formField.getAttributeStaticStr("var")) != null
+						|| request.getParameterValues(formField.getAttributeStaticStr("var")) != null) {
+					contains++;
+				}
+				needed++;
+			}
 		}
 		
 		return contains == needed;
 	}
 	
 	private void setFieldValuesFromRequest(List<Element> formFields, HttpServletRequest request) {
+		if (formFields == null)
+			return;
+		
 		formFields.forEach((Element formField) -> {
 			String type = formField.getAttributeStaticStr("type");
 			if (type == null)
