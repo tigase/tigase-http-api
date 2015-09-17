@@ -189,7 +189,7 @@ public class Servlet extends HttpServlet {
 		iqEl.addChild(commandEl);
 		
 		if (formFields != null) {
-			Element x = new Element("x", new String[] { "xmlns", "type" }, new String[] { "jabber:x:data", "form" });
+			Element x = new Element("x", new String[] { "xmlns", "type" }, new String[] { "jabber:x:data", "submit" });
 			formFields.forEach((Element formField) -> x.addChild(formField));
 			commandEl.addChild(x);
 		}
@@ -311,7 +311,13 @@ public class Servlet extends HttpServlet {
 			if (type == null)
 				return;
 			
-			formField.getChildren().forEach((Element oldChild) -> formField.removeChild(oldChild));
+			if (formField.getChildren() != null) {
+				formField.getChildren().forEach((Element oldChild) -> { 
+					if (oldChild != null) { 
+						formField.removeChild(oldChild); 
+					}
+				});
+			}
 			
 			String paramName = formField.getAttributeStaticStr("var");
 			String value = null;
