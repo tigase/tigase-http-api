@@ -287,7 +287,7 @@ public class Servlet extends HttpServlet {
 		if (formFields != null) {
 			for (Element formField : formFields) {
 				String type = formField.getAttributeStaticStr("type");
-				if (type == null || "boolean".equals(type)) {
+				if (type == null || "boolean".equals(type) || "fixed".equals(type)) {
 					continue;
 				}
 
@@ -299,7 +299,7 @@ public class Servlet extends HttpServlet {
 			}
 		}
 		
-		return contains == needed;
+		return contains == needed && needed > 0;
 	}
 	
 	private void setFieldValuesFromRequest(List<Element> formFields, HttpServletRequest request) {
