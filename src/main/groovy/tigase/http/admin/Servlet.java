@@ -327,6 +327,9 @@ public class Servlet extends HttpServlet {
 				case "list-multi":
 					String[] values = request.getParameterValues(paramName);
 					if (values != null) {
+						if (values.length == 1) {
+							values = values[0].replace("\r", "").split("\n");
+						}
 						for (int i=0; i<values.length; i++) {
 							value = values[i];
 							if (value != null) {
