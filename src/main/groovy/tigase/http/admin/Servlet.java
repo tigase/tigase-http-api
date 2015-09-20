@@ -48,6 +48,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.codehaus.groovy.control.CompilationFailedException;
 import tigase.http.PacketWriter;
+import tigase.server.Command;
 import tigase.util.TigaseStringprepException;
 import tigase.xml.XMLUtils;
 import tigase.xmpp.BareJID;
@@ -106,8 +107,8 @@ public class Servlet extends HttpServlet {
 				if (node != null && jidStr != null) {
 					JID jid = JID.jidInstance(jidStr);
 				
-					executeAdhocForm(request.getUserPrincipal(), jid, node, null, (List<Element> formFields) -> {
-						if (request.getContentLength() == 0) {
+					executeAdhocForm(request.getUserPrincipal(), jid, node, null, (Command.DataType formType, List<Element> formFields) -> {
+						if (formType == Command.DataType.result || request.getContentLength() == 0) {
 							model.put("formFields", formFields);
 							try {
 								generateResult(asyncCtx, model);
@@ -118,11 +119,11 @@ public class Servlet extends HttpServlet {
 							setFieldValuesFromRequest(formFields, request);
 							
 							try {
-								executeAdhocForm(request.getUserPrincipal(), jid, node, formFields, (List<Element> formFields1) -> {
-									if (requestHasValuesForFields(formFields1, request)) {
+								executeAdhocForm(request.getUserPrincipal(), jid, node, formFields, (Command.DataType formType1, List<Element> formFields1) -> {
+									if (formType1 == Command.DataType.form && requestHasValuesForFields(formFields1, request)) {
 										setFieldValuesFromRequest(formFields1, request);
 										try {
-											executeAdhocForm(request.getUserPrincipal(), jid, node, formFields1, (List<Element> formFields2) -> {
+											executeAdhocForm(request.getUserPrincipal(), jid, node, formFields1, (Command.DataType formType2, List<Element> formFields2) -> {
 
 												model.put("formFields", formFields2);
 												try {
@@ -176,7 +177,7 @@ public class Servlet extends HttpServlet {
 	private static final String ADHOC_COMMANDS_XMLNS = "http://jabber.org/protocol/commands";
 	
 	
-	private void executeAdhocForm(final Principal principal, JID componentJid, String node, List<Element> formFields, final Callback<List<Element>> callback) throws TigaseStringprepException {
+	private void executeAdhocForm(final Principal principal, JID componentJid, String node, List<Element> formFields, final CallbackExecuteForm<List<Element>> callback) throws TigaseStringprepException {
 		Element iqEl = new Element("iq");
 		iqEl.setXMLNS("jabber:client");
 		iqEl.setAttribute("from", principal.getName());
@@ -198,7 +199,14 @@ public class Servlet extends HttpServlet {
 		service.sendPacket(iq, null, (Packet result) -> {
 			Element xEl = result.getElement().findChildStaticStr(new String[] { "iq", "command", "x"});
 			List<Element> fields = xEl == null ? new ArrayList<>() : xEl.getChildren();
-			callback.call(fields);
+			final Command.DataType formType = (xEl == null || xEl.getAttributeStaticStr("type") != null) 
+					? Command.DataType.valueOf(xEl.getAttributeStaticStr("type")) : Command.DataType.result;
+			fields.forEach((Element e) -> {
+				if (e.getAttributeStaticStr("type") == null) {
+					e.setAttribute("type", formType == Command.DataType.form ? "text-single" : "fixed");
+				}
+			});
+			callback.call(formType, fields);
 		});
 	}
 	
@@ -372,6 +380,10 @@ public class Servlet extends HttpServlet {
 		
 		public void call(T result);
 		
+	}
+	
+	private interface CallbackExecuteForm<T> {
+		public void call(Command.DataType formType, T result);
 	}
 }
 
