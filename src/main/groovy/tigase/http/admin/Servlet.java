@@ -106,49 +106,49 @@ public class Servlet extends HttpServlet {
 				String jidStr = request.getParameter("jid");
 				if (node != null && jidStr != null) {
 					JID jid = JID.jidInstance(jidStr);
-				
-					executeAdhocForm(request.getUserPrincipal(), jid, node, null, (Command.DataType formType, List<Element> formFields) -> {
-						if (formType == Command.DataType.result || request.getContentLength() == 0) {
-							model.put("formFields", formFields);
-							try {
-								generateResult(asyncCtx, model);
-							} catch (Exception ex) {
-								log.log(Level.SEVERE, "exception processing HTTP request", ex);
-							}
-						} else {
-							setFieldValuesFromRequest(formFields, request);
-							
-							try {
-								executeAdhocForm(request.getUserPrincipal(), jid, node, formFields, (Command.DataType formType1, List<Element> formFields1) -> {
-									if (formType1 == Command.DataType.form && requestHasValuesForFields(formFields1, request)) {
-										setFieldValuesFromRequest(formFields1, request);
-										try {
-											executeAdhocForm(request.getUserPrincipal(), jid, node, formFields1, (Command.DataType formType2, List<Element> formFields2) -> {
-
-												model.put("formFields", formFields2);
-												try {
-													generateResult(asyncCtx, model);
-												} catch (Exception ex) {
-													log.log(Level.SEVERE, "exception processing HTTP request", ex);
-												}
-											});
-										} catch (TigaseStringprepException ex) {
-											log.log(Level.SEVERE, "exception processing HTTP request", ex);
-										}
-									} else {
-										model.put("formFields", formFields1);
-										try {
-											generateResult(asyncCtx, model);
-										} catch (Exception ex) {
-											log.log(Level.SEVERE, "exception processing HTTP request", ex);
-										}
-									}
-								});
-							} catch (TigaseStringprepException ex) {
-								log.log(Level.SEVERE, "exception processing HTTP request", ex);
-							}
-						}
-					});
+					processRequestStep(request, asyncCtx, model, jid, node, null);
+//					executeAdhocForm(request.getUserPrincipal(), jid, node, null, (Command.DataType formType, List<Element> formFields) -> {
+//						if (formType == Command.DataType.result || request.getContentLength() == 0) {
+//							model.put("formFields", formFields);
+//							try {
+//								generateResult(asyncCtx, model);
+//							} catch (Exception ex) {
+//								log.log(Level.SEVERE, "exception processing HTTP request", ex);
+//							}
+//						} else {
+//							setFieldValuesFromRequest(formFields, request);
+//							
+//							try {
+//								executeAdhocForm(request.getUserPrincipal(), jid, node, formFields, (Command.DataType formType1, List<Element> formFields1) -> {
+//									if (formType1 == Command.DataType.form && requestHasValuesForFields(formFields1, request)) {
+//										setFieldValuesFromRequest(formFields1, request);
+//										try {
+//											executeAdhocForm(request.getUserPrincipal(), jid, node, formFields1, (Command.DataType formType2, List<Element> formFields2) -> {
+//
+//												model.put("formFields", formFields2);
+//												try {
+//													generateResult(asyncCtx, model);
+//												} catch (Exception ex) {
+//													log.log(Level.SEVERE, "exception processing HTTP request", ex);
+//												}
+//											});
+//										} catch (TigaseStringprepException ex) {
+//											log.log(Level.SEVERE, "exception processing HTTP request", ex);
+//										}
+//									} else {
+//										model.put("formFields", formFields1);
+//										try {
+//											generateResult(asyncCtx, model);
+//										} catch (Exception ex) {
+//											log.log(Level.SEVERE, "exception processing HTTP request", ex);
+//										}
+//									}
+//								});
+//							} catch (TigaseStringprepException ex) {
+//								log.log(Level.SEVERE, "exception processing HTTP request", ex);
+//							}
+//						}
+//					});
 				} else {
 					generateResult(asyncCtx, model);
 				}
@@ -157,6 +157,29 @@ public class Servlet extends HttpServlet {
 			}
 		});
 	}	
+	
+	public void processRequestStep(final HttpServletRequest request, final AsyncContext asyncCtx, final Map model, final JID jid, final String node, final List<Element> formFields) throws TigaseStringprepException {
+		executeAdhocForm(request.getUserPrincipal(), jid, node, formFields, (Command.DataType formType1, List<Element> formFields1) -> {
+			int iteration = model.containsKey("iteration") ? (Integer) model.get("iteration") : 1;
+			if (formType1 == Command.DataType.form && requestHasValuesForFields(formFields1, request) && (iteration < 10)) {
+				setFieldValuesFromRequest(formFields1, request);
+				model.put("iteration", iteration++);
+				try {
+					processRequestStep(request, asyncCtx, model, jid, node, formFields1);
+				} catch (TigaseStringprepException ex) {
+					log.log(Level.SEVERE, "exception processing HTTP request", ex);
+				}
+			} else {
+				model.put("formFields", formFields1);
+				try {
+					generateResult(asyncCtx, model);
+				} catch (Exception ex) {
+					log.log(Level.SEVERE, "exception processing HTTP request", ex);
+				}
+			}
+		});
+		
+	}
 	
 	private void generateResult(final AsyncContext asyncCtx, final Map model) throws IOException, CompilationFailedException, ClassNotFoundException {
 		GStringTemplateEngine templateEngine = new GStringTemplateEngine();
