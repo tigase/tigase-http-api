@@ -183,7 +183,7 @@ In result of this operation you will receive ie. following XML:
                     }
 
                     if (fieldEl.getAttribute("type")) {
-                        field.label = fieldEl.getAttribute("type");
+                        field.type = fieldEl.getAttribute("type");
                     }
                     fields.add(field);
 
@@ -208,6 +208,35 @@ In result of this operation you will receive ie. following XML:
                         }
                     }
                 }
+				
+				def tables = [];
+				def table = null;
+				data.getChildren().each { child ->
+					if (!(child.getName() == "reported" || child.getName() == "item"))
+						return;
+					if (child.getName() == "reported") {
+						table = [label:child.getAttribute("label"), items:[]];
+						tables.add(table);
+						return;
+					}
+					if (table == null)
+						return;
+					def item = []
+					child.getChildren().each { fieldEl ->
+						def value = fieldEl.getChildren().findAll({ it.getName() == "value" });
+						if (value.size() > 0) {
+							value = value.get(0).getCData();
+						} else {
+							value = null;
+						}
+						item.add([var:fieldEl.getAttribute("var"), value:value])
+					}
+						
+					table.items.add([fields:item]);
+				}
+				if (!tables.isEmpty()) {
+					results.reported = tables;
+				}
 
                 callback([command:results])
             });

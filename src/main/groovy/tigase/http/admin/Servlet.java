@@ -221,7 +221,7 @@ public class Servlet extends HttpServlet {
 		Packet iq = Packet.packetInstance(iqEl);
 		service.sendPacket(iq, null, (Packet result) -> {
 			Element xEl = result.getElement().findChildStaticStr(new String[] { "iq", "command", "x"});
-			List<Element> fields = xEl == null ? new ArrayList<>() : xEl.getChildren();
+			List<Element> fields = xEl == null ? new ArrayList<>() : xEl.findChildren(e -> e.getName() == "field");
 			final Command.DataType formType = (xEl == null || xEl.getAttributeStaticStr("type") != null) 
 					? Command.DataType.valueOf(xEl.getAttributeStaticStr("type")) : Command.DataType.result;
 			fields.forEach((Element e) -> {
@@ -315,21 +315,28 @@ public class Servlet extends HttpServlet {
 	private boolean requestHasValuesForFields(List<Element> formFields, HttpServletRequest request) {
 		int contains = 0;
 		int needed = 0;
+		List<String> missing = log.isLoggable(Level.FINEST) ? new ArrayList<>() : null;
 		if (formFields != null) {
 			for (Element formField : formFields) {
 				String type = formField.getAttributeStaticStr("type");
-				if (type == null || "boolean".equals(type) || "fixed".equals(type)) {
+				if (type == null || "fixed".equals(type)) {
 					continue;
 				}
 
 				if (request.getParameter(formField.getAttributeStaticStr("var")) != null
 						|| request.getParameterValues(formField.getAttributeStaticStr("var")) != null) {
 					contains++;
+				} else if (missing != null) {
+					missing.add(formField.getAttributeStaticStr("var"));
 				}
 				needed++;
 			}
 		}
-		
+	
+		if (log.isLoggable(Level.FINEST) && contains != needed && needed > 0) {
+			log.log(Level.FINEST, "for URI = {0} needed field {1} but got {2}, still missing = {3}",
+					new Object[]{ request.getRequestURI() + "?" + request.getQueryString(), needed, contains, missing });
+		}
 		return contains == needed && needed > 0;
 	}
 	
