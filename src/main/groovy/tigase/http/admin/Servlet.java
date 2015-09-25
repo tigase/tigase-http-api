@@ -221,10 +221,12 @@ public class Servlet extends HttpServlet {
 		Packet iq = Packet.packetInstance(iqEl);
 		service.sendPacket(iq, null, (Packet result) -> {
 			Element xEl = result.getElement().findChildStaticStr(new String[] { "iq", "command", "x"});
-			List<Element> fields = xEl == null ? new ArrayList<>() : xEl.findChildren(e -> e.getName() == "field");
+			List<Element> fields = xEl == null ? new ArrayList<>() : xEl.getChildren();
 			final Command.DataType formType = (xEl == null || xEl.getAttributeStaticStr("type") != null) 
 					? Command.DataType.valueOf(xEl.getAttributeStaticStr("type")) : Command.DataType.result;
 			fields.forEach((Element e) -> {
+				if (e.getName() != "field")
+					return;
 				if (e.getAttributeStaticStr("type") == null) {
 					e.setAttribute("type", formType == Command.DataType.form ? "text-single" : "fixed");
 				}
@@ -318,8 +320,11 @@ public class Servlet extends HttpServlet {
 		List<String> missing = log.isLoggable(Level.FINEST) ? new ArrayList<>() : null;
 		if (formFields != null) {
 			for (Element formField : formFields) {
+				if (formField.getName() != "field")
+					continue;
+				
 				String type = formField.getAttributeStaticStr("type");
-				if (type == null || "fixed".equals(type)) {
+				if (type == null || "boolean".equals(type) || "fixed".equals(type)) {
 					continue;
 				}
 
@@ -345,6 +350,9 @@ public class Servlet extends HttpServlet {
 			return;
 		
 		formFields.forEach((Element formField) -> {
+			if (formField.getName() != "field")
+				return;
+			
 			String type = formField.getAttributeStaticStr("type");
 			if (type == null)
 				return;
