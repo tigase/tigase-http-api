@@ -102,8 +102,8 @@ public class Servlet extends HttpServlet {
 		    model.put("commands", commands);
 			
 			try {
-				String node = request.getParameter("node");
-				String jidStr = request.getParameter("jid");
+				String node = request.getParameter("_node");
+				String jidStr = request.getParameter("_jid");
 				if (node != null && jidStr != null) {
 					JID jid = JID.jidInstance(jidStr);
 					processRequestStep(request, asyncCtx, model, jid, node, null);
