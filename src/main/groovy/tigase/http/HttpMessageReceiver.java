@@ -51,7 +51,6 @@ import tigase.server.Permissions;
 import tigase.stats.StatisticsList;
 import tigase.xml.Element;
 import tigase.xmpp.Authorization;
-import tigase.xmpp.BareJID;
 import tigase.xmpp.JID;
 import tigase.xmpp.PacketErrorTypeException;
 import tigase.xmpp.StanzaType;
@@ -67,7 +66,7 @@ public class HttpMessageReceiver extends AbstractMessageReceiver implements Pack
 	private static final Class[] ALL_MODULES = { RestModule.class, DnsWebServiceModule.class, 
 		ServerInfoModule.class, SetupModule.class, WebModule.class, AdminModule.class };
 	
-	private HttpServer httpServer = new HttpServer();;
+	private HttpServer httpServer = new HttpServer();
 	
     private UserRepository user_repo_impl = null;
     private AuthRepository auth_repo_impl = null;
@@ -221,40 +220,45 @@ public class HttpMessageReceiver extends AbstractMessageReceiver implements Pack
 					httpProps.put(e.getKey().substring(keyPrefix.length()), e.getValue());
 				}
 			}
-			httpServer.setProperties(httpProps);		
-			httpServer.start();
+			httpServer.setProperties(httpProps);
 		}
 		
         user_repo_impl = (UserRepository) props.get(SHARED_USER_REPO_PROP_KEY);
         auth_repo_impl = (AuthRepository) props.get(SHARED_AUTH_REPO_PROP_KEY);;		
 		
+		reconfigure(props);
+	}
+	
+	protected void reconfigure(Map<String, Object> props) {
 		JID componentJid = JID.jidInstanceNS(getName() + "." + this.getDefHostName().getDomain());
-		
+
+		httpServer.start();
+
 		// configuring modules
 		for (Class cls : ALL_MODULES) {
 			try {
 				Module module = ((Class<? extends Module>) cls).newInstance();
 				String name = module.getName();
-				Map<String,Object> moduleProps = module.getDefaults();
+				Map<String, Object> moduleProps = module.getDefaults();
 				moduleProps.put("componentName", getName());
 				moduleProps.put(RepositoryFactory.SHARED_USER_REPO_PROP_KEY, props.get(RepositoryFactory.SHARED_USER_REPO_PROP_KEY));
 				moduleProps.put(ApiKeyRepository.API_KEYS_KEY, props.get(ApiKeyRepository.API_KEYS_KEY));
-				
+
 				String modulePrefix = name + "/";
-				for (Map.Entry<String,Object> e : props.entrySet()) {
+				for (Map.Entry<String, Object> e : props.entrySet()) {
 					if (e.getKey().startsWith(modulePrefix)) {
 						moduleProps.put(e.getKey().substring(modulePrefix.length()), e.getValue());
 					}
 				}
-				
-				if ((Boolean)moduleProps.get("active")) {
+
+				if ((Boolean) moduleProps.get("active")) {
 					Module oldModule = modules.get(name);
 					if (oldModule != null) {
 						module = oldModule;
 					}
-					moduleProps.put(Module.HTTP_SERVER_KEY, httpServer);		
+					moduleProps.put(Module.HTTP_SERVER_KEY, httpServer);
 					StringBuilder sb = new StringBuilder();
-					for (Map.Entry<String,Object> e : moduleProps.entrySet()) {
+					for (Map.Entry<String, Object> e : moduleProps.entrySet()) {
 						sb.append(e.getKey());
 						sb.append(" = ");
 						sb.append(e.getValue());
@@ -264,21 +268,19 @@ public class HttpMessageReceiver extends AbstractMessageReceiver implements Pack
 						log.log(Level.FINEST, "configuring module " + name + " with parameters = [" + sb.toString() + "]");
 					}
 					module.setProperties(moduleProps);
-					module.init(componentJid, this);
+					module.init(componentJid, HttpMessageReceiver.this);
 					modules.put(name, module);
 					module.start();
-					
+
 					//updateServiceDiscoveryItem(module.getJid().toString(), module.getJid().toString(), module.getDescription(), true, module.getFeatures());
-				}
-				else {
+				} else {
 					Module oldModule = modules.remove(name);
 					if (oldModule != null) {
 						removeServiceDiscoveryItem(module.getJid().toString(), module.getJid().toString(), module.getDescription());
 						oldModule.stop();
 					}
 				}
-			}
-			catch (Exception ex) {
+			} catch (Exception ex) {
 				log.log(Level.WARNING, "exception setting properties for module", ex);
 			}
 		}

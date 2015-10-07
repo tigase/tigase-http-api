@@ -90,12 +90,11 @@ public class JavaStandaloneHttpServer implements HttpServerIfc {
 	@Override
 	public void stop() {
 		synchronized (servers) {
-			HttpServer server = null;
-			for (Iterator<HttpServer> it = servers.iterator(); it.hasNext(); server = it.next()) {
-				it.remove();
+			for (HttpServer server : servers) {
 				undeploy(server,Collections.unmodifiableList(deployments));
 				server.stop(1);
 			}
+			servers.clear();
 			executor.shutdown();
 		}
 	}
@@ -161,7 +160,11 @@ public class JavaStandaloneHttpServer implements HttpServerIfc {
 	
 	private void undeploy(HttpServer server, List<DeploymentInfo> toUndeploy) {
 		for (DeploymentInfo info : toUndeploy) {
-			server.removeContext(info.getContextPath());
+			try {
+				server.removeContext(info.getContextPath());
+			} catch (IllegalArgumentException ex) {
+				log.log(Level.FINEST, "deployment context " + info.getContextPath() + " already removed");
+			}
 		}
 	}
 		
