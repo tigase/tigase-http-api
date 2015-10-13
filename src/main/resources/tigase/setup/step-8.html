@@ -328,7 +328,7 @@ ${ util.include('header', [title:'Setup: ' + title]) }
 	<tr><td>Loading socks5 component schema</td><td style="${stateStyle(result)}">${stateName(result)}</td></tr>	
 	<% if (result.name() != 'ok') { %><tr><td colspan='2' style="padding: 5px 15px;font-size: smaller;">${getLog()}</td></tr><% } %>
 	<% /* result = (dbException) ? [error:'Connection not valid'] : dbHelper.pubsubSchemaLoad(repo, config); */ %>
-	<%	props.setProperty("file", "database/" + props.get("dbType").toString()+"-pubsub-schema-3.0.0.sql");
+	<%	props.setProperty("file", "database/" + props.get("dbType").toString()+"-pubsub-schema-3.1.0.sql");
 		result = (!config.PubSubComponent) ? tigase.util.SchemaLoader.Result.skipped : loader.loadSchemaFile(props); %> 
 	<tr><td>Loading PubSub component schema</td><td style="${stateStyle(result)}">${stateName(result)}</td></tr>
 	<% if (result.name() != 'ok') { %><tr><td colspan='2' style="padding: 5px 15px;font-size: smaller;">${getLog()}</td></tr><% } %>
