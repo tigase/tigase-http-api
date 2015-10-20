@@ -31,6 +31,9 @@ import tigase.xmpp.BareJID
 import tigase.xmpp.JID
 import tigase.xmpp.StanzaType
 
+import java.util.logging.Logger
+import java.util.logging.Level
+
 /**
  * Class implements generic support for ad-hoc commands
  */
@@ -110,7 +113,11 @@ class AdHocHandler extends tigase.http.rest.Handler {
                 x.setAttribute("type", "submit");
                 command.addChild(x);
 
-                println fields
+                if (log.isLoggable(Level.FINEST)) {
+                  log.finest("adhoc fields: " + fields);
+                }
+
+               
 
                 fields.each { field ->
                     Element fieldEl = new Element("field");
