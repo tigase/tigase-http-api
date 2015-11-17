@@ -161,7 +161,7 @@ public class Servlet extends HttpServlet {
 	public void processRequestStep(final HttpServletRequest request, final AsyncContext asyncCtx, final Map model, final JID jid, final String node, final List<Element> formFields) throws TigaseStringprepException {
 		executeAdhocForm(request.getUserPrincipal(), jid, node, formFields, (Command.DataType formType1, List<Element> formFields1) -> {
 			int iteration = model.containsKey("iteration") ? (Integer) model.get("iteration") : 1;
-			if (formType1 == Command.DataType.form && requestHasValuesForFields(formFields1, request) && (iteration < 10)) {
+			if (formType1 == Command.DataType.form && ((requestHasValuesForFields(formFields1, request) && (iteration < 10)) || (iteration == 1 && "POST".equals(request.getMethod())))) {
 				setFieldValuesFromRequest(formFields1, request);
 				model.put("iteration", iteration++);
 				try {
