@@ -84,9 +84,10 @@ public class ApiKeyRepository extends UserRepoRepository<ApiKeyItem> {
 		if (openAccess)
 			return true;
 		
-		// if supplied key is null we deny access
+		// if supplied key is null we need to check if for this domain 
+		// or path open_access is not set
 		if (key == null)
-			return false;
+			key = "open_access";
 				
 		ApiKeyItem item = getItem(key);
 		

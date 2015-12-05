@@ -22,6 +22,7 @@
 package tigase.http.rest;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
@@ -121,7 +122,20 @@ public class ApiKeyItem extends RepositoryItemAbstract {
 	
 	@Override
 	public void initFromPropertyString(String propString) {
-		key = propString;
+		String[] props = propString.split(":");
+		key = props[0];
+		for (String prop : props) {
+			if (prop.startsWith("domain")) {
+				String[] v = prop.split("=");
+				if (!v[1].isEmpty())
+					this.domains.addAll(Arrays.asList(v[1].split(";")));
+			}
+			if (prop.startsWith("regex")) {
+				String[] v = prop.split("=");
+				if (!v[1].isEmpty())
+					Arrays.asList(v[1].split(";")).forEach(regex -> regexs.add(Pattern.compile(regex)));
+			}
+		}
 	}
 
 	@Override
@@ -142,6 +156,30 @@ public class ApiKeyItem extends RepositoryItemAbstract {
 	public String toPropertyString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(key);
+		if (!this.domains.isEmpty()) {
+			sb.append(":domain=");
+			boolean first = true;
+			for (String domain : domains) {
+				if (!first) {
+					sb.append(";");
+				} else {
+					first = false;
+				}
+				sb.append(domain);
+			}
+		}
+		if (!this.regexs.isEmpty()) {
+			sb.append(":regex=");
+			boolean first = true;
+			for (Pattern regex : regexs) {
+				if (!first) {
+					sb.append(";");
+				} else {
+					first = false;
+				}
+				sb.append(regex.pattern());
+			}
+		}
 		return sb.toString();
 	}
 	
