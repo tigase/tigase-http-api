@@ -35,6 +35,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
@@ -186,7 +187,7 @@ public class DummyServletRequest implements HttpServletRequest {
 
 	@Override
 	public Enumeration<String> getParameterNames() {
-		return null;
+		return new IteratorEnumerator(params.keySet().iterator());
 	}
 
 	@Override
@@ -539,4 +540,23 @@ public class DummyServletRequest implements HttpServletRequest {
 		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 	}
 	
+	private class IteratorEnumerator<T,K extends Iterator<T>> implements Enumeration<T> {
+		
+		private final Iterator<T> iter;
+		
+		public IteratorEnumerator(Iterator<T> iter) {
+			this.iter = iter;
+		}
+
+		@Override
+		public boolean hasMoreElements() {
+			return iter.hasNext();
+		}
+
+		@Override
+		public T nextElement() {
+			return iter.next();
+		}
+		
+	}
 }

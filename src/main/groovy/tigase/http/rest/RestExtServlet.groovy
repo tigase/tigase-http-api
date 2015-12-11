@@ -63,10 +63,14 @@ class RestExtServlet extends RestServlet {
 					try {
 						String methodStr = method.toLowerCase().capitalize();
 						if (handler."exec${methodStr}" == null)
-						return;
+							return;
 						File templateFile = new File(name + methodStr + ".html", scriptsDir);
-						if (!templateFile.exists()) 
-						return;
+						if (!templateFile.exists()) {
+							// in case we need one template file for every action
+							templateFile = new File(name + ".html", scriptsDir);
+							if (!templateFile.exists())
+								return;
+						}
 						
 						templates[method] = templateEngine.createTemplate(templateFile.getText());
 					} catch (Exception ex) {
@@ -138,7 +142,9 @@ class RestExtServlet extends RestServlet {
 				map.putAll(templateParams);
 				if (params != null) map.putAll(params);
 				return temp.make(map);
-			}				
+			}, getFile: { name ->
+				return new File(scriptsDir, name);
+			}
 		];
 		templateParams = [request:request, response:response, result:result, util:util];
 		Writable writable = template.make(templateParams);
