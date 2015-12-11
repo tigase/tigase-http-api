@@ -84,7 +84,7 @@ public class HttpServer {
 			try {
 				server.start();
 			} catch (Exception ex) {
-				Logger.getLogger(HttpServer.class.getName()).log(Level.SEVERE, null, ex);
+				Logger.getLogger(HttpServer.class.getName()).log(Level.SEVERE, "start of HTTP server failed", ex);
 			}
 		}	
 	}

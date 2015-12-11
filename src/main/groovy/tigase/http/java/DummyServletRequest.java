@@ -85,7 +85,7 @@ public class DummyServletRequest implements HttpServletRequest {
 				try {
 					params.put(URLDecoder.decode(val[0], "UTF-8"), val.length == 1 ? "" : URLDecoder.decode(val[1], "UTF-8"));
 				} catch (UnsupportedEncodingException ex) {
-					Logger.getLogger(DummyServletRequest.class.getName()).log(Level.SEVERE, null, ex);
+					Logger.getLogger(DummyServletRequest.class.getName()).log(Level.FINE, "could not decode URLEncoded paramters", ex);
 				}
 			}
 		}
@@ -392,12 +392,8 @@ public class DummyServletRequest implements HttpServletRequest {
 							}
 						};						
 					}
-				} catch (TigaseStringprepException ex) {
-					Logger.getLogger(DummyServletRequest.class.getName()).log(Level.SEVERE, null, ex);
-				} catch (TigaseDBException ex) {
-					Logger.getLogger(DummyServletRequest.class.getName()).log(Level.SEVERE, null, ex);
-				} catch (AuthorizationException ex) {
-					Logger.getLogger(DummyServletRequest.class.getName()).log(Level.SEVERE, null, ex);
+				} catch (TigaseStringprepException|TigaseDBException|AuthorizationException ex) {
+					Logger.getLogger(DummyServletRequest.class.getName()).log(Level.FINE, "could not authorize user", ex);
 				}
 			}
 		}
@@ -425,7 +421,7 @@ public class DummyServletRequest implements HttpServletRequest {
 		try {
 			buf.append(exchange.getRequestURI().toURL().toExternalForm());
 		} catch (MalformedURLException ex) {
-			Logger.getLogger(DummyServletRequest.class.getName()).log(Level.SEVERE, null, ex);
+			Logger.getLogger(DummyServletRequest.class.getName()).log(Level.FINE, "could not read request URL", ex);
 		}
 		return buf;
 	}

@@ -158,7 +158,7 @@ public class DummyServletResponse implements HttpServletResponse {
 		try {
 			return URLEncoder.encode(string, "UTF-8");
 		} catch (UnsupportedEncodingException ex) {
-			Logger.getLogger(DummyServletResponse.class.getName()).log(Level.SEVERE, null, ex);
+			Logger.getLogger(DummyServletResponse.class.getName()).log(Level.FINE, "could not URLEncode string: " + string, ex);
 		}
 		return null;
 	}
@@ -168,7 +168,7 @@ public class DummyServletResponse implements HttpServletResponse {
 		try {
 			return URLEncoder.encode(string, "UTF-8");
 		} catch (UnsupportedEncodingException ex) {
-			Logger.getLogger(DummyServletResponse.class.getName()).log(Level.SEVERE, null, ex);
+			Logger.getLogger(DummyServletResponse.class.getName()).log(Level.FINE, "could not URLEncode string: " + string, ex);
 		}
 		return null;
 	}
@@ -178,7 +178,7 @@ public class DummyServletResponse implements HttpServletResponse {
 		try {
 			return URLEncoder.encode(string, "UTF-8");
 		} catch (UnsupportedEncodingException ex) {
-			Logger.getLogger(DummyServletResponse.class.getName()).log(Level.SEVERE, null, ex);
+			Logger.getLogger(DummyServletResponse.class.getName()).log(Level.FINE, "could not URLEncode string: " + string, ex);
 		}
 		return null;
 	}
@@ -188,7 +188,7 @@ public class DummyServletResponse implements HttpServletResponse {
 		try {
 			return URLEncoder.encode(string, "UTF-8");
 		} catch (UnsupportedEncodingException ex) {
-			Logger.getLogger(DummyServletResponse.class.getName()).log(Level.SEVERE, null, ex);
+			Logger.getLogger(DummyServletResponse.class.getName()).log(Level.FINE, "could not URLEncode string: " + string, ex);
 		}
 		return null;
 	}
@@ -247,7 +247,7 @@ public class DummyServletResponse implements HttpServletResponse {
 		try {
 			exchange.sendResponseHeaders(i, 0);
 		} catch (IOException ex) {
-			Logger.getLogger(DummyServletResponse.class.getName()).log(Level.SEVERE, null, ex);
+			Logger.getLogger(DummyServletResponse.class.getName()).log(Level.FINE, null, ex);
 		}
 	}
 
@@ -256,7 +256,7 @@ public class DummyServletResponse implements HttpServletResponse {
 		try {
 			exchange.sendResponseHeaders(i, 0);
 		} catch (IOException ex) {
-			Logger.getLogger(DummyServletResponse.class.getName()).log(Level.SEVERE, null, ex);
+			Logger.getLogger(DummyServletResponse.class.getName()).log(Level.FINE, null, ex);
 		}
 	}
 

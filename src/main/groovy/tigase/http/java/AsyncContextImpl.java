@@ -82,7 +82,7 @@ public class AsyncContextImpl implements AsyncContext {
 			resp.flushBuffer();
 			exchange.getResponseBody().close();
 		} catch (IOException ex) {
-			Logger.getLogger(AsyncContextImpl.class.getName()).log(Level.SEVERE, null, ex);
+			Logger.getLogger(AsyncContextImpl.class.getName()).log(Level.FINE, null, ex);
 		}
 	}
 

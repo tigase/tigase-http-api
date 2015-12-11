@@ -79,7 +79,7 @@ public class RequestHandler implements HttpHandler {
 							he.getResponseBody().close();
 						}
 					} catch (ServletException ex) {
-						Logger.getLogger(RequestHandler.class.getName()).log(Level.SEVERE, null, ex);
+						Logger.getLogger(RequestHandler.class.getName()).log(Level.FINE, null, ex);
 					}
 				}
 				break;
@@ -96,7 +96,7 @@ public class RequestHandler implements HttpHandler {
 				servlets.put(contextPath + mapping.replace("/*", "/"), servlet);
 			}
 		} catch (Exception ex) {
-			Logger.getLogger(RequestHandler.class.getName()).log(Level.SEVERE, null, ex);
+			Logger.getLogger(RequestHandler.class.getName()).log(Level.WARNING, null, ex);
 		}
 	}
 	
