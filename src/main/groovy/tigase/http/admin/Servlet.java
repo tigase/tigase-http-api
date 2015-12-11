@@ -163,7 +163,7 @@ public class Servlet extends HttpServlet {
 			int iteration = model.containsKey("iteration") ? (Integer) model.get("iteration") : 1;
 			if (formType1 == Command.DataType.form && ((requestHasValuesForFields(formFields1, request) && (iteration < 10)) || (iteration == 1 && "POST".equals(request.getMethod())))) {
 				setFieldValuesFromRequest(formFields1, request);
-				model.put("iteration", iteration++);
+				model.put("iteration", ++iteration);
 				try {
 					processRequestStep(request, asyncCtx, model, jid, node, formFields1);
 				} catch (TigaseStringprepException ex) {
