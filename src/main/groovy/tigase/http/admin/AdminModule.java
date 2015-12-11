@@ -93,7 +93,7 @@ public class AdminModule extends AbstractModule {
 					.addInitParam(Servlet.SCRIPTS_DIR_KEY, scriptsDirFile.getCanonicalPath())
 					.addMapping("/*");
 		} catch (IOException ex) {
-			Logger.getLogger(AdminModule.class.getName()).log(Level.SEVERE, null, ex);
+			Logger.getLogger(AdminModule.class.getName()).log(Level.WARNING, null, ex);
 		}
 		httpDeployment.addServlets(servletInfo);
 //		if (scriptDirFiles != null) {

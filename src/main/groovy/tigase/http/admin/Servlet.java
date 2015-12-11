@@ -84,7 +84,7 @@ public class Servlet extends HttpServlet {
             processRequest(request, response);
         }
         catch (Exception ex) {
-            log.log(Level.SEVERE, "exception processing request", ex);
+            log.log(Level.FINE, "exception processing request", ex);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
@@ -153,7 +153,7 @@ public class Servlet extends HttpServlet {
 					generateResult(asyncCtx, model);
 				}
 			} catch (Exception ex) {
-				log.log(Level.SEVERE, "exception processing HTTP request", ex);
+				log.log(Level.FINE, "exception processing HTTP request", ex);
 			}
 		});
 	}	
@@ -167,14 +167,14 @@ public class Servlet extends HttpServlet {
 				try {
 					processRequestStep(request, asyncCtx, model, jid, node, formFields1);
 				} catch (TigaseStringprepException ex) {
-					log.log(Level.SEVERE, "exception processing HTTP request", ex);
+					log.log(Level.FINE, "exception processing HTTP request", ex);
 				}
 			} else {
 				model.put("formFields", formFields1);
 				try {
 					generateResult(asyncCtx, model);
 				} catch (Exception ex) {
-					log.log(Level.SEVERE, "exception processing HTTP request", ex);
+					log.log(Level.FINE, "exception processing HTTP request", ex);
 				}
 			}
 		});
@@ -250,7 +250,7 @@ public class Servlet extends HttpServlet {
 							callback.call(commands);
 						}
 					});	} catch (TigaseStringprepException ex) {
-					Logger.getLogger(Servlet.class.getName()).log(Level.SEVERE, null, ex);
+					Logger.getLogger(Servlet.class.getName()).log(Level.FINE, null, ex);
 				}
 			});
 		});		
