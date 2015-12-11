@@ -96,7 +96,7 @@ public class RestServlet extends HttpServlet {
             processRequest(request, response);
         }
         catch (Exception ex) {
-            log.log(Level.SEVERE, "exception processing request", ex);
+            log.log(Level.FINE, "exception processing request", ex);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }

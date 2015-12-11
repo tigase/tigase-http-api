@@ -184,8 +184,7 @@ class RestExtServlet extends RestServlet {
 			}	
 			super.processRequest(request, response);
 		} catch (Exception ex) {
-			log.log(Level.SEVERE, "exception processing HTTP request", ex);
-			ex.printStackTrace();
+			log.log(Level.FINE, "exception processing HTTP request", ex);
 		}
 	}
 }
