@@ -273,7 +273,7 @@ public class HttpMessageReceiver extends AbstractMessageReceiver implements Pack
 				// we can only process response we are waiting for so return error if packet is not expected
 				addOutPacket(Authorization.FEATURE_NOT_IMPLEMENTED.getResponseMessage(packet, null, false));
 			} catch (PacketErrorTypeException ex) {
-				log.log(Level.SEVERE, "packet processing type error", ex);
+				log.log(Level.FINEST, "packet processing type error", ex);
 			}
 		}		
 	}
