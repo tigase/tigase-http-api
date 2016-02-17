@@ -1,4 +1,4 @@
-${ util.include('header', [title: tigase.util.DNSResolver.getDefaultHostname() + ' statistics', 
+${ util.include('header', [title: tigase.util.DNSResolverFactory.getInstance().getDefaultHost() + ' statistics', 
     imports: [
 	[ type: 'css', content:'.chart-bar-legend { display: block; } .chart-bar-legend > li { width: 100; display: block; padding: 2px; }' ]
     ]]) }

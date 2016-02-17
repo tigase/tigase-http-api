@@ -26,7 +26,7 @@ import tigase.server.Command
 import tigase.server.Iq
 import tigase.server.Packet
 import tigase.util.Base64
-import tigase.util.DNSResolver
+import tigase.util.DNSResolverFactory
 import tigase.xml.Element
 import tigase.xmpp.BareJID
 import tigase.xmpp.JID
@@ -61,7 +61,7 @@ Example partial response:
          * Handles GET request and returns list of available ad-hoc commands
          */
         execGet = { Service service, callback, user ->
-			def domain = DNSResolver.getDefaultHostname();
+			def domain = DNSResolverFactory.getInstance().getDefaultHost();
 			
 			Element iq = new Element("iq");
             iq.setAttribute("to", "stats@$domain");
@@ -89,7 +89,7 @@ Example partial response:
 	}
 		def retrieveStats = { service, user, items, allResults, callback ->
 			items.each { ditem ->
-				def domain = DNSResolver.getDefaultHostname();
+				def domain = DNSResolverFactory.getInstance().getDefaultHost();
 				def compName = ditem.getAttribute("node");
 				def node = "stats/" + compName;
 			

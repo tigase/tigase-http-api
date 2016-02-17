@@ -1,8 +1,8 @@
 <%  
     def tmp = [
 		configType:'--gen-config-def',
-		virtualDomains: tigase.util.DNSResolver.getDefaultHostname(),
-		admins: 'admin@' + tigase.util.DNSResolver.getDefaultHostname(),
+		virtualDomains: tigase.util.DNSResolverFactory.getInstance().getDefaultHost(),
+		admins: 'admin@' + tigase.util.DNSResolverFactory.getInstance().getDefaultHost(),
 		adminPwd: 'tigase',
 		dbType: 'Derby',
 		advancedConfig : false

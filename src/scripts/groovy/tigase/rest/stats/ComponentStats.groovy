@@ -26,7 +26,7 @@ import tigase.server.Command
 import tigase.server.Iq
 import tigase.server.Packet
 import tigase.util.Base64
-import tigase.util.DNSResolver
+import tigase.util.DNSResolverFactory
 import tigase.xml.Element
 import tigase.xmpp.BareJID
 import tigase.xmpp.JID
@@ -62,7 +62,7 @@ Example partial response for sess-man component:
          */
         execGet = { Service service, callback, user, compName ->
 
-			String domain = DNSResolver.getDefaultHostname();
+			String domain = DNSResolverFactory.getInstance().getDefaultHost();
 			String node = "stats/" + compName;
 			
             Element iq = new Element("iq");
