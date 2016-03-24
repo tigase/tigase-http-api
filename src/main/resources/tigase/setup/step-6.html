@@ -28,7 +28,7 @@
 		plugins:defPlugins
 	] + config;
     def title = 'Plugins selection'
-    
+
 	tmp.each { k,v ->
 		if (request.getParameter(k)) {
 			Object old = tmp[k];
@@ -38,6 +38,8 @@
 			else {
 				tmp[k] = request.getParameter(k);
 			}
+		} else if ((k.endsWith("Component") || k.equals("clusterMode")) && (tmp[k] instanceof Boolean)) {
+			tmp[k] = false;
 		}
 	}
 	config.clear();
@@ -50,8 +52,26 @@
 			config.plugins.add(dp);
 		}
  	}
+	def depErrors = [];
+	[
+		[ id: "acsComponent", name: "Tigase Advanced Clustering Strategy (ACS) Component", dependencies:["clusterMode"] ],
+		[ id: "acsPubSubComponent", name: "PubSub ACS", dependencies: ["acsComponent"] ],
+		[ id: "acsMUCComponent", name: "MUC ACS", dependencies:["acsComponent"] ]
+	].each { item ->
+		if (config[item.id]) {
+			item.dependencies.each { dep ->
+				if (!config[dep]) {
+					config[item.id] = false;
+					depErrors.add(item.name);
+				}
+			}
+		}
+	}
 %>
 ${ util.include('header', [title:'Setup: ' + title]) }
+<% if (!depErrors.isEmpty()) { %>
+<h3 style="color: red;">Warning: Following components were deselected as Tigase Advanced Clustering Strategy (ACS) Component or cluster mode are disabled: ${ depErrors.toString().replace("[","").replace("]","") }</h3>
+<% } %>
 <h3>Please selected/deselect plugins to be loaded by the server.</h3>
 <form method='GET' >
 <input type='hidden' name='step' value='${Integer.parseInt(currentStep)+1}'/>

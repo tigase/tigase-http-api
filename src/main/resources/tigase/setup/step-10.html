@@ -111,6 +111,7 @@ config-type=${config.configType}
 		plugins += (it.value ? '+' : '-') + it.key.replace(':', '\\:');
 	} 
 %>
+<% if (config.acsComponent) { %>--sm-cluster-strategy-class=tigase.server.cluster.strategy.OnlineUsersCachingStrategy<% } %>
 --sm-plugins=${plugins}
 <% def ci = 1;
    components.each {
