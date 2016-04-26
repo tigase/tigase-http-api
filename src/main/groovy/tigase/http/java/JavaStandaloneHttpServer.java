@@ -24,28 +24,20 @@ package tigase.http.java;
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsServer;
+import tigase.http.DeploymentInfo;
+import tigase.http.api.HttpServerIfc;
+import tigase.io.TLSUtil;
+import tigase.net.SocketType;
+
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.net.ssl.SSLContext;
-import tigase.http.DeploymentInfo;
-import tigase.http.api.HttpServerIfc;
-import tigase.io.TLSUtil;
-import tigase.net.SocketType;
 
 /**
  * Basic implementation of HTTP server based on HttpServer implementation 
@@ -192,7 +184,7 @@ public class JavaStandaloneHttpServer implements HttpServerIfc {
 					TimerTask tt = new TimerTask() {
 						@Override
 						public void run() {
-							System.out.println("request processing time exceeded!");
+							log.log(Level.WARNING, "request processing time exceeded!");
 							current.interrupt();
 						}
 					};
