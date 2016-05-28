@@ -23,25 +23,20 @@ package tigase.http.java;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import tigase.http.DeploymentInfo;
+import tigase.http.ServletInfo;
+import tigase.http.api.Service;
+
 import javax.servlet.AsyncContext;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
-import tigase.http.DeploymentInfo;
-import tigase.http.ServletInfo;
-import tigase.http.api.Service;
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -60,7 +55,9 @@ public class RequestHandler implements HttpHandler {
 		public int compare(String o1, String o2) {
 			int val1 = o1.length() - o1.replace("/", "").length(); // 3
 			int val2 = o2.length() - o2.replace("/", "").length(); // 5
-			return val2 - val1;
+			if (val2 != val1)
+				return val2 - val1;
+			return Integer.compare(o2.length(), o1.length());
 		}
 	};
 	
@@ -83,9 +80,19 @@ public class RequestHandler implements HttpHandler {
 				HttpServlet servlet = servlets.get(key);
 				if (servlet != null) {
 					try {
-						String servletPath = key.substring(contextPath.length(), key.length()-1);
+						String servletPath = key.substring(contextPath.length(), key.length());
+						if (servletPath.isEmpty())
+							servletPath = "/";
 						DummyServletRequest req = new DummyServletRequest(he, contextPath, servletPath, service);
-						DummyServletResponse resp = new DummyServletResponse(he); 
+						DummyServletResponse resp = new DummyServletResponse(he);
+						if (key.endsWith(path)) {
+							String query = req.getQueryString();
+							if (query == null || query.isEmpty())
+								resp.sendRedirect(req.getRequestURI() + "/");
+							else
+								resp.sendRedirect(req.getRequestURI() + "/?" + query);
+							return;
+						}
 						servlet.service(req, resp);
 						AsyncContext async = req.getAsyncContext();
 						if (async == null) {
@@ -107,7 +114,13 @@ public class RequestHandler implements HttpHandler {
 			ServletConfig cfg = new ServletCfg(info.getInitParams());
 			servlet.init(cfg);
 			for (String mapping : info.getMappings()) {
-				servlets.put(contextPath + mapping.replace("/*", "/"), servlet);
+				if (mapping.endsWith("/"))
+					mapping = mapping.substring(0, mapping.length()-1);
+//				if ("/".equals(contextPath)) {
+//					servlets.put(mapping.replace("/*", ""), servlet);
+//				} else {
+				servlets.put(contextPath + mapping.replace("/*", ""), servlet);
+//				}
 			}
 		} catch (Exception ex) {
 			Logger.getLogger(RequestHandler.class.getName()).log(Level.WARNING, null, ex);
