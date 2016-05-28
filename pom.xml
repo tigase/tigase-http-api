@@ -259,7 +259,7 @@
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>
-			<version>9.2.1.v20140609</version>
+			<version>9.3.9.v20160517</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
@@ -277,9 +277,20 @@
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-servlet</artifactId>
-			<version>9.2.1.v20140609</version>
+			<version>9.3.9.v20160517</version>
 			<scope>compile</scope>
 		</dependency>
+<!--		<dependency>
+			<groupId>org.eclipse.jetty.http2</groupId>
+			<artifactId>http2-server</artifactId>
+			<version>9.3.9.v20160517</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-alpn-server</artifactId>
+			<version>9.3.9.v20160517</version>
+		</dependency> -->
 	</dependencies>
 
 	<repositories>

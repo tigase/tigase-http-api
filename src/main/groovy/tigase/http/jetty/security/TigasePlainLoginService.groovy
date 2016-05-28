@@ -27,11 +27,11 @@ import org.eclipse.jetty.security.LoginService
 import org.eclipse.jetty.security.MappedLoginService
 import org.eclipse.jetty.server.UserIdentity
 import org.eclipse.jetty.util.security.Password
-import tigase.http.HttpServer
 import tigase.http.api.Service
 import tigase.xmpp.BareJID
 
 import javax.security.auth.Subject
+import javax.servlet.ServletRequest
 import java.security.Principal
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -54,7 +54,7 @@ public class TigasePlainLoginService implements LoginService {
     }
 
     @Override
-    UserIdentity login(String s, Object o) {
+    UserIdentity login(String s, Object o, ServletRequest request) {
         String cred = null;
         if (o instanceof String) cred = (String) o;
         if (o instanceof Password) cred = ((Password) o).toString();

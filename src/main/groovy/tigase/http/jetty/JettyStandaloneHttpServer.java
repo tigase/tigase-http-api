@@ -19,25 +19,19 @@
 
 package tigase.http.jetty;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.net.ssl.SSLContext;
-import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
-import static tigase.http.api.HttpServerIfc.DEF_HTTP_PORT_VAL;
-import static tigase.http.api.HttpServerIfc.HTTP_PORTS_KEY;
-import static tigase.http.api.HttpServerIfc.HTTP_PORT_KEY;
-import static tigase.http.api.HttpServerIfc.PORT_DOMAIN_KEY;
-import static tigase.http.api.HttpServerIfc.PORT_SOCKET_KEY;
-import tigase.io.SSLContextContainerIfc;
 import tigase.io.TLSUtil;
 import tigase.net.SocketType;
+
+import javax.net.ssl.SSLContext;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This implementation embeds Jetty HTTP Server by starting separate instance
@@ -83,15 +77,45 @@ public class JettyStandaloneHttpServer extends AbstractJettyHttpServer {
 			server = new Server();
 			for (int port : ports) {
 				Map<String,Object> config = portsConfigs.get(String.valueOf(port));
+				if (config == null) {
+					config = new HashMap<>();
+				}
+//				boolean http2Enabled = (Boolean) config.getOrDefault(HTTP2_ENABLED_KEY, true);
 				ServerConnector connector = null;
-				if (config == null || ((SocketType) config.get(PORT_SOCKET_KEY)) == SocketType.plain) {
-					connector = new ServerConnector(server);
+				if (((SocketType) config.getOrDefault(PORT_SOCKET_KEY, SocketType.plain)) == SocketType.plain) {
+//					if (http2Enabled) {
+//						HttpConfiguration httpConfig = new HttpConfiguration();
+//						HttpConnectionFactory http1 = new HttpConnectionFactory(httpConfig);
+//						HTTP2CServerConnectionFactory http2 = new HTTP2CServerConnectionFactory(httpConfig);
+//						connector = new ServerConnector(server, http1, http2);
+//					} else {
+						connector = new ServerConnector(server);
+//					}
 				} else {
 					String domain = (String) config.get(PORT_DOMAIN_KEY);
 					SSLContext context = TLSUtil.getSSLContext("TLS", domain);
 					SslContextFactory contextFactory = new SslContextFactory();
 					contextFactory.setSslContext(context);
-					connector = new ServerConnector(server, contextFactory);
+//					if (http2Enabled) {
+//						contextFactory.setCipherComparator(HTTP2Cipher.COMPARATOR);
+//						contextFactory.setUseCipherSuitesOrder(true);
+//
+//						HttpConfiguration httpConfig = new HttpConfiguration();
+//						httpConfig.setSecureScheme("https");
+//						httpConfig.setSecurePort(port);
+//						httpConfig.setSendXPoweredBy(true);
+//						httpConfig.setSendServerVersion(true);
+//
+//						HttpConnectionFactory http1 = new HttpConnectionFactory(httpConfig);
+//						HTTP2ServerConnectionFactory http2 = new HTTP2ServerConnectionFactory(httpConfig);
+//
+//						NegotiatingServerConnectionFactory.checkProtocolNegotiationAvailable();
+//						ALPNServerConnectionFactory alpn = new ALPNServerConnectionFactory();
+//						alpn.setDefaultProtocol(http1.getProtocol())
+//						connector = new ServerConnector(server, contextFactory, alpn, http1, http2);
+//					} else {
+						connector = new ServerConnector(server, contextFactory);
+//					}
 				}
 				connector.setPort(port);
 				server.addConnector(connector);				
