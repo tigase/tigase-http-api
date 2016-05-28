@@ -21,17 +21,6 @@
  */
 package tigase.http.rest;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import tigase.http.AbstractModule;
 import tigase.http.DeploymentInfo;
 import tigase.http.HttpServer;
@@ -40,6 +29,17 @@ import tigase.http.util.StaticFileServlet;
 import tigase.stats.StatisticHolder;
 import tigase.stats.StatisticHolderImpl;
 import tigase.stats.StatisticsList;
+
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class RestModule extends AbstractModule {
 	
@@ -102,7 +102,8 @@ public class RestModule extends AbstractModule {
 
 		super.start();
 		httpDeployment = HttpServer.deployment().setClassLoader(this.getClass().getClassLoader())
-				.setContextPath(contextPath).setService(new tigase.http.ServiceImpl(this));
+				.setContextPath(contextPath).setService(new tigase.http.ServiceImpl(this)).setDeploymentName("REST API")
+				.setDeploymentDescription(getDescription());
 		if (vhosts != null) {
 			httpDeployment.setVHosts(vhosts);
 		}

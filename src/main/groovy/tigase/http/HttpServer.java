@@ -21,22 +21,24 @@
  */
 package tigase.http;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.servlet.http.HttpServlet;
 import tigase.conf.ConfigurationException;
 import tigase.http.api.HttpServerIfc;
 import tigase.http.java.JavaStandaloneHttpServer;
 import tigase.osgi.ModulesManagerImpl;
 import tigase.server.XMPPServer;
 
+import javax.servlet.http.HttpServlet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public class HttpServer {
 	
 	private static final Logger log = Logger.getLogger(HttpServer.class.getCanonicalName());
-	
+
 	/**
 	 * Existing HTTP server implementations:
 	 * 
@@ -47,6 +49,7 @@ public class HttpServer {
 	private static final String DEF_HTTP_SERVER_CLASS_VAL = JavaStandaloneHttpServer.class.getCanonicalName();
 	private static final String HTTP_SERVER_CLASS_KEY = "server-class";
 
+	private CopyOnWriteArrayList<DeploymentInfo> deployed = new CopyOnWriteArrayList<>();
 	private String serverClass = DEF_HTTP_SERVER_CLASS_VAL;
 	private HttpServerIfc server = null;
 	
@@ -97,12 +100,18 @@ public class HttpServer {
 
 	public void deploy(DeploymentInfo deployment) {
 		server.deploy(deployment);
+		deployed.add(deployment);
 	}
 	
 	public void undeploy(DeploymentInfo deployment) {
+		deployed.remove(deployment);
 		server.undeploy(deployment);
 	}
-	
+
+	public List<DeploymentInfo> listDeployed() {
+		return deployed;
+	}
+
 	public static DeploymentInfo deployment() {
 		return new DeploymentInfo();
 	}

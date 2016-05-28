@@ -21,20 +21,18 @@
  */
 package tigase.http.admin;
 
+import tigase.http.AbstractModule;
+import tigase.http.DeploymentInfo;
+import tigase.http.HttpServer;
+import tigase.http.ServletInfo;
+import tigase.http.util.StaticFileServlet;
+
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import tigase.http.AbstractModule;
-import tigase.http.DeploymentInfo;
-import tigase.http.HttpServer;
-import static tigase.http.Module.HTTP_CONTEXT_PATH_KEY;
-import static tigase.http.Module.HTTP_SERVER_KEY;
-import static tigase.http.Module.VHOSTS_KEY;
-import tigase.http.ServletInfo;
-import tigase.http.util.StaticFileServlet;
 
 /**
  *
@@ -75,7 +73,8 @@ public class AdminModule extends AbstractModule {
 
 		super.start();
 		httpDeployment = HttpServer.deployment().setClassLoader(this.getClass().getClassLoader())
-				.setContextPath(contextPath).setService(new tigase.http.ServiceImpl(this));
+				.setContextPath(contextPath).setService(new tigase.http.ServiceImpl(this)).setDeploymentName("Admin console")
+				.setDeploymentDescription(getDescription());
 		if (vhosts != null) {
 			httpDeployment.setVHosts(vhosts);
 		}

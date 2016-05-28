@@ -21,20 +21,14 @@
  */
 package tigase.http.server;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.io.IOException;
-import java.util.Map;
-import java.util.logging.Level;
 import tigase.http.AbstractModule;
 import tigase.http.DeploymentInfo;
 import tigase.http.HttpServer;
-import static tigase.http.Module.HTTP_CONTEXT_PATH_KEY;
-import static tigase.http.Module.HTTP_SERVER_KEY;
-import static tigase.http.Module.VHOSTS_KEY;
 import tigase.http.ServletInfo;
-import tigase.http.ServiceImpl;
 import tigase.http.util.StaticFileServlet;
+
+import java.io.File;
+import java.util.Map;
 
 /**
  *
@@ -66,7 +60,7 @@ public class ServerInfoModule extends AbstractModule {
 
 		super.start();
 		httpDeployment = HttpServer.deployment().setClassLoader(this.getClass().getClassLoader())
-				.setContextPath(contextPath);
+				.setContextPath(contextPath).setDeploymentName("Server").setDeploymentDescription(getDescription());
 		if (vhosts != null) {
 			httpDeployment.setVHosts(vhosts);
 		}

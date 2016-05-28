@@ -18,13 +18,13 @@
  */
 package tigase.http;
 
+import tigase.http.api.Service;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
-import tigase.http.api.Service;
 
 /**
  *
@@ -37,6 +37,7 @@ public class DeploymentInfo {
 	private ClassLoader classLoader = null;
 	private String contextPath = null;
 	private String name;
+	private String description = null;
 	private String[] vhosts = null;
 	private final ArrayList<ServletInfo> servlets = new ArrayList<ServletInfo>();
 	
@@ -60,6 +61,15 @@ public class DeploymentInfo {
 	
 	public DeploymentInfo setContextPath(String contextPath) {
 		this.contextPath = contextPath;
+		return this;
+	}
+
+	public String getDeploymentDescription() {
+		return description;
+	}
+
+	public DeploymentInfo setDeploymentDescription(String description) {
+		this.description = description;
 		return this;
 	}
 

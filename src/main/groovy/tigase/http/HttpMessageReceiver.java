@@ -21,19 +21,6 @@
  */
 package tigase.http;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import tigase.conf.ConfigurationException;
 import tigase.db.AuthRepository;
 import tigase.db.RepositoryFactory;
@@ -42,8 +29,8 @@ import tigase.http.admin.AdminModule;
 import tigase.http.dnswebservice.DnsWebServiceModule;
 import tigase.http.rest.ApiKeyRepository;
 import tigase.http.rest.RestModule;
-import tigase.http.setup.SetupModule;
 import tigase.http.server.ServerInfoModule;
+import tigase.http.setup.SetupModule;
 import tigase.http.ui.WebModule;
 import tigase.server.AbstractMessageReceiver;
 import tigase.server.Packet;
@@ -55,6 +42,11 @@ import tigase.xmpp.JID;
 import tigase.xmpp.PacketErrorTypeException;
 import tigase.xmpp.StanzaType;
 
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public class HttpMessageReceiver extends AbstractMessageReceiver implements PacketWriter {
 
 	private static final Logger log = Logger.getLogger(HttpMessageReceiver.class.getCanonicalName());
@@ -64,7 +56,7 @@ public class HttpMessageReceiver extends AbstractMessageReceiver implements Pack
 
 	private Map<String,Module> modules = new ConcurrentHashMap<String,Module>();
 	private static final Class[] ALL_MODULES = { RestModule.class, DnsWebServiceModule.class, 
-		ServerInfoModule.class, SetupModule.class, WebModule.class, AdminModule.class };
+		ServerInfoModule.class, SetupModule.class, WebModule.class, AdminModule.class, IndexModule.class };
 	
 	private HttpServer httpServer = new HttpServer();
 	

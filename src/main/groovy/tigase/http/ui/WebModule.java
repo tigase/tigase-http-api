@@ -21,17 +21,16 @@
  */
 package tigase.http.ui;
 
+import tigase.http.AbstractModule;
+import tigase.http.DeploymentInfo;
+import tigase.http.HttpServer;
+
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import tigase.http.AbstractModule;
-import tigase.http.DeploymentInfo;
-import tigase.http.HttpServer;
-import static tigase.http.Module.HTTP_CONTEXT_PATH_KEY;
-import static tigase.http.Module.HTTP_SERVER_KEY;
-import static tigase.http.Module.VHOSTS_KEY;
+
 import static tigase.http.ui.WarServlet.WAR_PATH_KEY;
 
 /**
@@ -106,7 +105,8 @@ public class WebModule extends AbstractModule {
 			deployment = HttpServer.deployment()
 					.setClassLoader(this.getClass().getClassLoader())
 					.setContextPath(contextPath)
-					.setDeploymentName("UI")
+					.setDeploymentName("User interface")
+					.setDeploymentDescription(getDescription())
 					.addServlets(HttpServer.servlet("WarServlet", WarServlet.class).addMapping("/*")
 							.addInitParam(WAR_PATH_KEY, warPath));
 			if (vhosts != null) {

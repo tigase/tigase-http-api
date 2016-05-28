@@ -21,28 +21,16 @@
  */
 package tigase.http.setup;
 
-import groovy.lang.Closure;
-import java.io.File;
-import java.io.FileFilter;
-import java.io.IOException;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import tigase.db.AuthRepository;
-import tigase.db.UserRepository;
 import tigase.http.AbstractModule;
 import tigase.http.DeploymentInfo;
 import tigase.http.HttpServer;
-import static tigase.http.Module.HTTP_CONTEXT_PATH_KEY;
-import static tigase.http.Module.HTTP_SERVER_KEY;
-import static tigase.http.Module.VHOSTS_KEY;
 import tigase.http.ServletInfo;
 import tigase.http.api.Service;
-import tigase.http.rest.RestModule;
-import tigase.server.Packet;
-import tigase.xmpp.BareJID;
+
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
 
 /**
  *
@@ -89,7 +77,7 @@ public class SetupModule extends AbstractModule {
 		service = new tigase.http.ServiceImpl(this);
 		modules.put(uuid, this);
 		httpDeployment = HttpServer.deployment().setClassLoader(this.getClass().getClassLoader())
-				.setContextPath(contextPath).setService(service);
+				.setContextPath(contextPath).setService(service).setDeploymentName("Setup").setDeploymentDescription(getDescription());
 		if (vhosts != null) {
 			httpDeployment.setVHosts(vhosts);
 		}
