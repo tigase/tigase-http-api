@@ -85,7 +85,7 @@ public class RequestHandler implements HttpHandler {
 							servletPath = "/";
 						DummyServletRequest req = new DummyServletRequest(he, contextPath, servletPath, service);
 						DummyServletResponse resp = new DummyServletResponse(he);
-						if (key.endsWith(path)) {
+						if (key.endsWith(path) && !key.equals("/")) {
 							String query = req.getQueryString();
 							if (query == null || query.isEmpty())
 								resp.sendRedirect(req.getRequestURI() + "/");
