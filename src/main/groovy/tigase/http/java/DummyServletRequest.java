@@ -23,44 +23,25 @@
 package tigase.http.java;
 
 import com.sun.net.httpserver.HttpExchange;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URLDecoder;
-import java.security.Principal;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.servlet.AsyncContext;
-import javax.servlet.DispatcherType;
-import javax.servlet.ReadListener;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletInputStream;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.HttpUpgradeHandler;
-import javax.servlet.http.Part;
 import tigase.db.AuthorizationException;
 import tigase.db.TigaseDBException;
 import tigase.http.api.Service;
 import tigase.util.Base64;
 import tigase.util.TigaseStringprepException;
 import tigase.xmpp.BareJID;
+
+import javax.servlet.*;
+import javax.servlet.http.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URLDecoder;
+import java.security.Principal;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -416,7 +397,7 @@ public class DummyServletRequest implements HttpServletRequest {
 				String user = authStr.substring(0, idx);
 				String pass = authStr.substring(idx + 1);
 				try {
-					if (service.getAuthRepository().plainAuth(BareJID.bareJIDInstance(user), pass)) {
+					if (service.checkCredentials(user, pass)) {
 						final String jid = user;
 						principal = new Principal() {
 							@Override
@@ -425,8 +406,9 @@ public class DummyServletRequest implements HttpServletRequest {
 							}
 						};						
 					}
-				} catch (TigaseStringprepException|TigaseDBException|AuthorizationException ex) {
+				} catch (TigaseStringprepException |TigaseDBException |AuthorizationException ex) {
 					Logger.getLogger(DummyServletRequest.class.getName()).log(Level.FINE, "could not authorize user", ex);
+					Logger.getLogger(DummyServletRequest.class.getName()).log(Level.SEVERE, null, ex);
 				}
 			}
 		}

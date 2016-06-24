@@ -52,6 +52,12 @@
 						config.httpRestApiKeys = props.get(key).split(',');
 						config.httpRestApiSecurity = (config.httpRestApiKeys.size() == 1 && config.httpRestApiKeys[0] == "open_access") ? "open_access" : "api_keys";
 						config.httpRestApiKeys = props.get(key);
+					} else if ('http/setup/admin-credentials'.equals(key)) {
+						if ("admin:tigase" == props.get(key))
+							returnl
+                        def val = props.get(key).split(":") as List;
+						config.setupUser = val.remove(0);
+						config.setupPassword = val.join(":");
 					}
 				}		
 				reader.close();
@@ -120,6 +126,9 @@ ${ util.include('header', [title:'Setup: ' + title]) }
 config-type=${config.configType}
 --virt-hosts=${config.virtualDomains}
 --admins=${config.admins}
+<% if (config.setupUser && config.setupPassword) { %>
+http/setup/admin-credentials=${config.setupUser}:${config.setupPassword}
+<% } %>
 <% 
 	def debug = "";
 	if (config.serverDebug) {

@@ -22,13 +22,15 @@
 
 package tigase.http
 
-import tigase.server.Packet
-import tigase.db.UserRepository
 import groovy.transform.CompileStatic
 import tigase.db.AuthRepository
-import tigase.http.AbstractModule
+import tigase.db.AuthorizationException
+import tigase.db.TigaseDBException
+import tigase.db.UserRepository
 import tigase.http.PacketWriter.Callback
 import tigase.http.api.Service
+import tigase.server.Packet
+import tigase.util.TigaseStringprepException
 import tigase.xmpp.BareJID
 
 @CompileStatic
@@ -76,6 +78,11 @@ public class ServiceImpl<T extends AbstractModule> implements Service<T>, tigase
 	
 	boolean isAllowed(String key, String domain, String path) {
 		return module.isRequestAllowed(key, domain, path);
+	}
+
+	boolean checkCredentials(String user, String password) throws TigaseStringprepException, TigaseDBException, AuthorizationException {
+		BareJID jid = BareJID.bareJIDInstance(user);
+		return module.getAuthRepository().plainAuth(jid, password);
 	}
 	
 	void executedIn(String path, long executionTime) {

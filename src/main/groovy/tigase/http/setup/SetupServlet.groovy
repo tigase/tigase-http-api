@@ -19,30 +19,21 @@
  * Last modified by $Author$
  * $Date$
  */
-package tigase.http.setup;
+package tigase.http.setup
 
-import groovy.lang.Writable;
-import groovy.text.GStringTemplateEngine;
-import groovy.text.Template;
-import groovy.text.TemplateEngine;
+import groovy.text.GStringTemplateEngine
+import groovy.text.Template
+import groovy.text.TemplateEngine
 import groovy.transform.CompileStatic
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.servlet.ServletConfig
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
+import javax.servlet.ServletConfig
+import javax.servlet.ServletException
+import javax.servlet.http.HttpServlet
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
+import java.util.concurrent.ConcurrentHashMap
+import java.util.logging.Level
+import java.util.logging.Logger
 /**
  *
  * @author andrzej
@@ -83,12 +74,10 @@ public class SetupServlet extends HttpServlet {
 	protected void processRequest(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		
-		if (setupModule.getAuthRepository() != null && !("localhost".equals(request.getRemoteHost()) || "127.0.0.1".equals(request.getRemoteAddr()) || !"::1".equals(request.getRemoteAddr()))) {
-			if (!request.isUserInRole('admin') && !request.authenticate(response)) {
-				return;
-			}
+		if (!request.isUserInRole('admin') && !request.authenticate(response)) {
+			return;
 		}
-		
+
 		loadTemplates();
 		
 		String i = request.getParameter("step");
