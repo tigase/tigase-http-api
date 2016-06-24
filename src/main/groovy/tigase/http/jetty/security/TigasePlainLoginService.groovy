@@ -65,7 +65,7 @@ public class TigasePlainLoginService implements LoginService {
 
             // authenticate using Tigase authentication repository
             boolean authOk = false;
-            try { authOk = getService().getAuthRepository().plainAuth(jid, cred); } catch (ex) {  log.log(Level.FINE, "not authorized used = " + jid, ex); }
+            try { authOk = getService().checkCredentials(s, cred); } catch (ex) {  log.log(Level.FINE, "not authorized used = " + jid, ex); }
 
             // we are authenticated so set correct authentication principal
             if (authOk) {
