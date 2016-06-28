@@ -407,8 +407,7 @@ public class DummyServletRequest implements HttpServletRequest {
 						};						
 					}
 				} catch (TigaseStringprepException |TigaseDBException |AuthorizationException ex) {
-					Logger.getLogger(DummyServletRequest.class.getName()).log(Level.FINE, "could not authorize user", ex);
-					Logger.getLogger(DummyServletRequest.class.getName()).log(Level.SEVERE, null, ex);
+					Logger.getLogger(DummyServletRequest.class.getName()).log(Level.FINEST, "could not authorize user", ex);
 				}
 			}
 		}
