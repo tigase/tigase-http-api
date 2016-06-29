@@ -25,10 +25,10 @@ ${ util.include('header', [title:'Setup: ' + title]) }
 <form method='GET' >
 	<input type='hidden' name='step' value='${Integer.parseInt(currentStep) + 1}'/>
 	<label for='setupUser'>Username:</label>
-	<input name='setupUser' type='text' value="${config.setupUser}" /><br/>
+	<input name='setupUser' type='text' value="${config.setupUser ?: ''}" /><br/>
 	<div style='padding-top: 1em'></div>
 	<label for='setupPassword'>Password:</label>
-	<input name='setupPassword' type='password' value="${config.setupPassword}"/><br/>
+	<input name='setupPassword' type='password' value="${config.setupPassword ?: ''}"/><br/>
 	<div style='padding-top: 1em'></div>
 	<button type="submit">Next</button>
 </form>

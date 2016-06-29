@@ -31,6 +31,19 @@ ${ util.include('footer') }
 			}
 		}
 	}
+
+	["setupUser","setupPassword"].each { k ->
+		if (request.getParameter(k)) {
+			Object old = tmp[k];
+			if (old instanceof Boolean) {
+				tmp[k] = Boolean.parseBoolean(request.getParameter(k));
+			}
+			else {
+				tmp[k] = request.getParameter(k);
+			}
+		}
+	}
+
 	config.clear();
 	config.putAll(tmp);
 %>
