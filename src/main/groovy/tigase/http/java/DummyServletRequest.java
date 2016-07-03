@@ -479,8 +479,10 @@ public class DummyServletRequest implements HttpServletRequest {
 	public boolean authenticate(HttpServletResponse hsr) throws IOException, ServletException {
 		hsr.setHeader("WWW-Authenticate", "Basic realm=\"TigasePlain\"");
 		hsr.sendError(401, "Not authorized");
-		exchange.getResponseBody().flush();
-		exchange.getResponseBody().close();
+		if (!"HEAD".equals(exchange.getRequestMethod())) {
+			exchange.getResponseBody().flush();
+			exchange.getResponseBody().close();
+		}
 		return false;
 	}
 
