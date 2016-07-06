@@ -39,6 +39,8 @@ import java.util.logging.Level
  */
 class AdHocHandler extends tigase.http.rest.Handler {
 
+	private static final Logger log = Logger.getLogger(AdHocHandler.class.getCanonicalName());
+
     def TIMEOUT = 30 * 1000;
 
     def COMMAND_XMLNS = "http://jabber.org/protocol/commands";
