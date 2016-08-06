@@ -1,6 +1,6 @@
 /*
  * Tigase HTTP API
- * Copyright (C) 2004-2014 "Tigase, Inc." <office@tigase.com>
+ * Copyright (C) 2004-2016 "Tigase, Inc." <office@tigase.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -18,30 +18,26 @@
  */
 package tigase.http.jetty;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import tigase.http.DeploymentInfo;
 import tigase.http.ServletInfo;
-import tigase.http.api.HttpServerIfc;
 import tigase.http.api.Service;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
- *
- * @author andrzej
+ * Created by andrzej on 06.08.2016.
  */
-public abstract class AbstractJettyHttpServer implements HttpServerIfc {
+public class JettyHttpServerHelper {
 
-	private static final Logger log = Logger.getLogger(AbstractJettyHttpServer.class.getCanonicalName());
+	public static final String CONTEXT_KEY = "context-key";
 
-	private static final String CONTEXT_KEY = "context-key";
-	
-	protected abstract void deploy(ServletContextHandler ctx);
-	protected abstract void undeploy(ServletContextHandler ctx);
-		
-	@Override
-	public void deploy(DeploymentInfo deployment) {
+	private static final Logger log = Logger.getLogger(JettyHttpServerHelper.class.getCanonicalName());
+
+	public static ServletContextHandler createServletContextHandler(DeploymentInfo deployment) {
+
 		ServletContextHandler context = new ServletContextHandler(ServletContextHandler.NO_SESSIONS);
 		try {
 			context.setSecurityHandler(context.getDefaultSecurityHandlerClass().newInstance());
@@ -60,7 +56,7 @@ public abstract class AbstractJettyHttpServer implements HttpServerIfc {
 		String[] vhosts = deployment.getVHosts();
 		if (vhosts != null && vhosts.length > 0) {
 			context.setVirtualHosts(vhosts);
-		}			
+		}
 		ServletInfo[] servletInfos = deployment.getServlets();
 		for (ServletInfo info : servletInfos) {
 			for (String mapping : info.getMappings()) {
@@ -69,17 +65,8 @@ public abstract class AbstractJettyHttpServer implements HttpServerIfc {
 				context.addServlet(holder, mapping);
 			}
 		}
-		
-		deploy(context);
-		deployment.put(CONTEXT_KEY, context);
+
+		return context;
 	}
 
-	@Override
-	public void undeploy(DeploymentInfo deployment) {
-		ServletContextHandler context = deployment.get(CONTEXT_KEY);
-		if (context != null) {
-			undeploy(context);
-		}
-	}
-	
 }

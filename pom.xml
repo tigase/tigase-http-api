@@ -21,7 +21,7 @@
 
 	<groupId>tigase</groupId>
 	<artifactId>tigase-http-api-jetty</artifactId>
-	<version>1.1.0-SNAPSHOT</version>
+	<version>1.2.0-SNAPSHOT</version>
 	<name>Tigase HTTP API - support for Jetty HTTP Server</name>
 	<description>Tigase HTTP API - support for Jetty HTTP Server</description>
 
@@ -273,7 +273,7 @@
 		<dependency>
 			<groupId>tigase</groupId>
 			<artifactId>tigase-http-api</artifactId>
-			<version>1.2.0-SNAPSHOT</version>
+			<version>1.3.0-SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>

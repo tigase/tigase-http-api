@@ -1,6 +1,6 @@
 /*
  * Tigase HTTP API
- * Copyright (C) 2004-2014 "Tigase, Inc." <office@tigase.com>
+ * Copyright (C) 2004-2016 "Tigase, Inc." <office@tigase.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -18,16 +18,25 @@
  */
 package tigase.http.jetty;
 
-import java.util.Hashtable;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import tigase.http.Activator;
+import tigase.http.DeploymentInfo;
+import tigase.http.api.HttpServerIfc;
+import tigase.kernel.core.Kernel;
+
+import java.util.Collections;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static tigase.http.jetty.JettyHttpServerHelper.CONTEXT_KEY;
+import static tigase.http.jetty.JettyHttpServerHelper.createServletContextHandler;
 
 /**
  * This implementation uses Jetty HTTP Server instance exising in OSGi environment
@@ -35,18 +44,18 @@ import tigase.http.Activator;
  *
  * @author andrzej
  */
-public class JettyOSGiHttpServer extends AbstractJettyHttpServer {
+public class JettyOSGiHttpServer implements HttpServerIfc {
 
 	private static final Logger log = Logger.getLogger(JettyOSGiHttpServer.class.getCanonicalName());
 	
 	private final BundleContext context;
 	private final ConcurrentHashMap<String,ServiceRegistration> registeredContexts = new ConcurrentHashMap<String,ServiceRegistration>();
+	private List<DeploymentInfo> deploymentInfos = new CopyOnWriteArrayList<>();
 
 	public JettyOSGiHttpServer() {
 		context = Activator.getContext();
 	}
 	
-	@Override
 	protected void deploy(ServletContextHandler ctx) {
 		String contextPath = ctx.getContextPath();
 		
@@ -59,7 +68,6 @@ public class JettyOSGiHttpServer extends AbstractJettyHttpServer {
 		registeredContexts.put(contextPath, registration);
 	}
 
-	@Override
 	protected void undeploy(ServletContextHandler ctx) {
 		String contextPath = ctx.getContextPath();
 		try {		
@@ -72,16 +80,37 @@ public class JettyOSGiHttpServer extends AbstractJettyHttpServer {
 			log.log(Level.SEVERE, "exception during unregistration of context = " + contextPath, ctx);
 		}	}
 
+
 	@Override
-	public void start() {
+	public void register(Kernel kernel) {
+
 	}
 
 	@Override
-	public void stop() {
+	public void unregister(Kernel kernel) {
+
 	}
 
 	@Override
-	public void setProperties(Map<String, Object> props) {
+	public List<DeploymentInfo> listDeployed() {
+		return Collections.unmodifiableList(deploymentInfos);
 	}
-	
+
+	@Override
+	public void deploy(DeploymentInfo deployment) {
+		ServletContextHandler context = createServletContextHandler(deployment);
+		deploy(context);
+		deployment.put(CONTEXT_KEY, context);
+		deploymentInfos.add(deployment);
+	}
+
+	@Override
+	public void undeploy(DeploymentInfo deployment) {
+		ServletContextHandler context = deployment.get(CONTEXT_KEY);
+		if (context != null) {
+			undeploy(context);
+		}
+		deploymentInfos.remove(deployment);
+	}
+
 }
