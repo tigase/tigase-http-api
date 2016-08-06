@@ -18,12 +18,8 @@
  */
 package tigase.http;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import javax.servlet.http.HttpServlet;
+import java.util.*;
 
 /**
  *
@@ -36,7 +32,7 @@ public class ServletInfo {
 	private final Map<String,String> initParams = new HashMap<String,String>();
 	private final List<String> mappings = new ArrayList<String>();
 	
-	protected ServletInfo(String name, Class<? extends HttpServlet> servletClass) {
+	public ServletInfo(String name, Class<? extends HttpServlet> servletClass) {
 		this.name = name;
 		this.servletClass = servletClass;
 	}

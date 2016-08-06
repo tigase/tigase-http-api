@@ -19,24 +19,37 @@
  * Last modified by $Author$
  * $Date$
  */
-package tigase.http;
+package tigase.http.modules.dnswebservice;
 
-import tigase.http.modules.Module;
-import tigase.server.Packet;
-import tigase.xmpp.JID;
+public class DnsItem {
 
-public interface PacketWriter {
+	private final String domain;
+
+	private final DnsEntry[] c2s;
+	private final DnsEntry[] bosh;
+	private final DnsEntry[] websocket;
 	
-	public static interface Callback {
-		
-		public void onResult(Packet packet);
-		
+	public DnsItem(String domain, DnsEntry[] c2s, DnsEntry[] bosh, DnsEntry[] websocket) {
+		this.domain = domain;
+		this.c2s = c2s;
+		this.bosh = bosh;
+		this.websocket = websocket;
 	}
-
-	boolean isAdmin(JID user);
 	
-	public boolean write(Module module, Packet packet);
+	public String getDomain() {
+		return domain;
+	}
 	
-	public boolean write(Module module, Packet packet, Integer timeout, Callback callback);
-		
+	public DnsEntry[] getC2S() {
+		return c2s;
+	}
+	
+	public DnsEntry[] getBosh() {
+		return bosh;
+	}
+	
+	public DnsEntry[] getWebSocket() {
+		return websocket;
+	}
+	
 }

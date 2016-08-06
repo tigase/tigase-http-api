@@ -19,24 +19,40 @@
  * Last modified by $Author$
  * $Date$
  */
-package tigase.http;
+package tigase.http.modules.setup;
 
-import tigase.http.modules.Module;
-import tigase.server.Packet;
-import tigase.xmpp.JID;
+import java.util.ArrayDeque;
+import java.util.logging.Handler;
+import java.util.logging.LogRecord;
 
-public interface PacketWriter {
+/**
+ *
+ * @author andrzej
+ */
+public class SetupLogHandler extends Handler {
+
+	private final ArrayDeque<LogRecord> queue = new ArrayDeque<LogRecord>();
 	
-	public static interface Callback {
-		
-		public void onResult(Packet packet);
-		
+	public SetupLogHandler() {
+	}
+	
+	@Override
+	public void publish(LogRecord record) {
+		queue.offer(record);
 	}
 
-	boolean isAdmin(JID user);
+	@Override
+	public void flush() {
+		queue.clear();
+	}
+
+	@Override
+	public void close() throws SecurityException {
+		flush();
+	}
 	
-	public boolean write(Module module, Packet packet);
+	public LogRecord poll() {
+		return queue.poll();
+	}
 	
-	public boolean write(Module module, Packet packet, Integer timeout, Callback callback);
-		
 }

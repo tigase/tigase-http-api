@@ -282,9 +282,9 @@ ${ util.include('header', [title:'Setup: ' + title]) }
 	
 		def loader = tigase.util.SchemaLoader.newInstance(props);
 		def logger = java.util.logging.Logger.getLogger("tigase.util.DBSchemaLoader");
-		def handler = (logger.getHandlers() as Set).find { it.getClass().getCanonicalName() == "tigase.http.setup.SetupLogHandler" };
+		def handler = (logger.getHandlers() as Set).find { it.getClass().getCanonicalName() == "tigase.http.modules.setup.SetupLogHandler" };
 		if (handler == null) {
-			handler = new tigase.http.setup.SetupLogHandler();
+			handler = new tigase.http.modules.setup.SetupLogHandler();
 			logger.addHandler(handler);			
 		}
 		handler.setLevel(java.util.logging.Level.FINEST);

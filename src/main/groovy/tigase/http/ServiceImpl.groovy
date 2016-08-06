@@ -29,6 +29,7 @@ import tigase.db.TigaseDBException
 import tigase.db.UserRepository
 import tigase.http.PacketWriter.Callback
 import tigase.http.api.Service
+import tigase.http.modules.AbstractModule
 import tigase.server.Packet
 import tigase.util.TigaseStringprepException
 import tigase.xmpp.BareJID

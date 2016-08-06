@@ -26,9 +26,10 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.script.Bindings;
+
+import tigase.http.modules.Module;
 import tigase.server.Command;
 import tigase.server.Iq;
 import tigase.server.Packet;

@@ -19,24 +19,50 @@
  * Last modified by $Author$
  * $Date$
  */
-package tigase.http;
+package tigase.http.modules.dnswebservice;
 
-import tigase.http.modules.Module;
-import tigase.server.Packet;
-import tigase.xmpp.JID;
-
-public interface PacketWriter {
+public class DnsEntry {
 	
-	public static interface Callback {
-		
-		public void onResult(Packet packet);
-		
+	private String host;
+	private String[] ips;
+	private int port;
+	private int priority;
+	private String url;
+	
+	public DnsEntry(String host, int port, String[] ips, int priority) {
+		this.host = host;
+		this.port = port;
+		this.ips = ips;
+		this.priority = priority;
+		this.url = null;
 	}
-
-	boolean isAdmin(JID user);
 	
-	public boolean write(Module module, Packet packet);
+	public DnsEntry(String url, int priority) {
+		this.url = url;
+		this.priority = priority;
+		this.host = null;
+		this.port = 0;
+		this.ips = null;
+	}
 	
-	public boolean write(Module module, Packet packet, Integer timeout, Callback callback);
-		
+	public String getHost() {
+		return host;
+	}
+	
+	public int getPort() {
+		return port;
+	}
+	
+	public String[] getIPs() {
+		return ips;
+	}
+	
+	public int getPriority() {
+		return priority;
+	}
+	
+	public String getURL() {
+		return url;
+	}
+	
 }

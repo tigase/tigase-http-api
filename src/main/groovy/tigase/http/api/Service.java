@@ -26,7 +26,7 @@ import tigase.db.AuthRepository;
 import tigase.db.AuthorizationException;
 import tigase.db.TigaseDBException;
 import tigase.db.UserRepository;
-import tigase.http.AbstractModule;
+import tigase.http.modules.AbstractModule;
 import tigase.http.PacketWriter.Callback;
 import tigase.server.Packet;
 import tigase.util.TigaseStringprepException;

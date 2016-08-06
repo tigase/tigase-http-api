@@ -1,6 +1,6 @@
 /*
  * Tigase HTTP API
- * Copyright (C) 2004-2014 "Tigase, Inc." <office@tigase.com>
+ * Copyright (C) 2004-2016 "Tigase, Inc." <office@tigase.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -24,9 +24,15 @@ package tigase.http.java;
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsServer;
+import tigase.http.AbstractHttpServer;
 import tigase.http.DeploymentInfo;
-import tigase.http.api.HttpServerIfc;
-import tigase.io.TLSUtil;
+import tigase.kernel.beans.Bean;
+import tigase.kernel.beans.Initializable;
+import tigase.kernel.beans.Inject;
+import tigase.kernel.beans.UnregisterAware;
+import tigase.kernel.beans.config.ConfigField;
+import tigase.kernel.beans.config.ConfigurationChangedAware;
+import tigase.kernel.core.Kernel;
 import tigase.net.SocketType;
 
 import javax.net.ssl.SSLContext;
@@ -48,47 +54,18 @@ import java.util.logging.Logger;
  * 
  * @author andrzej
  */
-public class JavaStandaloneHttpServer implements HttpServerIfc {
+@Bean(name = "httpServer", parent = Kernel.class, exportable = true)
+public class JavaStandaloneHttpServer extends AbstractHttpServer {
 
 	private static final Logger log = Logger.getLogger(JavaStandaloneHttpServer.class.getCanonicalName());
-	
+
 	private final Set<HttpServer> servers = new HashSet<HttpServer>();
-	private int[] ports = { DEF_HTTP_PORT_VAL };
-	private final Map<String,Map<String,Object>> portsConfigs = new HashMap<>();
+
 	private List<DeploymentInfo> deployments = new ArrayList<DeploymentInfo>();
-	private ExecutorWithTimeout executor = new ExecutorWithTimeout();
-	
-	@Override
-	public void start() {
-		synchronized (servers) {
-			if (!servers.isEmpty())
-				stop();
-			
-			executor.start();
-			for (int port : ports) {
-				try {
-					HttpServer server = createServer(port);
-					server.setExecutor(executor);
-					server.start();
-					deploy(server, Collections.unmodifiableList(deployments));
-					servers.add(server);
-				} catch (IOException ex) {
-					log.log(Level.SEVERE, "starting server on port " + port + " failed", ex);
-				}
-			}
-		}
-	}
 
 	@Override
-	public void stop() {
-		synchronized (servers) {
-			for (HttpServer server : servers) {
-				undeploy(server,Collections.unmodifiableList(deployments));
-				server.stop(1);
-			}
-			servers.clear();
-			executor.shutdown();
-		}
+	protected Class<?> getPortConfigBean() {
+		return PortConfigBean.class;
 	}
 
 	@Override
@@ -96,7 +73,7 @@ public class JavaStandaloneHttpServer implements HttpServerIfc {
 		deployments.add(deployment);
 		synchronized (servers) {
 			for (HttpServer server : servers) {
-				deploy(server, Collections.singletonList(deployment));
+				deploy(server);
 			}
 		}
 	}
@@ -106,51 +83,50 @@ public class JavaStandaloneHttpServer implements HttpServerIfc {
 		deployments.remove(deployment);
 		synchronized (servers) {
 			for (HttpServer server : servers) {
-				undeploy(server, Collections.singletonList(deployment));
+				undeploy(server);
 			}
 		}
 	}
-	
+
 	@Override
-	public void setProperties(Map<String, Object> props) {
-		if (props.containsKey(HTTP_PORT_KEY)) {
-			ports = new int[] { (Integer) props.get(HTTP_PORT_KEY) };
-		}
-		if (props.containsKey(HTTP_PORTS_KEY)) {
-			ports = (int[]) props.get(HTTP_PORTS_KEY);
-		}
-		portsConfigs.clear();
-		for (int port : ports) {
-			Map<String,Object> config = new HashMap<>();
-			String socket = (String) props.get(String.valueOf(port) + "/" + PORT_SOCKET_KEY);
-			config.put(PORT_SOCKET_KEY, socket != null ? SocketType.valueOf(socket) : SocketType.plain);
-			String domain = (String) props.get(String.valueOf(port) + "/" + PORT_DOMAIN_KEY);
-			config.put(PORT_DOMAIN_KEY, domain);
-			portsConfigs.put(String.valueOf(port), config);
-		}
-		executor.setProperties(props);
+	public List<DeploymentInfo> listDeployed() {
+		return Collections.unmodifiableList(deployments);
 	}
-	
-	private HttpServer createServer(int port) throws IOException {
-		Map<String,Object> config = portsConfigs.get(String.valueOf(port));
-		if (config == null || ((SocketType) config.get(PORT_SOCKET_KEY)) == SocketType.plain) {
-			return HttpServer.create(new InetSocketAddress(port), 100);
+
+	private void registerServer(HttpServer server) {
+		synchronized (servers) {
+			servers.add(server);
+			deploy(server);
+		}
+	}
+
+	private void unregisterServer(HttpServer server) {
+		synchronized (servers) {
+			undeploy(server);
+			servers.remove(server);
+		}
+	}
+
+	protected HttpServer createServer(PortConfigBean config) throws IOException {
+		if (config.getSocket() == SocketType.plain) {
+			return HttpServer.create(new InetSocketAddress(config.getPort()), 100);
 		} else {	
-			HttpsServer server = HttpsServer.create(new InetSocketAddress(port), 100);
-			String domain = (String) config.get(PORT_DOMAIN_KEY);
-			SSLContext sslContext = TLSUtil.getSSLContext("TLS", domain);
+			HttpsServer server = HttpsServer.create(new InetSocketAddress(config.getPort()), 100);
+			SSLContext sslContext = sslContextContainer.getSSLContext("TLS", config.getDomain(), false);
 			server.setHttpsConfigurator(new HttpsConfigurator(sslContext));
 			return server;
 		}
 	}
 	
-	private void deploy(HttpServer server, List<DeploymentInfo> toDeploy) {
+	protected void deploy(HttpServer server) {
+		List<DeploymentInfo> toDeploy = Collections.unmodifiableList(deployments);
 		for (DeploymentInfo info : toDeploy) {
 			server.createContext(info.getContextPath(), new RequestHandler(info));
 		}
 	}
 	
-	private void undeploy(HttpServer server, List<DeploymentInfo> toUndeploy) {
+	protected void undeploy(HttpServer server) {
+		List<DeploymentInfo> toUndeploy = Collections.unmodifiableList(deployments);
 		for (DeploymentInfo info : toUndeploy) {
 			try {
 				server.removeContext(info.getContextPath());
@@ -159,16 +135,18 @@ public class JavaStandaloneHttpServer implements HttpServerIfc {
 			}
 		}
 	}
-		
-	private class ExecutorWithTimeout implements Executor {
+
+	@Bean(name="executor", parent = JavaStandaloneHttpServer.class)
+	public static class ExecutorWithTimeout implements Executor, Initializable, UnregisterAware, ConfigurationChangedAware {
 
 		private static final String THREADS_KEY = "threads";
 		private static final String REQUEST_TIMEOUT_KEY = "request-timeout";
 		
 		private ExecutorService executor = null;
 		private Timer timer = null;
+		@ConfigField(desc = "Request timeout", alias = REQUEST_TIMEOUT_KEY)
 		private int timeout = 60 * 1000;
-		
+		@ConfigField(desc = "Number of threads", alias = THREADS_KEY)
 		private int threads = 4;
 		
 		public ExecutorWithTimeout() {
@@ -176,45 +154,84 @@ public class JavaStandaloneHttpServer implements HttpServerIfc {
 		
 		@Override
 		public void execute(final Runnable command) {
-			executor.execute(new Runnable() {
-
-				@Override
-				public void run() {
-					final Thread current = Thread.currentThread();
-					TimerTask tt = new TimerTask() {
-						@Override
-						public void run() {
-							log.log(Level.WARNING, "request processing time exceeded!");
-							current.interrupt();
-						}
-					};
-					timer.schedule(tt, timeout);
-					command.run();
-					tt.cancel();
-				}
-				
+			executor.execute(() -> {
+				final Thread current = Thread.currentThread();
+				TimerTask tt = new TimerTask() {
+					@Override
+					public void run() {
+						log.log(Level.WARNING, "request processing time exceeded!");
+						current.interrupt();
+					}
+				};
+				timer.schedule(tt, timeout);
+				command.run();
+				tt.cancel();
 			});
 		}
-		
-		public void start() {
+
+		@Override
+		public void beforeUnregister() {
+			executor.shutdown();
+			timer.cancel();
+		}
+
+		@Override
+		public void initialize() {
 			if (executor != null) {
-				shutdown();
+				beforeUnregister();
 			}
 			executor = Executors.newFixedThreadPool(threads);
 			timer = new Timer();
 		}
-		
-		public void shutdown() {
-			executor.shutdown();
-			timer.cancel();
+
+		@Override
+		public void beanConfigurationChanged(Collection<String> changedFields) {
+			initialize();
 		}
-		
-		public void setProperties(Map<String,Object> props) {
-			if (props.containsKey(THREADS_KEY)) {
-				threads = (Integer) props.get(THREADS_KEY);
+	}
+
+	public static class PortConfigBean extends AbstractHttpServer.PortConfigBean {
+
+		@Inject
+		private JavaStandaloneHttpServer serverManager;
+
+		@Inject(bean = "executor")
+		private ExecutorWithTimeout executor;
+
+		protected HttpServer httpServer;
+
+		public void beanConfigurationChanged(Collection<String> changedFields) {
+			if (serverManager == null)
+				return;
+
+			beforeUnregister();
+			initialize();
+		}
+
+		@Override
+		public void beforeUnregister() {
+			if (httpServer != null) {
+				serverManager.unregisterServer(httpServer);
+				httpServer.stop(1);
+				httpServer = null;
 			}
-			if (props.containsKey(REQUEST_TIMEOUT_KEY)) {
-				timeout = (Integer) props.get(REQUEST_TIMEOUT_KEY);
+		}
+
+		@Override
+		public void initialize() {
+			// During first initialization port may not be set - need to wait
+			if (getPort() == 0)
+				return;
+
+			if (httpServer == null) {
+				try {
+					httpServer = serverManager.createServer(this);
+					httpServer.setExecutor(executor);
+					httpServer.start();
+					serverManager.registerServer(httpServer);
+				} catch (IOException ex) {
+					throw new RuntimeException("Could not initialize HTTP server for port " + getPort());
+				}
 			}
 		}
 	}
