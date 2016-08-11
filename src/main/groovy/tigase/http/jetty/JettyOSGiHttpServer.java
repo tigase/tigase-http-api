@@ -78,8 +78,18 @@ public class JettyOSGiHttpServer implements HttpServerIfc {
 		}
 		catch (Exception ex) {
 			log.log(Level.SEVERE, "exception during unregistration of context = " + contextPath, ctx);
-		}	}
+		}
+	}
 
+	@Override
+	public List<Integer> getHTTPPorts() {
+		return null;
+	}
+
+	@Override
+	public List<Integer> getHTTPSPorts() {
+		return null;
+	}
 
 	@Override
 	public void register(Kernel kernel) {

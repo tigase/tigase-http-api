@@ -123,8 +123,13 @@ public class JettyStandaloneHttpServer extends AbstractHttpServer implements Ini
 		}
 	}
 
-	protected void registerConnector(ServerConnector connector) {
+	protected void registerConnector(ServerConnector connector, boolean secure) {
 		server.addConnector(connector);
+		if (secure) {
+			httpsPorts.add(connector.getPort());
+		} else {
+			httpPorts.add(connector.getPort());
+		}
 //		if (server.isStarted() || server.isStarting()) {
 //			try {
 //				connector.start();
@@ -134,8 +139,13 @@ public class JettyStandaloneHttpServer extends AbstractHttpServer implements Ini
 //		}
 	}
 
-	protected void unregisterConnector(ServerConnector connector) {
+	protected void unregisterConnector(ServerConnector connector, boolean secure) {
 		server.removeConnector(connector);
+		if (secure) {
+			httpsPorts.remove(connector.getPort());
+		} else {
+			httpPorts.remove(connector.getPort());
+		}
 	}
 
 	protected ServerConnector createConnector(PortConfigBean config) {
@@ -193,7 +203,7 @@ public class JettyStandaloneHttpServer extends AbstractHttpServer implements Ini
 				return;
 			}
 
-			serverManager.unregisterConnector(connector);
+			serverManager.unregisterConnector(connector, getSocket() != SocketType.plain);
 			connector = null;
 		}
 
@@ -201,7 +211,7 @@ public class JettyStandaloneHttpServer extends AbstractHttpServer implements Ini
 		public void initialize() {
 			if (getPort() != 0) {
 				connector = serverManager.createConnector(this);
-				serverManager.registerConnector(connector);
+				serverManager.registerConnector(connector, getSocket() != SocketType.plain);
 			}
 		}
 
