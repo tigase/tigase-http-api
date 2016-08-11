@@ -24,10 +24,10 @@ package tigase.http.modules;
 import tigase.db.AuthRepository;
 import tigase.db.UserRepository;
 import tigase.disco.ServiceEntity;
+import tigase.http.AbstractHttpModule;
 import tigase.http.CommandManager;
 import tigase.http.PacketWriter;
 import tigase.http.PacketWriter.Callback;
-import tigase.http.api.HttpServerIfc;
 import tigase.http.modules.rest.ApiKeyRepository;
 import tigase.kernel.beans.Initializable;
 import tigase.kernel.beans.Inject;
@@ -43,15 +43,14 @@ import tigase.xmpp.BareJID;
 import tigase.xmpp.JID;
 
 import javax.script.Bindings;
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
-public abstract class AbstractModule implements Module, Initializable, ConfigurationChangedAware, UnregisterAware {
+public abstract class AbstractModule extends AbstractHttpModule implements Module, Initializable, ConfigurationChangedAware, UnregisterAware {
 
 	private static final ConcurrentHashMap<String,AbstractModule> modules = new ConcurrentHashMap<>();
-
-	@Inject
-	protected HttpServerIfc httpServer = null;
 
 	@Inject
 	private UserRepository userRepository;
@@ -70,17 +69,11 @@ public abstract class AbstractModule implements Module, Initializable, Configura
 	protected CommandManager commandManager = new CommandManager(this);
 
 	private String componentName;
-	protected final String uuid = UUID.randomUUID().toString();
-	
+
 	public static <T extends AbstractModule> T getModuleByUUID(String uuid) {
 		return (T) modules.get(uuid);
 	}
 
-
-	@ConfigField(desc = "Context path", alias = HTTP_CONTEXT_PATH_KEY)
-	protected String contextPath = null;
-	@ConfigField(desc = "List of vhosts", alias = VHOSTS_KEY)
-	protected String[] vhosts = null;
 
 	@Override
 	public String getName() {
@@ -225,21 +218,8 @@ public abstract class AbstractModule implements Module, Initializable, Configura
 
 	@Override
 	public void initialize() {
+		super.initialize();
 		serviceEntity = new ServiceEntity(getName(), null, getDescription(), true);
 		serviceEntity.setFeatures(getFeatures());
-		start();
-	}
-
-	@Override
-	public void beforeUnregister() {
-		stop();
-	}
-
-	@Override
-	public void beanConfigurationChanged(Collection<String> changedFields) {
-		if (httpServer == null)
-			return;
-
-		start();
 	}
 }

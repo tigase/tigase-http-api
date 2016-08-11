@@ -96,6 +96,12 @@ public class JavaStandaloneHttpServer extends AbstractHttpServer {
 	private void registerServer(HttpServer server) {
 		synchronized (servers) {
 			servers.add(server);
+			int port = server.getAddress().getPort();
+			if (server instanceof HttpsServer) {
+				httpsPorts.add(port);
+			} else {
+				httpPorts.add(port);
+			}
 			deploy(server);
 		}
 	}
@@ -103,6 +109,13 @@ public class JavaStandaloneHttpServer extends AbstractHttpServer {
 	private void unregisterServer(HttpServer server) {
 		synchronized (servers) {
 			undeploy(server);
+			int port = server.getAddress().getPort();
+			if (server instanceof HttpsServer) {
+				httpsPorts.remove((Integer) port);
+			} else {
+				httpPorts.remove((Integer) port);
+			}
+			server.getAddress().getPort();
 			servers.remove(server);
 		}
 	}

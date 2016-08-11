@@ -52,4 +52,7 @@ public interface HttpServerIfc extends RegistrarBean {
 		return new ServletInfo(name, servletClass);
 	}
 
+	List<Integer> getHTTPPorts();
+	List<Integer> getHTTPSPorts();
+
 }

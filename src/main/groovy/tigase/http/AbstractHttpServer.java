@@ -32,10 +32,8 @@ import tigase.kernel.beans.config.ConfigurationChangedAware;
 import tigase.kernel.core.Kernel;
 import tigase.net.SocketType;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Created by andrzej on 06.08.2016.
@@ -50,7 +48,21 @@ public abstract class AbstractHttpServer implements HttpServerIfc {
 
 	protected Kernel kernel;
 
+	protected List<Integer> httpPorts = new CopyOnWriteArrayList<>();
+	protected List<Integer> httpsPorts = new CopyOnWriteArrayList<>();
+
+
 	protected abstract Class<?> getPortConfigBean();
+
+	@Override
+	public List<Integer> getHTTPPorts() {
+		return Collections.unmodifiableList(httpPorts);
+	}
+
+	@Override
+	public List<Integer> getHTTPSPorts() {
+		return Collections.unmodifiableList(httpsPorts);
+	}
 
 	public void setPorts(HashSet<Integer> ports) {
 		Set<Integer> oldPorts = new HashSet<Integer>(this.ports);

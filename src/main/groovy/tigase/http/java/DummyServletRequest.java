@@ -350,7 +350,10 @@ public class DummyServletRequest implements HttpServletRequest {
 
 	@Override
 	public String getPathInfo() {
-		return null;
+		int start = contextPath.length() + servletPath.length();
+		if (servletPath.endsWith("/"))
+			start -= 1;
+		return getRequestURI().substring(start);
 	}
 
 	@Override
@@ -516,7 +519,10 @@ public class DummyServletRequest implements HttpServletRequest {
 
 	@Override
 	public long getContentLengthLong() {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+		String contentLength = exchange.getRequestHeaders().getFirst("Content-Length");
+		if (contentLength == null || contentLength.isEmpty())
+			return 0;
+		return Long.parseLong(contentLength);
 	}
 	
 	private class IteratorEnumerator<T,K extends Iterator<T>> implements Enumeration<T> {
