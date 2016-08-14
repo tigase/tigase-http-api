@@ -31,6 +31,8 @@ import java.time.Duration;
  */
 public interface Logic {
 
+	long getMaxFileSize();
+
 	String requestSlot(JID requester, String filename, long filesize, String contentType) throws ComponentException;
 
 	String getUploadURI(JID requester, String slotId, String filename);

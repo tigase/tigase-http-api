@@ -21,7 +21,9 @@
  */
 package tigase.http.upload;
 
+import tigase.http.upload.logic.Logic;
 import tigase.kernel.beans.Bean;
+import tigase.kernel.beans.Inject;
 import tigase.server.Packet;
 import tigase.xml.Element;
 import tigase.xmpp.JID;
@@ -34,8 +36,13 @@ public class DiscoveryModule extends tigase.component.modules.impl.DiscoveryModu
 
 	private static final String XMLNS = "urn:xmpp:http:upload";
 
-	protected Packet prepareDiscoInfoReponse(Packet packet, String jid, String node, JID senderJID) {
-		Packet result = prepareDiscoInfoReponse(packet, jid, node, senderJID);
+	@Inject
+	private Logic logic;
+
+
+	@Override
+	protected Packet prepareDiscoInfoReponse(Packet packet, JID jid, String node, JID senderJID) {
+		Packet result = super.prepareDiscoInfoReponse(packet, jid, node, senderJID);
 
 		Element fileUploadForm = getForm();
 
@@ -64,8 +71,7 @@ public class DiscoveryModule extends tigase.component.modules.impl.DiscoveryModu
 		return x;
 	}
 
-	// TODO: Implement this properly!
 	private long getMaxFileSize() {
-		return -1;
+		return logic.getMaxFileSize();
 	}
 }

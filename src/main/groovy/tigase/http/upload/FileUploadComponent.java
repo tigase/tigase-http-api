@@ -29,7 +29,7 @@ import tigase.kernel.core.Kernel;
 /**
  * Created by andrzej on 06.08.2016.
  */
-@Bean(name = "upload", parent = Kernel.class)
+@Bean(name = "upload", parent = Kernel.class, active = false)
 public class FileUploadComponent extends AbstractKernelBasedComponent {
 
 	@Inject
@@ -39,6 +39,26 @@ public class FileUploadComponent extends AbstractKernelBasedComponent {
 	public String getComponentVersion() {
 		String version = this.getClass().getPackage().getImplementationVersion();
 		return version == null ? "0.0.0" : version;
+	}
+
+	@Override
+	public String getDiscoCategory() {
+		return "store";
+	}
+
+	@Override
+	public String getDiscoDescription() {
+		return "HTTP File Upload component";
+	}
+
+	@Override
+	public String getDiscoCategoryType() {
+		return "file";
+	}
+
+	@Override
+	public boolean isSubdomain() {
+		return true;
 	}
 
 	@Override

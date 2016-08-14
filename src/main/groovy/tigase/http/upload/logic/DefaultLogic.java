@@ -109,6 +109,11 @@ public class DefaultLogic implements Logic {
 	}
 
 	@Override
+	public long getMaxFileSize() {
+		return maxFileSize;
+	}
+
+	@Override
 	public String requestSlot(JID requester, String filename, long filesize, String contentType) throws ComponentException {
 		if (localOnly && !vHostManager.isLocalDomain(requester.getDomain()))
 			throw new ComponentException(Authorization.NOT_ALLOWED, "Only local XMPP users may use this service");
