@@ -83,4 +83,13 @@ public class FileUploadRepositoryPool<R extends FileUploadRepository<DataSource>
 	protected Class findClassForDataSource(DataSource dataSource) throws DBInitException {
 		return DataSourceHelper.getDefaultClass(FileUploadRepository.class, dataSource.getResourceUri());
 	}
+
+	@Override
+	public Class<?> getDefaultBeanClass() {
+		return FileUploadRepositoryConfigBean.class;
+	}
+
+	public static class FileUploadRepositoryConfigBean extends MDRepositoryConfigBean<FileUploadRepository<DataSource>> {
+
+	}
 }
