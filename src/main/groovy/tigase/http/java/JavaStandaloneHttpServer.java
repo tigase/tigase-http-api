@@ -57,13 +57,15 @@ public class JavaStandaloneHttpServer implements HttpServerIfc {
 	private final Map<String,Map<String,Object>> portsConfigs = new HashMap<>();
 	private List<DeploymentInfo> deployments = new ArrayList<DeploymentInfo>();
 	private ExecutorWithTimeout executor = new ExecutorWithTimeout();
+	private Timer timer = null;
 	
 	@Override
 	public void start() {
 		synchronized (servers) {
 			if (!servers.isEmpty())
 				stop();
-			
+
+			timer = new Timer();
 			executor.start();
 			for (int port : ports) {
 				try {
@@ -88,6 +90,8 @@ public class JavaStandaloneHttpServer implements HttpServerIfc {
 			}
 			servers.clear();
 			executor.shutdown();
+			timer.cancel();
+			timer = null;
 		}
 	}
 
@@ -146,7 +150,7 @@ public class JavaStandaloneHttpServer implements HttpServerIfc {
 	
 	private void deploy(HttpServer server, List<DeploymentInfo> toDeploy) {
 		for (DeploymentInfo info : toDeploy) {
-			server.createContext(info.getContextPath(), new RequestHandler(info));
+			server.createContext(info.getContextPath(), new RequestHandler(info, timer));
 		}
 	}
 	
@@ -164,11 +168,10 @@ public class JavaStandaloneHttpServer implements HttpServerIfc {
 
 		private static final String THREADS_KEY = "threads";
 		private static final String REQUEST_TIMEOUT_KEY = "request-timeout";
-		
+
 		private ExecutorService executor = null;
-		private Timer timer = null;
 		private int timeout = 60 * 1000;
-		
+
 		private int threads = 4;
 		
 		public ExecutorWithTimeout() {
@@ -180,20 +183,22 @@ public class JavaStandaloneHttpServer implements HttpServerIfc {
 
 				@Override
 				public void run() {
-					final Thread current = Thread.currentThread();
-					TimerTask tt = new TimerTask() {
-						@Override
-						public void run() {
-							log.log(Level.WARNING, "request processing time exceeded!");
-							current.interrupt();
-						}
-					};
-					timer.schedule(tt, timeout);
+					RequestHandler.setExecutionTimeout(timeout);
+//					final Thread current = Thread.currentThread();
+//					TimerTask tt = new TimerTask() {
+//						@Override
+//						public void run() {
+//							log.log(Level.WARNING, "request processing time exceeded!");
+//							current.interrupt();
+//						}
+//					};
+//					timer.schedule(tt, timeout);
 					command.run();
-					tt.cancel();
+//					tt.cancel();
 				}
-				
+
 			});
+			executor.execute(command);
 		}
 		
 		public void start() {
@@ -201,12 +206,10 @@ public class JavaStandaloneHttpServer implements HttpServerIfc {
 				shutdown();
 			}
 			executor = Executors.newFixedThreadPool(threads);
-			timer = new Timer();
 		}
 		
 		public void shutdown() {
 			executor.shutdown();
-			timer.cancel();
 		}
 		
 		public void setProperties(Map<String,Object> props) {

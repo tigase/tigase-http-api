@@ -22,16 +22,15 @@
 
 package rest.stream
 
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 import tigase.http.rest.Service
 import tigase.server.Packet
-import tigase.xmpp.BareJID
 import tigase.xml.DomBuilderHandler
-import tigase.xml.SimpleParser
 import tigase.xml.Element
+import tigase.xml.SimpleParser
 import tigase.xml.SingletonFactory
 
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
 /**
  * Class implements ability to send packets to any JID using REST API
  *
@@ -61,18 +60,18 @@ Example of content for sending a message:
 			char[] data = request.getReader().getText()?.toCharArray();
 			if (data == null || data.length == 0) {
 				callback({ req, HttpServletResponse resp ->
-						resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+						resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "No data received");
 				})
 				return;
 			}
 			
 			SimpleParser parser   = SingletonFactory.getParserInstance();
 			DomBuilderHandler domHandler = new DomBuilderHandler();
-			parser.parse(domHandler, data, 0, data.length);			
+			parser.parse(domHandler, data, 0, data.length);
 			Element packetEl = domHandler.getParsedElements().poll();
 			if (packetEl == null) {
 				callback({ req, HttpServletResponse resp ->
-						resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+						resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing XML element in content");
 				})
 				return;				
 			}

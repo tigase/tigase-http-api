@@ -32,10 +32,7 @@ import tigase.xmpp.BareJID;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URLDecoder;
 import java.security.Principal;
@@ -55,10 +52,14 @@ public class DummyServletRequest implements HttpServletRequest {
 	private final String servletPath;
 	private final String contextPath;
 	private final Service service;
+	private final Timer timer;
+	private final Integer executionTimeout;
 	private AsyncContext async;
+	private String characterEncoding = "UTF-8";
 	private Principal principal;
+	private BufferedReader reader;
 	
-	public DummyServletRequest(HttpExchange exchange, String contextPath, String servletPath, Service service) {
+	public DummyServletRequest(HttpExchange exchange, String contextPath, String servletPath, Service service, Timer timer, Integer executionTimeout) {
 		this.exchange = exchange;
 		this.params = new HashMap<String,Object>();
 		String query = exchange.getRequestURI().getRawQuery();
@@ -78,6 +79,8 @@ public class DummyServletRequest implements HttpServletRequest {
 		this.contextPath = contextPath;
 		this.servletPath = servletPath;
 		this.service = service;
+		this.timer = timer;
+		this.executionTimeout = executionTimeout;
 	}
 	
 	private void decodeParamsFromString(String query, Map params) {
@@ -116,11 +119,12 @@ public class DummyServletRequest implements HttpServletRequest {
 
 	@Override
 	public String getCharacterEncoding() {
-		return null;
+		return characterEncoding;
 	}
 
 	@Override
 	public void setCharacterEncoding(String string) throws UnsupportedEncodingException {
+		this.characterEncoding = string;
 	}
 
 	@Override
@@ -139,23 +143,33 @@ public class DummyServletRequest implements HttpServletRequest {
 	@Override
 	public ServletInputStream getInputStream() throws IOException {
 		return new ServletInputStream() {
+
+			private boolean finished = false;
+
 			@Override
 			public int read() throws IOException {
-				return exchange.getRequestBody().read();
+				int read = exchange.getRequestBody().read();
+				finished = read == -1;
+				return read;
 			}
 
 			@Override
 			public boolean isFinished() {
-				return false;
+				return finished;
 			}
 
 			@Override
 			public boolean isReady() {
-				return true;
+				try {
+					return exchange.getRequestBody().available() > 0;
+				} catch (IOException ex) {
+					return false;
+				}
 			}
 
 			@Override
 			public void setReadListener(ReadListener rl) {
+				throw new UnsupportedOperationException("setReadListener is not supported!");
 			}
 		};
 	}
@@ -206,7 +220,12 @@ public class DummyServletRequest implements HttpServletRequest {
 
 	@Override
 	public BufferedReader getReader() throws IOException {
-		return new BufferedReader(new InputStreamReader(exchange.getRequestBody()));
+		synchronized (this) {
+			if (reader == null) {
+				reader = new BufferedReader(new InputStreamReader(exchange.getRequestBody(), characterEncoding));
+			}
+		}
+		return reader;
 	}
 
 	@Override
@@ -284,7 +303,8 @@ public class DummyServletRequest implements HttpServletRequest {
 
 	@Override
 	public AsyncContext startAsync(ServletRequest sr, ServletResponse sr1) throws IllegalStateException {
-		async = new AsyncContextImpl(sr, sr1, exchange);
+		async = new AsyncContextImpl(sr, sr1, exchange, timer);
+		async.setTimeout(executionTimeout * 2);
 		return async;
 	}
 
