@@ -39,8 +39,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static tigase.http.jetty.JettyHttpServerHelper.createServletContextHandler;
 import static tigase.http.jetty.JettyHttpServerHelper.CONTEXT_KEY;
+import static tigase.http.jetty.JettyHttpServerHelper.createServletContextHandler;
 
 /**
  * This implementation embeds Jetty HTTP Server by starting separate instance
@@ -80,11 +80,6 @@ public class JettyStandaloneHttpServer extends AbstractHttpServer implements Ini
 		deploymentInfos.remove(deployment);
 	}
 
-
-	@Override
-	protected Class<?> getPortConfigBean() {
-		return PortConfigBean.class;
-	}
 
 	protected void deploy(ServletContextHandler ctx) {
 		contexts.addHandler(ctx);
@@ -190,6 +185,15 @@ public class JettyStandaloneHttpServer extends AbstractHttpServer implements Ini
 		return connector;
 	}
 
+	@Bean(name = "connections", parent = JettyStandaloneHttpServer.class, exportable = true)
+	public static class PortsConfigBean extends AbstractHttpServer.PortsConfigBean {
+
+		@Override
+		public Class<?> getDefaultBeanClass() {
+			return PortConfigBean.class;
+		}
+	}
+
 	public static class PortConfigBean extends AbstractHttpServer.PortConfigBean {
 
 		@Inject
@@ -209,7 +213,7 @@ public class JettyStandaloneHttpServer extends AbstractHttpServer implements Ini
 
 		@Override
 		public void initialize() {
-			if (getPort() != 0) {
+			if (serverManager != null) {
 				connector = serverManager.createConnector(this);
 				serverManager.registerConnector(connector, getSocket() != SocketType.plain);
 			}
