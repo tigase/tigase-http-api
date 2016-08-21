@@ -26,13 +26,17 @@ import tigase.io.SSLContextContainer;
 import tigase.io.SSLContextContainerIfc;
 import tigase.kernel.beans.Initializable;
 import tigase.kernel.beans.Inject;
+import tigase.kernel.beans.RegistrarBeanWithDefaultBeanClass;
 import tigase.kernel.beans.UnregisterAware;
 import tigase.kernel.beans.config.ConfigField;
 import tigase.kernel.beans.config.ConfigurationChangedAware;
 import tigase.kernel.core.Kernel;
 import tigase.net.SocketType;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -40,19 +44,17 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public abstract class AbstractHttpServer implements HttpServerIfc {
 
-	@ConfigField(desc = "Port to bind")
-	protected HashSet<Integer> ports = new HashSet<>(Arrays.asList(DEF_HTTP_PORT_VAL));
-
 	@Inject(bean = "sslContextContainer")
 	protected SSLContextContainerIfc sslContextContainer;
+
+	@Inject
+	protected PortsConfigBean portsConfigBean;
 
 	protected Kernel kernel;
 
 	protected List<Integer> httpPorts = new CopyOnWriteArrayList<>();
 	protected List<Integer> httpsPorts = new CopyOnWriteArrayList<>();
 
-
-	protected abstract Class<?> getPortConfigBean();
 
 	@Override
 	public List<Integer> getHTTPPorts() {
@@ -64,34 +66,12 @@ public abstract class AbstractHttpServer implements HttpServerIfc {
 		return Collections.unmodifiableList(httpsPorts);
 	}
 
-	public void setPorts(HashSet<Integer> ports) {
-		Set<Integer> oldPorts = new HashSet<Integer>(this.ports);
-		Set<Integer> newPorts = new HashSet<Integer>(ports);
-		newPorts.removeAll(this.ports);
-		oldPorts.removeAll(ports);
-
-		this.ports = ports;
-		if (kernel == null) {
-			return;
-		}
-
-		for (int port : oldPorts) {
-			unregisterPortConfigBean(port);
-		}
-		for (int port : newPorts) {
-			registerPortConfigBean(port);
-		}
-	}
-
 	@Override
 	public void register(Kernel kernel) {
 		this.kernel = kernel;
 
 		kernel.registerBean(SSLContextContainer.class).exec();
 
-		for (int port : ports) {
-			registerPortConfigBean(port);
-		}
 	}
 
 	@Override
@@ -99,21 +79,55 @@ public abstract class AbstractHttpServer implements HttpServerIfc {
 		this.kernel = null;
 	}
 
-	public void registerPortConfigBean(int port) {
-		String name = "port/" + port;
-		kernel.registerBean(name).asClass(getPortConfigBean()).exec();
-		PortConfigBean config = kernel.getInstance(name);
-		config.port = port;
-		config.beanConfigurationChanged(Collections.singleton("port"));
+	public abstract static class PortsConfigBean implements RegistrarBeanWithDefaultBeanClass, Initializable {
+
+		@Inject(nullAllowed = true)
+		private PortConfigBean[] portsBeans;
+
+		@ConfigField(desc = "Ports to enable", alias = "ports")
+		private HashSet<Integer> ports;
+
+		private Kernel kernel;
+
+		public PortsConfigBean() {
+
+		}
+
+		@Override
+		public void register(Kernel kernel) {
+			this.kernel = kernel;
+			String connManagerBean = kernel.getParent().getName();
+			this.kernel.getParent().ln("service", kernel, connManagerBean);
+		}
+
+		@Override
+		public void unregister(Kernel kernel) {
+			this.kernel = null;
+		}
+
+		@Override
+		public void initialize() {
+			if (ports == null) {
+				ports = new HashSet(Arrays.asList(8080));
+			}
+
+			for (Integer port : ports) {
+				String name = String.valueOf(port);
+				if (kernel.getDependencyManager().getBeanConfig(name) == null) {
+					kernel.registerBean(name).asClass(getDefaultBeanClass()).exec();
+				}
+			}
+
+
+			register(kernel);
+		}
 	}
 
-	public void unregisterPortConfigBean(int port) {
-		kernel.unregister("port/" + port);
-	}
 
 	public abstract static class PortConfigBean implements ConfigurationChangedAware, UnregisterAware, Initializable {
 
-		private int port;
+		@ConfigField(desc = "Port")
+		private Integer name;
 
 		@ConfigField(desc = "Socket type")
 		private SocketType socket = SocketType.plain;
@@ -122,7 +136,7 @@ public abstract class AbstractHttpServer implements HttpServerIfc {
 		private String domain;
 
 		public int getPort() {
-			return port;
+			return name;
 		}
 
 		public SocketType getSocket() {

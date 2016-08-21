@@ -64,11 +64,6 @@ public class JavaStandaloneHttpServer extends AbstractHttpServer {
 	private List<DeploymentInfo> deployments = new ArrayList<DeploymentInfo>();
 
 	@Override
-	protected Class<?> getPortConfigBean() {
-		return PortConfigBean.class;
-	}
-
-	@Override
 	public void deploy(DeploymentInfo deployment) {
 		deployments.add(deployment);
 		synchronized (servers) {
@@ -203,6 +198,16 @@ public class JavaStandaloneHttpServer extends AbstractHttpServer {
 		}
 	}
 
+	@Bean(name = "connections", parent = JavaStandaloneHttpServer.class, exportable = true)
+	public static class PortsConfigBean extends AbstractHttpServer.PortsConfigBean {
+
+		@Override
+		public Class<?> getDefaultBeanClass() {
+			return JavaStandaloneHttpServer.PortConfigBean.class;
+		}
+
+	}
+
 	public static class PortConfigBean extends AbstractHttpServer.PortConfigBean {
 
 		@Inject
@@ -232,10 +237,6 @@ public class JavaStandaloneHttpServer extends AbstractHttpServer {
 
 		@Override
 		public void initialize() {
-			// During first initialization port may not be set - need to wait
-			if (getPort() == 0)
-				return;
-
 			if (httpServer == null) {
 				try {
 					httpServer = serverManager.createServer(this);
