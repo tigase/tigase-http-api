@@ -1,0 +1,95 @@
+= HTTP API component
+Tigase HTTP API component is generic container used to provide other HTTP related features as modules.
+It is configured by default to run under name of `http` and since this version it is enabled by default even if it is not listed in configuration file.
+
+== Common module configuration
+=== Enabling/disabling module
+Every module can be actived or disabled by adjusting it's activity in following way:
+
+* in DSL based file:
+----
+http {
+    %module_id% (active: false) {}
+}
+----
+
+* in properties file:
+----
+http/%module_id%/active=false
+----
+
+You need to replace `%module_id%` with id of module which you want to change activity (in this case disable module).
+
+==== Example
+To disable REST module we would following entries can be used:
+
+* for DSL
+----
+http {
+    rest (active: false) {}
+}
+----
+* for properties
+----
+http/rest/active=false
+----
+
+=== Context path
+This property allows you to change context path used by module. In other words it allows you to change prefix used by module.
+By default every module (with exception of Index module) uses context path same as module id, which in case of REST module results in `/rest`
+
+==== Example
+Changing context path for REST module to `/api`
+
+* as DSL:
+----
+http {
+    rest {
+        context-path = '/api'
+    }
+}
+----
+* as properties:
+----
+http/rest/context-path=/api
+----
+
+=== List of virtual hosts
+This allows to limit module to be available only on listed virtual hosts, which allows to set context path to `/` for more than one module.
+
+==== Example
+Move REST module to be available only for requests directed to `api.example.com`
+
+* as DSL:
+----
+http {
+    rest {
+        vhosts = [ 'api.example.com' ]
+    }
+}
+----
+* as properties:
+----
+http/rest/vhosts=api.example.com
+----
+
+=== Complex example
+In this example we will disable Index module and move REST module to `http://api.example.com/` and `http://rest.example.com`.
+* as DSL:
+----
+http {
+    index (active: false) {}
+    rest {
+        context-path = '/'
+        vhosts = [ 'api.example.com', 'rest.example.com' ]
+    }
+}
+----
+* as properties:
+----
+http/index/active=false
+http/rest/context-path=/
+http/rest/vhosts=api.example.com,rest.example.com
+----
+
+include::HTTP_API_Component_modules.asciidoc[]

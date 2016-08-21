@@ -1,0 +1,106 @@
+== Admin UI module
+This is very simple module for administration of Tigase XMPP Server using HTTP browser.
+It allows administrators to execute ad-hoc commands from HTTP browser allowing to change some configuration options at runtime.
+
+== DNS Web Service module
+For web based XMPP clients it is not possible to execute DNS SRV requests to find address of XMPP server hosting for particular domain.
+To solve this DNS Web Service module was created.
+
+It handles incoming HTTP GET request and using passed `domain` and `callback` HTTP parameters executes DNS requests as specified in https://xmpp.org/extensions/xep-0156.html:[XEP-0156: Discovering Alternative XMPP Connection Methods].
+Results are returned in JSON format for easy processing by web based XMPP client.
+
+By default it is deployed at `/dns-webservice`
+
+=== Parameters
+domain:: Domain name to look for XMPP SRV client records
+callback:: Due to security reasons web based client may not be able to access some DNS Web Service due to cross-domain AJAX requests. Passing optional `callback` parameter sets name of callback for JSONP requests and results proper response in JSONP format.
+
+=== Discover way to connect to XMPP server hosting `sure.im` domain.
+Sending HTTP GET request to `http://our-xmpp-server:8080/dns-webservice/?domain=sure.im&version=2` you will receive following response
+
+[source,json]
+----
+{
+  domain: 'sure.im',
+  c2s: [
+    {
+      host: 'tigase.me',
+      ip: ['198.100.157.101','198.100.157.103','198.100.153.203'],
+      port: 5222,
+      priority: 5
+    }
+  ],
+  bosh: [
+    {url:'http://blue.sure.im:5280/bosh'},
+    {url:'http://green.sure.im:5280/bosh'},
+    {url:'http://orange.sure.im:5280/bosh'}
+  ],
+  websocket: [
+    {url:'ws://blue.sure.im:5290/'},
+    {url:'ws://green.sure.im:5290/'},
+    {url:'ws://orange.sure.im:5290/'}
+  ]
+}
+----
+
+As you can see in here we have names and IP address of XMPP servers hosting `sure.im` domain as well as list of URI for establishing connections using BOSH or WebSocket.
+
+== Index module
+This module is deployed by default at `/` and provides list of installed and available modules for virtual host for which it received request.
+
+== REST module
+This module provided REST-like API for accessing Tigase XMPP Server. It uses Groovy scripts to process HTTP requests and prepare responses.
+
+=== Configuration
+REST module supports additional configuration options.
+
+==== api-keys
+This setting is used to list API keys which will be allowed to access REST module using HTTP. By default all access to REST module is blocked and noone can access REST interface.
+
+To allow access for specific clients you should list of API keys here and add one of API keys listed here as `api-key` HTTP request parameter sent to server. You can also allow anyone to access REST API by setting this to `open_access`
+
+While configuring API key, it is possible to set that it should be valid only for particular domains (vhosts) and that it will be valid only for requests which path matches configured regular expression, ie. following value:
+----
+api-keys=test1,test2:domain=api.example.com;rest.example.com:regex=/rest/*,open_access:regex=/rest/test/.*
+----
+will:
+
+. set API key `test1` which will be valid for any vhost and for any request
+. set API key `test2` which will be valid for requests to vhost `api.example.com` or `rest.example.com` and path matching regular expression `/rest/*`
+. set open to everyone access to any domain/vhost with request path matching regular expression `/rest/test/.*`
+
+==== rest-scripts-dir
+Points to directory containing Groovy scripts used as handlers for processing REST API requests. *_(default: `scripts/rest`)_*
+
+==== Example
+Configure API keys for REST module:
+
+* as DSL:
+----
+http {
+    rest {
+        api-keys = [
+            'test1',
+            'test2:domain=api.example.com;rest.example.com:regex=/rest/*',
+            'open_access:regex=/rest/test/.*'
+        ]
+    }
+}
+----
+* as properties:
+----
+http/rest/api-keys=test1,test2:domain=api.example.com;rest.example.com:regex=/rest/*,open_access:regex=/rest/test/.*
+----
+
+== Server status module
+_(Work in progress)_
+
+This module is designed to present current server status and report possible issues.
+
+== Setup module
+Module created to act as a web based installer and configuration utility for Tigase XMPP Server.
+Allows you to modify basic Tigase XMPP Server settings, ie. related to database access.
+Changes may be saved to configuration file.
+
+== Web UI module
+This module contains full web client based on http://www.tigase.net/content/jaxmpp-library:[Tigase JaXMPP] client library allowing user to chat, manage contacts list (roster), browse message archive, etc.

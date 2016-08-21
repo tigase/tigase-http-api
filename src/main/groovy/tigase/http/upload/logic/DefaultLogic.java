@@ -59,10 +59,10 @@ public class DefaultLogic implements Logic {
 	@ConfigField(desc = "Maximal file size allowed for transfer", alias = "max-file-size")
 	private long maxFileSize = 5 *  1024 * 1024;
 
-	@ConfigField(desc = "Upload URI format")
+	@ConfigField(desc = "Upload URI format", alias = "upload-uri-format")
 	private UriFormat uploadUriFormat = new UriFormat("{proto}://{serverName}:{port}/upload/{userJid}/{slotId}/{filename}");
 
-	@ConfigField(desc = "Download URI format")
+	@ConfigField(desc = "Download URI format", alias = "download-uri-format")
 	private UriFormat downloadUriFormat = new UriFormat("{proto}://{serverName}:{port}/upload/{slotId}/{filename}");
 
 	@ConfigField(desc = "Port")
@@ -71,7 +71,7 @@ public class DefaultLogic implements Logic {
 	@ConfigField(desc = "Protocol")
 	private HttpProtocol protocol = null;
 
-	@ConfigField(desc = "HTTP server domain name")
+	@ConfigField(desc = "HTTP server domain name", alias = "server-name")
 	private String serverName = DNSResolverFactory.getInstance().getDefaultHost();
 
 	@ConfigField(desc = "Remove old uploads - period", alias = "expiration-period")

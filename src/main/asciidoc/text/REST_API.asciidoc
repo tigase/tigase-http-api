@@ -1,0 +1,222 @@
+
+= REST API
+Tigase HTTP API component using REST module and Groovy scripts responsible for handling and processing incoming HTTP requests provides REST API.
+This API may be useful for various integration scenarios.
+
+In next sections we will describe basic REST endpoints provided by Tigase HTTP API and explain basics of creation new custom endpoints.
+
+Other endpoints, specific to particular Tigase XMPP Server modules are described in documentation for modules providing them.
+You may also look at `http://localhost:8080/rest/` on your local Tigase XMPP Server installation at HTTP API, which will provide you with basic usage examples for REST endpoints available at your installation.
+
+For more informations about configuration of REST module please see section about <<REST module>>
+
+== Usage examples
+Below you will find some usage examples of endpoints provided by Tigase HTTP API project.
+
+=== Retrieving user avatar
+Request using GET method for url `/rest/avatar/admin@test-domain.com` will return avatar image for user admin@test-domain.com if avatar is set in user vcard or will return http error 404.
+
+Example url to retrieve avatar of user admin@domain.com is http://localhost:8080/rest/avatar/admin@domain.com. Entering this url in browser will execute GET request.
+
+=== Retrieving list of available adhoc commands
+
+==== using XML format
+To retrieve list of commands request using GET method for ``/rest/adhoc/sess-man@domain.com` where sess-man@domain.com is jid of a component.
+In example entering following url http://localhost:8080/rest/adhoc/sess-man@domain.com in browser will retrieve list of all ad-hoc commands available at sess-man@domain.com. This action is protected by authentication done using https://tools.ietf.org/html/rfc2617:[HTTP Basic Authentication]. Valid credentials are credentials of users available in user database of this Tigase XMPP Server instalation (username is bare jid with domain part of jid).
+
+Below is example result of that request:
+[source,xml]
+----
+<items>
+  <item>
+    <jid>sess-man@domain.com</jid>
+    <node>http://jabber.org/protocol/admin#get-active-users</node>
+    <name>Get list of active users</name>
+  </item>
+  <item>
+    <jid>sess-man@domain.com</jid>
+    <node>del-script</node>
+    <name>Remove command script</name>
+  </item>
+  <item>
+    <jid>sess-man@domain.com</jid>
+    <node>add-script</node>
+    <name>New command script</name>
+  </item>
+</items>
+----
+
+==== using JSON format
+To retrieve list of commands in JSON we need to pass `Content-Type: application/json` as HTTP header of request or add `type` parameter set to `application/json`. Example result below:
+[source,json]
+----
+{
+    "items": [
+        {
+            "jid": "sess-man@domain.com",
+            "node": "http://jabber.org/protocol/admin#get-active-users",
+            "name": "Get list of active users"
+        },
+        {
+            "jid": "sess-man@domain.com",
+            "node": "del-script",
+            "name": "Remove command script"
+        },
+        {
+            "jid": "sess-man@domain.com",
+            "node": "add-script",
+            "name": "New command script"
+        }
+    ]
+}
+----
+
+=== Executing example ad-hoc command
+
+==== using XML
+To execute command to get active users request using POST method for `/rest/adhoc/sess-man@domain.com` sending following content (request requires authentication using https://tools.ietf.org/html/rfc2617:[HTTP Basic Authentication]):
+[source,xml]
+----
+<command>
+  <node>http://jabber.org/protocol/admin#get-active-users</node>
+  <fields>
+    <item>
+      <var>domainjid</var>
+      <value>domain.com</value>
+    </item>
+    <item>
+      <var>max_items</var>
+      <value>25</value>
+    </item>
+  </fields>
+</command>
+</pre>
+----
+In this request we passed all parameters needed to execute adhoc command. We passed node of adhoc command and values for fields required by adhoc command (passed value of `domain.com` for `domainjid` field and `25` for `max_items` field).
+We also need to pass `Content-Type: text/xml` as HTTP header of request or add `type` parameter set to `text/xml`.
+
+Below is example result for request presented above:
+[source,xml]
+----
+<pre>
+<command>
+  <jid>sess-man@domain.com</jid>
+  <node>http://jabber.org/protocol/admin#get-active-users</node>
+  <fields>
+    <item>
+      <var>Users: 2</var>
+      <label>text-multi</label>
+      <value>admin@domain.com</value>
+      <value>user1@domain.com</value>
+    </item>
+  </fields>
+</command>
+</pre>
+----
+
+==== using JSON
+To execute command to get active users is JSON format request using POST method for `/rest/adhoc/sess-man@domain.com` sending following content (request requires authentication using https://tools.ietf.org/html/rfc2617:[HTTP Basic Authentication]):
+[source,json]
+----
+{
+  "command" : {
+    "node" : "http://jabber.org/protocol/admin#get-active-users",
+    "fields" : [
+      {
+        "var" : "domainjid",
+        "value" : "domain.com"
+      },
+      {
+        "var" : "max_items",
+        "value" : "25"
+      }
+    ]
+  }
+}
+----
+In this request we passed all parameters needed to execute adhoc command. We passed node of adhoc command and values for fields required by adhoc command (passed value of `domain.com` for `domainjid` field and `25` for `max_items` field).
+
+Below is example result for request presented above:
+[source,json]
+----
+{
+    "command": {
+        "jid": "sess-man@domain.com",
+        "node": "http://jabber.org/protocol/admin#get-active-users",
+        "fields": [
+            {
+                "var": "Users: 1",
+                "label": "text-multi",
+                "value": [
+                  "admin@domain.com",
+                  "user1@domain.com"
+                ]
+            }
+        ]
+    }
+}
+----
+
+=== Sending any XMPP Stanza
+XMPP message or any other XMPP stanza can be sent using this new API by sending HTTP POST request on (by default) http://localhost:8080/rest/stream/?api-key=@API_KEY@ with serialized XMPP stanza as a content, where `@API_KEY@` - is API key for HTTP API configured in server configuration file.
+Additionally each request needs to be authorized by sending valid administrator JID and password as user and password of https://tools.ietf.org/html/rfc2617:[HTTP Basic Authentication] method.
+Content of sent HTTP request should be encoded in `UTF-8` and `Content-Type` header should be set to `application/xml`.
+
+==== Handling of request
+If sent XMPP stanza will not contain `from` attribute then HTTP API component will provide it's own JID, while if `from` attribute will be set then it will be preserved.
+
+If `<iq/>` stanza is being sent and no `from` attribute is set then in HTTP response component will send response received for sent `<iq>` stanza.
+
+Successful request will return HTTP response code 200.
+
+==== Examples
+Sending XMPP message with from set to HTTP API component to full JID:: Following data needs to be sent as HTTP POST request content to `/rest/stream/?api-key=@API_KEY@` URL of HTTP API component to deliver message `Example message 1` to `test@example.com/resource-1`.
+[source,xml]
+----
+<message xmlns="jabber:client" type="chat" to="test@example.com/resource-1">
+    <body>Example message 1</body>
+</message>
+----
+
+Sending XMPP message with from set to HTTP API component to bare JID:: Following data needs to be sent as HTTP POST request content to `/rest/stream/?api-key=@API_KEY@` URL of HTTP API component to deliver message `Example message 1` to `test@example.com@`.
+[source,xml]
+----
+<message xmlns="jabber:client" type="chat" to="test@example.com">
+    <body>Example message 1</body>
+</message>
+----
+
+Sending XMPP message with from set to specified JID to recipients full JID:: Following data needs to be sent as HTTP POST request content to `/rest/stream/?api-key=@API_KEY@` URL of HTTP API component to deliver message `Example message 1` to `test@example.com/resource-1` with sender of message set to `sender@example.com`.
+[source,xml]
+----
+<message xmlns="jabber:client" type="chat" from="sender@example.com" to="test@example.com/resource-1">
+    <body>Example message 1</body>
+</message>
+----
+
+
+== Scripting introduction
+REST scripts in HTTP API component are used for processing all of requests incoming to REST endpoints.
+
+To add a new action to HTTP API component you need to create script in Groovy in which there will be implementation of class extending @tigase.http.rest.Handler@ class. URI of script will be created from location of script in scripts folder. (If script @TestHandler@ with regular expression will be set to @/test@ and will be placed in @scripts/rest/tested@, handler will be called for following URI @/rest/tested/test@)
+
+=== Properties
+In extended classes you need to set following properties:
+
+regex:: regular expression which is used to match request URI and parse parameters embedded in URI, ie.: `/\/([^@\/]+)@([^@\/]+)/`
+requiredRole:: role of user required to be able to access this URI. If `requiredRole` is to not null value then authentication will be required. Possible values are:
+* null
+* user
+* admin
+isAsync:: if set to true, it will be possible to wait for results (ie. wait for response for IQ stanza)
+
+=== Closure parameters
+Extended class should also set closures for one or more of following properties `execGet`, `execPut`, `execPost`, `execDelete` depending of which HTTP action or actions you need to support for following URI. Each closure *have dynamic arguments list*. Below is list of arguments passed to closure which describes how and when list of arguments changes:
+
+service:: implementation of `Service` interface (used to access database or send/receive XMPP stanzas)
+callback:: closure which needs to be called to return data (accepts only one argument of type `String`, `byte[]`, `Map` (if data is type of `Map` it will be encoded to JSON or XML depending of `Content-Type` header).
+user:: will be passed only if `requiredRole` is to not null value (*In other cases this argument will not be in arguments list!*)
+content:: parsed content of request - *will not be in arguments list if `Content-Length` of request is empty* (if `Content-Type` is of type XML or JSON returned as `Map` in other case it will be instance of `HttpServletRequest`)
+x:: additional arguments passed to callback are groups from regular expression matching URI (*groups are not passed as list, but are added to list of arguments as next arguments*)
+
+If property for corresponding HTTP action is not set, then component will return HTTP error 404.

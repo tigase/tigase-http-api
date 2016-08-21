@@ -1,0 +1,103 @@
+= HTTP server
+Instance of HTTP server is by default provided under name of `httpServer`.
+It will be enabled only if HTTP API component will be active of if HTTP File Upload component will be available.
+Default implementation of HTTP server used by this project is https://docs.oracle.com/javase/8/docs/jre/api/net/httpserver/spec/com/sun/net/httpserver/package-summary.html:[HttpServer] embedded in Java JDK.
+
+[NOTE]
+====
+This implementation is good for small installations of if there is no requirement for high performance HTTP server.
+If this is do not match your requirements it is also possible to use Jetty as embedded HTTP server using Tigase HTTP API - Jetty HTTP Server project.
+====
+
+== Dependencies
+Default HTTP server implementation requires almost no dependencies.
+However as we needed common API for processing HTTP requests (same for HTTP server from JDK and for other HTTP server, ie. Jetty), we decided to use Servlet API in version 3.1.
+
+Required file can be downloaded from Tigase HTTP API project https://projects.tigase.org/projects/tigase-http-api/files:[Files] section or using following link https://projects.tigase.org/attachments/download/1504/servlet-api-3.1.jar[servlet-api-3.1.jar]
+
+== Properties
+Following properties are accepted by default implementation of HTTP server provided by Tigase HTTP API:
+
+ports:: This property is used to configure on which ports on HTTP server should listen for incoming connections. If it is not set then default port `8080` will be used
+connections:: It is used to group configurations passed to ports
+{port}::: For every `{port}` you can pass separate configuration. To do so you need to replace `{port}` with port number, ie. `8080`. For every port you can pass following properties:
+socket:::: Sets type of socket used for handling incoming connections. Accepted values are:
+ * `plain` - port will work in plain HTTP mode *(_default_)*
+ * `ssl` - port will work in HTTPS mode
+domain:::: Property is used to configure domain name of SSL certificate which should be used by HTTP server running on this port (if `socket` is set to `ssl`). If it is not set then default SSL certificate of Tigase XMPP Server will be used.
+
+== Examples
+Below are few examples for use in DSL based configuration format and older properties based format.
+
+=== HTTPS on port 8443 with SSL certificate for example.com
+In DSL configuration file `httpServer` related configuration should look like this:
+----
+httpServer {
+    connections {
+        8443 () {
+            socket = ssl
+            domain = 'example.com'
+        }
+    }
+}
+----
+If you are using older properties based configuration file, then it should look like this:
+----
+httpServer/ports=8080,8443
+httpServer/connections/8443/socket=ssl
+httpServer/connections/8443/domain=example.com
+----
+
+=== Changing port from 8080 to 8081
+In DSL based configuration file:
+----
+httpServer {
+    connections {
+        8080 (active: false) {}
+        8081 () {}
+    }
+}
+----
+and in properties based file format:
+----
+httpServer/ports=8081
+----
+
+=== Usage of Jetty HTTP server as HTTP server
+As mentioned before it is possible to use Jetty as HTTP server.
+Jetty can be used in two forms:
+
+==== Standalone
+In this case Jetty instance is created and configured internally by Tigase HTTP API.
+This allows same configuration properties being used as for default HTTP server configuration.
+
+* as DSL:
+----
+httpServer (class: tigase.http.jetty.JettyStandaloneHttpServer) {
+    ...
+}
+----
+* as properties:
+----
+httpServer/class=tigase.http.jetty.JettyStandaloneHttpServer
+----
+
+==== OSGi
+This can only be used in Tigase is running inside OSGi container.
+If used Tigase HTTP API will try to retrieve Jetty HTTP server from OSGi container and use it.
+
+[NOTE]
+====
+Jetty HTTP server instance will not be configured by Tigase. We would only use this instance for deployment.
+====
+
+* as DSL:
+----
+httpServer (class: tigase.http.jetty.JettyOSGiHttpServer) {
+    ...
+}
+----
+* as properties:
+----
+httpServer/class=tigase.http.jetty.JettyOSGiHttpServer
+----
