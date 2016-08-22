@@ -171,8 +171,8 @@ class RestExtServlet extends RestServlet {
 			if (uri.equals(request.getContextPath() + request.getServletPath()) && "/".equals(request.getServletPath())) {
 				// accessing root of REST service - we should provide info about service here
 				Template template = (Template) includes["index"];
-			
-				def result = [service:service, fillTemplate: { String templateStr, Map params = [:] ->
+
+				def result = [service: service, fillTemplate: { String templateStr, Map params = [:] ->
 					if (templateStr == null)
 						return "No description";
 					params = prepareParams(request, response, params);
@@ -180,14 +180,16 @@ class RestExtServlet extends RestServlet {
 					Writable writable = t.make(params);
 					StringWriter sw = new StringWriter();
 					writable.writeTo(sw);
-					return sw.toString().replace("<", "&lt;").replace(">","&gt;").replace("\n","<br/>").replace("*code*","<div class='code'>").replace("*/code*","</div>");
+					return sw.toString().replace("<", "&lt;").replace(">", "&gt;").replace("\n", "<br/>").replace("*code*", "<div class='code'>").replace("*/code*", "</div>");
 				}];
 				fillResponseWithTemplate(template, request, response, result);
 				return;
-			}	
+			}
 			super.processRequest(request, response);
+		} catch (IOException ex) {
+			throw new IOException(ex);
 		} catch (Exception ex) {
-			log.log(Level.FINE, "exception processing HTTP request", ex);
+			throw new RuntimeException(ex);
 		}
 	}
 }

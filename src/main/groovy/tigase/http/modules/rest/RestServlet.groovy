@@ -21,21 +21,21 @@
  */
 package tigase.http.modules.rest
 
+import tigase.http.ServiceImpl
+import tigase.http.coders.Coder
 import tigase.http.coders.JsonCoder
 import tigase.http.coders.XmlCoder
 import tigase.http.rest.Handler
 import tigase.http.rest.Service
 import tigase.xmpp.BareJID
 
+import javax.servlet.ServletConfig
 import javax.servlet.annotation.WebServlet
 import javax.servlet.http.HttpServlet
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
-import tigase.http.ServiceImpl
-import tigase.http.coders.Coder
 import java.util.logging.Level
-import java.util.logging.Logger;
-import javax.servlet.ServletConfig
+import java.util.logging.Logger
 
 @WebServlet(asyncSupported=true)
 public class RestServlet extends HttpServlet {
@@ -94,13 +94,7 @@ public class RestServlet extends HttpServlet {
 
     @Override
     public void service(HttpServletRequest request, HttpServletResponse response) {
-        try {
-            processRequest(request, response);
-        }
-        catch (Exception ex) {
-            log.log(Level.FINE, "exception processing request", ex);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        }
+        processRequest(request, response);
     }
 
     /**

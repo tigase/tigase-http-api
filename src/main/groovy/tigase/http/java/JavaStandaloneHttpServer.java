@@ -42,6 +42,7 @@ import java.util.*;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -62,6 +63,9 @@ public class JavaStandaloneHttpServer extends AbstractHttpServer {
 	private final Set<HttpServer> servers = new HashSet<HttpServer>();
 
 	private List<DeploymentInfo> deployments = new ArrayList<DeploymentInfo>();
+
+	@Inject
+	private ExecutorWithTimeout executor;
 
 	@Override
 	public void deploy(DeploymentInfo deployment) {
@@ -129,7 +133,7 @@ public class JavaStandaloneHttpServer extends AbstractHttpServer {
 	protected void deploy(HttpServer server) {
 		List<DeploymentInfo> toDeploy = Collections.unmodifiableList(deployments);
 		for (DeploymentInfo info : toDeploy) {
-			server.createContext(info.getContextPath(), new RequestHandler(info));
+			server.createContext(info.getContextPath(), new RequestHandler(info, executor.timer));
 		}
 	}
 	
@@ -149,13 +153,14 @@ public class JavaStandaloneHttpServer extends AbstractHttpServer {
 
 		private static final String THREADS_KEY = "threads";
 		private static final String REQUEST_TIMEOUT_KEY = "request-timeout";
-		
+
 		private ExecutorService executor = null;
 		private Timer timer = null;
 		@ConfigField(desc = "Request timeout", alias = REQUEST_TIMEOUT_KEY)
 		private int timeout = 60 * 1000;
 		@ConfigField(desc = "Number of threads", alias = THREADS_KEY)
 		private int threads = 4;
+		private AtomicInteger counter = new AtomicInteger(0);
 		
 		public ExecutorWithTimeout() {
 		}
@@ -163,17 +168,9 @@ public class JavaStandaloneHttpServer extends AbstractHttpServer {
 		@Override
 		public void execute(final Runnable command) {
 			executor.execute(() -> {
-				final Thread current = Thread.currentThread();
-				TimerTask tt = new TimerTask() {
-					@Override
-					public void run() {
-						log.log(Level.WARNING, "request processing time exceeded!");
-						current.interrupt();
-					}
-				};
-				timer.schedule(tt, timeout);
+				RequestHandler.setExecutionTimeout(timeout);
+
 				command.run();
-				tt.cancel();
 			});
 		}
 
@@ -188,8 +185,13 @@ public class JavaStandaloneHttpServer extends AbstractHttpServer {
 			if (executor != null) {
 				beforeUnregister();
 			}
-			executor = Executors.newFixedThreadPool(threads);
 			timer = new Timer();
+			executor = Executors.newFixedThreadPool(threads, r -> {
+				Thread t = new Thread(r);
+				t.setName("http-server-pool-" + counter.incrementAndGet());
+				t.setDaemon(true);
+				return t;
+			});
 		}
 
 		@Override

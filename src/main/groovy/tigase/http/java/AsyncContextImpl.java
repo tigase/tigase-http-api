@@ -23,30 +23,32 @@
 package tigase.http.java;
 
 import com.sun.net.httpserver.HttpExchange;
+
+import javax.servlet.*;
 import java.io.IOException;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.servlet.AsyncContext;
-import javax.servlet.AsyncListener;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 
 /**
  *
  * @author andrzej
  */
-public class AsyncContextImpl implements AsyncContext {
+public class AsyncContextImpl extends TimerTask implements AsyncContext {
+
+	private static final Logger log = Logger.getLogger(AsyncContextImpl.class.getCanonicalName());
 
 	private final ServletRequest req;
 	private final ServletResponse resp;
 	private final HttpExchange exchange;
+	private final Timer timer;
 	
-	public AsyncContextImpl(ServletRequest req, ServletResponse resp, HttpExchange exchange) {
+	public AsyncContextImpl(ServletRequest req, ServletResponse resp, HttpExchange exchange, Timer timer) {
 		this.req = req;
 		this.resp = resp;
 		this.exchange = exchange;
+		this.timer = timer;
 	}
 	
 	@Override
@@ -78,12 +80,13 @@ public class AsyncContextImpl implements AsyncContext {
 
 	@Override
 	public void complete() {
+		cancel();
 		try {
 			resp.flushBuffer();
-			exchange.getResponseBody().close();
 		} catch (IOException ex) {
-			Logger.getLogger(AsyncContextImpl.class.getName()).log(Level.FINE, null, ex);
+			log.log(Level.FINEST, "Failure during completion of async task", ex);
 		}
+		exchange.close();
 	}
 
 	@Override
@@ -106,13 +109,22 @@ public class AsyncContextImpl implements AsyncContext {
 	}
 
 	@Override
-	public void setTimeout(long l) {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	public void setTimeout(long timeout) {
+		timer.schedule(this, timeout);
 	}
 
 	@Override
 	public long getTimeout() {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+		return this.scheduledExecutionTime();
 	}
-	
+
+	@Override
+	public void run() {
+		try {
+			exchange.sendResponseHeaders(504, -1);
+		} catch (IOException ex) {
+			log.log(Level.FINEST, " failed to send 504 error", ex);
+		}
+		exchange.close();
+	}
 }
