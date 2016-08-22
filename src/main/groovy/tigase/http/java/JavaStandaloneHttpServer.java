@@ -36,6 +36,7 @@ import java.util.*;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -173,39 +174,30 @@ public class JavaStandaloneHttpServer implements HttpServerIfc {
 		private int timeout = 60 * 1000;
 
 		private int threads = 4;
+		private AtomicInteger counter = new AtomicInteger(0);
 		
 		public ExecutorWithTimeout() {
 		}
 		
 		@Override
 		public void execute(final Runnable command) {
-			executor.execute(new Runnable() {
+			executor.execute(() -> {
+				RequestHandler.setExecutionTimeout(timeout);
 
-				@Override
-				public void run() {
-					RequestHandler.setExecutionTimeout(timeout);
-//					final Thread current = Thread.currentThread();
-//					TimerTask tt = new TimerTask() {
-//						@Override
-//						public void run() {
-//							log.log(Level.WARNING, "request processing time exceeded!");
-//							current.interrupt();
-//						}
-//					};
-//					timer.schedule(tt, timeout);
-					command.run();
-//					tt.cancel();
-				}
-
+				command.run();
 			});
-			executor.execute(command);
 		}
 		
 		public void start() {
 			if (executor != null) {
 				shutdown();
 			}
-			executor = Executors.newFixedThreadPool(threads);
+			executor = Executors.newFixedThreadPool(threads, r -> {
+				Thread t = new Thread(r);
+				t.setName("http-server-pool-" + counter.incrementAndGet());
+				t.setDaemon(true);
+				return t;
+			});
 		}
 		
 		public void shutdown() {

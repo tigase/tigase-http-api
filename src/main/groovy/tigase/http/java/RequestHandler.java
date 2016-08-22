@@ -132,8 +132,11 @@ public class RequestHandler implements HttpHandler {
 				he.sendResponseHeaders(404, -1);
 			}
 		} catch (IOException ex) {
-			exception = true;
 			tt.cancel();
+			AsyncContext async = req.getAsyncContext();
+			if (async != null && async instanceof AsyncContextImpl) {
+				((AsyncContextImpl) async).cancel();
+			}
 			throw new IOException(ex);
 		} catch (Throwable ex) {
 			exception = true;
