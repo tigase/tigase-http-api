@@ -56,6 +56,7 @@ http/rest/context-path=/api
 
 === List of virtual hosts
 This allows to limit module to be available only on listed virtual hosts, which allows to set context path to `/` for more than one module.
+Property accepts list of string, which in case of properties format is list of comma separated domain names and in DSL it is written as list of strings (see <<Complex example>>).
 
 ==== Example
 Move REST module to be available only for requests directed to `api.example.com`

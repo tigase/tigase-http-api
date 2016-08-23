@@ -90,7 +90,6 @@ To execute command to get active users request using POST method for `/rest/adho
     </item>
   </fields>
 </command>
-</pre>
 ----
 In this request we passed all parameters needed to execute adhoc command. We passed node of adhoc command and values for fields required by adhoc command (passed value of `domain.com` for `domainjid` field and `25` for `max_items` field).
 We also need to pass `Content-Type: text/xml` as HTTP header of request or add `type` parameter set to `text/xml`.
@@ -98,7 +97,6 @@ We also need to pass `Content-Type: text/xml` as HTTP header of request or add `
 Below is example result for request presented above:
 [source,xml]
 ----
-<pre>
 <command>
   <jid>sess-man@domain.com</jid>
   <node>http://jabber.org/protocol/admin#get-active-users</node>
@@ -111,7 +109,6 @@ Below is example result for request presented above:
     </item>
   </fields>
 </command>
-</pre>
 ----
 
 ==== using JSON

@@ -95,6 +95,8 @@ limit:: Maximal number of files to remove during single execution. *_(default: 1
 == Examples
 === Complex configuration example
 Configuration with separate repository for metadata to `example.com` pointing to `file_upload` data source, custom upload and download URI, maximal file size set to 10MB, expiration done every 6 hours and grouping of slot folders by user jid.
+
+* as DSL:
 ----
 upload() {
     logic {
@@ -119,9 +121,23 @@ upload() {
     }
 }
 ----
+* as properties:
+----
+upload/active=true
+upload/logic/local-only=true
+upload/logic/max-file-size=10485760
+upload/logic/upload-uri-format={proto}://{serverName}:{port}/upload/{userJid}/{slotId}/{filename}
+upload/logic/download-uri-format={proto}://{serverName}:{port}/upload/{domain}/{slotId}/{filename}
+upload/expiration/period=P6H
+upload/repositoryPool/domains=example.com
+upload/repositiryPool/example.com/data-source=file_upload
+upload/store/group-by-user=true
+----
 
 === Example configuration for clustering with HA
 Configuration for high availability in cluster with common storage at `/mnt/shared` and both servers available as `upload.example.com`
+
+* as DSL:
 ----
 upload() {
     logic {
@@ -133,4 +149,11 @@ upload() {
         path = '/mnt/shared/upload'
     }
 }
+----
+* as properties:
+----
+upload/active=true
+upload/logic/upload-uri-format={proto}://upload.example.com:{port}/upload/{userJid}/{slotId}/{filename}
+upload/logic/download-uri-format={proto}://upload.example.com:{port}/upload/{domain}/{slotId}/{filename}
+upload/store/path=/mnt/shared/upload
 ----
