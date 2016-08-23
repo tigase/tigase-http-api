@@ -446,10 +446,6 @@
 									<source>1.8</source>
 									<quiet>true</quiet>
 									<aggregate>true</aggregate>
-									<includeDependencySources>true</includeDependencySources>
-									<dependencySourceIncludes>
-										<dependencySourceInclude>tigase:*</dependencySourceInclude>
-									</dependencySourceIncludes>
 
 									<reportOutputDirectory>${project.reporting.outputDirectory}/docs/javadoc</reportOutputDirectory>
 									<destDir>docs/javadoc</destDir>
