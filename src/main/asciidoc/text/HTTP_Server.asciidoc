@@ -1,36 +1,39 @@
 = HTTP server
-Instance of HTTP server is by default provided under name of `httpServer`.
-It will be enabled only if HTTP API component will be active of if HTTP File Upload component will be available.
-Default implementation of HTTP server used by this project is https://docs.oracle.com/javase/8/docs/jre/api/net/httpserver/spec/com/sun/net/httpserver/package-summary.html:[HttpServer] embedded in Java JDK.
+:author: Andrzej Wójcik
+:date: 2016-08-21 13:28
 
-[NOTE]
-====
-This implementation is good for small installations of if there is no requirement for high performance HTTP server.
-If this is do not match your requirements it is also possible to use Jetty as embedded HTTP server using Tigase HTTP API - Jetty HTTP Server project.
-====
+HTTP server instance is provided as `httpServer` by default.
+The server will only be active and enabled if either the HTTP API component or HTTP File Upload component is enabled.
+This project uses the default implementation of an http server provided by link:https://docs.oracle.com/javase/8/docs/jre/api/net/httpserver/spec/com/sun/net/httpserver/package-summary.html[HttpServer] found embedded in Java JDK.
+
+NOTE: This implementation is good only for small installations of if there is *no requirement* for a high performance HTTP server.
+If this is do not match your requirements, it is recommended to use Jetty as the embedded HTTP server using xref:jettyHttp[Tigase HTTP API - Jetty HTTP Server] project.
 
 == Dependencies
-Default HTTP server implementation requires almost no dependencies.
-However as we needed common API for processing HTTP requests (same for HTTP server from JDK and for other HTTP server, ie. Jetty), we decided to use Servlet API in version 3.1.
+The default HTTP server implementation requires almost no dependencies as most calls are already embedded within JDK 8.
+However as a common API for processing HTTP requests is needed, as is the same for HTTP server from JDK and Jetty, we have decided to use HTTP Servlet API in version 3.1.
 
-Required file can be downloaded from Tigase HTTP API project https://projects.tigase.org/projects/tigase-http-api/files:[Files] section or using following link https://projects.tigase.org/attachments/download/1504/servlet-api-3.1.jar[servlet-api-3.1.jar]
+The required files can be downloaded from link:https://projects.tigase.org/projects/tigase-http-api/files[Tigase HTTP API project] section or using following link link:https://projects.tigase.org/attachments/download/1504/servlet-api-3.1.jar[servlet-api-3.1.jar]
 
-== Properties
-Following properties are accepted by default implementation of HTTP server provided by Tigase HTTP API:
+Please note that this file is included in dist-max, exe, and jar installer distributions of Tigase XMPP server.
+
+== Configuration Properties
+The HTTP server can be configured using any of all of the following properties.  Note that these settings only apply to the default implementation provided by Tigase HTTP API.
 
 ports:: This property is used to configure on which ports on HTTP server should listen for incoming connections. If it is not set then default port `8080` will be used
 connections:: It is used to group configurations passed to ports
-{port}::: For every `{port}` you can pass separate configuration. To do so you need to replace `{port}` with port number, ie. `8080`. For every port you can pass following properties:
+{port}::: For every `{port}` you can pass separate configuration. To do so you will need to replace `{port}` with port number, ie. `8080`. For every port you can pass following properties:
 socket:::: Sets type of socket used for handling incoming connections. Accepted values are:
  * `plain` - port will work in plain HTTP mode *(_default_)*
  * `ssl` - port will work in HTTPS mode
-domain:::: Property is used to configure domain name of SSL certificate which should be used by HTTP server running on this port (if `socket` is set to `ssl`). If it is not set then default SSL certificate of Tigase XMPP Server will be used.
+domain:::: This property is used to configure domain name of SSL certificate which should be used by HTTP server running on this port (if `socket` is set to `ssl`). If it is not set then default SSL certificate of Tigase XMPP Server will be used.
 
 == Examples
 Below are few examples for use in DSL based configuration format and older properties based format.
 
 === HTTPS on port 8443 with SSL certificate for example.com
 In DSL configuration file `httpServer` related configuration should look like this:
+[source,java]
 ----
 httpServer {
     connections {
@@ -50,6 +53,7 @@ httpServer/connections/8443/domain=example.com
 
 === Changing port from 8080 to 8081
 In DSL based configuration file:
+[source,java]
 ----
 httpServer {
     connections {
@@ -58,46 +62,50 @@ httpServer {
     }
 }
 ----
-and in properties based file format:
+In properties based file format:
 ----
 httpServer/ports=8081
 ----
 
+[[jettyHttp]]
 === Usage of Jetty HTTP server as HTTP server
-As mentioned before it is possible to use Jetty as HTTP server.
-Jetty can be used in two forms:
+As mentioned before it is possible to use Jetty as HTTP server for improved performence.
+Jetty API can be used in one of two forms: Standalone and OSGi.
 
 ==== Standalone
-In this case Jetty instance is created and configured internally by Tigase HTTP API.
-This allows same configuration properties being used as for default HTTP server configuration.
+In this case the Jetty instance is created and configured internally by Tigase HTTP API.
+This allows for the same configuration properties used as for default HTTP server configuration.
 
-* as DSL:
+===== Configured with DSL
+[source,properties]
 ----
 httpServer (class: tigase.http.jetty.JettyStandaloneHttpServer) {
     ...
 }
 ----
-* as properties:
+
+===== Configured with init.properties
+[source,properties]
 ----
 httpServer/class=tigase.http.jetty.JettyStandaloneHttpServer
 ----
 
 ==== OSGi
-This can only be used in Tigase is running inside OSGi container.
-If used Tigase HTTP API will try to retrieve Jetty HTTP server from OSGi container and use it.
+This can only be used when Tigase is running inside OSGi container.
+If this is used Tigase HTTP API will try to retrieve Jetty HTTP server from OSGi container and use it.
 
-[NOTE]
-====
-Jetty HTTP server instance will not be configured by Tigase. We would only use this instance for deployment.
-====
+NOTE: Jetty HTTP server instance is not configured by Tigase. We would only use this instance for deployment.
 
-* as DSL:
+===== Configured with DSL:
+[source,properties]
 ----
 httpServer (class: tigase.http.jetty.JettyOSGiHttpServer) {
     ...
 }
 ----
-* as properties:
+
+===== Configured with init.properties
+[source,properties]
 ----
 httpServer/class=tigase.http.jetty.JettyOSGiHttpServer
 ----
