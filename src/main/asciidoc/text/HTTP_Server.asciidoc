@@ -76,7 +76,7 @@ Jetty API can be used in one of two forms: Standalone and OSGi.
 In this case the Jetty instance is created and configured internally by Tigase HTTP API.
 This allows for the same configuration properties used as for default HTTP server configuration.
 
-===== Configured with DSL
+===== Configured with DSL:
 [source,properties]
 ----
 httpServer (class: tigase.http.jetty.JettyStandaloneHttpServer) {
@@ -84,7 +84,7 @@ httpServer (class: tigase.http.jetty.JettyStandaloneHttpServer) {
 }
 ----
 
-===== Configured with init.properties
+==== Configuration in old properties file:
 [source,properties]
 ----
 httpServer/class=tigase.http.jetty.JettyStandaloneHttpServer
@@ -104,7 +104,7 @@ httpServer (class: tigase.http.jetty.JettyOSGiHttpServer) {
 }
 ----
 
-===== Configured with init.properties
+==== Configuration in old properties file:
 [source,properties]
 ----
 httpServer/class=tigase.http.jetty.JettyOSGiHttpServer

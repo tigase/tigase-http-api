@@ -17,7 +17,7 @@ By default this component is *disabled* and needs to be enabled in configuration
 upload() {}
 ----
 
-=== Configuration in init.properties file
+==== Configuration in old properties file:
 [source,properties]
 ----
 upload/active=true
@@ -128,7 +128,7 @@ upload() {
 }
 ----
 
-==== Configuration in init.properties file:
+==== Configuration in old properties file:
 [source,config]
 ----
 upload/active=true
@@ -160,7 +160,7 @@ upload() {
 }
 ----
 
-==== Configuration in init.properties file:
+==== Configuration in old properties file:
 [source,config]
 ----
 upload/active=true

@@ -95,7 +95,7 @@ http {
 }
 ----
 
-===== Configuration in init.properties file
+===== Configuration in old properties file
 [source,properties]
 ----
 http/rest/api-keys=test1,test2:domain=api.example.com;rest.example.com:regex=/rest/*,open_access:regex=/rest/test/.*

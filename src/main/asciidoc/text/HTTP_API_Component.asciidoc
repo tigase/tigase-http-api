@@ -17,7 +17,7 @@ http {
 }
 ----
 
-==== Configured using init.properties file:
+==== Configuration in old properties file:
 [source,properties]
 ----
 http/%module_id%/active=false
@@ -28,7 +28,7 @@ You need to replace `%module_id%` with the id of module which you want to change
 === Example
 To disable REST module we would following entries can be used:
 
-==== Configured using DSL based file
+==== Configured using DSL based file:
 [source,DSL]
 ----
 http {
@@ -36,7 +36,7 @@ http {
 }
 ----
 
-==== Configured using init.properties file
+==== Configuration in old properties file:
 [source,properties]
 ----
 http/rest/active=false
@@ -49,7 +49,7 @@ By default every module (with exception of the Index module) uses a context path
 ==== Example
 Changing context path for REST module to `/api`
 
-===== Configured using DSL based file
+===== Configured using DSL based file:
 [source,dsl]
 ----
 http {
@@ -59,7 +59,7 @@ http {
 }
 ----
 
-===== Configured using init.properties file
+==== Configuration in old properties file:
 [source,properties]
 ----
 http/rest/context-path=/api
@@ -72,7 +72,7 @@ Property accepts list of strings, which in the case of init.properties file form
 ==== Example
 Here we want to move the REST module to be available only for requests directed to `api.example.com`
 
-===== Configured with DSL based file
+===== Configured with DSL based file:
 [source,dsl]
 ----
 http {
@@ -82,7 +82,7 @@ http {
 }
 ----
 
-===== Configured with init.properties file
+==== Configuration in old properties file:
 [source,properties]
 ----
 http/rest/vhosts=api.example.com
@@ -103,7 +103,7 @@ http {
 }
 ----
 
-==== Configured with init.properties file
+==== Configuration in old properties file:
 [source,properties]
 ----
 http/index/active=false
