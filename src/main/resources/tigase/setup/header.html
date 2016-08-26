@@ -63,7 +63,6 @@ background: radial-gradient(white 5%, rgba(255,255,255,0) 72%);" src="data:image
    def steps = [
 	[ id:"${i++}", label: 'About software' ],
 	[ id:"${i++}", label: 'Licence notice' ],
-	[ id:"${i++}", label: 'Load configuration' ],
 	[ id:"${i++}", label: 'Basic configuration' ],
 	[ id:"${i++}", label: 'Advanced configuration' ],
 	[ id:"${i++}", label: 'Configure features' ],
@@ -75,6 +74,7 @@ background: radial-gradient(white 5%, rgba(255,255,255,0) 72%);" src="data:image
    ];
 %>
 <div class="content">
+	<% if (currentStep != 'edit') { %>
 	<table style='border-spacing: 0px'>
 		<tr>
 			<td style='margin: 8px; vertical-align: top; padding-top: 20px; background-color: lightgray; width:250px;'><div class='sidebar'>
@@ -83,4 +83,4 @@ background: radial-gradient(white 5%, rgba(255,255,255,0) 72%);" src="data:image
 					<% } %>
 			</div>
 			<td style='min-height: 600px; padding: 1em;'>
-				
+	<% } %>

@@ -1,102 +1,84 @@
 <%  
+	def defPlugins = [
+		[ key: 'jabber:iq:auth', label: 'Non-SASL Authentication', value: true ],
+		[ key: 'urn:ietf:params:xml:ns:xmpp-sasl', label: 'SASL Authentication', value: true ],
+		[ key: 'urn:ietf:params:xml:ns:xmpp-bind', label: 'Resource Bind', value: true ],
+		[ key: 'urn:ietf:params:xml:ns:xmpp-session', label: 'Session bind', value: true ],
+		[ key: 'jabber:iq:register', label: 'User registration', value: true ],
+		[ key: 'jabber:iq:roster', label: 'Roster management', value: true ],
+		[ key: 'presence-state', label: 'Presence management (delivery)', value: true ],
+		[ key: 'presence-subscription', label: 'Presence management (subscription)', value: true ],
+		[ key: 'basic-filter', label: 'Basic filter', value: true ],
+		[ key: 'domain-filter', label: 'Domain filter', value: true ],
+		[ key: 'jabber:iq:privacy', label: 'Privacy lists', value: true ],
+		[ key: 'jabber:iq:version', label: 'Software version', value: true ],
+		[ key: 'http://jabber.org/protocol/stats', label: 'Server statistics', value: true ],
+		[ key: 'starttls', label: 'TLS', value: true ],
+		[ key: 'msgoffline', label: 'Offline message storage (old)', value: false ],
+		[ key: 'vcard-temp', label: 'vCard', value: true ],
+		[ key: 'http://jabber.org/protocol/commands', label: 'Ad-hoc commands', value: true ],
+		[ key: 'jabber:iq:private', label: 'Private data storage', value: true ],
+		[ key: 'urn:xmpp:ping', label: 'Ping', value: true ],
+		[ key: 'pep', label: 'Personal eventing (PEP)', value: true ],
+		[ key: 'zlib', label: 'Zlib stream compression (new, experimental)', value: true ],
+		[ key: 'message-archive-xep-0136', label: 'Message archive plugin (xep 0136) required by archive component', value: true ],
+		[ key: 'amp', label: 'Advanced Message Processing (AMP with offline message store)', value: true ]
+	];
     def tmp = [
-		authDB:false,
-		mucComponent: true,
-		PubSubComponent: true,
-		stunComponent: false,
-		socks5Component: false,
-		httpApiComponent: true,
-		messageArchiveComponent: true,
-		clusterMode : false,
-		acsComponent : false,
-		acsPubSubComponent : false,
-		acsMUCComponent : false,
-		serverDebug : true,
-		dbDebug : false,
-		pluginDebug : false,
-		clusterDebug : false
+		plugins:defPlugins
 	] + config;
-    def title = 'Advanced configuration options'
-    
+    def title = 'Plugins selection'
+
 	tmp.each { k,v ->
 		if (request.getParameter(k)) {
 			Object old = tmp[k];
 			if (old instanceof Boolean) {
-				tmp[k] = Boolean.parseBoolean(request.getParameter(k));
+				tmp[k] = Boolean.parseBoolean(request.getParameter(k)) || 'on'.equals(request.getParameter(k));
 			}
 			else {
 				tmp[k] = request.getParameter(k);
 			}
+		} else if ((k.endsWith("Component") || k.equals("clusterMode")) && (tmp[k] instanceof Boolean)) {
+			tmp[k] = false;
 		}
 	}
 	config.clear();
 	config.putAll(tmp);	
+	defPlugins.each { dp ->
+		def found = config.plugins.find { it.key == dp.key };
+		if (found) {
+			found.label = dp.label;
+		} else {
+			config.plugins.add(dp);
+		}
+ 	}
+	def depErrors = [];
+	[
+		[ id: "acsComponent", name: "Tigase Advanced Clustering Strategy (ACS) Component", dependencies:["clusterMode"] ],
+		[ id: "acsPubSubComponent", name: "PubSub ACS", dependencies: ["acsComponent"] ],
+		[ id: "acsMUCComponent", name: "MUC ACS", dependencies:["acsComponent"] ]
+	].each { item ->
+		if (config[item.id]) {
+			item.dependencies.each { dep ->
+				if (!config[dep]) {
+					config[item.id] = false;
+					depErrors.add(item.name);
+				}
+			}
+		}
+	}
 %>
 ${ util.include('header', [title:'Setup: ' + title]) }
-<h3>This panel offer advanced configuration options. Please do not change them unless you know what you are doing.</h3>
+<% if (!depErrors.isEmpty()) { %>
+<h3 style="color: red;">Warning: Following components were deselected as Tigase Advanced Clustering Strategy (ACS) Component or cluster mode are disabled: ${ depErrors.toString().replace("[","").replace("]","") }</h3>
+<% } %>
+<h3>Please selected/deselect plugins to be loaded by the server.</h3>
 <form method='GET' >
 <input type='hidden' name='step' value='${Integer.parseInt(currentStep)+1}'/>
-<div style='padding-top: 1em'></div>
-<label for='authDB'>Separate authentication database:</label>
-<input name='authDB' type='checkbox' ${ !(!(config.authDB)) ? 'checked' : '' } />
-<br/>
-<h3>Select optional components to run:</h3>
-<% [
-	[ key:'mucComponent', label:'MUC' ],
-	[ key:'PubSubComponent', label:'PubSub' ],
-	[ key:'stunComponent', label:'STUN Component' ],
-	[ key:'socks5Component', label:'Socks5 Component' ],
-	[ key:'httpApiComponent', label:'HTTP API Component' ],
-	[ key:'messageArchivingComponent', label:'Message Archiving Component' ]
-   ].each {
-%>
-<label for='${it.key}'>${it.label}</label>
-<input name='${it.key}' type='checkbox' ${ !(!(config[it.key])) ? 'checked' : '' } />
-<br/>
-<div style='padding-top: 1em'></div>
-<% } %>
-<h3>Cluster configuration</h3>
-<label for='clusterMode'>Do you want your server to run in the cluster mode?</label>
-<input name='clusterMode' type='checkbox' ${ !(!(config.clusterMode)) ? 'checked' : '' } onclick='
-document.getElementById("acsComponent").disabled = !this.checked;
-if (!this.checked) { 
-	document.getElementById("acsComponent").checked = false;
-	document.getElementById("acsPubSubComponent").checked = false;
-	document.getElementById("acsMUCComponent").checked = false;
-}
-document.getElementById("acsPubSubComponent").disabled = !document.getElementById("acsComponent").checked;
-document.getElementById("acsMUCComponent").disabled = !document.getElementById("acsComponent").checked;
-'/>
-<br/>
-<div style='padding-top: 1em'></div>
 
-<label for='acsComponent'>Tigase Advanced Clustering Strategy (ACS) Component</label>
-<input id="acsComponent" name='acsComponent' type="checkbox" ${(config.clusterMode) ? "" : "disabled"} ${ !(!(config.acsComponent)) ? 'checked' : '' } onclick='
-document.getElementById("acsPubSubComponent").disabled = !this.checked;
-document.getElementById("acsMUCComponent").disabled = !this.checked;
-if (!this.checked) { 
-	document.getElementById("acsPubSubComponent").checked = false;
-	document.getElementById("acsMUCComponent").checked = false;
-}' />
-<br/>
-<div style='padding-top: 1em'></div>
-<label for='acsPubSubComponent'>PubSub ACS</label>
-<input id="acsPubSubComponent" name='acsPubSubComponent' type="checkbox" ${(config.acsComponent && config.clusterMode) ? "" : "disabled"} ${ !(!(config.acsPubSubComponent)) ? 'checked' : '' }/>
-<br/>
-<div style='padding-top: 1em'></div>
-<label for='acsMUCComponent'>MUC ACS</label>
-<input id="acsMUCComponent" name='acsMUCComponent' type="checkbox" ${(config.acsComponent && config.clusterMode) ? "" : "disabled"} ${ !(!(config.acsMUCComponent)) ? 'checked' : '' } />
-	   
-<h3>Debug configuration</h3>
-<% [
-	[ key:'serverDebug', label:'Base server debug' ],
-	[ key:'pluginsDebug', label:'Plugins debug' ],
-	[ key:'dbDebug', label:'Database debug' ],
-	[ key:'clusterDebug', label:'Cluster debug' ]
-   ].each {
- %>
-<label for='${it.key}'>${it.label}</label>
-<input name='${it.key}' type='checkbox' ${ !(!(config[it.key])) ? 'checked' : '' } />
+<% config.plugins.each { %>
+<label for='${it.key}'>${it.label ?: it.key}</label>
+<input name='${it.key}' type='checkbox' ${ it.value ? "checked" : "" } />
 <br/>
 <div style='padding-top: 1em'></div>
 <% } %>
