@@ -148,7 +148,7 @@ public class JavaStandaloneHttpServer extends AbstractHttpServer {
 		}
 	}
 
-	@Bean(name="executor", parent = JavaStandaloneHttpServer.class)
+	@Bean(name="executor", parent = JavaStandaloneHttpServer.class, exportable = true)
 	public static class ExecutorWithTimeout implements Executor, Initializable, UnregisterAware, ConfigurationChangedAware {
 
 		private static final String THREADS_KEY = "threads";
