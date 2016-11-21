@@ -240,6 +240,14 @@
 					<include>**/*.html</include>
 				</includes>
 			</resource>
+			<resource>
+				<directory>src/main/asciidoc</directory>
+				<targetPath>documentation</targetPath>
+				<includes>
+					<include>**/*.asciidoc</include>
+					<include>**/*.css</include>
+				</includes>
+			</resource>
 		</resources>
 
 
