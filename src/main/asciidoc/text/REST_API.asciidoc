@@ -77,11 +77,14 @@ An example result is below:
 
 === Executing commands using ad-hoc command
 
-==== using XML
+==== Retrieving list of active users
+
+===== using XML
 To execute command `get active users` a request using POST method for `/rest/adhoc/sess-man@domain.com` sending following content:
 
 NOTE: This request requires authentication using https://tools.ietf.org/html/rfc2617:[HTTP Basic Authentication]
 
+.Request in XML
 [source,xml]
 ----
 <command>
@@ -103,6 +106,8 @@ In this request we passed all parameters needed to execute adhoc command. This i
 We also need to pass `Content-Type: text/xml` in the HTTP header of request _or_ add `type` parameter set to `text/xml`.
 
 Below is an example result for request presented above:
+
+.Response in XML
 [source,xml]
 ----
 <command>
@@ -119,11 +124,14 @@ Below is an example result for request presented above:
 </command>
 ----
 
-==== using JSON
+===== using JSON
 To execute the command to `get active users` in JSON format, request using POST method for `/rest/adhoc/sess-man@domain.com` sending the following content:
 
 NOTE: Request requires authentication using https://tools.ietf.org/html/rfc2617:[HTTP Basic Authentication]
 
+NOTE: To use JSON it is required to set HTTP header `Content-Type` to `application/json`
+
+.Request in JSON
 [source,json]
 ----
 {
@@ -146,7 +154,7 @@ NOTE: Request requires authentication using https://tools.ietf.org/html/rfc2617:
 In this request we passed all the parameters needed to execute this adhoc command. We passed the node of adhoc command, and values for fields required by adhoc command.
 In this case, we've passed `domain.com` for `domainjid` field, and `25` for `max_items` field.
 
-Below is example result for request presented above:
+.Response in JSON
 [source,json]
 ----
 {
@@ -164,6 +172,117 @@ Below is example result for request presented above:
             }
         ]
     }
+}
+----
+
+==== Ending user session
+
+To execute command to get active users request using POST method for `/rest/adhoc/sess-man@domain.com` sending content explained below (may require authentication using `Basic HTTP Authentication` with admin credentials depending on configuration). `sess-man@domain.com` in URL is JID of session manager component which usually is in form of `sess-man@domain` where `domain` is hosted domain name.
+
+===== using XML
+
+To execute command using XML content you need to set HTTP header `Content-Type` to `application/xml`
+
+.Request in XML
+[source,xml]
+----
+<command>
+  <node>http://jabber.org/protocol/admin#end-user-session</node>
+  <fields>
+    <item>
+      <var>accountjids</var>
+      <value>
+        <item>test@domain.com</item>
+      </value>
+    </item>
+  </fields>
+</command>
+</code></pre>
+----
+where `test@domain.com` is JID of user which should be disconnected.
+
+As a result server will return following XML:
+
+.Response in XML
+[source,xml]
+----
+<command>
+  <jid>sess-man@domain.com</jid>
+  <node>http://jabber.org/protocol/admin#end-user-session</node>
+  <fields>
+    <item>
+      <var>Notes</var>
+      <type>text-multi</type>
+      <value>Operation successful for user test@domain.com/resource</value>
+     </item>
+  </fields>
+</command>
+----
+to confirm that user `test@domain.com` with resource `resource` was connected and it was disconnected.
+
+If user was not connected server will return following response:
+[source,xml]
+----
+<command>
+  <jid>sess-man@domain.com</jid>
+  <node>http://jabber.org/protocol/admin#end-user-session</node>
+  <fields />
+</command>
+----
+
+==== using JSON
+
+To execute command using XML content you need to set HTTP header `Content-Type` to `application/json`
+
+.Request in JSON
+[source,json]
+----
+{
+  "command" : {
+    "node": "http://jabber.org/protocol/admin#end-user-session",
+    "fields": [
+      {
+        "var" : "accountjids",
+        "value" : [ "test@domain.com" ]
+      }
+    ]
+  }
+}
+----
+where `test@domain.com` is JID of user which should be disconnected.
+
+As a result server will return following JSON:
+
+.Response in JSON
+[source,json]
+----
+{
+  "command" : {
+    "jid" : "sess-man@domain.com",
+    "node" : "http://jabber.org/protocol/admin#end-user-session",
+    "fields" : [
+      {
+        "var" : "Notes",
+        "type" : "text-multi",
+        "value" : [
+          "Operation successful for user test@domain.com/resource"
+        ]
+      }
+    ]
+  }
+}
+----
+to confirm that user `test@domain.com` with resource `resource` was connected and it was disconnected.
+
+If user was not connected server will return following response:
+[source,json]
+----
+{
+  "command" : {
+    "jid" : "sess-man@domain.com",
+    "node" : "http://jabber.org/protocol/admin#end-user-session",
+    "fields" : []
+  }
 }
 ----
 
