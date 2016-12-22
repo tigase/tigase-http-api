@@ -25,6 +25,7 @@ import groovy.text.GStringTemplateEngine
 import groovy.text.Template
 import groovy.text.TemplateEngine
 import groovy.transform.CompileStatic
+import tigase.db.UserRepositoryMDImpl
 
 import javax.servlet.ServletConfig
 import javax.servlet.ServletException
@@ -50,7 +51,7 @@ public class SetupServlet extends HttpServlet {
 	private final Map config = [test:1];
 	
 	private SetupModule setupModule;
-	
+
 	@Override
     public void init() throws ServletException {
 		super.init();
@@ -79,14 +80,21 @@ public class SetupServlet extends HttpServlet {
 		}
 
 		loadTemplates();
-		
-		String i = request.getParameter("step");
-		if (i == null || i.isEmpty()) {
-			i = "1";
+
+		Template t = null;
+		Map templateParams = [request:request, response:response, servlet:this, config:config];;
+		if (setupModule.getUserRepository() == null || ((setupModule.getUserRepository() instanceof UserRepositoryMDImpl) && !((UserRepositoryMDImpl) setupModule.getUserRepository()).getRepo(null)))  {
+			String i = request.getParameter("step");
+			if (i == null || i.isEmpty()) {
+				i = "1";
+			}
+			t = templates.get("step" + i);
+			templateParams.put("currentStep", i);
+		} else {
+			t = templates.get("edit");
+			templateParams.put("currentStep", "edit");
 		}
-		Template t = templates.get("step" + i);
-		Map templateParams = null;
-		Map util = [
+		templateParams.put("util", [
 				link: { String url ->
 					if (request.getParameter("api-key")) {
 						return request.getContextPath() + url + (url.contains("?") ? "&" : "?") + "api-key=" + request.getParameter("api-key");
@@ -102,8 +110,7 @@ public class SetupServlet extends HttpServlet {
 					if (params != null) map.putAll(params);
 					return temp.make(map);
 				}				
-				];
-		templateParams = [request:request, response:response, servlet:this, util:util, config:config, currentStep:i];
+				]);
 		Writable w = t.make(templateParams);
 		
 		w.writeTo(response.getWriter());
@@ -125,7 +132,7 @@ public class SetupServlet extends HttpServlet {
 			}
 			i++;
 		}
-		["header", "footer", "index"].each { String file ->
+		["header", "footer", "index", "edit"].each { String file ->
 			try {
 				String templateSrc = load(file, null, "html");
 				Template template = templateEngine.createTemplate(templateSrc);

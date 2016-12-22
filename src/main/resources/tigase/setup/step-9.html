@@ -1,14 +1,35 @@
-<%  def title = 'HTTP API - REST security configuration' %>
+<%  def title = 'Setup security'
+def tmp = [
+	test:1
+] + config;
+
+tmp.each { k,v ->
+	if (request.getParameter(k)) {
+		Object old = tmp[k];
+		if (old instanceof Boolean) {
+			tmp[k] = Boolean.parseBoolean(request.getParameter(k));
+		}
+		else {
+			tmp[k] = request.getParameter(k);
+		}
+	}
+}
+config.clear();
+config.putAll(tmp);
+%>
 ${ util.include('header', [title:'Setup: ' + title]) }
-<h3>Configuration of security features of HTTP REST API</h3>
+<h3>Security of setup.</h3>
+<h3>By default Tigase XMPP Server is configured to allow access to this setup page only user authorized by JID and password listed as admins.</h3>
+<h3>However in rare conditions it may be impossible to access database for authentication. In this case we use separate admin credentials stored in <i>etc/init.properties</i> file.</h3>
+<h3>Please enter username and password you wish to use in this situation. If you leave it blank, setup will be inaccessible without connection to database.</h3>
 <form method='GET' >
-<label for="access_type"><b>Select security model of REST API</b></label><br/>
-<input type="radio" name="httpRestApiSecurity" value="forbidden" ${((config.httpRestApiSecurity ?: "forbidden") == 'forbidden') ? 'checked' : ''}>Access forbidden (REST API disabled)<br/>
-<input type="radio" name="httpRestApiSecurity" value="api_keys" ${(config.httpRestApiSecurity == 'api_keys') ? 'checked' : ''}>Access requires on of API keys: <input type="text" name="httpRestApiKeys" value="${config.httpRestApiKeys ?: ''}"/><br/>
-<input type="radio" name="httpRestApiSecurity" value="open_access" ${(config.httpRestApiSecurity == 'open_access') ? 'checked' : ''}>Open access<br/>
-
-<input type='hidden' name='step' value='10'/>
-
-<button type="submit">Next</button>
+	<input type='hidden' name='step' value='${Integer.parseInt(currentStep) + 1}'/>
+	<label for='setupUser'>Username:</label>
+	<input name='setupUser' type='text' value="${config.setupUser ?: ''}" /><br/>
+	<div style='padding-top: 1em'></div>
+	<label for='setupPassword'>Password:</label>
+	<input name='setupPassword' type='password' value="${config.setupPassword ?: ''}"/><br/>
+	<div style='padding-top: 1em'></div>
+	<button type="submit">Next</button>
 </form>
-${ util.include('footer') } 
+${ util.include('footer') }
