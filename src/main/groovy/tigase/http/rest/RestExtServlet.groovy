@@ -102,15 +102,18 @@ class RestExtServlet extends RestServlet {
 		// send output data enconded with XML or JSON
 		String type = request.getParameter("type");
 		if (type == null) {
-			String acceptString = request.getHeader("Accept");
-			if (acceptString && acceptString.startsWith("text/html")) {
-				type = "text/html";
+			type = request.getHeader("Content-Type");
+			if (type == null) {
+				String acceptString = request.getHeader("Accept");
+				if (acceptString && acceptString.startsWith("text/html")) {
+					type = "text/html";
+				}
 			}
 		}
 		if (log.isLoggable(Level.FINEST)) {
 			log.log(Level.FINEST, "got result for request with type = " + type);
 		}
-		if (type == "text/html") {
+		if (type == "text/html" || type == 'application/x-www-form-urlencoded') {
 			def templates = handlerTemplates[route];
 			if (log.isLoggable(Level.FINEST)) {
 				log.log(Level.WARNING, "looking for template for " + route + " and method " + request.getMethod() 
