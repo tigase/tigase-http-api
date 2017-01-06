@@ -24,9 +24,26 @@ package tigase.http.admin;
 import groovy.lang.Writable;
 import groovy.text.GStringTemplateEngine;
 import groovy.text.Template;
+import org.codehaus.groovy.control.CompilationFailedException;
+import tigase.http.ServiceImpl;
+import tigase.http.api.Service;
+import tigase.server.Command;
+import tigase.server.Packet;
+import tigase.util.TigaseStringprepException;
+import tigase.xml.Element;
+import tigase.xml.XMLUtils;
+import tigase.xmpp.BareJID;
+import tigase.xmpp.JID;
+import tigase.xmpp.StanzaType;
+
+import javax.servlet.AsyncContext;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,25 +52,6 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.servlet.AsyncContext;
-import tigase.http.api.Service;
-import tigase.http.ServiceImpl;
-import tigase.server.Packet;
-import tigase.xml.Element;
-
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.codehaus.groovy.control.CompilationFailedException;
-import tigase.http.PacketWriter;
-import tigase.server.Command;
-import tigase.util.TigaseStringprepException;
-import tigase.xml.XMLUtils;
-import tigase.xmpp.BareJID;
-import tigase.xmpp.JID;
-import tigase.xmpp.StanzaType;
 
 /**
  *
@@ -162,7 +160,7 @@ public class Servlet extends HttpServlet {
 		executeAdhocForm(request.getUserPrincipal(), jid, node, formFields, (Command.DataType formType1, List<Element> formFields1) -> {
 			int iteration = model.containsKey("iteration") ? (Integer) model.get("iteration") : 1;
 			if (formType1 == Command.DataType.form && ((requestHasValuesForFields(formFields1, request) && (iteration < 10)) || (iteration == 1 && "POST".equals(request.getMethod())))) {
-				setFieldValuesFromRequest(formFields1, request);
+				setFieldValuesFromRequest(formFields1, request, iteration);
 				model.put("iteration", ++iteration);
 				try {
 					processRequestStep(request, asyncCtx, model, jid, node, formFields1);
@@ -222,7 +220,7 @@ public class Servlet extends HttpServlet {
 		service.sendPacket(iq, null, (Packet result) -> {
 			Element xEl = result.getElement().findChildStaticStr(new String[] { "iq", "command", "x"});
 			List<Element> fields = xEl == null ? new ArrayList<>() : xEl.getChildren();
-			final Command.DataType formType = (xEl == null || xEl.getAttributeStaticStr("type") != null) 
+			final Command.DataType formType = (xEl != null && xEl.getAttributeStaticStr("type") != null)
 					? Command.DataType.valueOf(xEl.getAttributeStaticStr("type")) : Command.DataType.result;
 			fields.forEach((Element e) -> {
 				if (e.getName() != "field")
@@ -231,6 +229,9 @@ public class Servlet extends HttpServlet {
 					e.setAttribute("type", formType == Command.DataType.form ? "text-single" : "fixed");
 				}
 			});
+			if (fields.isEmpty()) {
+				fields.add(new Element("title", "Execution completed"));
+			}
 			callback.call(formType, fields);
 		});
 	}
@@ -345,7 +346,7 @@ public class Servlet extends HttpServlet {
 		return contains == needed && needed > 0;
 	}
 	
-	private void setFieldValuesFromRequest(List<Element> formFields, HttpServletRequest request) {
+	private void setFieldValuesFromRequest(List<Element> formFields, HttpServletRequest request, int iteration) {
 		if (formFields == null)
 			return;
 		
@@ -356,11 +357,13 @@ public class Servlet extends HttpServlet {
 			String type = formField.getAttributeStaticStr("type");
 			if (type == null)
 				return;
-			
+
+			List<Element> orginalChildren = new ArrayList<>();
 			if (formField.getChildren() != null) {
 				formField.getChildren().forEach((Element oldChild) -> { 
 					if (oldChild != null) { 
-						formField.removeChild(oldChild); 
+						formField.removeChild(oldChild);
+						orginalChildren.add(oldChild);
 					}
 				});
 			}
@@ -400,6 +403,8 @@ public class Servlet extends HttpServlet {
 					}
 					break;
 				case "hidden":
+					formField.addChildren(orginalChildren);
+					break;
 				case "list-single":
 				case "text-single":
 				case "jid-single":
