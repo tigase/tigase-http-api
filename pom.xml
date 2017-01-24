@@ -45,6 +45,17 @@
 		<url>http://www.tigase.org</url>
 	</organization>
 
+    <profiles>
+        <profile>
+            <id>disable-java8-doclint</id>
+            <activation>
+                <jdk>[1.8,)</jdk>
+            </activation>
+            <properties>
+                <additionalparam>-Xdoclint:none</additionalparam>
+            </properties>
+        </profile>
+    </profiles>	
 	<build>
 		<finalName>${project.artifactId}</finalName>
 
