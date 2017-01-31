@@ -22,7 +22,6 @@ import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-import tigase.http.Activator;
 import tigase.http.DeploymentInfo;
 import tigase.http.api.HttpServerIfc;
 import tigase.kernel.core.Kernel;

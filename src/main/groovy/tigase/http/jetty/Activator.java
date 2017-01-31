@@ -21,7 +21,26 @@
  */
 package tigase.http.jetty;
 
+import org.osgi.framework.BundleContext;
 import tigase.osgi.AbstractActivator;
 
 public class Activator extends AbstractActivator {
+
+	private static BundleContext context;
+
+	public static BundleContext getContext() {
+		return context;
+	}
+
+	@Override
+	public void start(BundleContext bc) throws Exception {
+		context = bc;
+		super.start(bc);
+	}
+
+	@Override
+	public void stop(BundleContext bc) throws Exception {
+		super.stop(bc);
+		context = null;
+	}
 }
