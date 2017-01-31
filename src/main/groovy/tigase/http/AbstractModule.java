@@ -28,6 +28,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.script.Bindings;
 import tigase.db.AuthRepository;
 import tigase.db.UserRepository;
@@ -37,6 +39,7 @@ import tigase.http.rest.ApiKeyRepository;
 import tigase.server.Command;
 import tigase.server.Packet;
 import tigase.server.script.CommandIfc;
+import tigase.stats.StatisticsList;
 import tigase.util.TigaseStringprepException;
 import tigase.xml.Element;
 import tigase.xmpp.BareJID;
@@ -44,6 +47,8 @@ import tigase.xmpp.JID;
 
 public abstract class AbstractModule implements Module {
 
+	private static final ConcurrentHashMap<String,AbstractModule> modules = new ConcurrentHashMap<>();		
+	
 	private JID jid;
 	private PacketWriter writer;
 	
@@ -51,6 +56,12 @@ public abstract class AbstractModule implements Module {
 	private ApiKeyRepository apiKeyRepository = null;
 	protected CommandManager commandManager = new CommandManager(this);
 	
+	protected final String uuid = UUID.randomUUID().toString();
+	
+	public static <T extends AbstractModule> T getModuleByUUID(String uuid) {
+		return (T) modules.get(uuid);
+	}	
+
 	@Override
 	public boolean addOutPacket(Packet packet) {
 		return writer.write(this, packet);
@@ -61,6 +72,13 @@ public abstract class AbstractModule implements Module {
 		return writer.write(this, packet, timeout, callback);
 	}
 
+	@Override
+	public void everyHour() {}
+	@Override
+	public void everyMinute() {}
+	@Override
+	public void everySecond() {}
+	
 	@Override
 	public String[] getFeatures() {
 		return new String[] { Command.XMLNS };
@@ -113,6 +131,16 @@ public abstract class AbstractModule implements Module {
 	}
 	
 	@Override
+	public void getStatistics(String compName, StatisticsList list) {
+		
+	}
+	
+	@Override
+	public void setStatisticsPrefix(String prefix) {
+		
+	}
+	
+	@Override
 	public void setProperties(Map<String, Object> props) {
 		serviceEntity = new ServiceEntity(getName(), null, getDescription(), true);
 		serviceEntity.setFeatures(getFeatures());
@@ -121,6 +149,11 @@ public abstract class AbstractModule implements Module {
 		}
 		apiKeyRepository.setRepoUser(BareJID.bareJIDInstanceNS(getName(), (String) props.get("componentName")));
 		apiKeyRepository.setProperties(props);				
+	}
+	
+	@Override
+	public void statisticExecutedIn(long executionTime) {
+		
 	}
 	
 	@Override
@@ -156,11 +189,16 @@ public abstract class AbstractModule implements Module {
 	
 	@Override
 	public void start() {
+		modules.put(uuid, this);
 	}
 	
 	@Override
 	public void stop() {
+		modules.remove(uuid, this);
 		apiKeyRepository.setAutoloadTimer(0);
 	}
-	
+
+	public void executedIn(String path, long executionTime) {
+		
+	}
 }

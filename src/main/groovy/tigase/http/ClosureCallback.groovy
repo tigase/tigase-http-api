@@ -20,9 +20,8 @@
  * $Date$
  */
 
-package tigase.http.rest
+package tigase.http
 
-import tigase.http.*;
 import tigase.server.Packet
 
 class ClosureCallback implements PacketWriter.Callback {

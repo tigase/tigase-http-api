@@ -21,17 +21,19 @@
  */
 package tigase.http.rest
 
+import tigase.http.ServiceImpl
+import tigase.http.coders.Coder
 import tigase.http.coders.JsonCoder
 import tigase.http.coders.XmlCoder
 import tigase.xmpp.BareJID
 
+import javax.servlet.ServletConfig
 import javax.servlet.annotation.WebServlet
 import javax.servlet.http.HttpServlet
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 import java.util.logging.Level
-import java.util.logging.Logger;
-import javax.servlet.ServletConfig
+import java.util.logging.Logger
 
 @WebServlet(asyncSupported=true)
 public class RestServlet extends HttpServlet {
@@ -43,21 +45,25 @@ public class RestServlet extends HttpServlet {
     def methods = ["GET", "POST", "PUT", "DELETE"];
     def handlers = [:];
 
-    def xmlCoder = new XmlCoder();
-    def jsonCoder = new JsonCoder();
+    Coder xmlCoder = new XmlCoder();
+    Coder jsonCoder = new JsonCoder();
 
-	def service = null;
+	Service<RestModule> service = null;
+	File scriptsDir = null;
 	
     @Override
     public void init() {
         super.init()
 		ServletConfig cfg = super.getServletConfig();
 		String moduleName = cfg.getInitParameter(REST_MODULE_KEY);
-		service = new ServiceImpl(moduleName);
-		File scriptDir = new File(cfg.getInitParameter(SCRIPTS_DIR_KEY));
+		service = new ServiceImpl<RestModule>(moduleName);
+		scriptsDir = new File(cfg.getInitParameter(SCRIPTS_DIR_KEY));
 		
-		File[] scriptFiles = RestModule.getGroovyFiles(scriptDir);
+		File[] scriptFiles = RestModule.getGroovyFiles(scriptsDir);
+		
 		loadHandlers(scriptFiles);
+		
+		service.getModule().registerRestServlet(this);
     }
 
     public void loadHandlers(File[] scriptFiles) {
@@ -86,13 +92,7 @@ public class RestServlet extends HttpServlet {
 
     @Override
     public void service(HttpServletRequest request, HttpServletResponse response) {
-        try {
-            processRequest(request, response);
-        }
-        catch (Exception ex) {
-            log.log(Level.FINE, "exception processing request", ex);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        }
+        processRequest(request, response);
     }
 
     /**
@@ -197,10 +197,16 @@ public class RestServlet extends HttpServlet {
      * @return
      */
     def execute(HttpServletRequest request, HttpServletResponse response, Handler route, def reqParams, def asyncCtx) {
+		long start = System.currentTimeMillis();
+        def prefix = request.getServletPath();
+        prefix = request.getContextPath() + prefix
+		
         String type = request.getContentType();
         String requestContent = null;
 
         def callback = { result ->
+			long end = System.currentTimeMillis();
+			executedIn(prefix + route.regex.toString(), end-start);
             if (result == null) {
                 // no response - nothing to send so there was nothing
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -229,7 +235,7 @@ public class RestServlet extends HttpServlet {
 					encodeResults(request, response, route, reqParams, result);
                 }
             }
-
+			
             if (asyncCtx) {
                 asyncCtx.complete();
             }
@@ -283,6 +289,10 @@ public class RestServlet extends HttpServlet {
         // Call exact closure
         route."exec$method".call(params);
     }
+	
+	def executedIn(String route, long executionTime) {
+		service.executedIn(route, executionTime);
+	}
 
 	def encodeResults(HttpServletRequest request, HttpServletResponse response, Handler route, def reqParams, def result ) {
 		// send output data enconded with XML or JSON

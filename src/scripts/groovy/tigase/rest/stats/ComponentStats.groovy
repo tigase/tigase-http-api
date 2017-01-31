@@ -26,7 +26,7 @@ import tigase.server.Command
 import tigase.server.Iq
 import tigase.server.Packet
 import tigase.util.Base64
-import tigase.util.DNSResolver
+import tigase.util.DNSResolverFactory
 import tigase.xml.Element
 import tigase.xmpp.BareJID
 import tigase.xmpp.JID
@@ -44,6 +44,15 @@ class ComponentStatsHandler extends tigase.http.rest.Handler {
     def DISCO_ITEMS_XMLNS = "http://jabber.org/protocol/disco#items";
 
     public ComponentStatsHandler() {
+		description = [
+			regex : "/{component_jid}",
+			GET : [ info:'Retrieve statistics of component', 
+				description: """Retrieves statistics of a component which jid is passed in url as {component_jid} and returns them in form of XML or JSON depending on passed Accept HTTP request header.
+
+Example partial response for sess-man component:
+\${util.formatData([stats:[component:'sess-man',node:'stats/sess-man',data:[[var:'sess-man/Registered accounts',value:292],[var:'sess-man/Open user connections',value:10]]]])}
+"""]
+		]
 		regex = /\/([^@\/]+)/
         requiredRole = "admin"
         isAsync = true
@@ -53,7 +62,7 @@ class ComponentStatsHandler extends tigase.http.rest.Handler {
          */
         execGet = { Service service, callback, user, compName ->
 
-			String domain = DNSResolver.getDefaultHostname();
+			String domain = DNSResolverFactory.getInstance().getDefaultHost();
 			String node = "stats/" + compName;
 			
             Element iq = new Element("iq");

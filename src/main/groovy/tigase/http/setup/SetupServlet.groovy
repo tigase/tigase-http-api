@@ -19,30 +19,22 @@
  * Last modified by $Author$
  * $Date$
  */
-package tigase.http.setup;
+package tigase.http.setup
 
-import groovy.lang.Writable;
-import groovy.text.GStringTemplateEngine;
-import groovy.text.Template;
-import groovy.text.TemplateEngine;
+import groovy.text.GStringTemplateEngine
+import groovy.text.Template
+import groovy.text.TemplateEngine
 import groovy.transform.CompileStatic
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.servlet.ServletConfig
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import tigase.db.UserRepositoryMDImpl
 
+import javax.servlet.ServletConfig
+import javax.servlet.ServletException
+import javax.servlet.http.HttpServlet
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
+import java.util.concurrent.ConcurrentHashMap
+import java.util.logging.Level
+import java.util.logging.Logger
 /**
  *
  * @author andrzej
@@ -59,7 +51,7 @@ public class SetupServlet extends HttpServlet {
 	private final Map config = [test:1];
 	
 	private SetupModule setupModule;
-	
+
 	@Override
     public void init() throws ServletException {
 		super.init();
@@ -83,21 +75,26 @@ public class SetupServlet extends HttpServlet {
 	protected void processRequest(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		
-		if (setupModule.getAuthRepository() != null && !("localhost".equals(request.getRemoteHost()) || "127.0.0.1".equals(request.getRemoteAddr()) || !"::1".equals(request.getRemoteAddr()))) {
-			if (!request.isUserInRole('admin') && !request.authenticate(response)) {
-				return;
-			}
+		if (!request.isUserInRole('admin') && !request.authenticate(response)) {
+			return;
 		}
-		
+
 		loadTemplates();
-		
-		String i = request.getParameter("step");
-		if (i == null || i.isEmpty()) {
-			i = "1";
+
+		Template t = null;
+		Map templateParams = [request:request, response:response, servlet:this, config:config];;
+		if (setupModule.getUserRepository() == null || ((setupModule.getUserRepository() instanceof UserRepositoryMDImpl) && !((UserRepositoryMDImpl) setupModule.getUserRepository()).getRepo(null)))  {
+			String i = request.getParameter("step");
+			if (i == null || i.isEmpty()) {
+				i = "1";
+			}
+			t = templates.get("step" + i);
+			templateParams.put("currentStep", i);
+		} else {
+			t = templates.get("edit");
+			templateParams.put("currentStep", "edit");
 		}
-		Template t = templates.get("step" + i);
-		Map templateParams = null;
-		Map util = [
+		templateParams.put("util", [
 				link: { String url ->
 					if (request.getParameter("api-key")) {
 						return request.getContextPath() + url + (url.contains("?") ? "&" : "?") + "api-key=" + request.getParameter("api-key");
@@ -113,8 +110,7 @@ public class SetupServlet extends HttpServlet {
 					if (params != null) map.putAll(params);
 					return temp.make(map);
 				}				
-				];
-		templateParams = [request:request, response:response, servlet:this, util:util, config:config, currentStep:i];
+				]);
 		Writable w = t.make(templateParams);
 		
 		w.writeTo(response.getWriter());
@@ -136,7 +132,7 @@ public class SetupServlet extends HttpServlet {
 			}
 			i++;
 		}
-		["header", "footer", "index"].each { String file ->
+		["header", "footer", "index", "edit"].each { String file ->
 			try {
 				String templateSrc = load(file, null, "html");
 				Template template = templateEngine.createTemplate(templateSrc);
@@ -157,7 +153,7 @@ public class SetupServlet extends HttpServlet {
 			is = getClass().getResourceAsStream("/"+path);
 		}
 		if (is == null)
-			throw new RuntimeException("Resource not found");
+			throw new IOException("Resource not found");
 		
 		char[] buf = new char[1024];
 		StringBuilder sb = new StringBuilder();

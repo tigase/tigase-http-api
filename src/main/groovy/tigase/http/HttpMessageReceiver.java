@@ -21,38 +21,31 @@
  */
 package tigase.http;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import tigase.conf.ConfigurationException;
 import tigase.db.AuthRepository;
 import tigase.db.RepositoryFactory;
 import tigase.db.UserRepository;
+import tigase.http.admin.AdminModule;
 import tigase.http.dnswebservice.DnsWebServiceModule;
 import tigase.http.rest.ApiKeyRepository;
 import tigase.http.rest.RestModule;
-import tigase.http.setup.SetupModule;
 import tigase.http.server.ServerInfoModule;
+import tigase.http.setup.SetupModule;
 import tigase.http.ui.WebModule;
 import tigase.server.AbstractMessageReceiver;
 import tigase.server.Packet;
 import tigase.server.Permissions;
+import tigase.stats.StatisticsList;
 import tigase.xml.Element;
 import tigase.xmpp.Authorization;
-import tigase.xmpp.BareJID;
 import tigase.xmpp.JID;
 import tigase.xmpp.PacketErrorTypeException;
 import tigase.xmpp.StanzaType;
+
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class HttpMessageReceiver extends AbstractMessageReceiver implements PacketWriter {
 
@@ -63,12 +56,33 @@ public class HttpMessageReceiver extends AbstractMessageReceiver implements Pack
 
 	private Map<String,Module> modules = new ConcurrentHashMap<String,Module>();
 	private static final Class[] ALL_MODULES = { RestModule.class, DnsWebServiceModule.class, 
-		ServerInfoModule.class, SetupModule.class, WebModule.class };
+		ServerInfoModule.class, SetupModule.class, WebModule.class, AdminModule.class, IndexModule.class };
 	
-	private HttpServer httpServer = new HttpServer();;
+	private HttpServer httpServer = new HttpServer();
 	
     private UserRepository user_repo_impl = null;
     private AuthRepository auth_repo_impl = null;
+	
+	@Override
+	public void everyHour() {
+		for (Module m : modules.values()) {
+			m.everyHour();
+		}		
+	}
+	
+	@Override
+	public void everyMinute() {
+		for (Module m : modules.values()) {
+			m.everyMinute();
+		}		
+	}
+	
+	@Override
+	public void everySecond() {
+		for (Module m : modules.values()) {
+			m.everySecond();
+		}
+	}
 	
     @Override
     public void start() {
@@ -171,6 +185,15 @@ public class HttpMessageReceiver extends AbstractMessageReceiver implements Pack
 			return super.getDiscoItems(node, jid, from);
 		}
 	}	
+	
+	@Override
+	public void getStatistics(StatisticsList list) {
+		super.getStatistics(list);
+		
+		for (Module m : modules.values()) {
+			m.getStatistics(getName(), list);
+		}
+	}	
 		
 	@Override
 	public void setProperties(Map<String, Object> props) throws ConfigurationException {
@@ -189,40 +212,45 @@ public class HttpMessageReceiver extends AbstractMessageReceiver implements Pack
 					httpProps.put(e.getKey().substring(keyPrefix.length()), e.getValue());
 				}
 			}
-			httpServer.setProperties(httpProps);		
-			httpServer.start();
+			httpServer.setProperties(httpProps);
 		}
 		
         user_repo_impl = (UserRepository) props.get(SHARED_USER_REPO_PROP_KEY);
         auth_repo_impl = (AuthRepository) props.get(SHARED_AUTH_REPO_PROP_KEY);;		
 		
+		reconfigure(props);
+	}
+	
+	protected void reconfigure(Map<String, Object> props) {
 		JID componentJid = JID.jidInstanceNS(getName() + "." + this.getDefHostName().getDomain());
-		
+
+		httpServer.start();
+
 		// configuring modules
 		for (Class cls : ALL_MODULES) {
 			try {
 				Module module = ((Class<? extends Module>) cls).newInstance();
 				String name = module.getName();
-				Map<String,Object> moduleProps = module.getDefaults();
+				Map<String, Object> moduleProps = module.getDefaults();
 				moduleProps.put("componentName", getName());
 				moduleProps.put(RepositoryFactory.SHARED_USER_REPO_PROP_KEY, props.get(RepositoryFactory.SHARED_USER_REPO_PROP_KEY));
 				moduleProps.put(ApiKeyRepository.API_KEYS_KEY, props.get(ApiKeyRepository.API_KEYS_KEY));
-				
+
 				String modulePrefix = name + "/";
-				for (Map.Entry<String,Object> e : props.entrySet()) {
+				for (Map.Entry<String, Object> e : props.entrySet()) {
 					if (e.getKey().startsWith(modulePrefix)) {
 						moduleProps.put(e.getKey().substring(modulePrefix.length()), e.getValue());
 					}
 				}
-				
-				if ((Boolean)moduleProps.get("active")) {
+
+				if ((Boolean) moduleProps.get("active")) {
 					Module oldModule = modules.get(name);
 					if (oldModule != null) {
 						module = oldModule;
 					}
-					moduleProps.put(Module.HTTP_SERVER_KEY, httpServer);		
+					moduleProps.put(Module.HTTP_SERVER_KEY, httpServer);
 					StringBuilder sb = new StringBuilder();
-					for (Map.Entry<String,Object> e : moduleProps.entrySet()) {
+					for (Map.Entry<String, Object> e : moduleProps.entrySet()) {
 						sb.append(e.getKey());
 						sb.append(" = ");
 						sb.append(e.getValue());
@@ -232,21 +260,19 @@ public class HttpMessageReceiver extends AbstractMessageReceiver implements Pack
 						log.log(Level.FINEST, "configuring module " + name + " with parameters = [" + sb.toString() + "]");
 					}
 					module.setProperties(moduleProps);
-					module.init(componentJid, this);
+					module.init(componentJid, HttpMessageReceiver.this);
 					modules.put(name, module);
 					module.start();
-					
+
 					//updateServiceDiscoveryItem(module.getJid().toString(), module.getJid().toString(), module.getDescription(), true, module.getFeatures());
-				}
-				else {
+				} else {
 					Module oldModule = modules.remove(name);
 					if (oldModule != null) {
 						removeServiceDiscoveryItem(module.getJid().toString(), module.getJid().toString(), module.getDescription());
 						oldModule.stop();
 					}
 				}
-			}
-			catch (Exception ex) {
+			} catch (Exception ex) {
 				log.log(Level.WARNING, "exception setting properties for module", ex);
 			}
 		}
@@ -291,7 +317,14 @@ public class HttpMessageReceiver extends AbstractMessageReceiver implements Pack
 		if (packet.getStanzaFrom() == null) {
 			packet.initVars(from, packet.getStanzaTo());
 		}
+        String id = packet.getAttributeStaticStr("id");
+		if (id == null) {
+			id = UUID.randomUUID().toString();
+			packet.getElement().setAttribute("id", id);
+			packet.initVars(packet.getStanzaFrom(), packet.getStanzaTo());
+		}		
 		packet.setPacketFrom(from);
+		
 		return addOutPacket(packet);
 	}
 
@@ -303,6 +336,12 @@ public class HttpMessageReceiver extends AbstractMessageReceiver implements Pack
         if (packet.getStanzaFrom() == null) {
             packet.initVars(from, packet.getStanzaTo());
         }
+        String id = packet.getAttributeStaticStr("id");
+		if (id == null) {
+			id = UUID.randomUUID().toString();
+			packet.getElement().setAttribute("id", id);
+			packet.initVars(packet.getStanzaFrom(), packet.getStanzaTo());
+		}			
         packet.setPacketFrom(from);
 
         if (packet.getStanzaFrom() != null && !this.isLocalDomainOrComponent(packet.getStanzaFrom().toString())) {
@@ -314,7 +353,6 @@ public class HttpMessageReceiver extends AbstractMessageReceiver implements Pack
             }
         }
 
-        String id = packet.getAttributeStaticStr("id");
         final String key = generateKey(uuid, id);
 
         if (callback != null) {

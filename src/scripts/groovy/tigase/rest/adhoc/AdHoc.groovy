@@ -40,7 +40,7 @@ import java.util.logging.Level
 class AdHocHandler extends tigase.http.rest.Handler {
 
 	private static final Logger log = Logger.getLogger(AdHocHandler.class.getCanonicalName());
-
+	
     def TIMEOUT = 30 * 1000;
 
     def COMMAND_XMLNS = "http://jabber.org/protocol/commands";
@@ -48,6 +48,22 @@ class AdHocHandler extends tigase.http.rest.Handler {
     def DISCO_ITEMS_XMLNS = "http://jabber.org/protocol/disco#items";
 
     public AdHocHandler() {
+		description = [
+			regex : "/{component_jid}",
+			GET : [ info:'List available adhoc commands', 
+				description: """Retrieves list of available adhoc commands to execute on component which is running as {component_jid}, where {component_jid} may be Tigase XMPP Server internal component jid.
+
+Example result:
+\${util.formatData([items:[[jid:'sess-man@domain.com',node:'http://jabber.org/protocol/admin#get-active-users',name:'Get list of active users'],[jid:'sess-man@domain.com',node:'del-script',name:'Remove command script'],[jid:'sess-man@domain.com',node:'add-script',name:'New command script']]])}
+"""],
+			POST : [ info:'Execute adhoc command',
+				description: """To execute adhoc command you need to provide proper {component_jid} and also pass additional data in form of XML or JSON as ie. to execute Get list of active users command you need to pass following XML:
+\${util.formatData([command:[node:'http://jabber.org/protocol/admin#get-active-users',fields:[[var:'domainjid',value:'domain.com'],[var:'max_items',value:'25']]]])}
+
+In result of this operation you will receive ie. following XML:
+\${util.formatData([command:[jid:'sess-man@domain.com',node:'http://jabber.org/protocol/admin#get-active-users',fields:[[var:'Users: 2',label:'text-multi',value:['user1@domain.com','user2@domain.com']]]]])}
+"""]
+		];
 		regex = /\/(?:([^@\/]+)@){0,1}([^@\/]+)/
         requiredRole = "admin"
         isAsync = true
@@ -176,7 +192,7 @@ class AdHocHandler extends tigase.http.rest.Handler {
                     }
 
                     if (fieldEl.getAttribute("type")) {
-                        field.label = fieldEl.getAttribute("type");
+                        field.type = fieldEl.getAttribute("type");
                     }
                     fields.add(field);
 
@@ -201,6 +217,35 @@ class AdHocHandler extends tigase.http.rest.Handler {
                         }
                     }
                 }
+				
+				def tables = [];
+				def table = null;
+				data.getChildren().each { child ->
+					if (!(child.getName() == "reported" || child.getName() == "item"))
+						return;
+					if (child.getName() == "reported") {
+						table = [label:child.getAttribute("label"), items:[]];
+						tables.add(table);
+						return;
+					}
+					if (table == null)
+						return;
+					def item = []
+					child.getChildren().each { fieldEl ->
+						def value = fieldEl.getChildren().findAll({ it.getName() == "value" });
+						if (value.size() > 0) {
+							value = value.get(0).getCData();
+						} else {
+							value = null;
+						}
+						item.add([var:fieldEl.getAttribute("var"), value:value])
+					}
+						
+					table.items.add([fields:item]);
+				}
+				if (!tables.isEmpty()) {
+					results.reported = tables;
+				}
 
                 callback([command:results])
             });

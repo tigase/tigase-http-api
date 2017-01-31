@@ -23,42 +23,22 @@
 package tigase.http.java;
 
 import com.sun.net.httpserver.HttpExchange;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URLDecoder;
-import java.security.Principal;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.servlet.AsyncContext;
-import javax.servlet.DispatcherType;
-import javax.servlet.ReadListener;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletInputStream;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.HttpUpgradeHandler;
-import javax.servlet.http.Part;
 import tigase.db.AuthorizationException;
 import tigase.db.TigaseDBException;
 import tigase.http.api.Service;
 import tigase.util.Base64;
 import tigase.util.TigaseStringprepException;
 import tigase.xmpp.BareJID;
+
+import javax.servlet.*;
+import javax.servlet.http.*;
+import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URLDecoder;
+import java.security.Principal;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -67,31 +47,64 @@ import tigase.xmpp.BareJID;
 public class DummyServletRequest implements HttpServletRequest {
 
 	private final HttpExchange exchange;
-	private final Map<String,String> params;
+	private final Map<String,Object> params;
 	
 	private final String servletPath;
 	private final String contextPath;
 	private final Service service;
+	private final Timer timer;
+	private final Integer executionTimeout;
 	private AsyncContext async;
+	private String characterEncoding = "UTF-8";
 	private Principal principal;
+	private BufferedReader reader;
 	
-	public DummyServletRequest(HttpExchange exchange, String contextPath, String servletPath, Service service) {
+	public DummyServletRequest(HttpExchange exchange, String contextPath, String servletPath, Service service, Timer timer, Integer executionTimeout) {
 		this.exchange = exchange;
-		this.params = new HashMap<String,String>();
+		this.params = new HashMap<String,Object>();
 		String query = exchange.getRequestURI().getRawQuery();
 		if (query != null) {
-			for (String part : query.split("&")) {
-				String[] val = part.split("=");
-				try {
-					params.put(URLDecoder.decode(val[0], "UTF-8"), val.length == 1 ? "" : URLDecoder.decode(val[1], "UTF-8"));
-				} catch (UnsupportedEncodingException ex) {
-					Logger.getLogger(DummyServletRequest.class.getName()).log(Level.FINE, "could not decode URLEncoded paramters", ex);
-				}
+			decodeParamsFromString(query, params);
+		}
+		if ("application/x-www-form-urlencoded".equals(getContentType())) {
+			int len = getContentLength();
+			byte[] data = new byte[len];
+			try {
+				exchange.getRequestBody().read(data);
+				decodeParamsFromString(new String(data), params);
+			} catch (IOException ex) {
+				Logger.getLogger(DummyServletRequest.class.getName()).log(Level.FINE, "could not read parameters from input stream", ex);
 			}
 		}
 		this.contextPath = contextPath;
 		this.servletPath = servletPath;
 		this.service = service;
+		this.timer = timer;
+		this.executionTimeout = executionTimeout;
+	}
+	
+	private void decodeParamsFromString(String query, Map params) {
+		for (String part : query.split("&")) {
+			String[] val = part.split("=");
+			try {
+				String k = URLDecoder.decode(val[0], "UTF-8");
+				String v = val.length == 1 ? "" : URLDecoder.decode(val[1], "UTF-8");
+				if (params.containsKey(k)) {
+					if (params.get(k) instanceof String[]) {
+						String[] oldV = (String[]) params.get(k);
+						oldV = Arrays.copyOf(oldV, oldV.length + 1);
+						oldV[oldV.length - 1] = v;
+						params.put(k, oldV);
+					} else {
+						params.put(k, new String[] { (String)params.get(k), v });
+					}
+				} else {
+					params.put(k, v);
+				}
+			} catch (UnsupportedEncodingException ex) {
+				Logger.getLogger(DummyServletRequest.class.getName()).log(Level.FINE, "could not decode URLEncoded paramters", ex);
+			}
+		}	
 	}
 	
 	@Override
@@ -106,11 +119,12 @@ public class DummyServletRequest implements HttpServletRequest {
 
 	@Override
 	public String getCharacterEncoding() {
-		return null;
+		return characterEncoding;
 	}
 
 	@Override
 	public void setCharacterEncoding(String string) throws UnsupportedEncodingException {
+		this.characterEncoding = string;
 	}
 
 	@Override
@@ -129,40 +143,54 @@ public class DummyServletRequest implements HttpServletRequest {
 	@Override
 	public ServletInputStream getInputStream() throws IOException {
 		return new ServletInputStream() {
+
+			private boolean finished = false;
+
 			@Override
 			public int read() throws IOException {
-				return exchange.getRequestBody().read();
+				int read = exchange.getRequestBody().read();
+				finished = read == -1;
+				return read;
 			}
 
 			@Override
 			public boolean isFinished() {
-				return false;
+				return finished;
 			}
 
 			@Override
 			public boolean isReady() {
-				return true;
+				try {
+					return exchange.getRequestBody().available() > 0;
+				} catch (IOException ex) {
+					return false;
+				}
 			}
 
 			@Override
 			public void setReadListener(ReadListener rl) {
+				throw new UnsupportedOperationException("setReadListener is not supported!");
 			}
 		};
 	}
 
 	@Override
-	public String getParameter(String string) {
-		return params.get(string);
+	public String getParameter(String key) {
+		Object val = params.get(key);
+		return (val instanceof String) ? ((String) val) : null; 
 	}
 
 	@Override
 	public Enumeration<String> getParameterNames() {
-		return null;
+		return new IteratorEnumerator(params.keySet().iterator());
 	}
 
 	@Override
-	public String[] getParameterValues(String string) {
-		return null;
+	public String[] getParameterValues(String key) {
+		Object val = params.get(key);
+		if (val == null)
+			return null;
+		return (val instanceof String[]) ? ((String[]) val) : new String[] { (String) val }; 
 	}
 
 	@Override
@@ -192,7 +220,12 @@ public class DummyServletRequest implements HttpServletRequest {
 
 	@Override
 	public BufferedReader getReader() throws IOException {
-		return new BufferedReader(new InputStreamReader(exchange.getRequestBody()));
+		synchronized (this) {
+			if (reader == null) {
+				reader = new BufferedReader(new InputStreamReader(exchange.getRequestBody(), characterEncoding));
+			}
+		}
+		return reader;
 	}
 
 	@Override
@@ -270,7 +303,8 @@ public class DummyServletRequest implements HttpServletRequest {
 
 	@Override
 	public AsyncContext startAsync(ServletRequest sr, ServletResponse sr1) throws IllegalStateException {
-		async = new AsyncContextImpl(sr, sr1, exchange);
+		async = new AsyncContextImpl(sr, sr1, exchange, timer);
+		async.setTimeout(executionTimeout * 2);
 		return async;
 	}
 
@@ -383,7 +417,7 @@ public class DummyServletRequest implements HttpServletRequest {
 				String user = authStr.substring(0, idx);
 				String pass = authStr.substring(idx + 1);
 				try {
-					if (service.getAuthRepository().plainAuth(BareJID.bareJIDInstance(user), pass)) {
+					if (service.checkCredentials(user, pass)) {
 						final String jid = user;
 						principal = new Principal() {
 							@Override
@@ -392,8 +426,8 @@ public class DummyServletRequest implements HttpServletRequest {
 							}
 						};						
 					}
-				} catch (TigaseStringprepException|TigaseDBException|AuthorizationException ex) {
-					Logger.getLogger(DummyServletRequest.class.getName()).log(Level.FINE, "could not authorize user", ex);
+				} catch (TigaseStringprepException |TigaseDBException |AuthorizationException ex) {
+					Logger.getLogger(DummyServletRequest.class.getName()).log(Level.FINEST, "could not authorize user", ex);
 				}
 			}
 		}
@@ -465,8 +499,10 @@ public class DummyServletRequest implements HttpServletRequest {
 	public boolean authenticate(HttpServletResponse hsr) throws IOException, ServletException {
 		hsr.setHeader("WWW-Authenticate", "Basic realm=\"TigasePlain\"");
 		hsr.sendError(401, "Not authorized");
-		exchange.getResponseBody().flush();
-		exchange.getResponseBody().close();
+		if (!"HEAD".equals(exchange.getRequestMethod())) {
+			exchange.getResponseBody().flush();
+			exchange.getResponseBody().close();
+		}
 		return false;
 	}
 
@@ -503,4 +539,23 @@ public class DummyServletRequest implements HttpServletRequest {
 		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 	}
 	
+	private class IteratorEnumerator<T,K extends Iterator<T>> implements Enumeration<T> {
+		
+		private final Iterator<T> iter;
+		
+		public IteratorEnumerator(Iterator<T> iter) {
+			this.iter = iter;
+		}
+
+		@Override
+		public boolean hasMoreElements() {
+			return iter.hasNext();
+		}
+
+		@Override
+		public T nextElement() {
+			return iter.next();
+		}
+		
+	}
 }

@@ -26,7 +26,7 @@ import tigase.server.Command
 import tigase.server.Iq
 import tigase.server.Packet
 import tigase.util.Base64
-import tigase.util.DNSResolver
+import tigase.util.DNSResolverFactory
 import tigase.xml.Element
 import tigase.xmpp.BareJID
 import tigase.xmpp.JID
@@ -44,6 +44,15 @@ class ServerStatsHandler extends tigase.http.rest.Handler {
     def DISCO_ITEMS_XMLNS = "http://jabber.org/protocol/disco#items";
 
     public ServerStatsHandler() {
+		description = [
+			regex : "/",
+			GET : [ info:'Retrieve statistics of server', 
+				description: """Retrieves statistics of a server and returns them in form of XML or JSON depending on passed Accept HTTP request header.
+
+Example partial response:
+\${util.formatData([stats:['vhost-man':[component:'vhost-man',node:'stats/vhost-man',data:[[var:'vhost-man/Number of VHosts',value:15]]],'sess-man':[component:'sess-man',node:'stats/sess-man',data:[[var:'sess-man/Registered accounts',value:292],[var:'sess-man/Open user connections',value:10]]],'message-router':[component:'message-router',node:'stats/message-router',data:[[var:'message-router/CPU usage',value:'0,1%'],[var:'message-router/Used Heap',value:'101 454 KB']]]]])}
+"""]
+		]
 		regex = /\//
         requiredRole = "admin"
         isAsync = true
@@ -52,7 +61,7 @@ class ServerStatsHandler extends tigase.http.rest.Handler {
          * Handles GET request and returns list of available ad-hoc commands
          */
         execGet = { Service service, callback, user ->
-			def domain = DNSResolver.getDefaultHostname();
+			def domain = DNSResolverFactory.getInstance().getDefaultHost();
 			
 			Element iq = new Element("iq");
             iq.setAttribute("to", "stats@$domain");
@@ -80,7 +89,7 @@ class ServerStatsHandler extends tigase.http.rest.Handler {
 	}
 		def retrieveStats = { service, user, items, allResults, callback ->
 			items.each { ditem ->
-				def domain = DNSResolver.getDefaultHostname();
+				def domain = DNSResolverFactory.getInstance().getDefaultHost();
 				def compName = ditem.getAttribute("node");
 				def node = "stats/" + compName;
 			

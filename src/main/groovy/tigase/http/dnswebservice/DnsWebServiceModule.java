@@ -21,13 +21,11 @@
  */
 package tigase.http.dnswebservice;
 
-import java.util.Arrays;
-import java.util.Map;
 import tigase.http.AbstractModule;
 import tigase.http.DeploymentInfo;
 import tigase.http.HttpServer;
-import static tigase.http.Module.HTTP_CONTEXT_PATH_KEY;
-import static tigase.http.Module.HTTP_SERVER_KEY;
+
+import java.util.Map;
 
 public class DnsWebServiceModule extends AbstractModule {
 	
@@ -83,6 +81,7 @@ public class DnsWebServiceModule extends AbstractModule {
 				.setClassLoader(this.getClass().getClassLoader())
 				.setContextPath(contextPath)
 				.setDeploymentName("DnsWebService")
+				.setDeploymentDescription(getDescription())
 				.addServlets(HttpServer.servlet("JsonServlet", JsonServlet.class).addMapping("/*"));
 		if (vhosts != null) {
 			deployment.setVHosts(vhosts);

@@ -1,6 +1,6 @@
 /*
  * Tigase HTTP API
- * Copyright (C) 2004-2014 "Tigase, Inc." <office@tigase.com>
+ * Copyright (C) 2004-2015 "Tigase, Inc." <office@tigase.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -19,7 +19,7 @@
  * Last modified by $Author$
  * $Date$
  */
-package tigase.http.server;
+package tigase.http.admin;
 
 import tigase.http.AbstractModule;
 import tigase.http.DeploymentInfo;
@@ -28,30 +28,43 @@ import tigase.http.ServletInfo;
 import tigase.http.util.StaticFileServlet;
 
 import java.io.File;
+import java.io.FileFilter;
+import java.io.IOException;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author andrzej
  */
-public class ServerInfoModule extends AbstractModule {
+public class AdminModule extends AbstractModule {
 
+	private static final String DEF_SCRIPTS_DIR_VAL = "scripts/admin";
+	
+	private static final String SCRIPTS_DIR_KEY = "admin-scripts-dir";
+	
+	private static final String NAME =  "admin";
+	private static final String DESCRIPTION = "Admin console - support for management of server using simple HTTP console";
+	
+	private String scriptsDir = DEF_SCRIPTS_DIR_VAL;
 	private String contextPath = null;
 	
 	private HttpServer httpServer = null;
 	private DeploymentInfo httpDeployment = null;
+
 	private String[] vhosts = null;
-	
+		
 	@Override
 	public String getName() {
-		return "server";
+		return NAME;
 	}
 
 	@Override
 	public String getDescription() {
-		return "Server information module";
+		return DESCRIPTION;
 	}
-
+	
 	@Override
 	public void start() {
 		if (httpDeployment != null) {
@@ -60,21 +73,46 @@ public class ServerInfoModule extends AbstractModule {
 
 		super.start();
 		httpDeployment = HttpServer.deployment().setClassLoader(this.getClass().getClassLoader())
-				.setContextPath(contextPath).setDeploymentName("Server").setDeploymentDescription(getDescription());
+				.setContextPath(contextPath).setService(new tigase.http.ServiceImpl(this)).setDeploymentName("Admin console")
+				.setDeploymentDescription(getDescription());
 		if (vhosts != null) {
 			httpDeployment.setVHosts(vhosts);
 		}
+		File scriptsDirFile = new File(scriptsDir);
+		File[] scriptDirFiles = scriptsDirFile.listFiles(new FileFilter() {
+			@Override
+			public boolean accept(File file) {
+				return file.isDirectory() && !"static".equals(file.getName());
+			}
+		});
+
+		ServletInfo servletInfo = HttpServer.servlet("Servlet", Servlet.class);
+		try {
+			servletInfo.addInitParam(Servlet.MODULE_ID_KEY, uuid)
+					.addInitParam(Servlet.SCRIPTS_DIR_KEY, scriptsDirFile.getCanonicalPath())
+					.addMapping("/*");
+		} catch (IOException ex) {
+			Logger.getLogger(AdminModule.class.getName()).log(Level.WARNING, null, ex);
+		}
+		httpDeployment.addServlets(servletInfo);
+//		if (scriptDirFiles != null) {
+//			for (File dirFile : scriptDirFiles) {
+//				try {
+//					startRestServletForDirectory(httpDeployment, dirFile);
+//				} catch (IOException ex) {
+//					log.log(Level.FINE, "Exception while scanning for scripts to load", ex);
+//				}
+//			}
+//		}
 		
-		ServletInfo servletInfo = HttpServer.servlet("StaticServlet", StaticFileServlet.class);
-		servletInfo.addInitParam(StaticFileServlet.DIRECTORY_KEY, new File("logs").getAbsolutePath())
-				.addInitParam(StaticFileServlet.INDEX_KEY, "/server-info.html")
-				.addInitParam(StaticFileServlet.ALLOWED_PATTERN_KEY, "/server-info\\.html")
-				.addMapping("/*");
+		servletInfo = HttpServer.servlet("StaticServlet", StaticFileServlet.class);
+		servletInfo.addInitParam(StaticFileServlet.DIRECTORY_KEY, new File(scriptsDirFile, "static").getAbsolutePath())
+				.addMapping("/static/*");
 		httpDeployment.addServlets(servletInfo);		
 		
 		httpServer.deploy(httpDeployment);
 	}
-	
+
 	@Override
 	public void stop() {
 		if (httpDeployment != null) { 
@@ -82,12 +120,13 @@ public class ServerInfoModule extends AbstractModule {
 			httpDeployment = null;
 		}
 		super.stop();
-	}	
-	
+	}
+
 	@Override
 	public Map<String, Object> getDefaults() {
 		Map<String,Object> props = super.getDefaults();
 		props.put(HTTP_CONTEXT_PATH_KEY, "/" + getName());
+		props.put(SCRIPTS_DIR_KEY, DEF_SCRIPTS_DIR_VAL);
 		return props;
 	}
 	
@@ -102,6 +141,10 @@ public class ServerInfoModule extends AbstractModule {
 		if (props.containsKey(HTTP_SERVER_KEY)) {
 			httpServer = (HttpServer) props.get(HTTP_SERVER_KEY);
 		}
+		if (props.containsKey(SCRIPTS_DIR_KEY)) {
+			scriptsDir = (String) props.get(SCRIPTS_DIR_KEY);
+		}
 		vhosts = (String[]) props.get(VHOSTS_KEY);
-	}	
+	}
+	
 }

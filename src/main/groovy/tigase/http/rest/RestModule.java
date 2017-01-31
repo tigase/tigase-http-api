@@ -21,20 +21,25 @@
  */
 package tigase.http.rest;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import tigase.http.AbstractModule;
 import tigase.http.DeploymentInfo;
 import tigase.http.HttpServer;
 import tigase.http.ServletInfo;
 import tigase.http.util.StaticFileServlet;
+import tigase.stats.StatisticHolder;
+import tigase.stats.StatisticHolderImpl;
+import tigase.stats.StatisticsList;
+
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class RestModule extends AbstractModule {
 	
@@ -54,14 +59,30 @@ public class RestModule extends AbstractModule {
 
 	private String scriptsDir = DEF_SCRIPTS_DIR_VAL;
 	private String[] vhosts = null;
+	private List<RestServlet> restServlets = new ArrayList<RestServlet>();
+		
+	private static final ConcurrentHashMap<String,StatisticHolder> stats = new ConcurrentHashMap<String, StatisticHolder>();
 	
-	private final String uuid = UUID.randomUUID().toString();
-	
-	private static final ConcurrentHashMap<String,RestModule> modules = new ConcurrentHashMap<String,RestModule>();
-	
-	public static RestModule getModuleByUUID(String uuid) {
-		return modules.get(uuid);
+	@Override
+	public void everyHour() {
+		for (StatisticHolder holder : stats.values()) {
+			holder.everyHour();
+		} 		
 	}
+	
+	@Override
+	public void everyMinute() {
+		for (StatisticHolder holder : stats.values()) {
+			holder.everyMinute();
+		} 	
+	}
+	
+	@Override
+	public void everySecond() {
+		for (StatisticHolder holder : stats.values()) {
+			holder.everySecond();
+		} 		
+	}	
 	
 	@Override
 	public String getName() {
@@ -78,11 +99,11 @@ public class RestModule extends AbstractModule {
 		if (httpDeployment != null) {
 			stop();
 		}
-		modules.put(uuid, this);
 
 		super.start();
 		httpDeployment = HttpServer.deployment().setClassLoader(this.getClass().getClassLoader())
-				.setContextPath(contextPath).setService(new ServiceImpl(this));
+				.setContextPath(contextPath).setService(new tigase.http.ServiceImpl(this)).setDeploymentName("REST API")
+				.setDeploymentDescription(getDescription());
 		if (vhosts != null) {
 			httpDeployment.setVHosts(vhosts);
 		}
@@ -104,6 +125,17 @@ public class RestModule extends AbstractModule {
 			}
 		}
 		
+		try {
+			ServletInfo servletInfo = HttpServer.servlet("RestServlet", RestExtServlet.class);
+			servletInfo.addInitParam(RestServlet.REST_MODULE_KEY, uuid)
+					.addInitParam(RestServlet.SCRIPTS_DIR_KEY, scriptsDirFile.getCanonicalPath())
+					.addMapping("/");
+			httpDeployment.addServlets(servletInfo);
+		} catch (IOException ex) {
+			log.log(Level.FINE, "Exception while scanning for scripts to load", ex);
+		}
+		
+		
 		ServletInfo servletInfo = HttpServer.servlet("StaticServlet", StaticFileServlet.class);
 		servletInfo.addInitParam(StaticFileServlet.DIRECTORY_KEY, new File(scriptsDirFile, "static").getAbsolutePath())
 				.addMapping("/static/*");
@@ -117,8 +149,8 @@ public class RestModule extends AbstractModule {
 		if (httpDeployment != null) { 
 			httpServer.undeploy(httpDeployment);
 			httpDeployment = null;
-			modules.remove(uuid, this);
 		}
+		restServlets = new ArrayList<RestServlet>();
 		super.stop();
 	}
 
@@ -149,6 +181,37 @@ public class RestModule extends AbstractModule {
 		commandManager.registerCmd(reloadHandlersCmd);
 	}
 	
+	@Override
+	public void getStatistics(String compName, StatisticsList list) {
+		for (StatisticHolder holder : stats.values()) {
+			holder.getStatistics(compName, list);
+		} 
+	}			
+	
+	public void executedIn(String path, long executionTime) {
+		StatisticHolder holder = stats.get(path);
+		if (holder == null) {
+			StatisticHolder tmp = new StatisticHolderImpl();
+			tmp.setStatisticsPrefix(getName() + ", path=" + path);
+			holder = stats.putIfAbsent(path, tmp);
+			if (holder == null)
+				holder = tmp;
+		}
+		holder.statisticExecutedIn(executionTime);
+	}
+	
+	public void statisticExecutedIn(long executionTime) {
+		
+	}
+	
+	protected void registerRestServlet(RestServlet servlet) {
+		restServlets.add(servlet);
+	}
+	
+	protected List<? extends RestServlet> getRestServlets() {
+		return restServlets;
+	}
+	
     private void startRestServletForDirectory(DeploymentInfo httpDeployment, File scriptsDirFile) 
 			throws IOException {
         File[] scriptFiles = getGroovyFiles(scriptsDirFile);
@@ -157,6 +220,7 @@ public class RestModule extends AbstractModule {
 			ServletInfo servletInfo = HttpServer.servlet("RestServlet", RestExtServlet.class);
 			servletInfo.addInitParam(RestServlet.REST_MODULE_KEY, uuid)
 					.addInitParam(RestServlet.SCRIPTS_DIR_KEY, scriptsDirFile.getCanonicalPath())
+					.addInitParam("mapping", "/" + scriptsDirFile.getName() + "/*")
 					.addMapping("/" + scriptsDirFile.getName() + "/*");
 			httpDeployment.addServlets(servletInfo);
         }

@@ -1,129 +1,35 @@
-<%  def title = 'Finished'
-	if ('true'.equals(request.getParameter('save'))) {
-		def cfgContent = request.getParameter('config');
-		def f = new File('etc/init.properties');
-		if (f.exists()) {
-			def bf = new File('etc/init.properties.bak');
-			if (!bf.exists()) bf.createNewFile();
-			bf.setText(f.getText());
-		} else {
-			f.createNewFile();
-		}
-		f.setText(cfgContent); %>
-${ util.include('header', [title:'Setup: ' + title]) }
-<h3>Installation of Tigase XMPP Server is finished.</h3>
-<h3><i>etc/init.properties</i> configuration file is update with new configuration. Please restart server to apply new configuration.</h3>
-${ util.include('footer') } 
-<%		return;
-	}
-    def tmp = [
+<%  def title = 'Setup security'
+def tmp = [
 	test:1
-	] + config;
-    
-	tmp.each { k,v ->
-		if (request.getParameter(k)) {
-			Object old = tmp[k];
-			if (old instanceof Boolean) {
-				tmp[k] = Boolean.parseBoolean(request.getParameter(k));
-			}
-			else {
-				tmp[k] = request.getParameter(k);
-			}
+] + config;
+
+tmp.each { k,v ->
+	if (request.getParameter(k)) {
+		Object old = tmp[k];
+		if (old instanceof Boolean) {
+			tmp[k] = Boolean.parseBoolean(request.getParameter(k));
+		}
+		else {
+			tmp[k] = request.getParameter(k);
 		}
 	}
-	config.clear();
-	config.putAll(tmp);
+}
+config.clear();
+config.putAll(tmp);
 %>
 ${ util.include('header', [title:'Setup: ' + title]) }
-<h3>Installation of Tigase XMPP Server is finished.</h3>
+<h3>Security of setup.</h3>
+<h3>By default Tigase XMPP Server is configured to allow access to this setup page only user authorized by JID and password listed as admins.</h3>
+<h3>However in rare conditions it may be impossible to access database for authentication. In this case we use separate admin credentials stored in <i>etc/init.properties</i> file.</h3>
+<h3>Please enter username and password you wish to use in this situation. If you leave it blank, setup will be inaccessible without connection to database.</h3>
 <form method='GET' >
-<input type='hidden' name='step' value='${Integer.parseInt(currentStep)}'/>
-<input type='hidden' name='save' value='true'/>
-<%
-	def components = [];
-	if (config.mucComponent) {
-		def cls = 'tigase.muc.MUCComponent';
-		if (config.acsMUCComponent) {
-			cls = 'tigase.muc.cluster.MUCComponentClustered';
-		}
-		components.add([cls:cls, name:'muc']);
-	}
-	if (config.PubSubComponent) {
-		def cls = 'tigase.pubsub.PubSubComponent';
-		if (config.acsPubSubComponent) {
-			cls = 'tigase.pubsub.cluster.PubSubComponentClustered';
-		}
-		components.add([cls:cls, name:'pubsub']);
-	}
-	if (config.httpApiComponent) {
-		components.add([cls:'tigase.http.HttpMessageReceiver', name:'http']);
-	}
-	if (config.stunComponent) {
-		components.add([cls:'tigase.stun.StunComponent', name:'stun']);
-	}
-	if (config.socks5Component) {
-		components.add([cls:'tigase.socks5.Socks5Component', name:'socks5']);
-	}
-	if (config.messageArchivingComponent) {
-		components.add([cls:'tigase.archive.MessageArchiveComponent', name:'message-archiving']);
-	}
-%>
-<label for='config'>Configuration created during installation:</label><br/>
-<textarea name='config' rows=40 cols=80>
-config-type=${config.configType}
-<% if (config.clusterMode) { %>--cluster-mode=true<% } %>
---virt-hosts=${config.virtualDomains}
---admins=${config.admins}
-<% 
-	def debug = "";
-	if (config.serverDebug) {
-		if (debug.length() > 0)
-			debug += ',';
-		debug += 'server';
-	}
-	if (config.pluginDebug) {
-		if (debug.length() > 0)
-			debug += ',';
-		debug += 'xmpp';
-	}
-	if (config.dbDebug) {
-		if (debug.length() > 0)
-			debug += ',';
-		debug += 'db';
-	}
-	if (config.clusterDebug) {
-		if (debug.length() > 0)
-			debug += ',';
-		debug += 'cluster';
-	}
-    if (debug.length() > 0) {
- %>
---debug=${debug}
-<% } %><% def dbUri = ((config.dbType?.toLowerCase()) == "derby") ? "jdbc:derby:${config.dbName};create=true"
-		: "jdbc:${config.dbType?.toLowerCase()}://${config.dbHost}/${config.dbName}?user=${config.dbUser}&password=${config.dbPass}".toString(); 
-	def userDbUri = dbUri.toString(); 
-	def authDbUri = dbUri.toString(); %>
---user-db-uri=${userDbUri}
-<% if (userDbUri != authDbUri) { %>--auth-db-uri=${authDbUri}<% } %>
-<%  def plugins = "";
-    config.plugins.each {
-		if (plugins.length() > 0) plugins += ",";
-		plugins += (it.value ? '+' : '-') + it.key.replace(':', '\\:');
-	} 
-%>
---sm-plugins=${plugins}
-<% def ci = 1;
-   components.each {
- %>
---comp-name-${ci}=${it.name}
---comp-class-${ci}=${it.cls}
-<% ci++;
-   } %>
-</textarea>
-
-<h3>Do you wish to save this config to <i>etc/init.properties</i> file?</h3>
-
-<button type="submit">Save</button>
-
+	<input type='hidden' name='step' value='${Integer.parseInt(currentStep) + 1}'/>
+	<label for='setupUser'>Username:</label>
+	<input name='setupUser' type='text' value="${config.setupUser ?: ''}" /><br/>
+	<div style='padding-top: 1em'></div>
+	<label for='setupPassword'>Password:</label>
+	<input name='setupPassword' type='password' value="${config.setupPassword ?: ''}"/><br/>
+	<div style='padding-top: 1em'></div>
+	<button type="submit">Next</button>
 </form>
-${ util.include('footer') } 
+${ util.include('footer') }

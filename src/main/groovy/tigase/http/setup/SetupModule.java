@@ -21,28 +21,21 @@
  */
 package tigase.http.setup;
 
-import groovy.lang.Closure;
-import java.io.File;
-import java.io.FileFilter;
-import java.io.IOException;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import tigase.db.AuthRepository;
-import tigase.db.UserRepository;
+import tigase.db.AuthorizationException;
+import tigase.db.TigaseDBException;
 import tigase.http.AbstractModule;
 import tigase.http.DeploymentInfo;
 import tigase.http.HttpServer;
-import static tigase.http.Module.HTTP_CONTEXT_PATH_KEY;
-import static tigase.http.Module.HTTP_SERVER_KEY;
-import static tigase.http.Module.VHOSTS_KEY;
 import tigase.http.ServletInfo;
 import tigase.http.api.Service;
-import tigase.http.rest.RestModule;
-import tigase.server.Packet;
+import tigase.util.TigaseStringprepException;
 import tigase.xmpp.BareJID;
+
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
 
 /**
  *
@@ -51,7 +44,9 @@ import tigase.xmpp.BareJID;
 public class SetupModule extends AbstractModule {
 
 	private static final Logger log = Logger.getLogger(SetupModule.class.getCanonicalName());
-	
+
+	private static final String CREDENTIALS_KEY = "admin-credentials";
+
 	private static final String NAME = "setup";
 	
 	private String contextPath = null;
@@ -61,6 +56,9 @@ public class SetupModule extends AbstractModule {
 
 	private String[] vhosts = null;
 	private Service service = null;
+
+	private String adminUser = null;
+	private String adminPassword = null;
 
 	private final String uuid = UUID.randomUUID().toString();
 	private static final ConcurrentHashMap<String,AbstractModule> modules = new ConcurrentHashMap<String,AbstractModule>();
@@ -86,37 +84,32 @@ public class SetupModule extends AbstractModule {
 		}
 	
 		super.start();
-		service = new Service() { 
 
-			@Override
-			public void sendPacket(Packet packet, Long timeout, Closure closure) {
-				throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-			}
-
-			@Override
-			public UserRepository getUserRepository() {
-				return SetupModule.this.getUserRepository();
-			}
-
-			@Override
-			public AuthRepository getAuthRepository() {
-				return SetupModule.this.getAuthRepository();
-			}
+		service = new tigase.http.ServiceImpl(this) {
 
 			@Override
 			public boolean isAdmin(BareJID user) {
-				return SetupModule.this.isAdmin(user);
+				return user.toString().equals(adminUser) || super.isAdmin(user);
 			}
 
 			@Override
-			public boolean isAllowed(String key, String domain, String path) {
-				return SetupModule.this.isRequestAllowed(key, domain, path);
+			public boolean checkCredentials(String user, String password) throws TigaseStringprepException, TigaseDBException, AuthorizationException {
+				if (adminUser != null && adminPassword != null && adminUser.equals(user) && adminPassword.equals(password)) {
+					return true;
+				}
+
+				AuthRepository authRepository = SetupModule.this.getAuthRepository();
+				if (authRepository == null)
+					return false;
+				BareJID jid = BareJID.bareJIDInstance(user);
+				return authRepository.plainAuth(jid, password);
 			}
-			
+
 		};
+
 		modules.put(uuid, this);
 		httpDeployment = HttpServer.deployment().setClassLoader(this.getClass().getClassLoader())
-				.setContextPath(contextPath).setService(service);
+				.setContextPath(contextPath).setService(service).setDeploymentName("Setup").setDeploymentDescription(getDescription());
 		if (vhosts != null) {
 			httpDeployment.setVHosts(vhosts);
 		}
@@ -154,6 +147,21 @@ public class SetupModule extends AbstractModule {
 		if (props.containsKey(HTTP_SERVER_KEY)) {
 			httpServer = (HttpServer) props.get(HTTP_SERVER_KEY);
 		}
+		if (props.containsKey(CREDENTIALS_KEY)) {
+			String credentials = (String) props.get(CREDENTIALS_KEY);
+			int idx = credentials.indexOf(":");
+			if (idx > -1) {
+				adminUser = credentials.substring(0, idx);
+				adminPassword = credentials.substring(idx + 1);
+			} else {
+				adminUser = null;
+				adminPassword = null;
+			}
+		}
 		vhosts = (String[]) props.get(VHOSTS_KEY);
-	}	
+	}
+
+	protected Service getService() {
+		return service;
+	}
 }

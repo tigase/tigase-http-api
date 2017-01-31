@@ -23,23 +23,20 @@ package tigase.http.java;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.servlet.AsyncContext;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import tigase.http.DeploymentInfo;
 import tigase.http.ServletInfo;
 import tigase.http.api.Service;
+
+import javax.servlet.AsyncContext;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServlet;
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -47,11 +44,34 @@ import tigase.http.api.Service;
  */
 public class RequestHandler implements HttpHandler {
 
+	private static final Logger log = Logger.getLogger(RequestHandler.class.getCanonicalName());
+
+	private static final AtomicInteger counter = new AtomicInteger(0);
+
 	private final String contextPath;
 	private final Map<String,HttpServlet> servlets = new ConcurrentHashMap<String,HttpServlet>();
 	private final Service service;
-	
-	public RequestHandler(DeploymentInfo info) {
+	private final Timer timer;
+
+	private static final ThreadLocal<Integer> executionTimeout = ThreadLocal.withInitial(() -> 60 * 1000);
+
+	private static final Comparator<String> COMPARATOR = new Comparator<String>() {
+		@Override
+		public int compare(String o1, String o2) {
+			int val1 = o1.length() - o1.replace("/", "").length(); // 3
+			int val2 = o2.length() - o2.replace("/", "").length(); // 5
+			if (val2 != val1)
+				return val2 - val1;
+			return Integer.compare(o2.length(), o1.length());
+		}
+	};
+
+	public static void setExecutionTimeout(Integer timeout) {
+		executionTimeout.set(timeout);
+	}
+
+	public RequestHandler(DeploymentInfo info, Timer timer) {
+		this.timer = timer;
 		contextPath = info.getContextPath();
 		service = info.getService();
 		ServletInfo[] servletInfos = info.getServlets();
@@ -61,30 +81,89 @@ public class RequestHandler implements HttpHandler {
 	}
 	
 	@Override
-	public void handle(HttpExchange he) throws IOException {
-		String path = he.getRequestURI().getPath();
-		List<String> keys = new ArrayList<String>(servlets.keySet());
-		for (String key : keys) {
-			if (path.startsWith(key)) {
-				HttpServlet servlet = servlets.get(key);
-				if (servlet != null) {
-					try {
-						String servletPath = key.substring(contextPath.length(), key.length()-1);
-						DummyServletRequest req = new DummyServletRequest(he, contextPath, servletPath, service);
-						DummyServletResponse resp = new DummyServletResponse(he); 
-						servlet.service(req, resp);
-						AsyncContext async = req.getAsyncContext();
-						if (async == null) {
-							resp.flushBuffer();
-							he.getResponseBody().close();
+	public void handle(final HttpExchange he) throws IOException {
+		DummyServletRequest req = null;
+		DummyServletResponse resp = null;
+
+		final int reqId = counter.incrementAndGet();
+
+		final Thread current = Thread.currentThread();
+		final TimerTask tt = new TimerTask() {
+			@Override
+			public void run() {
+				log.log(Level.WARNING, "request processing time exceeded!" + " for id = " + reqId);
+				current.interrupt();
+			}
+		};
+		timer.schedule(tt, executionTimeout.get());
+
+		boolean exception = false;
+		try {
+			String path = he.getRequestURI().getPath();
+			log.log(Level.FINEST, "received request for path = " + path);
+			List<String> keys = new ArrayList<String>(servlets.keySet());
+			Collections.sort(keys, COMPARATOR);
+			boolean handled = false;
+			for (String key : keys) {
+				if (path.startsWith(key)) {
+					HttpServlet servlet = servlets.get(key);
+					if (servlet != null) {
+						String servletPath = key.substring(contextPath.length(), key.length());
+						if (servletPath.isEmpty())
+							servletPath = "/";
+						req = new DummyServletRequest(he, contextPath, servletPath, service, timer, executionTimeout.get());
+						resp = new DummyServletResponse(he);
+						if (key.endsWith(path) && !key.equals("/")) {
+							String query = req.getQueryString();
+							if (query == null || query.isEmpty())
+								resp.sendRedirect(req.getRequestURI() + "/");
+							else
+								resp.sendRedirect(req.getRequestURI() + "/?" + query);
+							return;
 						}
-					} catch (ServletException ex) {
-						Logger.getLogger(RequestHandler.class.getName()).log(Level.FINE, null, ex);
+						servlet.service(req, resp);
+						handled = true;
 					}
+					break;
 				}
-				break;
+			}
+
+			if (!handled) {
+				he.sendResponseHeaders(404, -1);
+			}
+		} catch (IOException ex) {
+			tt.cancel();
+			AsyncContext async = req.getAsyncContext();
+			if (async != null && async instanceof AsyncContextImpl) {
+				((AsyncContextImpl) async).cancel();
+			}
+			throw new IOException(ex);
+		} catch (Throwable ex) {
+			exception = true;
+			log.log(Level.FINEST, "Exception during processing HTTP request" + " for id = " + reqId, ex);
+			try {
+				he.sendResponseHeaders(500, -1);
+			} catch (IOException ex1) {
+				// ignoring IOException - here we want to properly finish processing this request
 			}
 		}
+		if (req != null && resp != null) {
+			AsyncContext async = req.getAsyncContext();
+			if (async == null || exception) {
+				try {
+					resp.flushBuffer();
+				} catch (IOException ex) {
+					// ignoring IOException - here we want to properly finish processing this request
+				}
+				if (async instanceof AsyncContextImpl) {
+					((AsyncContextImpl) async).cancel();
+				}
+				he.close();
+			}
+		} else {
+			he.close();
+		}
+		tt.cancel();
 	}
 	
 	private void registerServlet(ServletInfo info) {
@@ -93,7 +172,13 @@ public class RequestHandler implements HttpHandler {
 			ServletConfig cfg = new ServletCfg(info.getInitParams());
 			servlet.init(cfg);
 			for (String mapping : info.getMappings()) {
-				servlets.put(contextPath + mapping.replace("/*", "/"), servlet);
+				if (mapping.endsWith("/"))
+					mapping = mapping.substring(0, mapping.length()-1);
+//				if ("/".equals(contextPath)) {
+//					servlets.put(mapping.replace("/*", ""), servlet);
+//				} else {
+				servlets.put(contextPath + mapping.replace("/*", ""), servlet);
+//				}
 			}
 		} catch (Exception ex) {
 			Logger.getLogger(RequestHandler.class.getName()).log(Level.WARNING, null, ex);

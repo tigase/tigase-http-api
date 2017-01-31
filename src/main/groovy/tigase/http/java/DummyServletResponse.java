@@ -23,6 +23,11 @@
 package tigase.http.java;
 
 import com.sun.net.httpserver.HttpExchange;
+
+import javax.servlet.ServletOutputStream;
+import javax.servlet.WriteListener;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
@@ -31,11 +36,6 @@ import java.util.Collection;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.ServletResponse;
-import javax.servlet.WriteListener;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  *
@@ -66,7 +66,7 @@ public class DummyServletResponse implements HttpServletResponse {
 			@Override
 			public void write(int b) throws IOException {
 				if (exchange.getResponseCode() == -1)
-					exchange.sendResponseHeaders(200, 0);
+					sendResponseHeaders(200, 0);
 				exchange.getResponseBody().write(b);
 			}
 
@@ -85,7 +85,7 @@ public class DummyServletResponse implements HttpServletResponse {
 	public PrintWriter getWriter() throws IOException {
 		if (writer == null) {
 			if (exchange.getResponseCode() == -1)
-					exchange.sendResponseHeaders(200, 0);
+					sendResponseHeaders(200, 0);
 			writer =  new PrintWriter(exchange.getResponseBody());	
 		}
 		return writer;
@@ -195,25 +195,26 @@ public class DummyServletResponse implements HttpServletResponse {
 
 	@Override
 	public void sendError(int i, String string) throws IOException {
-		if (string != null) {
-			exchange.sendResponseHeaders(i, string.getBytes().length);
+		if (string != null && !"HEAD".equals(exchange.getRequestMethod())) {
+			sendResponseHeaders(i, string.getBytes().length);
 			PrintWriter writer = getWriter();
 			writer.write(string);
 			writer.flush();
 		}
 		else {
-			exchange.sendResponseHeaders(i, 0);
+			sendResponseHeaders(i, 0);
 		}
 	}
 
 	@Override
 	public void sendError(int i) throws IOException {
-		exchange.sendResponseHeaders(i, 0);
+		sendResponseHeaders(i, 0);
 	}
 
 	@Override
 	public void sendRedirect(String string) throws IOException {
-		exchange.sendResponseHeaders(302, 0);
+		exchange.getResponseHeaders().set("Location", string);
+		sendResponseHeaders(302, 0);
 	}
 
 	@Override
@@ -245,7 +246,7 @@ public class DummyServletResponse implements HttpServletResponse {
 	@Override
 	public void setStatus(int i) {
 		try {
-			exchange.sendResponseHeaders(i, 0);
+			sendResponseHeaders(i, 0);
 		} catch (IOException ex) {
 			Logger.getLogger(DummyServletResponse.class.getName()).log(Level.FINE, null, ex);
 		}
@@ -254,7 +255,7 @@ public class DummyServletResponse implements HttpServletResponse {
 	@Override
 	public void setStatus(int i, String string) {
 		try {
-			exchange.sendResponseHeaders(i, 0);
+			sendResponseHeaders(i, 0);
 		} catch (IOException ex) {
 			Logger.getLogger(DummyServletResponse.class.getName()).log(Level.FINE, null, ex);
 		}
@@ -284,5 +285,12 @@ public class DummyServletResponse implements HttpServletResponse {
 	public void setContentLengthLong(long l) {
 		setHeader("Content-Length", String.valueOf(l));
 	}
-	
+
+	private void sendResponseHeaders(int rCode, int contentLength) throws IOException {
+		if ("HEAD".equals(exchange.getRequestMethod())) {
+			exchange.sendResponseHeaders(rCode, -1);
+		} else {
+			exchange.sendResponseHeaders(rCode, contentLength);
+		}
+	}
 }
