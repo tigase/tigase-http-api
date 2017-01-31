@@ -55,7 +55,7 @@ public class FileUploadRepositoryPool<R extends FileUploadRepository<DataSource>
 		if (sender != null) {
 			return getRepository(sender.getDomain()).getSlot(sender, slotId);
 		} else {
-			for (FileUploadRepository repo : getRepositories()) {
+			for (FileUploadRepository repo : getRepositories().values()) {
 				Slot slot = repo.getSlot(null, slotId);
 				if (slot != null)
 					return slot;
