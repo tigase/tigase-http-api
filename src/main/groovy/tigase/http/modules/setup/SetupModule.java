@@ -30,6 +30,7 @@ import tigase.http.ServletInfo;
 import tigase.http.api.Service;
 import tigase.http.modules.AbstractModule;
 import tigase.kernel.beans.Bean;
+import tigase.kernel.beans.config.ConfigField;
 import tigase.util.TigaseStringprepException;
 import tigase.xmpp.BareJID;
 
@@ -46,6 +47,7 @@ public class SetupModule extends AbstractModule {
 
 	private static final Logger log = Logger.getLogger(SetupModule.class.getCanonicalName());
 
+	@ConfigField(desc = "Allow particular username and password to access setup page")
 	private static final String CREDENTIALS_KEY = "admin-credentials";
 
 	private DeploymentInfo httpDeployment = null;
