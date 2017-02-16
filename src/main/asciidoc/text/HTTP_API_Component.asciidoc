@@ -9,7 +9,6 @@ It is configured by default to run under name of `http`. Installations of Tigase
 === Enabling/disabling module
 Every module can be activated or disabled by adjusting it's activity in following way:
 
-==== Configured using DSL based file:
 [source,DSL]
 ----
 http {
@@ -17,29 +16,17 @@ http {
 }
 ----
 
-==== Configuration in old properties file:
-[source,properties]
-----
-http/%module_id%/active=false
-----
-
+[NOTE]
 You need to replace `%module_id%` with the id of module which you want to change activity (in this case, it will disable module).
 
 === Example
 To disable REST module we would following entries can be used:
 
-==== Configured using DSL based file:
 [source,DSL]
 ----
 http {
     rest (active: false) {}
 }
-----
-
-==== Configuration in old properties file:
-[source,properties]
-----
-http/rest/active=false
 ----
 
 === Context path
@@ -49,7 +36,6 @@ By default every module (with exception of the Index module) uses a context path
 ==== Example
 Changing context path for REST module to `/api`
 
-===== Configured using DSL based file:
 [source,dsl]
 ----
 http {
@@ -59,12 +45,6 @@ http {
 }
 ----
 
-==== Configuration in old properties file:
-[source,properties]
-----
-http/rest/context-path=/api
-----
-
 === List of virtual hosts
 This provies the ability to limit modules to be available only on listed virtual hosts, and allows to set context path to `/` for more than one module.
 Property accepts list of strings, which in the case of init.properties file format is list of comma separated domain names and in DSL it is written as list of strings (see xref:complexExample[Complex Example]).
@@ -72,7 +52,6 @@ Property accepts list of strings, which in the case of init.properties file form
 ==== Example
 Here we want to move the REST module to be available only for requests directed to `api.example.com`
 
-===== Configured with DSL based file:
 [source,dsl]
 ----
 http {
@@ -82,16 +61,10 @@ http {
 }
 ----
 
-==== Configuration in old properties file:
-[source,properties]
-----
-http/rest/vhosts=api.example.com
-----
-
 [[complexExample]]
 === Complex example
 In this example we will disable the Index module and move REST module to `http://api.example.com/` and `http://rest.example.com`.
-==== Configured with DSL based file
+
 [source,dsl]
 ----
 http {
@@ -101,14 +74,6 @@ http {
         vhosts = [ 'api.example.com', 'rest.example.com' ]
     }
 }
-----
-
-==== Configuration in old properties file:
-[source,properties]
-----
-http/index/active=false
-http/rest/context-path=/
-http/rest/vhosts=api.example.com,rest.example.com
 ----
 
 include::HTTP_API_Component_modules.asciidoc[]

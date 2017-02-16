@@ -65,9 +65,15 @@ This setting is used to provide API-keys that will provide access to the REST mo
 To allow access for specific clients you should create a list of API keys here and add one of the API keys listed here as the `api-key` HTTP request parameter sent to server. You can also allow anyone to access REST API by setting this to `open_access`, however this may leave your server vulnerable.
 
 While configuring the API key, it is possible to set specific api keys for specific domains or vhosts.  These API keys will only be valid for the specified vhost and the path that matches the configured value.  For example:
+
+.Example of API keys
 [source,properties]
 ----
-api-keys=test1,test2:domain=api.example.com;rest.example.com:regex=/rest/*,open_access:regex=/rest/test/.*
+api-keys = [
+    'test1',
+    'test2:domain=api.example.com;rest.example.com:regex=/rest/*',
+    'open_access:regex=/rest/test/.*'
+]
 ----
 does the following:
 
@@ -81,7 +87,6 @@ Points to a local directory containing Groovy scripts used as handlers for proce
 ==== Example
 Configure API keys for the REST module:
 
-===== Configuration in DSL based file
 [source,java]
 ----
 http {
@@ -93,12 +98,6 @@ http {
         ]
     }
 }
-----
-
-===== Configuration in old properties file
-[source,properties]
-----
-http/rest/api-keys=test1,test2:domain=api.example.com;rest.example.com:regex=/rest/*,open_access:regex=/rest/test/.*
 ----
 
 === Server status module

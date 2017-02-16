@@ -32,7 +32,7 @@ domain:::: This property is used to configure domain name of SSL certificate whi
 Below are few examples for use in DSL based configuration format and older properties based format.
 
 === HTTPS on port 8443 with SSL certificate for example.com
-In DSL configuration file `httpServer` related configuration should look like this:
+In configuration file `httpServer` related configuration should look like this:
 [source,java]
 ----
 httpServer {
@@ -44,15 +44,8 @@ httpServer {
     }
 }
 ----
-If you are using older properties based configuration file, then it should look like this:
-----
-httpServer/ports=8080,8443
-httpServer/connections/8443/socket=ssl
-httpServer/connections/8443/domain=example.com
-----
 
 === Changing port from 8080 to 8081
-In DSL based configuration file:
 [source,java]
 ----
 httpServer {
@@ -61,10 +54,6 @@ httpServer {
         8081 () {}
     }
 }
-----
-In properties based file format:
-----
-httpServer/ports=8081
 ----
 
 [[jettyHttp]]
@@ -76,18 +65,12 @@ Jetty API can be used in one of two forms: Standalone and OSGi.
 In this case the Jetty instance is created and configured internally by Tigase HTTP API.
 This allows for the same configuration properties used as for default HTTP server configuration.
 
-===== Configured with DSL:
+.Configuration with use of standalone Jetty HTTP Server
 [source,properties]
 ----
 httpServer (class: tigase.http.jetty.JettyStandaloneHttpServer) {
     ...
 }
-----
-
-==== Configuration in old properties file:
-[source,properties]
-----
-httpServer/class=tigase.http.jetty.JettyStandaloneHttpServer
 ----
 
 ==== OSGi
@@ -96,7 +79,7 @@ If this is used Tigase HTTP API will try to retrieve Jetty HTTP server from OSGi
 
 NOTE: Jetty HTTP server instance is not configured by Tigase. We would only use this instance for deployment.
 
-===== Configured with DSL:
+.Configuration in OSGi mode with use of Jetty HTTP Server
 [source,properties]
 ----
 httpServer (class: tigase.http.jetty.JettyOSGiHttpServer) {
@@ -104,8 +87,3 @@ httpServer (class: tigase.http.jetty.JettyOSGiHttpServer) {
 }
 ----
 
-==== Configuration in old properties file:
-[source,properties]
-----
-httpServer/class=tigase.http.jetty.JettyOSGiHttpServer
-----
