@@ -75,5 +75,3 @@ http {
     }
 }
 ----
-
-include::HTTP_API_Component_modules.asciidoc[]
