@@ -48,7 +48,7 @@ import static tigase.http.jetty.JettyHttpServerHelper.createServletContextHandle
  * 
  * @author andrzej
  */
-@Bean(name = "httpServer", exportable = true)
+@Bean(name = "httpServer", exportable = true, active = true)
 public class JettyStandaloneHttpServer extends AbstractHttpServer implements Initializable, UnregisterAware {
 
 	private static final Logger log = Logger.getLogger(JettyStandaloneHttpServer.class.getCanonicalName());
@@ -185,7 +185,7 @@ public class JettyStandaloneHttpServer extends AbstractHttpServer implements Ini
 		return connector;
 	}
 
-	@Bean(name = "connections", parent = JettyStandaloneHttpServer.class, exportable = true)
+	@Bean(name = "connections", parent = JettyStandaloneHttpServer.class, active = true, exportable = true)
 	public static class PortsConfigBean extends AbstractHttpServer.PortsConfigBean {
 
 		@Override
