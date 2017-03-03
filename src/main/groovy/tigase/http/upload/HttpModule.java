@@ -31,7 +31,7 @@ import tigase.kernel.beans.UnregisterAware;
 /**
  * Created by andrzej on 08.08.2016.
  */
-@Bean(name = "httpModule", parent = FileUploadComponent.class)
+@Bean(name = "httpModule", parent = FileUploadComponent.class, active = true)
 public class HttpModule extends AbstractHttpModule implements Initializable, UnregisterAware {
 
 	@Inject

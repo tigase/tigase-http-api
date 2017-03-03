@@ -38,7 +38,7 @@ import tigase.xmpp.Authorization;
 /**
  * Created by andrzej on 06.08.2016.
  */
-@Bean(name = "slotRequestModule", parent = FileUploadComponent.class)
+@Bean(name = "slotRequestModule", parent = FileUploadComponent.class, active = true)
 public class SlotRequestModule implements Module {
 
 	private static final String XMLNS = "urn:xmpp:http:upload";

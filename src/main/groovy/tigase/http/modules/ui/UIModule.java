@@ -32,7 +32,7 @@ import java.io.FilenameFilter;
 /**
  * Created by andrzej on 05.08.2016.
  */
-@Bean(name = "ui", parent = HttpMessageReceiver.class, selectors = { UIModule.UIModuleSelector.class })
+@Bean(name = "ui", parent = HttpMessageReceiver.class, active = true, selectors = { UIModule.UIModuleSelector.class })
 public class UIModule extends WebModule {
 
 	public UIModule() {

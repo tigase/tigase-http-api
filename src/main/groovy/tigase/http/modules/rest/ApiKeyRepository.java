@@ -32,7 +32,7 @@ import tigase.xmpp.BareJID;
 
 import java.util.Map;
 
-@Bean(name = "repository", parent = AbstractModule.class)
+@Bean(name = "repository", parent = AbstractModule.class, active = true)
 @ConfigAliases({
 	@ConfigAlias(field = "items", alias = "api-keys")
 })

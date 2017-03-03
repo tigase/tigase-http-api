@@ -48,7 +48,7 @@ import java.util.regex.Pattern;
 /**
  * Created by andrzej on 07.08.2016.
  */
-@Bean(name = "logic", parent = FileUploadComponent.class, exportable = true)
+@Bean(name = "logic", parent = FileUploadComponent.class, active = true, exportable = true)
 public class DefaultLogic implements Logic {
 
 	private static final Logger log = Logger.getLogger(DefaultLogic.class.getCanonicalName());

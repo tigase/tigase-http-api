@@ -42,7 +42,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@Bean(name = "rest", parent = HttpMessageReceiver.class)
+@Bean(name = "rest", parent = HttpMessageReceiver.class, active = true)
 public class RestModule extends AbstractModule {
 	
 	private static final Logger log = Logger.getLogger(RestModule.class.getCanonicalName());

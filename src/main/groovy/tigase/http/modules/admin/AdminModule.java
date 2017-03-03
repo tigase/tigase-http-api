@@ -39,7 +39,7 @@ import java.util.logging.Logger;
  *
  * @author andrzej
  */
-@Bean(name = "admin", parent = HttpMessageReceiver.class)
+@Bean(name = "admin", parent = HttpMessageReceiver.class, active = true)
 public class AdminModule extends AbstractModule {
 
 	private static final String DEF_SCRIPTS_DIR_VAL = "scripts/admin";

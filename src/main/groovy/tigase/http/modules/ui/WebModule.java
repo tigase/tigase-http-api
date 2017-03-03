@@ -35,7 +35,7 @@ import static tigase.http.modules.ui.WarServlet.WAR_PATH_KEY;
  *
  * @author andrzej
  */
-@Bean(name = "webModule")
+@Bean(name = "webModule", active = true)
 public class WebModule extends AbstractModule {
 
 	private static final Logger log = Logger.getLogger(WebModule.class.getCanonicalName());

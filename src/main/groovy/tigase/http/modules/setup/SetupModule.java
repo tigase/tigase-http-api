@@ -42,7 +42,7 @@ import java.util.logging.Logger;
  *
  * @author andrzej
  */
-@Bean(name = "setup", parent = HttpMessageReceiver.class)
+@Bean(name = "setup", parent = HttpMessageReceiver.class, active = true)
 public class SetupModule extends AbstractModule {
 
 	private static final Logger log = Logger.getLogger(SetupModule.class.getCanonicalName());

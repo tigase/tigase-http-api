@@ -174,7 +174,7 @@ public class FileServlet extends HttpServlet {
 		}
 	}
 
-	@Bean(name = "fileServletContext", parent = HttpModule.class)
+	@Bean(name = "fileServletContext", parent = HttpModule.class, active = true)
 	public static class FileServletContext {
 
 		@Inject

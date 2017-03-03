@@ -55,7 +55,7 @@ import java.util.logging.Logger;
  * 
  * @author andrzej
  */
-@Bean(name = "httpServer", parent = Kernel.class, exportable = true)
+@Bean(name = "httpServer", parent = Kernel.class, active = true, exportable = true)
 public class JavaStandaloneHttpServer extends AbstractHttpServer {
 
 	private static final Logger log = Logger.getLogger(JavaStandaloneHttpServer.class.getCanonicalName());
@@ -148,7 +148,7 @@ public class JavaStandaloneHttpServer extends AbstractHttpServer {
 		}
 	}
 
-	@Bean(name="executor", parent = JavaStandaloneHttpServer.class, exportable = true)
+	@Bean(name="executor", parent = JavaStandaloneHttpServer.class, active = true, exportable = true)
 	public static class ExecutorWithTimeout implements Executor, Initializable, UnregisterAware, ConfigurationChangedAware {
 
 		private static final String THREADS_KEY = "threads";
@@ -200,7 +200,7 @@ public class JavaStandaloneHttpServer extends AbstractHttpServer {
 		}
 	}
 
-	@Bean(name = "connections", parent = JavaStandaloneHttpServer.class, exportable = true)
+	@Bean(name = "connections", parent = JavaStandaloneHttpServer.class, active = true, exportable = true)
 	public static class PortsConfigBean extends AbstractHttpServer.PortsConfigBean {
 
 		@Override

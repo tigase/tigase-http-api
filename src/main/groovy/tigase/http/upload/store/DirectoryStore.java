@@ -40,7 +40,7 @@ import java.util.stream.Stream;
 /**
  * Created by andrzej on 08.08.2016.
  */
-@Bean(name = "store", parent = FileUploadComponent.class, exportable = true)
+@Bean(name = "store", parent = FileUploadComponent.class, active = true, exportable = true)
 public class DirectoryStore implements Store {
 
 	private static final Logger log = Logger.getLogger(DirectoryStore.class.getCanonicalName());

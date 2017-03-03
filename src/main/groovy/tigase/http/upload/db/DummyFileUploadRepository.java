@@ -35,7 +35,7 @@ import java.util.List;
 /**
  * Created by andrzej on 08.08.2016.
  */
-@Bean(name = "repo", exportable = true)
+@Bean(name = "repo", exportable = true, active = true)
 public class DummyFileUploadRepository implements FileUploadRepository {
 
 	@Override

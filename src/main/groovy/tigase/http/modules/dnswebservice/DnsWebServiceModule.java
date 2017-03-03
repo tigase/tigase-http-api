@@ -26,7 +26,7 @@ import tigase.http.HttpMessageReceiver;
 import tigase.http.modules.AbstractModule;
 import tigase.kernel.beans.Bean;
 
-@Bean(name = "dns-webservice", parent = HttpMessageReceiver.class)
+@Bean(name = "dns-webservice", parent = HttpMessageReceiver.class, active = true)
 public class DnsWebServiceModule extends AbstractModule {
 	
 	private DeploymentInfo deployment = null;

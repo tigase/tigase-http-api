@@ -42,7 +42,7 @@ import java.util.concurrent.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@Bean(name = "http", parent = Kernel.class)
+@Bean(name = "http", parent = Kernel.class, active = true)
 public class HttpMessageReceiver extends AbstractMessageReceiver implements PacketWriter, RegistrarBean {
 
 	private static final Logger log = Logger.getLogger(HttpMessageReceiver.class.getCanonicalName());

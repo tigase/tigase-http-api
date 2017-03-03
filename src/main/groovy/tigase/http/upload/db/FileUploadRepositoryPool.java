@@ -37,7 +37,7 @@ import java.util.List;
 /**
  * Created by andrzej on 10.08.2016.
  */
-@Bean(name = "repositoryPool", parent = FileUploadComponent.class, exportable = true)
+@Bean(name = "repositoryPool", parent = FileUploadComponent.class, active = true, exportable = true)
 public class FileUploadRepositoryPool<R extends FileUploadRepository<DataSource>> extends MDRepositoryBean<R> implements FileUploadRepository {
 
 	@Override

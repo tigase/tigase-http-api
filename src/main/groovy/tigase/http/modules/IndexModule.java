@@ -41,7 +41,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Created by andrzej on 28.05.2016.
  */
-@Bean(name = "index", parent = HttpMessageReceiver.class)
+@Bean(name = "index", parent = HttpMessageReceiver.class, active = true)
 public class IndexModule extends AbstractModule {
 
 	private static final ConcurrentHashMap<String,IndexModule> modules = new ConcurrentHashMap<>();

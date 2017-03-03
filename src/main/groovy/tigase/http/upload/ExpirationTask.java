@@ -32,7 +32,7 @@ import java.time.Duration;
 /**
  * Created by andrzej on 09.08.2016.
  */
-@Bean(name = "expiration", parent = FileUploadComponent.class)
+@Bean(name = "expiration", parent = FileUploadComponent.class, active = true)
 public class ExpirationTask extends ScheduledTask {
 
 	@ConfigField(desc = "Expiration time", alias = "expiration-time")

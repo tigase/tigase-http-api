@@ -34,7 +34,7 @@ import java.io.File;
  *
  * @author andrzej
  */
-@Bean(name = "server", parent = HttpMessageReceiver.class)
+@Bean(name = "server", parent = HttpMessageReceiver.class, active = true)
 public class ServerInfoModule extends AbstractModule {
 
 	private DeploymentInfo httpDeployment = null;
