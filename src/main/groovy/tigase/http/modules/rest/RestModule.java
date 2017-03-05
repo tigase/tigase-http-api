@@ -28,6 +28,8 @@ import tigase.http.modules.AbstractModule;
 import tigase.http.util.StaticFileServlet;
 import tigase.kernel.beans.Bean;
 import tigase.kernel.beans.config.ConfigField;
+import tigase.kernel.core.BeanConfig;
+import tigase.kernel.core.Kernel;
 import tigase.stats.StatisticHolder;
 import tigase.stats.StatisticHolderImpl;
 import tigase.stats.StatisticsList;
@@ -37,6 +39,7 @@ import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
@@ -144,6 +147,18 @@ public class RestModule extends AbstractModule {
 			httpServer.undeploy(httpDeployment);
 			httpDeployment = null;
 		}
+		Kernel kernel = getKernel(uuid);
+		Iterator<BeanConfig> it = kernel.getDependencyManager().getBeanConfigs().iterator();
+		while (it.hasNext()) {
+			BeanConfig bc = it.next();
+			if (bc.getState() == BeanConfig.State.initialized) {
+				try {
+					kernel.unregister(bc.getBeanName());
+				} catch (Exception ex) {
+					log.log(Level.WARNING, "Could not unregister bean!", ex);
+				}
+			}
+		}
 		restServlets = new ArrayList<RestServlet>();
 		super.stop();
 	}
@@ -200,6 +215,10 @@ public class RestModule extends AbstractModule {
                 return s.endsWith("groovy");
             }
         });
+	}
+
+	public Kernel getKernel() {
+		return getKernel(uuid);
 	}
 
 	@Override

@@ -22,6 +22,8 @@
 package tigase.http.modules.rest
 
 import tigase.http.rest.Handler
+import tigase.kernel.beans.Bean
+import tigase.kernel.core.Kernel
 
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -38,22 +40,28 @@ public class HandlersLoader {
         return instance;
     }
 
-    public def loadHandler(GroovyClassLoader classLoader, File file) {
+    public def loadHandler(GroovyClassLoader classLoader, File file, Kernel kernel) {
         Class cls = classLoader.parseClass(file);
-        Object scriptInstance = cls.newInstance()
+        Object scriptInstance;
+        if (cls.getAnnotation(Bean.class) != null) {
+            kernel.registerBean(cls).exec();
+            scriptInstance = kernel.getInstance(cls);
+        } else {
+            scriptInstance = cls.newInstance()
+        }
         Handler handler = (Handler) scriptInstance;
 		handler.pathName = file.getAbsolutePath();
 		return handler;
     }
 
-    public def loadHandlers(List<File> scripts) {
+    public def loadHandlers(Kernel kernel, List<File> scripts) {
         def classLoader = new GroovyClassLoader(this.getClass().getClassLoader());
         def newHandlers = [];
 
         scripts.each { file ->
             try {
                 log.info("loading handler from file = " + file.getCanonicalPath())
-                newHandlers.add(loadHandler(classLoader, file))
+                newHandlers.add(loadHandler(classLoader, file, kernel))
                 log.info("handler loaded");
             }
             catch (Throwable ex) {

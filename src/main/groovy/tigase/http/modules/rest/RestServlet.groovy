@@ -70,7 +70,7 @@ public class RestServlet extends HttpServlet {
 
     public void loadHandlers(File[] scriptFiles) {
         if (scriptFiles != null) {
-            def listOfHandlers = HandlersLoader.getInstance().loadHandlers(scriptFiles.toList());
+            def listOfHandlers = HandlersLoader.getInstance().loadHandlers(service.getModule().getKernel(), scriptFiles.toList());
 
             def newHandlers = [:];
             methods.each { method ->

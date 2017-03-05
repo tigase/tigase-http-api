@@ -69,21 +69,17 @@ public class JavaStandaloneHttpServer extends AbstractHttpServer {
 
 	@Override
 	public void deploy(DeploymentInfo deployment) {
-		deployments.add(deployment);
 		synchronized (servers) {
-			for (HttpServer server : servers) {
-				deploy(server);
-			}
+			deployments.add(deployment);
+			servers.forEach(server -> this.deploy(server, deployment));
 		}
 	}
 
 	@Override
 	public void undeploy(DeploymentInfo deployment) {
-		deployments.remove(deployment);
 		synchronized (servers) {
-			for (HttpServer server : servers) {
-				undeploy(server);
-			}
+			servers.forEach(server -> this.undeploy(server, deployment));
+			deployments.remove(deployment);
 		}
 	}
 
@@ -131,20 +127,22 @@ public class JavaStandaloneHttpServer extends AbstractHttpServer {
 	}
 	
 	protected void deploy(HttpServer server) {
-		List<DeploymentInfo> toDeploy = Collections.unmodifiableList(deployments);
-		for (DeploymentInfo info : toDeploy) {
-			server.createContext(info.getContextPath(), new RequestHandler(info, executor.timer));
-		}
+		Collections.unmodifiableList(deployments).forEach(info -> deploy(server, info));
+	}
+
+	protected void deploy(HttpServer server, DeploymentInfo info) {
+		server.createContext(info.getContextPath(), new RequestHandler(info, executor.timer));
 	}
 	
 	protected void undeploy(HttpServer server) {
-		List<DeploymentInfo> toUndeploy = Collections.unmodifiableList(deployments);
-		for (DeploymentInfo info : toUndeploy) {
-			try {
-				server.removeContext(info.getContextPath());
-			} catch (IllegalArgumentException ex) {
-				log.log(Level.FINEST, "deployment context " + info.getContextPath() + " already removed");
-			}
+		Collections.unmodifiableList(deployments).forEach(info -> undeploy(server, info));
+	}
+
+	protected void undeploy(HttpServer server, DeploymentInfo info) {
+		try {
+			server.removeContext(info.getContextPath());
+		} catch (IllegalArgumentException ex) {
+			log.log(Level.FINEST, "deployment context " + info.getContextPath() + " already removed");
 		}
 	}
 
