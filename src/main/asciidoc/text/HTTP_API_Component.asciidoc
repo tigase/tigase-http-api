@@ -1,3 +1,4 @@
+[[compHTTPAPI]]
 = HTTP API component
 :author: Andrzej Wójcik
 :date: 2016-08-21 13:28
