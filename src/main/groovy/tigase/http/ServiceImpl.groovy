@@ -29,18 +29,19 @@ import tigase.db.TigaseDBException
 import tigase.db.UserRepository
 import tigase.http.PacketWriter.Callback
 import tigase.http.api.Service
-import tigase.http.modules.AbstractModule
+import tigase.http.modules.AbstractBareModule
+import tigase.http.modules.Module
 import tigase.server.Packet
 import tigase.util.TigaseStringprepException
 import tigase.xmpp.BareJID
 
 @CompileStatic
-public class ServiceImpl<T extends AbstractModule> implements Service<T>, tigase.http.rest.Service {
+public class ServiceImpl<T extends Module> implements Service<T>, tigase.http.rest.Service {
 
 	private final T module;
 	
 	public ServiceImpl(String moduleUUID) {
-		this((T) AbstractModule.getModuleByUUID(moduleUUID));
+		this((T) AbstractBareModule.getModuleByUUID(moduleUUID));
 	}
 	
 	public ServiceImpl(T module) {
@@ -84,10 +85,6 @@ public class ServiceImpl<T extends AbstractModule> implements Service<T>, tigase
 	boolean checkCredentials(String user, String password) throws TigaseStringprepException, TigaseDBException, AuthorizationException {
 		BareJID jid = BareJID.bareJIDInstance(user);
 		return module.getAuthRepository().plainAuth(jid, password);
-	}
-	
-	void executedIn(String path, long executionTime) {
-		module.executedIn(path, executionTime);
 	}
 	
 	T getModule() {

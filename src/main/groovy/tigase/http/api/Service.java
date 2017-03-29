@@ -26,13 +26,13 @@ import tigase.db.AuthRepository;
 import tigase.db.AuthorizationException;
 import tigase.db.TigaseDBException;
 import tigase.db.UserRepository;
-import tigase.http.modules.AbstractModule;
 import tigase.http.PacketWriter.Callback;
+import tigase.http.modules.Module;
 import tigase.server.Packet;
 import tigase.util.TigaseStringprepException;
 import tigase.xmpp.BareJID;
 
-public interface Service<T extends AbstractModule> {
+public interface Service<T extends Module> {
 	
 	void sendPacket(Packet packet, Long timeout, Callback closure);
     void sendPacket(Packet packet, Long timeout, Closure closure);

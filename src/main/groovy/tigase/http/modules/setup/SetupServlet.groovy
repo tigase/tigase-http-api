@@ -26,6 +26,7 @@ import groovy.text.Template
 import groovy.text.TemplateEngine
 import groovy.transform.CompileStatic
 import tigase.db.UserRepositoryMDImpl
+import tigase.http.modules.AbstractBareModule
 
 import javax.servlet.ServletConfig
 import javax.servlet.ServletException
@@ -57,7 +58,7 @@ public class SetupServlet extends HttpServlet {
 		super.init();
 		ServletConfig cfg = super.getServletConfig();
 		String moduleUUID = cfg.getInitParameter("module");
-		setupModule = (SetupModule) SetupModule.getModuleByUUID(moduleUUID);
+		setupModule = (SetupModule) AbstractBareModule.getModuleByUUID(moduleUUID);
 		loadTemplates();
 	}
 	

@@ -21,15 +21,16 @@
  */
 package tigase.http;
 
-import tigase.db.AuthRepository;
-import tigase.db.UserRepository;
 import tigase.http.api.HttpServerIfc;
 import tigase.http.modules.Module;
 import tigase.kernel.beans.Bean;
+import tigase.kernel.beans.BeanSelector;
 import tigase.kernel.beans.Inject;
 import tigase.kernel.beans.RegistrarBean;
 import tigase.kernel.core.Kernel;
-import tigase.server.*;
+import tigase.server.AbstractMessageReceiver;
+import tigase.server.Packet;
+import tigase.server.Permissions;
 import tigase.stats.StatisticsList;
 import tigase.xml.Element;
 import tigase.xmpp.Authorization;
@@ -42,7 +43,7 @@ import java.util.concurrent.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@Bean(name = "http", parent = Kernel.class, active = true)
+@Bean(name = "http", parent = Kernel.class, active = true, selectors = { BeanSelector.Always.class })
 public class HttpMessageReceiver extends AbstractMessageReceiver implements PacketWriter, RegistrarBean {
 
 	private static final Logger log = Logger.getLogger(HttpMessageReceiver.class.getCanonicalName());
@@ -56,11 +57,6 @@ public class HttpMessageReceiver extends AbstractMessageReceiver implements Pack
 
 	@Inject
 	private HttpServerIfc httpServer;
-
-	@Inject
-    private UserRepository user_repo_impl;
-	@Inject
-    private AuthRepository auth_repo_impl;
 	
 	@Override
 	public void everyHour() {

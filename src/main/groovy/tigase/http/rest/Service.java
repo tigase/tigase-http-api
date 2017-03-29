@@ -21,8 +21,8 @@
  */
 package tigase.http.rest;
 
-import tigase.http.modules.AbstractModule;
+import tigase.http.modules.Module;
 
-public interface Service<T extends AbstractModule> extends tigase.http.api.Service<T> {
+public interface Service<T extends Module> extends tigase.http.api.Service<T> {
 
 }

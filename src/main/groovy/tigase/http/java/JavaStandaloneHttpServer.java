@@ -26,10 +26,7 @@ import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsServer;
 import tigase.http.AbstractHttpServer;
 import tigase.http.DeploymentInfo;
-import tigase.kernel.beans.Bean;
-import tigase.kernel.beans.Initializable;
-import tigase.kernel.beans.Inject;
-import tigase.kernel.beans.UnregisterAware;
+import tigase.kernel.beans.*;
 import tigase.kernel.beans.config.ConfigField;
 import tigase.kernel.beans.config.ConfigurationChangedAware;
 import tigase.kernel.core.Kernel;
@@ -55,7 +52,7 @@ import java.util.logging.Logger;
  * 
  * @author andrzej
  */
-@Bean(name = "httpServer", parent = Kernel.class, active = true, exportable = true)
+@Bean(name = "httpServer", parent = Kernel.class, active = true, exportable = true, selectors = { BeanSelector.Always.class })
 public class JavaStandaloneHttpServer extends AbstractHttpServer {
 
 	private static final Logger log = Logger.getLogger(JavaStandaloneHttpServer.class.getCanonicalName());
@@ -146,7 +143,7 @@ public class JavaStandaloneHttpServer extends AbstractHttpServer {
 		}
 	}
 
-	@Bean(name="executor", parent = JavaStandaloneHttpServer.class, active = true, exportable = true)
+	@Bean(name="executor", parent = JavaStandaloneHttpServer.class, active = true, exportable = true, selectors = {BeanSelector.Always.class})
 	public static class ExecutorWithTimeout implements Executor, Initializable, UnregisterAware, ConfigurationChangedAware {
 
 		private static final String THREADS_KEY = "threads";
@@ -198,7 +195,8 @@ public class JavaStandaloneHttpServer extends AbstractHttpServer {
 		}
 	}
 
-	@Bean(name = "connections", parent = JavaStandaloneHttpServer.class, active = true, exportable = true)
+	@Bean(name = "connections", parent = JavaStandaloneHttpServer.class, active = true, exportable = true, selectors = {
+			BeanSelector.Always.class})
 	public static class PortsConfigBean extends AbstractHttpServer.PortsConfigBean {
 
 		@Override

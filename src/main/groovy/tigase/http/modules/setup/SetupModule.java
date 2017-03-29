@@ -24,59 +24,60 @@ package tigase.http.modules.setup;
 import tigase.db.AuthRepository;
 import tigase.db.AuthorizationException;
 import tigase.db.TigaseDBException;
+import tigase.db.UserRepository;
 import tigase.http.DeploymentInfo;
 import tigase.http.HttpMessageReceiver;
 import tigase.http.ServletInfo;
 import tigase.http.api.Service;
-import tigase.http.modules.AbstractModule;
+import tigase.http.modules.AbstractBareModule;
+import tigase.http.modules.Module;
 import tigase.kernel.beans.Bean;
+import tigase.kernel.beans.BeanSelector;
+import tigase.kernel.beans.Inject;
 import tigase.kernel.beans.config.ConfigField;
 import tigase.util.TigaseStringprepException;
 import tigase.xmpp.BareJID;
 
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 /**
  *
  * @author andrzej
  */
-@Bean(name = "setup", parent = HttpMessageReceiver.class, active = true)
-public class SetupModule extends AbstractModule {
+@Bean(name = "setup", parent = HttpMessageReceiver.class, active = true, selectors = { BeanSelector.Always.class })
+public class SetupModule extends AbstractBareModule
+		implements Module {
 
 	private static final Logger log = Logger.getLogger(SetupModule.class.getCanonicalName());
-
-	@ConfigField(desc = "Allow particular username and password to access setup page")
-	private static final String CREDENTIALS_KEY = "admin-credentials";
 
 	private DeploymentInfo httpDeployment = null;
 
 	private Service service = null;
 
+	@ConfigField(desc = "Allow access to setup for user", alias = "admin-user")
 	private String adminUser = null;
+	@ConfigField(desc = "Allow access to setup with password", alias = "admin-password")
 	private String adminPassword = null;
 
-	private final String uuid = UUID.randomUUID().toString();
-	private static final ConcurrentHashMap<String,AbstractModule> modules = new ConcurrentHashMap<String,AbstractModule>();
-	
-	public static AbstractModule getModuleByUUID(String uuid) {
-		return modules.get(uuid);
-	}	
+	@Inject(nullAllowed = true)
+	private AuthRepository authRepo;
 
 	@Override
 	public String getDescription() {
 		return "Setup - handles basic configuration of Tigase XMPP Server";
 	}
-	
+
+	@Override
+	public boolean isRequestAllowed(String key, String domain, String path) {
+		return false;
+	}
+
 	@Override
 	public void start() {
 		if (httpDeployment != null) {
 			stop();
 		}
 	
-		super.start();
-
 		service = new tigase.http.ServiceImpl(this) {
 
 			@Override
@@ -98,8 +99,9 @@ public class SetupModule extends AbstractModule {
 			}
 
 		};
-
-		modules.put(uuid, this);
+		
+		super.start();
+		
 		httpDeployment = httpServer.deployment().setClassLoader(this.getClass().getClassLoader())
 				.setContextPath(contextPath).setService(service).setDeploymentName("Setup").setDeploymentDescription(getDescription());
 		if (vhosts != null) {
@@ -115,11 +117,20 @@ public class SetupModule extends AbstractModule {
 	public void stop() {
 		if (httpDeployment != null) { 
 			httpServer.undeploy(httpDeployment);
-			modules.remove(uuid, this);
 			httpDeployment = null;
 		}
 		super.stop();
-	}	
+	}
+
+	@Override
+	public UserRepository getUserRepository() {
+		return null;
+	}
+
+	@Override
+	public AuthRepository getAuthRepository() {
+		return authRepo;
+	}
 
 	protected Service getService() {
 		return service;

@@ -55,11 +55,11 @@ public class UIModule extends WebModule {
 		return (files != null && files.length > 0) ? files[0] : null;
 	}
 
-	public static class UIModuleSelector implements BeanSelector {
+	public static class UIModuleSelector extends BeanSelector.DefaultMode {
 
 		@Override
 		public boolean shouldRegister(Kernel kernel) {
-			return getWarFile() != null;
+			return super.shouldRegister(kernel) && getWarFile() != null;
 		}
 	}
 }

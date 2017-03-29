@@ -293,7 +293,7 @@ public class RestServlet extends HttpServlet {
     }
 	
 	def executedIn(String route, long executionTime) {
-		service.executedIn(route, executionTime);
+		service.getModule().executedIn(route, executionTime)
 	}
 
 	def encodeResults(HttpServletRequest request, HttpServletResponse response, Handler route, def reqParams, def result ) {
