@@ -27,7 +27,7 @@ import org.junit.runner.Description;
 import org.junit.runners.MethodSorters;
 import org.junit.runners.model.Statement;
 import tigase.db.*;
-import tigase.util.SchemaLoader;
+import tigase.db.util.SchemaLoader;
 import tigase.xmpp.JID;
 
 import java.io.File;
