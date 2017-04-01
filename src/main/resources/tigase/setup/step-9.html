@@ -1,34 +1,14 @@
-<%  def title = 'Setup security'
-def tmp = [
-	test:1
-] + config;
-
-tmp.each { k,v ->
-	if (request.getParameter(k)) {
-		Object old = tmp[k];
-		if (old instanceof Boolean) {
-			tmp[k] = Boolean.parseBoolean(request.getParameter(k));
-		}
-		else {
-			tmp[k] = request.getParameter(k);
-		}
-	}
-}
-config.clear();
-config.putAll(tmp);
-%>
-${ util.include('header', [title:'Setup: ' + title]) }
+${ util.include('header', [title:'Setup: ' + page.title]) }
 <h3>Security of setup.</h3>
 <h3>By default Tigase XMPP Server is configured to allow access to this setup page only user authorized by JID and password listed as admins.</h3>
 <h3>However in rare conditions it may be impossible to access database for authentication. In this case we use separate admin credentials stored in <i>etc/init.properties</i> file.</h3>
 <h3>Please enter username and password you wish to use in this situation. If you leave it blank, setup will be inaccessible without connection to database.</h3>
-<form method='GET' >
-	<input type='hidden' name='step' value='${Integer.parseInt(currentStep) + 1}'/>
-	<label for='setupUser'>Username:</label>
-	<input name='setupUser' type='text' value="${config.setupUser ?: ''}" /><br/>
-	<div style='padding-top: 1em'></div>
-	<label for='setupPassword'>Password:</label>
-	<input name='setupPassword' type='password' value="${config.setupPassword ?: ''}"/><br/>
+<form method='POST' action="?step=${ page.nextPage() }"><% def q = page.getQuestion('setupUser'); %>
+	<label for='${q.getName()}'>Username:</label>
+	<input name='${q.getName()}' type='text' value="${q.getValue() ?: ''}" /><br/>
+	<div style='padding-top: 1em'></div><% q = page.getQuestion('setupPassword'); %>
+	<label for='${q.getName()}'>Password:</label>
+	<input name='${q.getName()}' type='password' value="${q.getValue() ?: ''}"/><br/>
 	<div style='padding-top: 1em'></div>
 	<button type="submit">Next</button>
 </form>

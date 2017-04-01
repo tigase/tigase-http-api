@@ -32,7 +32,10 @@ import tigase.xmpp.BareJID;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URLDecoder;
 import java.security.Principal;
@@ -47,7 +50,7 @@ import java.util.logging.Logger;
 public class DummyServletRequest implements HttpServletRequest {
 
 	private final HttpExchange exchange;
-	private final Map<String,Object> params;
+	private final Map<String,String[]> params;
 	
 	private final String servletPath;
 	private final String contextPath;
@@ -61,7 +64,7 @@ public class DummyServletRequest implements HttpServletRequest {
 	
 	public DummyServletRequest(HttpExchange exchange, String contextPath, String servletPath, Service service, Timer timer, Integer executionTimeout) {
 		this.exchange = exchange;
-		this.params = new HashMap<String,Object>();
+		this.params = new HashMap<>();
 		String query = exchange.getRequestURI().getRawQuery();
 		if (query != null) {
 			decodeParamsFromString(query, params);
@@ -83,23 +86,23 @@ public class DummyServletRequest implements HttpServletRequest {
 		this.executionTimeout = executionTimeout;
 	}
 	
-	private void decodeParamsFromString(String query, Map params) {
+	private void decodeParamsFromString(String query, Map<String, String[]> params) {
 		for (String part : query.split("&")) {
 			String[] val = part.split("=");
 			try {
 				String k = URLDecoder.decode(val[0], "UTF-8");
 				String v = val.length == 1 ? "" : URLDecoder.decode(val[1], "UTF-8");
 				if (params.containsKey(k)) {
-					if (params.get(k) instanceof String[]) {
-						String[] oldV = (String[]) params.get(k);
+//					if (params.get(k) instanceof String[]) {
+						String[] oldV = params.get(k);
 						oldV = Arrays.copyOf(oldV, oldV.length + 1);
 						oldV[oldV.length - 1] = v;
 						params.put(k, oldV);
-					} else {
-						params.put(k, new String[] { (String)params.get(k), v });
-					}
+//					} else {
+//						params.put(k, new String[] { (String)params.get(k), v });
+//					}
 				} else {
-					params.put(k, v);
+					params.put(k, new String[] { v });
 				}
 			} catch (UnsupportedEncodingException ex) {
 				Logger.getLogger(DummyServletRequest.class.getName()).log(Level.FINE, "could not decode URLEncoded paramters", ex);
@@ -176,8 +179,8 @@ public class DummyServletRequest implements HttpServletRequest {
 
 	@Override
 	public String getParameter(String key) {
-		Object val = params.get(key);
-		return (val instanceof String) ? ((String) val) : null; 
+		String[] val = params.get(key);
+		return (val != null && val.length == 1) ? val[0] : null; //(val instanceof String) ? ((String) val) : null;
 	}
 
 	@Override
@@ -187,15 +190,16 @@ public class DummyServletRequest implements HttpServletRequest {
 
 	@Override
 	public String[] getParameterValues(String key) {
-		Object val = params.get(key);
-		if (val == null)
-			return null;
-		return (val instanceof String[]) ? ((String[]) val) : new String[] { (String) val }; 
+//		Stringp[] val = params.get(key);
+//		if (val == null)
+//			return null;
+//		return (val instanceof String[]) ? ((String[]) val) : new String[] { (String) val };
+		return params.get(key);
 	}
 
 	@Override
 	public Map<String, String[]> getParameterMap() {
-		return null;
+		return Collections.unmodifiableMap(params);
 	}
 
 	@Override

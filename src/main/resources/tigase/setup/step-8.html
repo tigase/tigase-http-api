@@ -1,13 +1,10 @@
-<%  def title = 'HTTP API - REST security configuration' %>
-${ util.include('header', [title:'Setup: ' + title]) }
+${ util.include('header', [title:'Setup: ' + page.title]) }
 <h3>Configuration of security features of HTTP REST API</h3>
-<form method='GET' >
+<form method='POST' action="?step=${ page.nextPage() }"><% def q1 = page.getQuestion('httpRestApiSecurity'); def q2 = page.getQuestion('httpRestApiKeys'); %>
 <label for="access_type"><b>Select security model of REST API</b></label><br/>
-<input type="radio" name="httpRestApiSecurity" value="forbidden" ${((config.httpRestApiSecurity ?: "forbidden") == 'forbidden') ? 'checked' : ''}>Access forbidden (REST API disabled)<br/>
-<input type="radio" name="httpRestApiSecurity" value="api_keys" ${(config.httpRestApiSecurity == 'api_keys') ? 'checked' : ''}>Access requires on of API keys: <input type="text" name="httpRestApiKeys" value="${config.httpRestApiKeys ?: ''}"/><br/>
-<input type="radio" name="httpRestApiSecurity" value="open_access" ${(config.httpRestApiSecurity == 'open_access') ? 'checked' : ''}>Open access<br/>
-
-<input type='hidden' name='step' value='${Integer.parseInt(currentStep)+1}'/>
+<input type="radio" name="${q1.getName()}" value="forbidden" ${ q1.isSelected('forbidden') ? 'checked' : ''}>Access forbidden (REST API disabled)<br/>
+<input type="radio" name="${q1.getName()}" value="api_keys" ${ q1.isSelected('api_keys') ? 'checked' : ''}>Access requires on of API keys: <input type="text" name="${q2.getName()}" value="${ q2.getValue() }"/><br/>
+<input type="radio" name="${q1.getName()}" value="open_access" ${ q1.isSelected('open_access') ? 'checked' : ''}>Open access<br/>
 
 <button type="submit">Next</button>
 </form>

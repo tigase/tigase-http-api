@@ -1,108 +1,48 @@
-<%  
-    def tmp = [
-		authDB:false,
-		mucComponent: true,
-		PubSubComponent: true,
-		stunComponent: false,
-		socks5Component: false,
-		httpApiComponent: true,
-		messageArchiveComponent: true,
-		clusterMode : false,
-		acsComponent : false,
-		acsPubSubComponent : false,
-		acsMUCComponent : false,
-		serverDebug : true,
-		dbDebug : false,
-		pluginDebug : false,
-		clusterDebug : false
-	] + config;
-    def title = 'Advanced configuration options'
-    
-	tmp.each { k,v ->
-		if (request.getParameter(k)) {
-			Object old = tmp[k];
-			if (old instanceof Boolean) {
-				tmp[k] = Boolean.parseBoolean(request.getParameter(k));
-			}
-			else {
-				tmp[k] = request.getParameter(k);
-			}
-		}
-	}
-	config.clear();
-	config.putAll(tmp);	
-%>
-${ util.include('header', [title:'Setup: ' + title]) }
+${ util.include('header', [title:'Setup: ' + page.title]) }
 <h3>This panel offer advanced configuration options. Please do not change them unless you know what you are doing.</h3>
-<form method='GET' >
-<input type='hidden' name='step' value='${Integer.parseInt(currentStep)+1}'/>
+<script>
+	var checkACS = function() {
+		var acsRequired = false;
+		["pubsub","muc"].forEach(function(name) {
+			var el = document.getElementById("id-" + name);
+			if (el != null) {
+				acsRequired |= el.checked || false;
+			}
+		});
+		document.getElementById("acsComponent").disabled = !document.getElementById("clusterMode").checked || (document.getElementById("clusterMode").checked && acsRequired);
+
+		if (document.getElementById("acsComponent").checked) {
+			document.getElementById("acsComponent").checked = document.getElementById("clusterMode").checked;
+		} else {
+			document.getElementById("acsComponent").checked = document.getElementById("clusterMode").checked && acsRequired;
+		}
+		document.getElementById("acs-warn").style.display = (document.getElementById("clusterMode").checked && acsRequired) ? "inline" : "none";
+	};
+</script>
+<form method='POST' action="?step=${ page.nextPage() }">
 <div style='padding-top: 1em'></div>
-<label for='authDB'>Separate authentication database:</label>
-<input name='authDB' type='checkbox' ${ !(!(config.authDB)) ? 'checked' : '' } />
-<br/>
-<h3>Select optional components to run:</h3>
-<% [
-	[ key:'mucComponent', label:'MUC' ],
-	[ key:'PubSubComponent', label:'PubSub' ],
-	[ key:'stunComponent', label:'STUN Component' ],
-	[ key:'socks5Component', label:'Socks5 Component' ],
-	[ key:'httpApiComponent', label:'HTTP API Component' ],
-	[ key:'messageArchivingComponent', label:'Message Archiving Component' ]
-   ].each {
-%>
-<label for='${it.key}'>${it.label}</label>
-<input name='${it.key}' type='checkbox' ${ !(!(config[it.key])) ? 'checked' : '' } />
+<h3>Select optional components to run:</h3><% page.getOptionalComponents().each { %>
+<label for='${it.getName()}'>${it.getLabel()}</label>
+<input name='${it.getName()}' type='checkbox' id='id-${it.getBeanName()}' ${ it.isSelected(it.getBeanName()) ? 'checked' : '' } onclick='checkACS();'/>
 <br/>
 <div style='padding-top: 1em'></div>
 <% } %>
-<h3>Cluster configuration</h3>
-<label for='clusterMode'>Do you want your server to run in the cluster mode?</label>
-<input name='clusterMode' type='checkbox' ${ !(!(config.clusterMode)) ? 'checked' : '' } onclick='
-document.getElementById("acsComponent").disabled = !this.checked;
-if (!this.checked) { 
-	document.getElementById("acsComponent").checked = false;
-	document.getElementById("acsPubSubComponent").checked = false;
-	document.getElementById("acsMUCComponent").checked = false;
-}
-document.getElementById("acsPubSubComponent").disabled = !document.getElementById("acsComponent").checked;
-document.getElementById("acsMUCComponent").disabled = !document.getElementById("acsComponent").checked;
+<h3>Cluster configuration</h3><% def q = page.getQuestion('clusterMode') %>
+<label for='${q.getName()}'>Do you want your server to run in the cluster mode?</label>
+<input name='${q.getName()}' id="clusterMode" type='checkbox' ${ q.isSelected("true") ? 'checked' : '' } onclick='
+checkACS();
 '/>
 <br/>
-<div style='padding-top: 1em'></div>
+<div style='padding-top: 1em'></div><% q = page.getQuestion('acsComponent') %>
 
-<label for='acsComponent'>Tigase Advanced Clustering Strategy (ACS) Component</label>
-<input id="acsComponent" name='acsComponent' type="checkbox" ${(config.clusterMode) ? "" : "disabled"} ${ !(!(config.acsComponent)) ? 'checked' : '' } onclick='
-document.getElementById("acsPubSubComponent").disabled = !this.checked;
-document.getElementById("acsMUCComponent").disabled = !this.checked;
-if (!this.checked) { 
-	document.getElementById("acsPubSubComponent").checked = false;
-	document.getElementById("acsMUCComponent").checked = false;
-}' />
-<br/>
-<div style='padding-top: 1em'></div>
-<label for='acsPubSubComponent'>PubSub ACS</label>
-<input id="acsPubSubComponent" name='acsPubSubComponent' type="checkbox" ${(config.acsComponent && config.clusterMode) ? "" : "disabled"} ${ !(!(config.acsPubSubComponent)) ? 'checked' : '' }/>
-<br/>
-<div style='padding-top: 1em'></div>
-<label for='acsMUCComponent'>MUC ACS</label>
-<input id="acsMUCComponent" name='acsMUCComponent' type="checkbox" ${(config.acsComponent && config.clusterMode) ? "" : "disabled"} ${ !(!(config.acsMUCComponent)) ? 'checked' : '' } />
-	   
-<h3>Debug configuration</h3>
-<% [
-	[ key:'serverDebug', label:'Base server debug' ],
-	[ key:'pluginsDebug', label:'Plugins debug' ],
-	[ key:'dbDebug', label:'Database debug' ],
-	[ key:'clusterDebug', label:'Cluster debug' ]
-   ].each {
- %>
-<label for='${it.key}'>${it.label}</label>
-<input name='${it.key}' type='checkbox' ${ !(!(config[it.key])) ? 'checked' : '' } />
-<br/>
-<div style='padding-top: 1em'></div>
-<% } %>
+<label for='${q.getName()}'>Tigase Advanced Clustering Strategy (ACS) Component</label>
+<input name='${q.getName()}' id='acsComponent' type="checkbox" ${ q.isSelected("true") ? "" : "disabled"} ${ q.isSelected("true") ? 'checked' : '' } /><span id="acs-warn" style="color: red; display: none;"><br/>Warning: Tigase ACS is required for PubSub and MUC components to work and cannot be disabled!</span>
 	   
 <div style='padding-top: 1em'></div>
 <button type="submit">Next</button>
 
 </form>
+<script>
+	checkACS();
+</script>
 ${ util.include('footer') } 

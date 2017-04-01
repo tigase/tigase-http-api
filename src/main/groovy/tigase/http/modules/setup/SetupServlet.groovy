@@ -49,7 +49,8 @@ public class SetupServlet extends HttpServlet {
 	
 	private final Map<String,Template> templates = new ConcurrentHashMap<>();
 	
-	private final Map config = [test:1];
+	//private final Map config = [test:1];
+	private final Setup setup = new Setup();
 	
 	private SetupModule setupModule;
 
@@ -83,13 +84,21 @@ public class SetupServlet extends HttpServlet {
 		loadTemplates();
 
 		Template t = null;
-		Map templateParams = [request:request, response:response, servlet:this, config:config];;
+		Map templateParams = [request:request, response:response, servlet:this];
 		if (setupModule.getUserRepository() == null || ((setupModule.getUserRepository() instanceof UserRepositoryMDImpl) && !((UserRepositoryMDImpl) setupModule.getUserRepository()).getRepo(null)))  {
-			String i = request.getParameter("step");
-			if (i == null || i.isEmpty()) {
-				i = "1";
+			templateParams["setup"] = setup;
+			String step  = request.getParameter("step");
+			int i = 1;
+			if (step != null) {
+				i = Integer.parseInt(step);
 			}
+
 			t = templates.get("step" + i);
+			if (i > 1 && "POST".equals(request.getMethod())) {
+				Setup.Page page = setup.getPage(i-1);
+				page.setValues(request.getParameterMap());
+			}
+			templateParams.put("page", setup.getPage(i));
 			templateParams.put("currentStep", i);
 		} else {
 			t = templates.get("edit");

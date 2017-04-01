@@ -1,21 +1,8 @@
-<%  
-    def tmp = [test:1] + config;
-    def title = 'About software'
-    
-	tmp.each { k,v ->
-		if (request.getParameter(k)) {
-			tmp[k] = request.getParameter(k);
-		}
-	}
-	config.clear();
-	config.putAll(tmp);
-%>
-${ util.include('header', [title:'Setup: ' + title]) }
+${ util.include('header', [title:'Setup: ' + page.title, currentStep:'test']) }
 <h3>While the Tigase server is quite stable and well tested application the installer itself is a new addition. Take precautions especially if you upgrade the ser
 ver from earlier version. Backup old server files and the database.</h3>
 <h3>If you notice any problems please report them to address: <a href="mailto:artur.hefczyc@tigase.org">artur.hefczyc@tigase.org</a></h3>
-<form method='GET' >
-<input type='hidden' name='step' value='${Integer.parseInt(currentStep)+1}'/>
+<form method='POST' action="?step=${ page.nextPage() }">
 
 <div style='padding-top: 1em'></div>
 <button type="submit">Next</button>

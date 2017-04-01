@@ -1,68 +1,41 @@
-<%  
-    def tmp = [
-		dbSuperuser : 'root',
-		dbSuperpass : '',
-		dbUser : 'tigase',
-		dbPass : 'tigase12',
-		dbName : 'tigasedb',
-		dbHost : 'localhost',
-		dbParams : ''
-	] + config;
-    def title = 'Database configuration for ' + config.dbType
-    
-	tmp.each { k,v ->
-		if (request.getParameter(k)) {
-			Object old = tmp[k];
-			if (old instanceof Boolean) {
-				tmp[k] = Boolean.parseBoolean(request.getParameter(k));
-			}
-			else {
-				tmp[k] = request.getParameter(k);
-			}
-		}
-	}
-	config.clear();
-	config.putAll(tmp);	
-%>
-${ util.include('header', [title:'Setup: ' + title]) }
-<h3>You have selected ${config.dbType} database. This database needs additional configuration parameters. Please enter all required information.</h3>
-<form method='GET' >
-<input type='hidden' name='step' value='${Integer.parseInt(currentStep)+1}'/>
-
-<label for='dbSuperuser'>Super user account name:</label>
-<input type='text' size='30' name='dbSuperuser' value='${config.dbSuperuser}' />
+${ util.include('header', [title:'Setup: ' + page.title]) }
+<h3>You have selected ${setup.config.dbType?.name()} database. This database needs additional configuration parameters. Please enter all required information.</h3>
+<form method='POST' action="?step=${ page.nextPage() }">
+<% def q = page.getQuestion('dbSuperuser'); %>
+<label for='${q.getName()}'>Super user account name:</label>
+<input type='text' size='30' name='${q.getName()}' value='${q.getValue()}' />
+<br/>
+<div style='padding-top: 1em'></div>
+<% q = page.getQuestion('dbSuperpass'); %>
+<label for='${q.getName()}'>Super user account password:</label>
+<input type='password' size='30' name='${q.getName()}' value='${q.getValue()}' />
 <br/>
 <div style='padding-top: 1em'></div>
 
-<label for='dbSuperpass'>Super user account password:</label>
-<input type='password' size='30' name='dbSuperpass' value='${config.dbSuperpass}' />
+<h3>Database details. It will be created automatically if it does not exist.</h3>
+<% q = page.getQuestion('dbUser'); %>
+<label for='${q.getName()}'>Database account:</label>
+<input type='text' size='30' name='${q.getName()}' value='${q.getValue()}' />
 <br/>
 <div style='padding-top: 1em'></div>
-
-<h3>${config.dbType} database details. It will be created automatically if it does not exist.</h3>
-
-<label for='dbUser'>Database account:</label>
-<input type='text' size='30' name='dbUser' value='${config.dbUser}' />
+<% q = page.getQuestion('dbPass'); %>
+<label for='${q.getName()}'>Account password:</label>
+<input type='text' size='30' name='${q.getName()}' value='${q.getValue()}' />
 <br/>
 <div style='padding-top: 1em'></div>
-
-<label for='dbPass'>Account password:</label>
-<input type='text' size='30' name='dbPass' value='${config.dbPass}' />
+<% q = page.getQuestion('dbName'); %>
+<label for='${q.getName()}'>Database name:</label>
+<input type='text' size='30' name='${q.getName()}' value='${q.getValue()}' />
 <br/>
 <div style='padding-top: 1em'></div>
-
-<label for='dbName'>Database name:</label>
-<input type='text' size='30' name='dbName' value='${config.dbName}' />
+<% q = page.getQuestion('dbHost'); %>
+<label for='${q.getName()}'>Database host or IP:</label>
+<input type='text' size='30' name='${q.getName()}' value='${q.getValue()}' />
 <br/>
 <div style='padding-top: 1em'></div>
-
-<label for='dbHost'>Database host or IP:</label>
-<input type='text' size='30' name='dbHost' value='${config.dbHost}' />
-<br/>
-<div style='padding-top: 1em'></div>
-
-<label for='dbParams'>Additional database parameters:</label>
-<input type='text' size='30' name='dbParams' value='${config.dbParams}' />
+<% q = page.getQuestion('dbParams'); %>
+<label for='${q.getName()}'>Additional database parameters:</label>
+<input type='text' size='30' name='${q.getName()}' value='${q.getValue()}' />
 <br/>
 <div style='padding-top: 1em'></div>
 
