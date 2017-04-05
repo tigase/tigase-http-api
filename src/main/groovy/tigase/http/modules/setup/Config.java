@@ -148,7 +148,7 @@ public class Config {
 		props.put("--debug", "server");
 
 		AbstractBeanConfigurator.BeanDefinition dataSource = createBean("dataSource");
-		addBean(dataSource, setBeanProperty(createBean("default"), "uri", getDatabaseUri()));
+		addBean(props, addBean(dataSource, setBeanProperty(createBean("default"), "uri", getDatabaseUri())));
 
 		AbstractBeanConfigurator.BeanDefinition sessMan = createBean("sess-man");
 		addBean(props, sessMan);
@@ -175,7 +175,10 @@ public class Config {
 					addBean(props, createBean(def.getName(), optionalComponents.contains(def.getName())));
 				});
 
-		props.computeIfPresent("http", (name, def) -> {
+		props.compute("http", (name, def) -> {
+			if (def == null) {
+				def = createBean("http");
+			}
 			switch (httpRestApiSecurity) {
 				case forbidden:
 					break;

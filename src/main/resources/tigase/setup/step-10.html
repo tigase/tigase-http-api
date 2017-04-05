@@ -1,7 +1,7 @@
 ${ util.include('header', [title:'Setup: ' + page.title]) }
 <h3>Installation of Tigase XMPP Server is almost finished.</h3>
-<form method='POST' action="?step=${ page.nextPage() }">
-<input type='hidden' name='save' value='true'/>
+<form method='POST' action="?step=${ page.nextPage() }"><% def q = page.getQuestion('saveConfig'); %>
+<input type='hidden' name='${q.getName()}' value='true'/>
 <label for='config'>Configuration created during installation:</label><br/>
 <textarea name='config' rows=40 cols=80>
 ${ setup.config.getConfigurationInDSL() }

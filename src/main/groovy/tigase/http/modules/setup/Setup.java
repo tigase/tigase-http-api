@@ -241,9 +241,9 @@ public class Setup {
 	private class VirtualDomainsQuestion extends SingleAnswerQuestion {
 		VirtualDomainsQuestion(String id, Config config) {
 			super(id, ()-> Arrays.stream(config.virtualDomains).collect(
-					Collectors.joining(",")), admins -> {
-				if (admins != null) {
-					config.virtualDomains = admins.split(",");
+					Collectors.joining(",")), vhosts -> {
+				if (vhosts != null) {
+					config.virtualDomains = vhosts.split(",");
 				} else {
 					config.virtualDomains = new String[0];
 				}
@@ -473,6 +473,7 @@ public class Setup {
 
 		private Properties getSchemaLoaderProperties() {
 			Properties props = new java.util.Properties();
+			props.setProperty("schemaVersion", "7-2");
 
 			if (config.dbType != null) {
 				props.setProperty("dbType", config.dbType.name().toLowerCase());

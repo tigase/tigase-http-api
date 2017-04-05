@@ -18,7 +18,7 @@ ${ util.include('header', [title:'Setup: ' + page.title]) }
 <br/>
 <div style='padding-top: 1em'></div><% q = page.getQuestion('virtualDomains') %>
 <label for='${q.getName()}'>Your XMPP (Jabber) domains</label>
-<input name=${q.getName()}' type='text' size='30' value='${q.getValue()}' />
+<input name='${q.getName()}' type='text' size='30' value='${q.getValue()}' />
 <br/>
 <div style='padding-top: 1em'></div><% q = page.getQuestion('admins') %>
 <label for='${q.getName()}'>Server administrators</label>
