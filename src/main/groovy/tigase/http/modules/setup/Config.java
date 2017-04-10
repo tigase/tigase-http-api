@@ -148,7 +148,8 @@ public class Config {
 		props.put("--debug", "server");
 
 		AbstractBeanConfigurator.BeanDefinition dataSource = createBean("dataSource");
-		addBean(props, addBean(dataSource, setBeanProperty(createBean("default"), "uri", getDatabaseUri())));
+		addBean(dataSource, setBeanProperty(createBean("default"), "uri", getDatabaseUri()));
+		addBean(props, dataSource);
 
 		AbstractBeanConfigurator.BeanDefinition sessMan = createBean("sess-man");
 		addBean(props, sessMan);
