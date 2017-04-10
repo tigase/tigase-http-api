@@ -143,7 +143,7 @@ public class Config {
 		if (clusterMode) {
 			props.put("--cluster-mode", "true");
 		}
-		props.put("--virtual-hosts", Arrays.stream(virtualDomains).collect(Collectors.joining(",")));
+		props.put("--virt-hosts", Arrays.stream(virtualDomains).collect(Collectors.joining(",")));
 		props.put("admin", admins);
 		props.put("--debug", "server");
 
