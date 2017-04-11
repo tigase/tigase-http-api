@@ -221,6 +221,17 @@
 
 		<resources>
 			<resource>
+				<directory>database</directory>
+				<targetPath>database</targetPath>
+				<includes>
+					<include>**/*.sql</include>
+					<include>**/*.sh</include>
+					<include>**/*.cmd</include>
+					<include>**/*.txt</include>
+				</includes>
+			</resource>
+
+			<resource>
 				<directory>src/scripts/groovy/tigase/</directory>
 				<targetPath>scripts</targetPath>
 				<includes>

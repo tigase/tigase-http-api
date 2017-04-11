@@ -84,7 +84,7 @@ call TigAddIndexIfNotExists('tig_hfu_slots', 'tig_hfu_slots_slot_id_index', 0, '
 -- QUERY END:
 
 -- QUERY START:
-call TigAddIndexIfNotExists('tig_hfu_slots', 'tig_hfu_slots_domain_ts_index', 0, '(domain, ts)');
+call TigAddIndexIfNotExists('tig_hfu_slots', 'tig_hfu_slots_domain_ts_index', 0, '(domain(255), ts)');
 -- QUERY END:
 
 

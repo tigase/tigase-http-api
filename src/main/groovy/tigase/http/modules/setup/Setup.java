@@ -446,10 +446,17 @@ public class Setup {
 					return new Entry("Loading Message Archiving component schema", loader.loadSchemaFile(props), logHandler);
 				});
 			}
+			if (config.optionalComponents.contains("http") || config.optionalComponents.contains("upload")) {
+				String version = getComponentSchemaVersion("http");
+				operations.add(loader -> {
+					props.setProperty("file", "database/" + props.get("dbType").toString()+"-http-api-schema-" + version + ".sql");
+					return new Entry("Loading HTTP API and Upload components schema", loader.loadSchemaFile(props), logHandler);
+				});
+			}
 			if (config.optionalComponents.contains("socks5")) {
 				operations.add(loader -> {
 					props.setProperty("file", "database/" + props.get("dbType").toString()+"-socks5-schema.sql");
-					return new Entry("Loading socks5 component schema", loader.loadSchemaFile(props), logHandler);
+					return new Entry("Loading Socks5 component schema", loader.loadSchemaFile(props), logHandler);
 				});
 			}
 
@@ -459,15 +466,17 @@ public class Setup {
 		}
 
 		private String getComponentSchemaVersion(String compName) {
-			return SetupHelper.getAvailableComponents()
+			String version = SetupHelper.getAvailableComponents()
 					.stream()
 					.filter(def -> def.getName().equals(compName))
 //					.filter(def -> !ClusteredComponentIfc.class.isAssignableFrom(def.getClazz()))
 					.map(def -> def.getClazz())
 					.map(cls -> cls.getPackage().getImplementationVersion())
-					.map(ver -> ver.replace("-SNAPSHOT", ""))
+					.filter(ver -> ver != null && !ver.isEmpty())
+					.map(ver -> ver.split("-")[0])
 					.findAny()
 					.get();
+			return version;
 		}
 
 
