@@ -70,6 +70,7 @@ public class Setup {
 						   new SingleAnswerQuestion("dbPass", ()-> config.dbPass, pass -> config.dbPass = pass),
 						   new SingleAnswerQuestion("dbName", ()-> config.dbName, name -> config.dbName = name),
 						   new SingleAnswerQuestion("dbHost", ()-> config.dbHost, host -> config.dbHost = host),
+						   new SingleAnswerQuestion("dbUseSSL", ()-> String.valueOf(config.dbUseSSL), val -> config.dbUseSSL = val != null ? (Boolean.parseBoolean(val) || "on".equals(val)) : false),
 						   new SingleAnswerQuestion("dbParams", ()-> config.dbParams, params -> config.dbParams = params)
 		));
 
@@ -383,7 +384,7 @@ public class Setup {
 		}
 
 		public synchronized List<Entry> loadSchema() {
-			Properties props = getSchemaLoaderProperties();
+			Properties props = config.getSchemaLoaderProperties();
 			SchemaLoader loader = SchemaLoader.newInstance(props);
 			Logger logger = java.util.logging.Logger.getLogger(loader.getClass().getCanonicalName());
 			SetupLogHandler handler = Arrays.stream(logger.getHandlers())
@@ -478,43 +479,7 @@ public class Setup {
 					.get();
 			return version;
 		}
-
-
-		private Properties getSchemaLoaderProperties() {
-			Properties props = new java.util.Properties();
-			props.setProperty("schemaVersion", "7-2");
-
-			if (config.dbType != null) {
-				props.setProperty("dbType", config.dbType.name().toLowerCase());
-			}
-			if (config.dbUser != null) {
-				props.setProperty("dbUser", config.dbUser);
-			}
-			if (config.dbPass != null) {
-				props.setProperty("dbPass", config.dbPass);
-			}
-			if (config.dbName != null) {
-				props.setProperty("dbName", config.dbName);
-			}
-			if (config.dbSuperuser != null) {
-				props.setProperty("rootUser", config.dbSuperuser);
-			}
-			if (config.dbSuperpass != null) {
-				props.setProperty("rootPass", config.dbSuperpass);
-			}
-			if (config.dbHost != null) {
-				props.setProperty("dbHostname", config.dbHost);
-			}
-			if (config.admins != null && config.admins.length > 0) {
-				props.setProperty("adminJID", Arrays.stream(config.admins).collect(Collectors.joining(",")));
-			}
-			if (config.adminPwd != null) {
-				props.setProperty("adminJIDpass", config.adminPwd);
-			}
-
-			return props;
-		}
-
+		
 		private class Entry {
 
 			public final String name;

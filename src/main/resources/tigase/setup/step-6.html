@@ -33,6 +33,11 @@ ${ util.include('header', [title:'Setup: ' + page.title]) }
 <input type='text' size='30' name='${q.getName()}' value='${q.getValue()}' />
 <br/>
 <div style='padding-top: 1em'></div>
+<% q = page.getQuestion('dbUseSSL'); %>
+<label for='${q.getName()}'>Enable SSL support for database connection (if database supports it)</label>
+<input type='checkbox' size='30' name='${q.getName()}' <% if (q.isSelected("true")) { %>checked<% } %> />
+<br/>
+<div style='padding-top: 1em'></div>
 <% q = page.getQuestion('dbParams'); %>
 <label for='${q.getName()}'>Additional database parameters:</label>
 <input type='text' size='30' name='${q.getName()}' value='${q.getValue()}' />

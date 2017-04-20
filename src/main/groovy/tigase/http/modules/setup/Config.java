@@ -20,6 +20,7 @@
 package tigase.http.modules.setup;
 
 import tigase.conf.ConfigWriter;
+import tigase.db.util.SchemaLoader;
 import tigase.kernel.beans.config.AbstractBeanConfigurator;
 import tigase.server.xmppsession.SessionManager;
 import tigase.xmpp.XMPPImplIfc;
@@ -52,6 +53,7 @@ public class Config {
 	protected String dbPass = "tigase12";
 	protected String dbName = "tigasedb";
 	protected String dbHost = "localhost";
+	protected boolean dbUseSSL = false;
 	protected String dbParams = "";
 
 	protected RestApiSecurity httpRestApiSecurity = RestApiSecurity.forbidden;
@@ -128,12 +130,54 @@ public class Config {
 	public String getDatabaseUri() {
 		if (dbType == null)
 			return null;
-		switch (dbType) {
-			case Derby:
-				return "jdbc:derby:" + dbName + ";create=true";
-			default:
-				return "jdbc:" + dbType.name().toLowerCase() +"://" + dbHost + "/" + dbName + "?user=" + dbUser + "&password=" + dbPass;
+
+		Properties props = getSchemaLoaderProperties();
+		return SchemaLoader.newInstance(props).getDBUri(props);
+//		String uri;
+//		switch (dbType) {
+//			case Derby:
+//				uri =  "jdbc:derby:" + dbName + ";create=true";
+//			default:
+//				uri = "jdbc:" + dbType.name().toLowerCase() +"://" + dbHost + "/" + dbName + "?user=" + dbUser + "&password=" + dbPass;
+//		}
+	}
+
+	public Properties getSchemaLoaderProperties() {
+		Properties props = new java.util.Properties();
+		props.setProperty("schemaVersion", "7-2");
+
+		Config config = this;
+
+		if (config.dbType != null) {
+			props.setProperty("dbType", config.dbType.name().toLowerCase());
 		}
+		if (config.dbUser != null) {
+			props.setProperty("dbUser", config.dbUser);
+		}
+		if (config.dbPass != null) {
+			props.setProperty("dbPass", config.dbPass);
+		}
+		if (config.dbName != null) {
+			props.setProperty("dbName", config.dbName);
+		}
+		if (config.dbSuperuser != null) {
+			props.setProperty("rootUser", config.dbSuperuser);
+		}
+		if (config.dbSuperpass != null) {
+			props.setProperty("rootPass", config.dbSuperpass);
+		}
+		if (config.dbHost != null) {
+			props.setProperty("dbHostname", config.dbHost);
+		}
+		props.setProperty("useSSL", String.valueOf(config.dbUseSSL));
+		if (config.admins != null && config.admins.length > 0) {
+			props.setProperty("adminJID", Arrays.stream(config.admins).collect(Collectors.joining(",")));
+		}
+		if (config.adminPwd != null) {
+			props.setProperty("adminJIDpass", config.adminPwd);
+		}
+
+		return props;
 	}
 
 	public Map<String, Object> getConfigurationInMap() throws IOException {
