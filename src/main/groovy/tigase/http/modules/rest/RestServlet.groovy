@@ -113,13 +113,7 @@ public class RestServlet extends HttpServlet {
         prefix = request.getContextPath() + prefix
 
 		def apiKey = request.getParameter("api-key") ?: request.getHeader("Api-Key");
-		def fullPath = request.getRequestURI();
-		def host = request.getServerName();
-		if (!service.isAllowed(apiKey, host, fullPath)) {
-			response.sendError(HttpServletResponse.SC_FORBIDDEN, "To access URI = '" + fullPath + "' a valid api key is required");
-			return;
-		}
-		
+
         String localUri = request.getRequestURI().replace(prefix, "");
 
         if (log.isLoggable(Level.FINEST)) {
@@ -146,13 +140,20 @@ public class RestServlet extends HttpServlet {
                 else
                     params.remove(0);
 
+				def fullPath = request.getRequestURI();
+				def host = request.getServerName();
+				if (handler.apiKey && !service.isAllowed(apiKey, host, fullPath)) {
+					response.sendError(HttpServletResponse.SC_FORBIDDEN, "To access URI = '" + fullPath + "' a valid api key is required");
+					return;
+				}
+
                 // if authentication is required check if user is in proper role
                 if (handler.authRequired(apiKey) && (!request.isUserInRole(handler.requiredRole) && !request.authenticate(response))) {
                     handled = true;
                     return;
                 }
 
-                // prepare for execution
+				// prepare for execution
                 if (handler.isAsync) {
                     executeAsync(request, response, handler, params);
                 }

@@ -48,6 +48,11 @@ abstract class Handler {
      */
     def regex = null;
 
+	/**
+	 * true if requests require valid API-KEY
+	 */
+	def apiKey = true;
+
     /**
      * name of role required to execute
      */

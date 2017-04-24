@@ -1,0 +1,11 @@
+${ util.include('header', [title:'Account confirmation']) }
+<table style="margin: auto;">
+<% if (result.account) { %>
+<tr><td><h2>Account confirmation successful.</h2></td></tr>
+<tr><td><h3>Your new account ${result?.account?.jid} is now active!</h3></td></tr>
+<% } else { %>
+<tr><td><h2>Account confirmation failure.</h2></td></tr>
+<tr><td><h3>Error: ${result?.error?.message}</h3></td></tr>
+<% } %>
+</table>
+${ util.include('footer') }
