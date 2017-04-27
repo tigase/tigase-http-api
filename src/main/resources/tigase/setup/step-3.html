@@ -7,9 +7,10 @@ ${ util.include('header', [title:'Setup: ' + page.title]) }
 <label for='${q.getName()}'>Configuration type:</label>
 <select name='${q.getName()}'>
 <% [
-    [ value:'Default', label:'Default installation' ],
-    [ value:'SessionManagerOnly', label:'Session Manager only' ],
-    [ value:'ConnectionManagersOnly', label:'Network connectivity only' ]
+    [ value:'default', label:'Default installation' ],
+    [ value:'session-manager', label:'Session Manager only' ],
+    [ value:'connection-managers', label:'Network connectivity only' ],
+    [ value:'component', label:'External component only' ]
    ].each {
  %>
     <option value='${it.value}' ${ q.isSelected(it.value) ? 'selected' : '' } >${it.label}</option>

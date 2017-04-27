@@ -20,6 +20,7 @@
 package tigase.http.modules.setup;
 
 import tigase.kernel.beans.config.AbstractBeanConfigurator;
+import tigase.kernel.beans.selector.ServerBeanSelector;
 import tigase.kernel.core.Kernel;
 import tigase.server.ServerComponent;
 
@@ -45,6 +46,7 @@ public class SetupHelper {
 
 	public static List<BeanDefinition> getAvailableBeans(Class processorClazz, Class componentClazz) {
 		Kernel kernel = new Kernel();
+		kernel.registerBean("beanSelector").asInstance(new ServerBeanSelector()).exportable().exec();
 		return AbstractBeanConfigurator.getBeanClassesFromAnnotations(kernel, componentClazz)
 				.entrySet()
 				.stream()

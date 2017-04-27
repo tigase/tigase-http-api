@@ -24,6 +24,8 @@ package tigase.http.modules.ui;
 import tigase.http.HttpMessageReceiver;
 import tigase.kernel.beans.Bean;
 import tigase.kernel.beans.BeanSelector;
+import tigase.kernel.beans.selector.ConfigType;
+import tigase.kernel.beans.selector.ConfigTypeEnum;
 import tigase.kernel.core.Kernel;
 
 import java.io.File;
@@ -33,6 +35,7 @@ import java.io.FilenameFilter;
  * Created by andrzej on 05.08.2016.
  */
 @Bean(name = "ui", parent = HttpMessageReceiver.class, active = true, selectors = { UIModule.UIModuleSelector.class })
+@ConfigType(ConfigTypeEnum.DefaultMode)
 public class UIModule extends WebModule {
 
 	public UIModule() {
@@ -55,11 +58,11 @@ public class UIModule extends WebModule {
 		return (files != null && files.length > 0) ? files[0] : null;
 	}
 
-	public static class UIModuleSelector extends BeanSelector.DefaultMode {
+	public static class UIModuleSelector implements BeanSelector {
 
 		@Override
-		public boolean shouldRegister(Kernel kernel) {
-			return super.shouldRegister(kernel) && getWarFile() != null;
+		public boolean shouldRegister(Class clazz, Kernel kernel) {
+			return getWarFile() != null;
 		}
 	}
 }

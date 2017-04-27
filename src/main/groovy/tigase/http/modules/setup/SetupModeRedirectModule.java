@@ -32,14 +32,16 @@ import tigase.http.ServiceImpl;
 import tigase.http.ServletInfo;
 import tigase.http.modules.AbstractBareModule;
 import tigase.kernel.beans.Bean;
-import tigase.kernel.beans.BeanSelector;
+import tigase.kernel.beans.selector.ConfigType;
+import tigase.kernel.beans.selector.ConfigTypeEnum;
 import tigase.util.TigaseStringprepException;
 import tigase.xmpp.BareJID;
 
 /**
  * Created by andrzej on 06.04.2017.
  */
-@Bean(name = "setupRedirect", parent = HttpMessageReceiver.class, active = true, selectors = {BeanSelector.SetupMode.class})
+@Bean(name = "setupRedirect", parent = HttpMessageReceiver.class, active = true)
+@ConfigType(ConfigTypeEnum.SetupMode)
 public class SetupModeRedirectModule extends AbstractBareModule {
 
 	private DeploymentInfo httpDeployment;

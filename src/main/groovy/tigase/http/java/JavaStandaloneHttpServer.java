@@ -29,6 +29,8 @@ import tigase.http.DeploymentInfo;
 import tigase.kernel.beans.*;
 import tigase.kernel.beans.config.ConfigField;
 import tigase.kernel.beans.config.ConfigurationChangedAware;
+import tigase.kernel.beans.selector.ConfigType;
+import tigase.kernel.beans.selector.ConfigTypeEnum;
 import tigase.kernel.core.Kernel;
 import tigase.net.SocketType;
 
@@ -52,7 +54,8 @@ import java.util.logging.Logger;
  * 
  * @author andrzej
  */
-@Bean(name = "httpServer", parent = Kernel.class, active = true, exportable = true, selectors = { BeanSelector.Always.class })
+@Bean(name = "httpServer", parent = Kernel.class, active = true, exportable = true)
+@ConfigType({ConfigTypeEnum.DefaultMode,ConfigTypeEnum.SetupMode})
 public class JavaStandaloneHttpServer extends AbstractHttpServer {
 
 	private static final Logger log = Logger.getLogger(JavaStandaloneHttpServer.class.getCanonicalName());
@@ -143,7 +146,7 @@ public class JavaStandaloneHttpServer extends AbstractHttpServer {
 		}
 	}
 
-	@Bean(name="executor", parent = JavaStandaloneHttpServer.class, active = true, exportable = true, selectors = {BeanSelector.Always.class})
+	@Bean(name="executor", parent = JavaStandaloneHttpServer.class, active = true, exportable = true)
 	public static class ExecutorWithTimeout implements Executor, Initializable, UnregisterAware, ConfigurationChangedAware {
 
 		private static final String THREADS_KEY = "threads";
@@ -195,8 +198,7 @@ public class JavaStandaloneHttpServer extends AbstractHttpServer {
 		}
 	}
 
-	@Bean(name = "connections", parent = JavaStandaloneHttpServer.class, active = true, exportable = true, selectors = {
-			BeanSelector.Always.class})
+	@Bean(name = "connections", parent = JavaStandaloneHttpServer.class, active = true, exportable = true)
 	public static class PortsConfigBean extends AbstractHttpServer.PortsConfigBean {
 
 		@Override

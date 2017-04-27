@@ -22,6 +22,8 @@ package tigase.http.modules.setup;
 import tigase.conf.ConfigWriter;
 import tigase.db.util.SchemaLoader;
 import tigase.kernel.beans.config.AbstractBeanConfigurator;
+import tigase.kernel.beans.selector.ConfigType;
+import tigase.kernel.beans.selector.ConfigTypeEnum;
 import tigase.server.xmppsession.SessionManager;
 import tigase.xmpp.XMPPImplIfc;
 
@@ -36,7 +38,7 @@ public class Config {
 	
 	private String acsName = "";
 	protected boolean acs = true;
-	protected ConfigType configType = ConfigType.Default;
+	private ConfigTypeEnum configType = ConfigTypeEnum.DefaultMode;
 	protected String[] virtualDomains = new String[] { tigase.util.DNSResolverFactory.getInstance().getDefaultHost() };
 	protected String[] admins = new String[] { "admin@" + tigase.util.DNSResolverFactory.getInstance().getDefaultHost() };
 	protected String adminPwd = "tigase";
@@ -44,8 +46,8 @@ public class Config {
 	protected boolean advancedConfig = false;
 	protected boolean clusterMode = false;
 
-	protected Set<String> optionalComponents;
-	protected Set<String> plugins;
+	protected Set<String> optionalComponents = new HashSet<>();
+	protected Set<String> plugins = new HashSet<>();
 
 	protected String dbSuperuser = "root";
 	protected String dbSuperpass = "";
@@ -63,9 +65,25 @@ public class Config {
 	protected String setupPassword = null;
 
 	public Config() {
+		setConfigType(ConfigTypeEnum.DefaultMode);
+	}
+
+	public ConfigTypeEnum getConfigType() {
+		return configType;
+	}
+
+	public void setConfigType(ConfigTypeEnum configType) {
+		if (configType == null) {
+			configType = ConfigTypeEnum.DefaultMode;
+		}
+		this.configType = configType;
 		optionalComponents = SetupHelper.getAvailableComponents()
 				.stream()
 				.filter(def -> !def.isCoreComponent())
+				.filter(def -> {
+					ConfigType ct = (ConfigType) def.getClazz().getAnnotation(ConfigType.class);
+					return ct == null || Arrays.asList(ct.value()).contains(this.configType);
+				})
 				.filter(def -> def.isActive())
 				.map(def -> def.getName())
 				.collect(Collectors.toSet());
@@ -73,6 +91,11 @@ public class Config {
 		plugins = SetupHelper.getAvailableProcessors(SessionManager.class, XMPPImplIfc.class)
 				.stream()
 				.filter(def -> def.isActive())
+				.filter(def -> this.configType == ConfigTypeEnum.DefaultMode || this.configType == ConfigTypeEnum.SessionManagerMode)
+				.filter(def -> {
+					ConfigType ct = (ConfigType) def.getClazz().getAnnotation(ConfigType.class);
+					return ct == null || Arrays.asList(ct.value()).contains(this.configType.name());
+				})
 				.map(def -> def.getName())
 				.collect(Collectors.toSet());
 	}
@@ -87,36 +110,6 @@ public class Config {
 
 	public boolean getACS() {
 		return acs;
-	}
-
-	public static enum ConfigType {
-		Default;//,
-//		SessionManagerOnly,
-//		ConnectionManagersOnly;
-
-		public String getValue() {
-			switch (this) {
-				case Default:
-					return "default";
-//				case SessionManagerOnly:
-//					return "--gen-config-sm";
-//				case ConnectionManagersOnly:
-//					return "--gen-config-cs";
-			}
-			return null;
-		}
-
-		public String getLabel() {
-			switch (this) {
-				case Default:
-					return "Default installation";
-//				case SessionManagerOnly:
-//					return "Session Manager only";
-//				case ConnectionManagersOnly:
-//					return "Network connectivity only";
-			}
-			return null;
-		}
 	}
 
 	public String getAcsName() {
@@ -183,7 +176,7 @@ public class Config {
 	public Map<String, Object> getConfigurationInMap() throws IOException {
 		Map<String, Object> props = new HashMap<>();
 
-		props.put("config-type", configType.name().toLowerCase());
+		props.put("config-type", configType.id().toLowerCase());
 		if (clusterMode) {
 			props.put("--cluster-mode", "true");
 		}
@@ -214,10 +207,19 @@ public class Config {
 		SetupHelper.getAvailableComponents()
 				.stream()
 				.filter(def -> !def.isCoreComponent())
-				.filter(def -> (def.isActive() && !optionalComponents.contains(def.getName())) ||
-						((!def.isActive()) && optionalComponents.contains(def.getName())))
+				.filter(def -> {
+					ConfigType ct = def.getClazz().getAnnotation(ConfigType.class);
+					if (optionalComponents.contains(def.getName())) {
+						return def.isActive() == false || (ct != null && !Arrays.asList(ct.value()).contains(this.configType));
+					} else {
+						return def.isActive() == true && (ct != null && Arrays.asList(ct.value()).contains(this.configType));
+					}
+				})
 				.forEach(def -> {
-					addBean(props, createBean(def.getName(), optionalComponents.contains(def.getName())));
+					ConfigType ct = def.getClazz().getAnnotation(ConfigType.class);
+					addBean(props, createBean(def.getName(), optionalComponents.contains(def.getName()),
+											  (ct != null && !Arrays.asList(ct.value()).contains(this.configType)) ? def
+													  .getClazz() : null));
 				});
 
 		props.compute("http", (name, def) -> {
@@ -261,9 +263,16 @@ public class Config {
 	}
 
 	private static AbstractBeanConfigurator.BeanDefinition createBean(String name, boolean active) {
+		return createBean(name, active, null);
+	}
+
+	private static AbstractBeanConfigurator.BeanDefinition createBean(String name, boolean active, Class cls) {
 		AbstractBeanConfigurator.BeanDefinition def = new AbstractBeanConfigurator.BeanDefinition();
 		def.setBeanName(name);
 		def.setActive(active);
+		if (cls != null) {
+			def.setClazzName(cls.getCanonicalName());
+		}
 		return def;
 	}
 

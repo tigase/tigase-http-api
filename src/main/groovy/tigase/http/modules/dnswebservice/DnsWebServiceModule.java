@@ -25,8 +25,11 @@ import tigase.http.DeploymentInfo;
 import tigase.http.HttpMessageReceiver;
 import tigase.http.modules.AbstractModule;
 import tigase.kernel.beans.Bean;
+import tigase.kernel.beans.selector.ConfigType;
+import tigase.kernel.beans.selector.ConfigTypeEnum;
 
 @Bean(name = "dns-webservice", parent = HttpMessageReceiver.class, active = true)
+@ConfigType({ConfigTypeEnum.DefaultMode, ConfigTypeEnum.SessionManagerMode, ConfigTypeEnum.ConnectionManagersMode, ConfigTypeEnum.ComponentMode})
 public class DnsWebServiceModule extends AbstractModule {
 	
 	private DeploymentInfo deployment = null;

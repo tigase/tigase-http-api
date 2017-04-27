@@ -27,6 +27,8 @@ import tigase.http.ServletInfo;
 import tigase.http.modules.AbstractModule;
 import tigase.http.util.StaticFileServlet;
 import tigase.kernel.beans.Bean;
+import tigase.kernel.beans.selector.ConfigType;
+import tigase.kernel.beans.selector.ConfigTypeEnum;
 
 import java.io.File;
 
@@ -35,6 +37,7 @@ import java.io.File;
  * @author andrzej
  */
 @Bean(name = "server", parent = HttpMessageReceiver.class, active = true)
+@ConfigType({ConfigTypeEnum.DefaultMode, ConfigTypeEnum.SessionManagerMode, ConfigTypeEnum.ConnectionManagersMode, ConfigTypeEnum.ComponentMode})
 public class ServerInfoModule extends AbstractModule {
 
 	private DeploymentInfo httpDeployment = null;

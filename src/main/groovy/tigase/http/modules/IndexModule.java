@@ -28,6 +28,8 @@ import tigase.http.DeploymentInfo;
 import tigase.http.HttpMessageReceiver;
 import tigase.http.ServletInfo;
 import tigase.kernel.beans.Bean;
+import tigase.kernel.beans.selector.ConfigType;
+import tigase.kernel.beans.selector.ConfigTypeEnum;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -42,6 +44,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Created by andrzej on 28.05.2016.
  */
 @Bean(name = "index", parent = HttpMessageReceiver.class, active = true)
+@ConfigType({ConfigTypeEnum.DefaultMode, ConfigTypeEnum.SessionManagerMode, ConfigTypeEnum.ConnectionManagersMode, ConfigTypeEnum.ComponentMode})
 public class IndexModule extends AbstractModule {
 
 	private static final ConcurrentHashMap<String,IndexModule> modules = new ConcurrentHashMap<>();

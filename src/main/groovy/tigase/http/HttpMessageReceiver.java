@@ -24,9 +24,10 @@ package tigase.http;
 import tigase.http.api.HttpServerIfc;
 import tigase.http.modules.Module;
 import tigase.kernel.beans.Bean;
-import tigase.kernel.beans.BeanSelector;
 import tigase.kernel.beans.Inject;
 import tigase.kernel.beans.RegistrarBean;
+import tigase.kernel.beans.selector.ConfigType;
+import tigase.kernel.beans.selector.ConfigTypeEnum;
 import tigase.kernel.core.Kernel;
 import tigase.server.AbstractMessageReceiver;
 import tigase.server.Packet;
@@ -43,7 +44,8 @@ import java.util.concurrent.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@Bean(name = "http", parent = Kernel.class, active = true, selectors = { BeanSelector.Always.class })
+@Bean(name = "http", parent = Kernel.class, active = true)
+@ConfigType({ConfigTypeEnum.DefaultMode, ConfigTypeEnum.SetupMode})
 public class HttpMessageReceiver extends AbstractMessageReceiver implements PacketWriter, RegistrarBean {
 
 	private static final Logger log = Logger.getLogger(HttpMessageReceiver.class.getCanonicalName());

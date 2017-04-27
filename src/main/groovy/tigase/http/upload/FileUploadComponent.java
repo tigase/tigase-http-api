@@ -24,12 +24,15 @@ package tigase.http.upload;
 import tigase.component.AbstractKernelBasedComponent;
 import tigase.kernel.beans.Bean;
 import tigase.kernel.beans.Inject;
+import tigase.kernel.beans.selector.ConfigType;
+import tigase.kernel.beans.selector.ConfigTypeEnum;
 import tigase.kernel.core.Kernel;
 
 /**
  * Created by andrzej on 06.08.2016.
  */
 @Bean(name = "upload", parent = Kernel.class, active = false)
+@ConfigType(ConfigTypeEnum.DefaultMode)
 public class FileUploadComponent extends AbstractKernelBasedComponent {
 
 	@Inject

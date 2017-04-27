@@ -28,6 +28,8 @@ import tigase.http.modules.AbstractModule;
 import tigase.http.util.StaticFileServlet;
 import tigase.kernel.beans.Bean;
 import tigase.kernel.beans.config.ConfigField;
+import tigase.kernel.beans.selector.ConfigType;
+import tigase.kernel.beans.selector.ConfigTypeEnum;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -40,6 +42,7 @@ import java.util.logging.Logger;
  * @author andrzej
  */
 @Bean(name = "admin", parent = HttpMessageReceiver.class, active = true)
+@ConfigType({ConfigTypeEnum.DefaultMode, ConfigTypeEnum.SessionManagerMode, ConfigTypeEnum.ConnectionManagersMode, ConfigTypeEnum.ComponentMode})
 public class AdminModule extends AbstractModule {
 
 	private static final String DEF_SCRIPTS_DIR_VAL = "scripts/admin";

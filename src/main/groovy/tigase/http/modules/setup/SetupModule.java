@@ -32,7 +32,6 @@ import tigase.http.api.Service;
 import tigase.http.modules.AbstractBareModule;
 import tigase.http.modules.Module;
 import tigase.kernel.beans.Bean;
-import tigase.kernel.beans.BeanSelector;
 import tigase.kernel.beans.Inject;
 import tigase.kernel.beans.config.ConfigField;
 import tigase.util.TigaseStringprepException;
@@ -44,7 +43,7 @@ import java.util.logging.Logger;
  *
  * @author andrzej
  */
-@Bean(name = "setup", parent = HttpMessageReceiver.class, active = true, selectors = { BeanSelector.Always.class })
+@Bean(name = "setup", parent = HttpMessageReceiver.class, active = true)
 public class SetupModule extends AbstractBareModule
 		implements Module {
 

@@ -28,6 +28,8 @@ import tigase.http.modules.AbstractModule;
 import tigase.http.util.StaticFileServlet;
 import tigase.kernel.beans.Bean;
 import tigase.kernel.beans.config.ConfigField;
+import tigase.kernel.beans.selector.ConfigType;
+import tigase.kernel.beans.selector.ConfigTypeEnum;
 import tigase.kernel.core.BeanConfig;
 import tigase.kernel.core.Kernel;
 import tigase.stats.StatisticHolder;
@@ -46,6 +48,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Bean(name = "rest", parent = HttpMessageReceiver.class, active = true)
+@ConfigType({ConfigTypeEnum.DefaultMode, ConfigTypeEnum.SessionManagerMode, ConfigTypeEnum.ConnectionManagersMode, ConfigTypeEnum.ComponentMode})
 public class RestModule extends AbstractModule {
 	
 	private static final Logger log = Logger.getLogger(RestModule.class.getCanonicalName());

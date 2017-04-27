@@ -20,6 +20,7 @@
 package tigase.http.modules.setup;
 
 import tigase.db.util.SchemaLoader;
+import tigase.kernel.beans.selector.ConfigTypeEnum;
 import tigase.server.BasicComponent;
 import tigase.server.xmppsession.SessionManager;
 import tigase.xmpp.XMPPImplIfc;
@@ -50,7 +51,8 @@ public class Setup {
 						   new SingleAnswerQuestion("acsName", config::getAcsName, config::setAcsName)));
 
 		pages.add(new Page("Basic Tigase server configuration",
-						   new SingleAnswerQuestion("configType", () -> config.configType.name(), type -> Config.ConfigType.valueOf(type)),
+						   new SingleAnswerQuestion("configType", () -> config.getConfigType().id(), type -> config.setConfigType(ConfigTypeEnum
+								   .valueForId(type))),
 						   new VirtualDomainsQuestion("virtualDomains", config),
 						   new AdminsQuestion("admins", config), new SingleAnswerQuestion("adminPwd", ()-> config.adminPwd, pwd -> config.adminPwd = pwd),
 						   new SingleAnswerQuestion("dbType", ()-> config.dbType != null ? config.dbType.name() : null, type -> config.dbType = (type == null ? null : Config.DbType.valueOf(type))),
