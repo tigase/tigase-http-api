@@ -18,12 +18,49 @@ ${ util.include('header', [title:'Setup: ' + page.title]) }
 		}
 		document.getElementById("acs-warn").style.display = (document.getElementById("clusterMode").checked && acsRequired) ? "inline" : "none";
 	};
+	var exclusiveComponents = [
+	    [ 'message-archive', 'unified-archive' ]
+	];
+	var checkComponent = function() {
+	    checkACS();
+
+	    exclusiveComponents.forEach(function(list) {
+            var sel = list.map(function(cmpId) {
+                return document.getElementById('id-' + cmpId);
+            });
+            sel = sel.reduce(function(prev, el) {
+                if (!prev) {
+                    prev = 0;
+                }
+                if (el && el.checked) {
+                    prev++;
+                }
+                return prev;
+            },0);
+
+            var error = sel > 1;
+            list.forEach(function(cmpId) {
+                var el = document.getElementById('id-' + cmpId + '-error');
+                if (el) {
+                    el.style.display = error ? "inline" : "none";
+                    var listCopy = list.slice();
+                    listCopy = listCopy.map(function(id) {
+                        return document.getElementById('id-' + id);
+                    });
+                    listCopy = listCopy.filter(function(x) { return !!x; });
+                    listCopy = listCopy.map(function(x) { return x.previousElementSibling.innerHTML; });
+                    el.innerHTML = '<br/>Only one of components ' + listCopy.join(', ') + ' should be active at the same time!';
+                }
+            });
+        });
+
+	};
 </script>
 <form method='POST' action="?step=${ page.nextPage() }">
 <div style='padding-top: 1em'></div>
 <h3>Select optional components to run:</h3><% page.getOptionalComponents().each { %>
 <label for='${it.getName()}'>${it.getLabel()}</label>
-<input name='${it.getName()}' type='checkbox' id='id-${it.getBeanName()}' ${ it.isSelected(it.getBeanName()) ? 'checked' : '' } onclick='checkACS();'/>
+<input name='${it.getName()}' type='checkbox' id='id-${it.getBeanName()}' ${ it.isSelected(it.getBeanName()) ? 'checked' : '' } onclick='checkComponent();'/><span style="color: red; display: none;" id="id-${it.getBeanName()}-error"></span>
 <br/>
 <div style='padding-top: 1em'></div>
 <% } %>

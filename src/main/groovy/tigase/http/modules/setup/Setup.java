@@ -354,9 +354,24 @@ public class Setup {
 			return def.getName();
 		}
 
+		public boolean mayBeChanged() {
+			if (!mayBeEnabled()) {
+				return false;
+			}
+			if (def.getClazz().getCanonicalName().equals("tigase.archive.unified.processors.UnifiedArchivePlugin") &&
+					config.optionalComponents.contains("unified-archive")) {
+				return false;
+			}
+			return true;
+		}
+
 		public boolean mayBeEnabled() {
+			if (def.getClazz().getCanonicalName().startsWith("tigase.archive.unified")) {
+				return config.optionalComponents.contains("unified-archive");
+			}
 			if (def.getClazz().getCanonicalName().startsWith("tigase.archive.")) {
-				return config.optionalComponents.contains("message-archive");
+				return config.optionalComponents.contains("message-archive") ||
+						config.optionalComponents.contains("unified-archive");
 			}
 			if (def.getClazz().getCanonicalName().startsWith("tigase.pubsub.")) {
 				return config.optionalComponents.contains("pubsub");
@@ -365,13 +380,24 @@ public class Setup {
 		}
 
 		public String getCause() {
+			if (def.getClazz().getCanonicalName().startsWith("tigase.archive.unified")) {
+				return "Processor requires Tigase Unified Archive Component";
+			}
 			if (def.getClazz().getCanonicalName().startsWith("tigase.archive.")) {
-				return "Processor requires Tigase Message Archiving Component";
+				return "Processor requires Tigase Message Archiving Component or Tigase Unified Component";
 			}
 			if (def.getClazz().getCanonicalName().startsWith("tigase.pubsub.")) {
 				return "Processor requires Tigase PubSub Component";
 			}
 			return null;
+		}
+
+		@Override
+		public boolean isSelected(String value) {
+			if (def.getClazz().getCanonicalName().equals("tigase.archive.unified.processors.UnifiedArchivePlugin")) {
+				return config.optionalComponents.contains("unified-archive");
+			}
+			return super.isSelected(value);
 		}
 	}
 
@@ -447,6 +473,13 @@ public class Setup {
 				operations.add(loader -> {
 					props.setProperty("file", "database/" + props.get("dbType").toString()+"-message-archiving-schema-" + version + ".sql");
 					return new Entry("Loading Message Archiving component schema", loader.loadSchemaFile(props), logHandler);
+				});
+			}
+			if (config.optionalComponents.contains("unified-archive")) {
+				String version = getComponentSchemaVersion("unified-archive");
+				operations.add(loader -> {
+					props.setProperty("file", "database/" + props.get("dbType").toString()+"-unified-archive-schema-" + version + ".sql");
+					return new Entry("Loading Unified Archive component schema", loader.loadSchemaFile(props), logHandler);
 				});
 			}
 			if (config.optionalComponents.contains("http") || config.optionalComponents.contains("upload")) {
