@@ -18,7 +18,7 @@ def stateName = { state ->
 ${ util.include('header', [title:'Setup: ' + page.title]) }
 <h3>You have selected database with URI = ${setup.config.getDatabaseUri()}</h3>
 <table>
-	<% page.loadSchema().each { entry -> %>
+	<% page.loadSchema().values().iterator().next().each { entry -> %>
 	<tr><td>${entry.name}</td><td style="${stateStyle(entry.result)}">${stateName(entry.result)}</td></tr>
 	<% if (entry.result.name() != 'ok') { %><tr><td colspan='2' style="padding: 5px 15px;font-size: smaller;">${entry.message?.replace('\n', '<br/>')}</td></tr><% } %>
 	<% } %>

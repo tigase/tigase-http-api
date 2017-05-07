@@ -19,21 +19,20 @@
 
 package tigase.http.modules.setup;
 
+import tigase.conf.ConfigReader;
 import tigase.db.util.SchemaLoader;
+import tigase.db.util.SchemaManager;
 import tigase.kernel.beans.selector.ConfigTypeEnum;
 import tigase.server.BasicComponent;
 import tigase.server.xmppsession.SessionManager;
+import tigase.util.ui.console.CommandlineParameter;
 import tigase.xmpp.XMPPImplIfc;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.logging.Level;
-import java.util.logging.LogRecord;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -55,7 +54,7 @@ public class Setup {
 								   .valueForId(type))),
 						   new VirtualDomainsQuestion("virtualDomains", config),
 						   new AdminsQuestion("admins", config), new SingleAnswerQuestion("adminPwd", ()-> config.adminPwd, pwd -> config.adminPwd = pwd),
-						   new SingleAnswerQuestion("dbType", ()-> config.dbType != null ? config.dbType.name() : null, type -> config.dbType = (type == null ? null : Config.DbType.valueOf(type))),
+						   new SingleAnswerQuestion("dbType", ()-> config.getDbType(), type -> config.setDbType(type)),
 						   new SingleAnswerQuestion("advancedConfig", () -> String.valueOf(config.advancedConfig), val -> config.advancedConfig = val != null ? (Boolean.parseBoolean(val) || "on".equals(val)) : false)
 						   ));
 		pages.add(new AdvConfigPage("Advanced configuration options", config, Stream.of(
@@ -65,16 +64,7 @@ public class Setup {
 
 		pages.add(new PluginsConfigPage("Plugins selection", config));
 
-		pages.add(new Page("Database configuration",
-						   new SingleAnswerQuestion("dbSuperuser", ()-> config.dbSuperuser, user -> config.dbSuperuser = user),
-						   new SingleAnswerQuestion("dbSuperpass", ()-> config.dbSuperpass, pass -> config.dbSuperpass = pass),
-						   new SingleAnswerQuestion("dbUser", ()-> config.dbUser, user -> config.dbUser = user),
-						   new SingleAnswerQuestion("dbPass", ()-> config.dbPass, pass -> config.dbPass = pass),
-						   new SingleAnswerQuestion("dbName", ()-> config.dbName, name -> config.dbName = name),
-						   new SingleAnswerQuestion("dbHost", ()-> config.dbHost, host -> config.dbHost = host),
-						   new SingleAnswerQuestion("dbUseSSL", ()-> String.valueOf(config.dbUseSSL), val -> config.dbUseSSL = val != null ? (Boolean.parseBoolean(val) || "on".equals(val)) : false),
-						   new SingleAnswerQuestion("dbParams", ()-> config.dbParams, params -> config.dbParams = params)
-		));
+		pages.add(new DBSetupPage("Database configuration"));
 
 		pages.add(new DBCheckPage("Database connectivity check"));
 
@@ -111,7 +101,7 @@ public class Setup {
 
 		public Page(String title, Stream<Question> questions) {
 			this.title = title;
-			questions.forEach(this::addQuestion);
+			setQuestions(questions);
 		}
 
 		public Page(String title, Question... questions) {
@@ -138,6 +128,15 @@ public class Setup {
 
 		public Question getQuestion(String id) {
 			return questions.get(id);
+		}
+
+		public void beforeDisplay() {
+			
+		}
+
+		protected void setQuestions(Stream<Question> questions) {
+			this.questions.clear();
+			questions.forEach(this::addQuestion);
 		}
 
 		public Integer nextPage() {
@@ -180,13 +179,23 @@ public class Setup {
 
 	public static class SingleAnswerQuestion extends Question {
 
+		private final String label;
 		private final Supplier<String> getter;
 		private final Consumer<String> setter;
 
 		public SingleAnswerQuestion(String id, Supplier<String> getter, Consumer<String> setter) {
+			this(id, null, getter, setter);
+		}
+
+		public SingleAnswerQuestion(String id, String label, Supplier<String> getter, Consumer<String> setter) {
 			super(id);
+			this.label = label;
 			this.getter = getter;
 			this.setter = setter;
+		}
+
+		public String getLabel() {
+			return label;
 		}
 
 		public String getValue() {
@@ -401,6 +410,64 @@ public class Setup {
 		}
 	}
 
+	private class DBSetupPage extends Page {
+
+		private List<Question> questions = new ArrayList<>();
+
+		public DBSetupPage(String title) {
+			super(title);
+		}
+
+		@Override
+		public void beforeDisplay() {
+			List<CommandlineParameter> options = SchemaLoader.newInstance(config.getDbType())
+					.createParameters()
+					.getSetupOptions();
+			Stream<Question> questions = options.stream().map(o -> {
+				SingleAnswerQuestion question = null;
+				if (Boolean.class.equals(o.getType())) {
+					question = new SingleAnswerQuestion(o.getFullName().get(), o.getDescription().get(), ()-> {
+						String val = config.dbProperties.getProperty(o.getFullName().get());
+						if (val == null) {
+							val = o.getDefaultValue().orElse(null);
+						}
+						return val;
+					}, val -> {
+						boolean bval = val != null ? (Boolean.parseBoolean(val) || "on".equals(val)) : false;
+						config.dbProperties.setProperty(o.getFullName().get(), String.valueOf(bval));
+					});
+				} else {
+					question = new SingleAnswerQuestion(o.getFullName().get(), o.getDescription().get(), ()-> {
+						String val = config.dbProperties.getProperty(o.getFullName().get());
+						if (val == null) {
+							val = o.getDefaultValue().orElse(null);
+						}
+						return val;
+					}, val -> {
+						if (val == null) {
+							config.dbProperties.remove(o.getFullName().get());
+						} else {
+							config.dbProperties.setProperty(o.getFullName().get(), val);
+						}
+					});
+				}
+				return question;
+			});
+			this.questions.clear();
+			setQuestions(questions);
+		}
+
+		@Override
+		protected void addQuestion(Question question) {
+			super.addQuestion(question);
+			questions.add(question);
+		}
+
+		public List<Question> getQuestions() {
+			return questions;
+		}
+	}
+
 	private class DBCheckPage extends Page {
 
 		public DBCheckPage(String title, Stream<Question> questions) {
@@ -411,139 +478,20 @@ public class Setup {
 			super(title, questions);
 		}
 
-		public synchronized List<Entry> loadSchema() {
-			Properties props = config.getSchemaLoaderProperties();
-			SchemaLoader loader = SchemaLoader.newInstance(props);
-			Logger logger = java.util.logging.Logger.getLogger(loader.getClass().getCanonicalName());
-			SetupLogHandler handler = Arrays.stream(logger.getHandlers())
-					.filter(h -> h instanceof SetupLogHandler)
-					.map(h -> (SetupLogHandler) h)
-					.findAny()
-					.orElseGet(() -> {
-						SetupLogHandler handler1 = new SetupLogHandler();
-						logger.addHandler(handler1);
-						return handler1;
-					});
-			handler.setLevel(java.util.logging.Level.FINEST);
-			logger.setLevel(java.util.logging.Level.FINEST);
+		public synchronized Map<SchemaManager.DataSourceInfo, List<SchemaManager.ResultEntry>> loadSchema() {
+			try {
+				String configStr = config.getConfigurationInDSL();
 
-			List<Function<SchemaLoader,Entry>> operations = getOperations(props, handler);
-			List<Entry> results = new ArrayList<>();
+				SchemaManager schemaManager = new SchemaManager();
+				schemaManager.readConfig(configStr);
+				schemaManager.setDbRootCredentials(config.dbProperties.getProperty("rootUser"), config.dbProperties.getProperty("rootPass"));
 
-			for (Function<SchemaLoader,Entry> operation : operations) {
-				Entry entry = operation.apply(loader);
-				results.add(entry);
-//				if (entry.result == SchemaLoader.Result.error) {
-//					break;
-//				}
+				return schemaManager.loadSchemas();
+			} catch (IOException|ConfigReader.ConfigException e) {
+				throw new RuntimeException(e);
 			}
-			loader.shutdown(props);
-
-			return results;
 		}
 
-		private List<Function<SchemaLoader,Entry>> getOperations(Properties props, SetupLogHandler logHandler) {
-			List<Function<SchemaLoader,Entry>> operations = new ArrayList<>();
-
-			operations.add(loader -> new Entry("Checking connection to database", loader.validateDBConnection(props),
-											   logHandler));
-			operations.add(loader -> new Entry("Checking if database exists", loader.validateDBExists(props),
-											   logHandler));
-			operations.add(loader -> new Entry("Checking database schema", loader.validateDBSchema(props),
-											   logHandler));
-			operations.add(loader -> new Entry("Adding XMPP admin accounts", loader.addXmppAdminAccount(props),
-											   logHandler));
-
-			if (config.optionalComponents.contains("muc")) {
-				String version = getComponentSchemaVersion("muc");
-				operations.add(loader -> {
-					props.setProperty("file", "database/" + props.get("dbType").toString()+"-muc-schema-" + version + ".sql");
-					return new Entry("Loading MUC component schema", loader.loadSchemaFile(props), logHandler);
-				});
-			}
-			if (config.optionalComponents.contains("pubsub")) {
-				String version = getComponentSchemaVersion("pubsub");
-				operations.add(loader -> {
-					props.setProperty("file", "database/" + props.get("dbType").toString()+"-pubsub-schema-" + version + ".sql");
-					return new Entry("Loading PubSub component schema", loader.loadSchemaFile(props), logHandler);
-				});
-			}
-			if (config.optionalComponents.contains("message-archive")) {
-				String version = getComponentSchemaVersion("message-archive");
-				operations.add(loader -> {
-					props.setProperty("file", "database/" + props.get("dbType").toString()+"-message-archiving-schema-" + version + ".sql");
-					return new Entry("Loading Message Archiving component schema", loader.loadSchemaFile(props), logHandler);
-				});
-			}
-			if (config.optionalComponents.contains("unified-archive")) {
-				String version = getComponentSchemaVersion("unified-archive");
-				operations.add(loader -> {
-					props.setProperty("file", "database/" + props.get("dbType").toString()+"-unified-archive-schema-" + version + ".sql");
-					return new Entry("Loading Unified Archive component schema", loader.loadSchemaFile(props), logHandler);
-				});
-			}
-			if (config.optionalComponents.contains("http") || config.optionalComponents.contains("upload")) {
-				String version = getComponentSchemaVersion("http");
-				operations.add(loader -> {
-					props.setProperty("file", "database/" + props.get("dbType").toString()+"-http-api-schema-" + version + ".sql");
-					return new Entry("Loading HTTP API and Upload components schema", loader.loadSchemaFile(props), logHandler);
-				});
-			}
-			if (config.optionalComponents.contains("socks5")) {
-				operations.add(loader -> {
-					props.setProperty("file", "database/" + props.get("dbType").toString()+"-socks5-schema.sql");
-					return new Entry("Loading Socks5 component schema", loader.loadSchemaFile(props), logHandler);
-				});
-			}
-
-			operations.add(loader -> new Entry("Post installation action", loader.postInstallation(props), logHandler));
-
-			return operations;
-		}
-
-		private String getComponentSchemaVersion(String compName) {
-			String version = SetupHelper.getAvailableComponents()
-					.stream()
-					.filter(def -> def.getName().equals(compName))
-//					.filter(def -> !ClusteredComponentIfc.class.isAssignableFrom(def.getClazz()))
-					.map(def -> def.getClazz())
-					.map(cls -> cls.getPackage().getImplementationVersion())
-					.filter(ver -> ver != null && !ver.isEmpty())
-					.map(ver -> ver.split("-")[0])
-					.findAny()
-					.get();
-			return version;
-		}
-		
-		private class Entry {
-
-			public final String name;
-			public final SchemaLoader.Result result;
-			public final String message;
-
-			private Entry(String name, SchemaLoader.Result result, SetupLogHandler logHandler) {
-				this.name = name;
-				this.result = result;
-				LogRecord rec;
-				StringBuilder sb = null;
-				while ((rec = logHandler.poll()) != null) {
-					if (rec.getLevel().intValue() <= Level.FINE.intValue()) {
-						continue;
-					}
-					if (rec.getMessage() == null) {
-						continue;
-					}
-					if (sb == null) {
-						sb = new StringBuilder();
-					} else {
-						sb.append("\n");
-					}
-					sb.append(String.format(rec.getMessage(), rec.getParameters()));
-				}
-				this.message = sb == null ? null : sb.toString();
-			}
-
-		}
 	}
 	
 }

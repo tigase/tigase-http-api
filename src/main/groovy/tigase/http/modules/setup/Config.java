@@ -42,22 +42,15 @@ public class Config {
 	protected String[] virtualDomains = new String[] { tigase.util.DNSResolverFactory.getInstance().getDefaultHost() };
 	protected String[] admins = new String[] { "admin@" + tigase.util.DNSResolverFactory.getInstance().getDefaultHost() };
 	protected String adminPwd = "tigase";
-	protected DbType dbType = null;
+	private String dbType = null;
 	protected boolean advancedConfig = false;
 	protected boolean clusterMode = false;
 
 	protected Set<String> optionalComponents = new HashSet<>();
 	protected Set<String> plugins = new HashSet<>();
 
-	protected String dbSuperuser = "root";
-	protected String dbSuperpass = "";
-	protected String dbUser = "tigase";
-	protected String dbPass = "tigase12";
-	protected String dbName = "tigasedb";
-	protected String dbHost = "localhost";
-	protected boolean dbUseSSL = false;
-	protected String dbParams = "";
-
+	protected Properties dbProperties = new Properties();
+	
 	protected RestApiSecurity httpRestApiSecurity = RestApiSecurity.forbidden;
 	protected String[] httpRestApiKeys = new String[0];
 
@@ -100,6 +93,15 @@ public class Config {
 				.collect(Collectors.toSet());
 	}
 
+	public String getDbType() {
+		return dbType;
+	}
+
+	public void setDbType(String type) {
+		this.dbType = type;
+		this.dbProperties.setProperty("dbType", type);
+	}
+
 	public List<BeanDefinition> getComponents() {
 		return null;
 	}
@@ -125,52 +127,16 @@ public class Config {
 			return null;
 
 		Properties props = getSchemaLoaderProperties();
-		return SchemaLoader.newInstance(props).getDBUri(props);
-//		String uri;
-//		switch (dbType) {
-//			case Derby:
-//				uri =  "jdbc:derby:" + dbName + ";create=true";
-//			default:
-//				uri = "jdbc:" + dbType.name().toLowerCase() +"://" + dbHost + "/" + dbName + "?user=" + dbUser + "&password=" + dbPass;
-//		}
+
+		SchemaLoader loader = SchemaLoader.newInstance(dbType);
+		SchemaLoader.Parameters parameters = loader.createParameters();
+		parameters.setProperties(props);
+		loader.init(parameters);
+		return loader.getDBUri();
 	}
 
 	public Properties getSchemaLoaderProperties() {
-		Properties props = new java.util.Properties();
-		props.setProperty("schemaVersion", "7-2");
-
-		Config config = this;
-
-		if (config.dbType != null) {
-			props.setProperty("dbType", config.dbType.name().toLowerCase());
-		}
-		if (config.dbUser != null) {
-			props.setProperty("dbUser", config.dbUser);
-		}
-		if (config.dbPass != null) {
-			props.setProperty("dbPass", config.dbPass);
-		}
-		if (config.dbName != null) {
-			props.setProperty("dbName", config.dbName);
-		}
-		if (config.dbSuperuser != null) {
-			props.setProperty("rootUser", config.dbSuperuser);
-		}
-		if (config.dbSuperpass != null) {
-			props.setProperty("rootPass", config.dbSuperpass);
-		}
-		if (config.dbHost != null) {
-			props.setProperty("dbHostname", config.dbHost);
-		}
-		props.setProperty("useSSL", String.valueOf(config.dbUseSSL));
-		if (config.admins != null && config.admins.length > 0) {
-			props.setProperty("adminJID", Arrays.stream(config.admins).collect(Collectors.joining(",")));
-		}
-		if (config.adminPwd != null) {
-			props.setProperty("adminJIDpass", config.adminPwd);
-		}
-
-		return props;
+		return dbProperties;
 	}
 
 	public Map<String, Object> getConfigurationInMap() throws IOException {
@@ -300,14 +266,6 @@ public class Config {
 			f.createNewFile();
 		}
 		new ConfigWriter().write(f, props);
-	}
-
-	public static enum DbType {
-		Derby,
-		MySQL,
-		PostgreSQL,
-		SQLServer,
-		Other
 	}
 
 	public static enum RestApiSecurity {

@@ -24,6 +24,7 @@ package tigase.http.upload.db;
 import tigase.db.DataRepository;
 import tigase.db.Repository;
 import tigase.db.TigaseDBException;
+import tigase.http.db.Schema;
 import tigase.kernel.beans.config.ConfigField;
 import tigase.xmpp.BareJID;
 import tigase.xmpp.JID;
@@ -42,6 +43,7 @@ import java.util.List;
  * Created by andrzej on 07.08.2016.
  */
 @Repository.Meta( supportedUris = { "jdbc:[^:]+:.*" } )
+@Repository.SchemaId(id = Schema.HTTP_UPLOAD_SCHEMA_ID, name = Schema.HTTP_UPLOAD_SCHEMA_NAME)
 public class JDBCFileUploadRepository implements FileUploadRepository<DataRepository> {
 
 	private static final String DEF_ALLOCATE_SLOT = "{ call Tig_HFU_AllocateSlot(?, ?, ?, ?, ?, ?, ?) }";

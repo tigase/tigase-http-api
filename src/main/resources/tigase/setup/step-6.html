@@ -1,48 +1,13 @@
 ${ util.include('header', [title:'Setup: ' + page.title]) }
-<h3>You have selected ${setup.config.dbType?.name()} database. This database needs additional configuration parameters. Please enter all required information.</h3>
+<h3>You have selected ${setup.config.dbType} database. This database needs additional configuration parameters. Please enter all required information.</h3>
 <form method='POST' action="?step=${ page.nextPage() }">
-<% def q = page.getQuestion('dbSuperuser'); %>
-<label for='${q.getName()}'>Super user account name:</label>
-<input type='text' size='30' name='${q.getName()}' value='${q.getValue()}' />
+<% page.getQuestions().each { q -> %>
+<label for='${q.getName()}'>${q.getLabel()} :</label>
+<% if (q.getName().endsWith("useSSL")) { %><input type='checkbox' size='30' name='${q.getName()}' <% if (q.isSelected("true")) { %>checked<% } %> /><% } else { %>
+<br/><input type='text' size='90' name='${q.getName()}' value='${q.getValue()}' /><% } %>
 <br/>
 <div style='padding-top: 1em'></div>
-<% q = page.getQuestion('dbSuperpass'); %>
-<label for='${q.getName()}'>Super user account password:</label>
-<input type='password' size='30' name='${q.getName()}' value='${q.getValue()}' />
-<br/>
-<div style='padding-top: 1em'></div>
-
-<h3>Database details. It will be created automatically if it does not exist.</h3>
-<% q = page.getQuestion('dbUser'); %>
-<label for='${q.getName()}'>Database account:</label>
-<input type='text' size='30' name='${q.getName()}' value='${q.getValue()}' />
-<br/>
-<div style='padding-top: 1em'></div>
-<% q = page.getQuestion('dbPass'); %>
-<label for='${q.getName()}'>Account password:</label>
-<input type='text' size='30' name='${q.getName()}' value='${q.getValue()}' />
-<br/>
-<div style='padding-top: 1em'></div>
-<% q = page.getQuestion('dbName'); %>
-<label for='${q.getName()}'>Database name:</label>
-<input type='text' size='30' name='${q.getName()}' value='${q.getValue()}' />
-<br/>
-<div style='padding-top: 1em'></div>
-<% q = page.getQuestion('dbHost'); %>
-<label for='${q.getName()}'>Database host or IP:</label>
-<input type='text' size='30' name='${q.getName()}' value='${q.getValue()}' />
-<br/>
-<div style='padding-top: 1em'></div>
-<% q = page.getQuestion('dbUseSSL'); %>
-<label for='${q.getName()}'>Enable SSL support for database connection (if database supports it)</label>
-<input type='checkbox' size='30' name='${q.getName()}' <% if (q.isSelected("true")) { %>checked<% } %> />
-<br/>
-<div style='padding-top: 1em'></div>
-<% q = page.getQuestion('dbParams'); %>
-<label for='${q.getName()}'>Additional database parameters:</label>
-<input type='text' size='30' name='${q.getName()}' value='${q.getValue()}' />
-<br/>
-<div style='padding-top: 1em'></div>
+<% } %>
 
 <div style='padding-top: 1em'></div>
 <button type="submit">Next</button>

@@ -42,11 +42,11 @@ ${ util.include('header', [title:'Setup: ' + page.title]) }
 }
 ">
 <% [
-	[ value:'Derby', label:'Derby (built-in database)' ],
-	[ value:'MySQL', label:'MySQL' ],
-	[ value:'PostgreSQL', label:'PostgreSQL' ],
-	[ value:'SQLServer', label:'SQLServer', warning:'You have selected MS SQL Server as your database. While we provide you, for easy install, with open-source jTDS JDBC driver allowing to connect to MS SQL Server, we recommend using JDBC driver from Microsoft.' ],
-	[ value:'Other', label:'Other...' ]
+	[ value:'derby', label:'Derby (built-in database)' ],
+	[ value:'mysql', label:'MySQL' ],
+	[ value:'postgresql', label:'PostgreSQL' ],
+	[ value:'sqlserver', label:'SQLServer', warning:'You have selected MS SQL Server as your database. While we provide you, for easy install, with open-source jTDS JDBC driver allowing to connect to MS SQL Server, we recommend using JDBC driver from Microsoft.' ],
+    [ value:'mongodb', label: 'MongoDB' ]
    ].each {
  %>
  <option value='${it.value}' ${ q.isSelected(it.value) ? 'selected' : '' } ${it.warning ? 'warning="' + it.warning + '"' : ''} >${it.label}</option>

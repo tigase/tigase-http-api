@@ -98,7 +98,9 @@ public class SetupServlet extends HttpServlet {
 				Setup.Page page = setup.getPage(i-1);
 				page.setValues(request.getParameterMap());
 			}
-			templateParams.put("page", setup.getPage(i));
+			Setup.Page page = setup.getPage(i);
+			page.beforeDisplay();
+			templateParams.put("page", page);
 			templateParams.put("currentStep", i);
 		} else {
 			t = templates.get("edit");

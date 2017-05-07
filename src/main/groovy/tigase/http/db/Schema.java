@@ -1,6 +1,6 @@
 /*
  * Tigase HTTP API
- * Copyright (C) 2004-2014 "Tigase, Inc." <office@tigase.com>
+ * Copyright (C) 2004-2017 "Tigase, Inc." <office@tigase.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -19,40 +19,14 @@
  * Last modified by $Author$
  * $Date$
  */
-package tigase.http.modules.setup;
-
-import java.util.ArrayDeque;
-import java.util.logging.Handler;
-import java.util.logging.LogRecord;
+package tigase.http.db;
 
 /**
- *
- * @author andrzej
+ * Created by andrzej on 04.05.2017.
  */
-public class SetupLogHandler extends Handler {
+public class Schema {
 
-	private final ArrayDeque<LogRecord> queue = new ArrayDeque<LogRecord>();
-	
-	public SetupLogHandler() {
-	}
-	
-	@Override
-	public void publish(LogRecord record) {
-		queue.offer(record);
-	}
-
-	@Override
-	public void flush() {
-		queue.clear();
-	}
-
-	@Override
-	public void close() throws SecurityException {
-		flush();
-	}
-	
-	public LogRecord poll() {
-		return queue.poll();
-	}
+	public static final String HTTP_UPLOAD_SCHEMA_ID = "http-api";
+	public static final String HTTP_UPLOAD_SCHEMA_NAME = "Tigase HTTP API - File Upload";
 	
 }
