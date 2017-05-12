@@ -19,12 +19,13 @@
 
 package tigase.http.modules.setup;
 
-import tigase.conf.ConfigReader;
 import tigase.db.util.SchemaLoader;
 import tigase.db.util.SchemaManager;
 import tigase.kernel.beans.selector.ConfigTypeEnum;
 import tigase.server.BasicComponent;
 import tigase.server.xmppsession.SessionManager;
+import tigase.util.setup.BeanDefinition;
+import tigase.util.setup.SetupHelper;
 import tigase.util.ui.console.CommandlineParameter;
 import tigase.xmpp.XMPPImplIfc;
 
@@ -69,14 +70,14 @@ public class Setup {
 		pages.add(new DBCheckPage("Database connectivity check"));
 
 		pages.add(new Page("HTTP API - REST security configuration",
-				  new SingleAnswerQuestion("httpRestApiSecurity", ()-> config.httpRestApiSecurity.name(),
-										   val -> config.httpRestApiSecurity = Config.RestApiSecurity.valueOf(val)),
-				  new SingleAnswerQuestion("httpRestApiKeys", ()-> Arrays.stream(config.httpRestApiKeys).collect(Collectors.joining(",")),
-										   (val)-> config.httpRestApiKeys = val == null ?  new String[0] : val.split(","))));
+				  new SingleAnswerQuestion("httpRestApiSecurity", ()-> config.httpSecurity.restApiSecurity.name(),
+										   val -> config.httpSecurity.restApiSecurity = SetupHelper.RestApiSecurity.valueOf(val)),
+				  new SingleAnswerQuestion("httpRestApiKeys", ()-> Arrays.stream(config.httpSecurity.restApiKeys).collect(Collectors.joining(",")),
+										   (val)-> config.httpSecurity.restApiKeys = val == null ?  new String[0] : val.split(","))));
 
 		pages.add(new Page("Setup security",
-						   new SingleAnswerQuestion("setupUser", ()-> config.setupUser, user -> config.setupUser = user),
-						   new SingleAnswerQuestion("setupPassword", ()-> config.setupPassword, pass -> config.setupPassword = pass)));
+						   new SingleAnswerQuestion("setupUser", ()-> config.httpSecurity.setupUser, user -> config.httpSecurity.setupUser = user),
+						   new SingleAnswerQuestion("setupPassword", ()-> config.httpSecurity.setupPassword, pass -> config.httpSecurity.setupPassword = pass)));
 
 		pages.add(new Page("Saving configuration", new SingleAnswerQuestion("saveConfig", ()-> "true", val -> {
 			if (val != null ? (Boolean.parseBoolean(val) || "on".equals(val)) : false) {
@@ -421,7 +422,6 @@ public class Setup {
 		@Override
 		public void beforeDisplay() {
 			List<CommandlineParameter> options = SchemaLoader.newInstance(config.getDbType())
-					.createParameters()
 					.getSetupOptions();
 			Stream<Question> questions = options.stream().map(o -> {
 				SingleAnswerQuestion question = null;
@@ -480,14 +480,14 @@ public class Setup {
 
 		public synchronized Map<SchemaManager.DataSourceInfo, List<SchemaManager.ResultEntry>> loadSchema() {
 			try {
-				String configStr = config.getConfigurationInDSL();
+				Map<String, Object> configStr = config.getConfigurationInMap();
 
 				SchemaManager schemaManager = new SchemaManager();
-				schemaManager.readConfig(configStr);
+				schemaManager.setConfig(configStr);
 				schemaManager.setDbRootCredentials(config.dbProperties.getProperty("rootUser"), config.dbProperties.getProperty("rootPass"));
 
 				return schemaManager.loadSchemas();
-			} catch (IOException|ConfigReader.ConfigException e) {
+			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
 		}

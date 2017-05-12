@@ -19,12 +19,14 @@
 
 package tigase.http.modules.setup;
 
+import tigase.conf.ConfigBuilder;
 import tigase.conf.ConfigWriter;
 import tigase.db.util.SchemaLoader;
 import tigase.kernel.beans.config.AbstractBeanConfigurator;
 import tigase.kernel.beans.selector.ConfigType;
 import tigase.kernel.beans.selector.ConfigTypeEnum;
 import tigase.server.xmppsession.SessionManager;
+import tigase.util.setup.SetupHelper;
 import tigase.xmpp.XMPPImplIfc;
 
 import java.io.*;
@@ -50,12 +52,8 @@ public class Config {
 	protected Set<String> plugins = new HashSet<>();
 
 	protected Properties dbProperties = new Properties();
-	
-	protected RestApiSecurity httpRestApiSecurity = RestApiSecurity.forbidden;
-	protected String[] httpRestApiKeys = new String[0];
 
-	protected String setupUser = null;
-	protected String setupPassword = null;
+	protected SetupHelper.HttpSecurity httpSecurity = new SetupHelper.HttpSecurity();
 
 	public Config() {
 		setConfigType(ConfigTypeEnum.DefaultMode);
@@ -102,10 +100,6 @@ public class Config {
 		this.dbProperties.setProperty("dbType", type);
 	}
 
-	public List<BeanDefinition> getComponents() {
-		return null;
-	}
-
 	public void setACS(boolean acs) {
 		this.acs = acs;
 	}
@@ -140,76 +134,11 @@ public class Config {
 	}
 
 	public Map<String, Object> getConfigurationInMap() throws IOException {
-		Map<String, Object> props = new HashMap<>();
-
-		props.put("config-type", configType.id().toLowerCase());
-		if (clusterMode) {
-			props.put("--cluster-mode", "true");
-		}
-		props.put("--virt-hosts", Arrays.stream(virtualDomains).collect(Collectors.joining(",")));
-		props.put("admin", admins);
-		props.put("--debug", "server");
-
-		AbstractBeanConfigurator.BeanDefinition dataSource = createBean("dataSource");
-		addBean(dataSource, setBeanProperty(createBean("default"), "uri", getDatabaseUri()));
-		addBean(props, dataSource);
-
-		AbstractBeanConfigurator.BeanDefinition sessMan = createBean("sess-man");
-		addBean(props, sessMan);
-		SetupHelper.getAvailableProcessors(SessionManager.class, XMPPImplIfc.class)
-				.stream()
-				.filter(def -> (def.isActive() && !plugins.contains(def.getName())) ||
-						((!def.isActive()) && plugins.contains(def.getName())))
-				.forEach(def -> {
-					addBean(sessMan, createBean(def.getName(), plugins.contains(def.getName())));
-				});
-
-		if (acs) {
-			AbstractBeanConfigurator.BeanDefinition strategy = createBean("strategy");
-			strategy.setClazzName("tigase.server.cluster.strategy.OnlineUsersCachingStrategy");
-			addBean(sessMan, strategy);
-		}
-
-		SetupHelper.getAvailableComponents()
-				.stream()
-				.filter(def -> !def.isCoreComponent())
-				.filter(def -> {
-					ConfigType ct = def.getClazz().getAnnotation(ConfigType.class);
-					if (optionalComponents.contains(def.getName())) {
-						return def.isActive() == false || (ct != null && !Arrays.asList(ct.value()).contains(this.configType));
-					} else {
-						return def.isActive() == true && (ct != null && Arrays.asList(ct.value()).contains(this.configType));
-					}
-				})
-				.forEach(def -> {
-					ConfigType ct = def.getClazz().getAnnotation(ConfigType.class);
-					addBean(props, createBean(def.getName(), optionalComponents.contains(def.getName()),
-											  (ct != null && !Arrays.asList(ct.value()).contains(this.configType)) ? def
-													  .getClazz() : null));
-				});
-
-		props.compute("http", (name, def) -> {
-			if (def == null) {
-				def = createBean("http");
-			}
-			switch (httpRestApiSecurity) {
-				case forbidden:
-					break;
-				case api_keys:
-					setBeanProperty((AbstractBeanConfigurator.BeanDefinition) def, "api-keys", httpRestApiKeys);
-					break;
-				case open_access:
-					setBeanProperty((AbstractBeanConfigurator.BeanDefinition) def, "api-keys", Arrays.asList("open_access"));
-			}
-			if (setupUser != null && !setupUser.isEmpty() && setupPassword != null && !setupPassword.isEmpty()) {
-				addBean((AbstractBeanConfigurator.BeanDefinition) def,
-						setBeanProperty(setBeanProperty(createBean("setup"), "admin-user", setupUser), "admin-password",
-										setupPassword));
-			}
-			return def;
-		});
-
-		return props;
+		ConfigBuilder builder = SetupHelper.generateConfig(configType, getDatabaseUri(), clusterMode, acs,
+														   Optional.of(optionalComponents), Optional.of(plugins),
+														   virtualDomains, Optional.ofNullable(admins),
+														   Optional.ofNullable(httpSecurity));
+		return builder.build();
 	}
 
 	public String getConfigurationInDSL() throws IOException {
@@ -267,11 +196,5 @@ public class Config {
 		}
 		new ConfigWriter().write(f, props);
 	}
-
-	public static enum RestApiSecurity {
-		forbidden,
-		api_keys,
-		open_access
-	}
-
+	
 }
