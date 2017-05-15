@@ -1,3 +1,4 @@
+[[httpServer]]
 = HTTP server
 :author: Andrzej Wójcik
 :date: 2016-08-21 13:28
@@ -86,4 +87,3 @@ httpServer (class: tigase.http.jetty.JettyOSGiHttpServer) {
     ...
 }
 ----
-
