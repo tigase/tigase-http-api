@@ -135,7 +135,7 @@ public class Config {
 
 	public Map<String, Object> getConfigurationInMap() throws IOException {
 		ConfigBuilder builder = SetupHelper.generateConfig(configType, getDatabaseUri(), clusterMode, acs,
-														   Optional.of(optionalComponents), Optional.of(plugins),
+														   Optional.of(optionalComponents), Optional.empty(), Optional.of(plugins),
 														   virtualDomains, Optional.ofNullable(admins),
 														   Optional.ofNullable(httpSecurity));
 		return builder.build();
