@@ -157,6 +157,7 @@ public class Setup {
 
 		private final String id;
 		private Page page;
+		private boolean secret = false;
 
 		public Question(String id) {
 			this.id = id;
@@ -176,6 +177,13 @@ public class Setup {
 
 		protected abstract void setValues(String[] values);
 
+		public boolean isSecret() {
+			return secret;
+		}
+
+		protected void setSecret(boolean secret) {
+			this.secret = secret;
+		}
 	}
 
 	public static class SingleAnswerQuestion extends Question {
@@ -450,6 +458,7 @@ public class Setup {
 							config.dbProperties.setProperty(o.getFullName().get(), val);
 						}
 					});
+					question.setSecret(o.isSecret());
 				}
 				return question;
 			});

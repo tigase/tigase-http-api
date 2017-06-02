@@ -4,7 +4,7 @@ ${ util.include('header', [title:'Setup: ' + page.title]) }
 <% page.getQuestions().each { q -> %>
 <label for='${q.getName()}'>${q.getLabel()} :</label>
 <% if (q.getName().endsWith("useSSL")) { %><input type='checkbox' size='30' name='${q.getName()}' <% if (q.isSelected("true")) { %>checked<% } %> /><% } else { %>
-<br/><input type='text' size='90' name='${q.getName()}' value='${q.getValue()}' /><% } %>
+<br/><input type='${q.isSecret() ? "password" : "text"}' size='90' name='${q.getName()}' value='${q.getValue() ?: ""}' /><% } %>
 <br/>
 <div style='padding-top: 1em'></div>
 <% } %>
