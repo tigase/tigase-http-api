@@ -25,8 +25,9 @@ import groovy.text.GStringTemplateEngine
 import groovy.text.Template
 import groovy.text.TemplateEngine
 import groovy.transform.CompileStatic
-import tigase.db.UserRepositoryMDImpl
+import tigase.db.AuthRepositoryMDImpl
 import tigase.http.modules.AbstractBareModule
+import tigase.http.util.CSSHelper
 
 import javax.servlet.ServletConfig
 import javax.servlet.ServletException
@@ -85,7 +86,7 @@ public class SetupServlet extends HttpServlet {
 
 		Template t = null;
 		Map templateParams = [request:request, response:response, servlet:this];
-		if (setupModule.getUserRepository() == null || ((setupModule.getUserRepository() instanceof UserRepositoryMDImpl) && !((UserRepositoryMDImpl) setupModule.getUserRepository()).getRepo(null)))  {
+		if (setupModule.getAuthRepository() == null || ((setupModule.getAuthRepository() instanceof AuthRepositoryMDImpl) && !((AuthRepositoryMDImpl) setupModule.getAuthRepository()).getRepo(null)))  {
 			templateParams["setup"] = setup;
 			String step  = request.getParameter("step");
 			int i = 1;
@@ -121,7 +122,12 @@ public class SetupServlet extends HttpServlet {
 					map.putAll(templateParams);
 					if (params != null) map.putAll(params);
 					return temp.make(map);
-				}				
+				}, inlineCss: { String path ->
+					String content = CSSHelper.getCssFileContent(path);
+					if (content == null)
+						return "";
+			        return "<style>" + content + "</style>";
+				}
 				]);
 		Writable w = t.make(templateParams);
 		

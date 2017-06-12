@@ -1,16 +1,27 @@
 ${ util.include('header', [title:'Setup: ' + page.title]) }
-<h3>You have selected ${setup.config.dbType} database. This database needs additional configuration parameters. Please enter all required information.</h3>
+<div class="panel panel-default">
+    <div class="panel-heading panel-xs">
+        <h4>You have selected ${setup.config.dbType} database. This database needs additional configuration parameters. Please enter all required information.</h4>
+    </div>
+    <div class="panel-body">
 <form method='POST' action="?step=${ page.nextPage() }">
 <% page.getQuestions().each { q -> %>
-<label for='${q.getName()}'>${q.getLabel()} :</label>
-<% if (q.getName().endsWith("useSSL")) { %><input type='checkbox' size='30' name='${q.getName()}' <% if (q.isSelected("true")) { %>checked<% } %> /><% } else { %>
-<br/><input type='${q.isSecret() ? "password" : "text"}' size='90' name='${q.getName()}' value='${q.getValue() ?: ""}' /><% } %>
-<br/>
-<div style='padding-top: 1em'></div>
+    <div class="form-group">
+        <% if (q.getName().endsWith("useSSL")) { %>
+        <label class="col-sm-6 control-label" style="margin-left: -15px; padding-top: 7px;" for='${q.getName()}'><%= q.getLabel() %></label>
+        <div class="col-sm-6">
+            <input class="form-control" type='checkbox' size='30' name='${q.getName()}' <% if (q.isSelected("true")) { %>checked<% } %> />
+        </div>
+        <% } else { %>
+        <label class="control-label" for='${q.getName()}'><%= q.getLabel() %></label>
+        <input class="form-control" type='${q.isSecret() ? "password" : "text"}' size='90' name='${q.getName()}' value='${q.getValue() ?: ""}' />
+        <% } %>
+    </div>
 <% } %>
+    </div>
+</div>
 
-<div style='padding-top: 1em'></div>
-<button type="submit">Next</button>
+    <button class="btn btn-default" type="submit">Next</button>
 
 </form>
 ${ util.include('footer') } 

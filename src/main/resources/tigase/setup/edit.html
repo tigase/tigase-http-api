@@ -13,24 +13,45 @@ if (saved) {
     }
 } %>
 ${ util.include('header', [title:'Setup: ' + title]) }
-<div style="width: 100%; text-align: center">
-    <% if ((!saved) || (error != null)) { %>
-<form method='POST' style="margin: 1em 2em; " >
-    <% if (error) { %>
-    <h3 style="color: red">Update of configuration file failed: ${ex.getMessage()}</h3>
-    <label for='config'>Unsaved configuration:</label><br/>
-    <% } else { %>
-    <label for='config'>Current Tigase XMPP Server configuration:</label><br/>
-    <% } %>
-<textarea name='config' rows=40 cols=140 style="width: 100%">
+<% if ((!saved) || (error != null)) { %>
+    <form method='POST' style="margin: 1em 2em; " >
+        <% if (error) { %>
+        <div class="panel panel-danger">
+            <div class="panel-heading panel-xs">
+                <h4>Update of configuration file failed</h4>
+            </div>
+            <div class="panel-body">
+                <h4>${ex.getMessage()}</h4>
+            </div>
+        </div>
+        <% } %>
+
+        <div class="panel panel-default">
+            <div class="panel-heading panel-xs">
+                <% if (error) { %>
+                <h4>Unsaved configuration:</h4>
+                <% } else { %>
+                <h4>Current Tigase XMPP Server configuration:</h4>
+                <% } %>
+            </div>
+            <div class="panel-body">
+<textarea class="form-control" name='config' rows=40 cols=140 style="width: 100%">
 <%= saved ?: new File("etc/init.properties").getText() %>
 </textarea>
+                <h4>Do you wish to save this configuration to <i>etc/init.properties</i> file?</h4>
+            </div>
+        </div>
+        <button class="btn btn-default" type="submit" style="margin-top: 1em; margin-left: 100px;">Save</button>
+    </form>
 
-<h3 style="display: inline;">Do you wish to save this configuration to <i>etc/init.properties</i> file?</h3>     <button type="submit" style="margin-top: 1em; margin-left: 100px;">Save</button>
-
-</form>
-    <% } else { %>
-<h3>Configuration file was successfully updated with new configuration.<br/>File with old configuration was backed up as <i>init.properties.bak</i>.<br/><br/>Please restart server to apply new configuration.</h3>
-<%  } %>
+<% } else { %>
+<div class="panel panel-success">
+    <div class="panel-heading panel-xs">
+        <h4>Configuration file was successfully updated with new configuration.</h4>
+    </div>
+    <div class="panel-body">
+        <h4>File with old configuration was backed up as <i>init.properties.bak</i>.<br/><br/>Please restart server to apply new configuration.</h4>
+    </div>
 </div>
+<% } %>
 ${ util.include('footer') }

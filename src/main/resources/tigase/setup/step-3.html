@@ -1,37 +1,51 @@
 ${ util.include('header', [title:'Setup: ' + page.title]) }
-<h3>On this panel you can specify basic configuration settings for the Tigase server.</h3>
-<h3>Based on your selection here more configuration options might be presented later on. After the configuration is complete init.properties file will be created.</h3>
-<h3>You can optionally restart the server at the end of the process if you like.</h3>
-<form method='POST' action="?step=${ page.nextPage() }">
-<div style='padding-top: 1em'></div><% def q = page.getQuestion('configType') %>
-<label for='${q.getName()}'>Configuration type:</label>
-<select name='${q.getName()}'>
-<% [
-    [ value:'default', label:'Default installation' ],
-    [ value:'session-manager', label:'Session Manager only' ],
-    [ value:'connection-managers', label:'Network connectivity only' ],
-    [ value:'component', label:'External component only' ]
-   ].each {
- %>
-    <option value='${it.value}' ${ q.isSelected(it.value) ? 'selected' : '' } >${it.label}</option>
+<form class="form-horizontal" method='POST' action="?step=${ page.nextPage() }">
+<div class="panel panel-default">
+    <div class="panel-body">
+<p>On this panel you can specify basic configuration settings for the Tigase server.</p>
+<p>Based on your selection here more configuration options might be presented later on. After the configuration is complete init.properties file will be created.</p>
+<p>You can optionally restart the server at the end of the process if you like.</p>
+<% def fieldFn = { q, label, valueControl -> %>
+<div class="form-group">
+    <label class="col-sm-3 control-label" for='${q.getName()}'><%= label %></label>
+    <div class="col-sm-9">
+        <% valueControl(q); %>
+    </div>
+</div>
 <% } %>
-</select>
-<br/>
-<div style='padding-top: 1em'></div><% q = page.getQuestion('virtualDomains') %>
-<label for='${q.getName()}'>Your XMPP (Jabber) domains</label>
-<input name='${q.getName()}' type='text' size='30' value='${q.getValue()}' />
-<br/>
-<div style='padding-top: 1em'></div><% q = page.getQuestion('admins') %>
-<label for='${q.getName()}'>Server administrators</label>
-<input name='${q.getName()}' type='text' size='30' value='${q.getValue()}' />
-<br/>
-<div style='padding-top: 1em'></div><% q = page.getQuestion('adminPwd') %>
-<label for='${q.getName()}'>Admin password</label>
-<input name='${q.getName()}' type='password' size='30' value='${q.getValue()}' />
-<br/>
-<div style='padding-top: 1em'></div><% q = page.getQuestion('dbType') %>
-<label for='${q.getName()}'>Select database</label>
-<select name='${q.getName()}' id='dbType' onchange="
+    <% def q = page.getQuestion('configType') %>
+    <% fieldFn(q, "Configuration type", { q1 -> %>
+    <select class="form-control" name='${q1.getName()}'>
+        <% [
+        [ value:'default', label:'Default installation' ],
+        [ value:'session-manager', label:'Session Manager only' ],
+        [ value:'connection-managers', label:'Network connectivity only' ],
+        [ value:'component', label:'External component only' ]
+        ].each {
+        %>
+        <option value='${it.value}' ${ q1.isSelected(it.value) ? 'selected' : '' } >${it.label}</option>
+        <% } %>
+    </select>
+    <% }); %>
+
+    <% q = page.getQuestion('virtualDomains') %>
+    <% fieldFn(q, "Your XMPP (Jabber) domains", { q1 -> %>
+    <input class="form-control" name='${q.getName()}' type='text' size='30' value='${q.getValue()}' />
+    <% }); %>
+
+    <% q = page.getQuestion('admins') %>
+    <% fieldFn(q, "Server administrators", { q1 -> %>
+    <input class="form-control" name='${q.getName()}' type='text' size='30' value='${q.getValue()}' />
+    <% }); %>
+
+    <% q = page.getQuestion('adminPwd') %>
+    <% fieldFn(q, "Admin password", { q1 -> %>
+    <input class="form-control" name='${q.getName()}' type='password' size='30' value='${q.getValue()}' />
+    <% }); %>
+
+    <% q = page.getQuestion('dbType') %>
+    <% fieldFn(q, "Select database", { q1 -> %>
+    <select class="form-control" name='${q.getName()}' id='dbType' onchange="
 	var select = document.getElementById('dbType');
 	for (var i=0; i<select.children.length; i++) {
     var it = select.children[i];
@@ -41,7 +55,7 @@ ${ util.include('header', [title:'Setup: ' + page.title]) }
 	}
 }
 ">
-<% [
+    <% [
 	[ value:'derby', label:'Derby (built-in database)' ],
 	[ value:'mysql', label:'MySQL' ],
 	[ value:'postgresql', label:'PostgreSQL' ],
@@ -49,16 +63,19 @@ ${ util.include('header', [title:'Setup: ' + page.title]) }
     [ value:'mongodb', label: 'MongoDB' ]
    ].each {
  %>
- <option value='${it.value}' ${ q.isSelected(it.value) ? 'selected' : '' } ${it.warning ? 'warning="' + it.warning + '"' : ''} >${it.label}</option>
-<% } %>
-</select><span id='dbTypeWarning' style='color: red; font-size:0.8em;'></span>
-<br/>
-<div style='padding-top: 1em'></div><% q = page.getQuestion('advancedConfig') %>
-<label for='${q.getName()}'>Advanced configuration options</label>
-<input name='${q.getName()}' type='checkbox' ${ q.isSelected("true") ? "checked" : "" } />
+        <option value='${it.value}' ${ q.isSelected(it.value) ? 'selected' : '' } ${it.warning ? 'warning="' + it.warning + '"' : ''} >${it.label}</option>
+    <% } %>
+    </select><span id='dbTypeWarning' style='color: red; font-size:0.8em;'></span>
+    <% }); %>
 
-<div style='padding-top: 1em'></div>
-<button type="submit">Next</button>
+    <% q = page.getQuestion('advancedConfig') %>
+    <% fieldFn(q, "Advanced configuration options", { q1 -> %>
+    <input class="form-control" name='${q.getName()}' type='checkbox' ${ q.isSelected("true") ? "checked" : "" } />
+    <% }); %>
+
+</div>
+</div>
+<button class="btn btn-default" type="submit">Next</button>
 
 </form>
-${ util.include('footer') } 
+${ util.include('footer') }

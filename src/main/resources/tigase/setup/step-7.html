@@ -16,17 +16,30 @@ def stateName = { state ->
 }
 %>
 ${ util.include('header', [title:'Setup: ' + page.title]) }
-<h3>You have selected database with URI = ${setup.config.getDatabaseUri()}</h3>
-<table>
+<div class="panel panel-default">
+	<div class="panel-heading panel-xs"><h4>You have selected database with URI = ${setup.config.getDatabaseUri()}</h4></div>
+</div>
+<!--<table>-->
 	<% page.loadSchema().values().iterator().next().each { entry -> %>
-	<tr><td>${entry.name}</td><td style="${stateStyle(entry.result)}">${stateName(entry.result)}</td></tr>
-	<% if (entry.result.name() != 'ok') { %><tr><td colspan='2' style="padding: 5px 15px;font-size: smaller;">${entry.message?.replace('\n', '<br/>')}</td></tr><% } %>
+	<div class="panel ${entry.result.name() != 'ok' ? (entry.result.name() == 'error' ? 'panel-danger' : 'panel-warning') : 'panel-success'}">
+		<div class="panel-heading panel-xs">
+			<span style="float: left;"><h4 style="display: inline;">${entry.name}</h4></span><span style="float: right;"><h4 style="display: inline;">${stateName(entry.result)}</h4></span>
+			<div style="clear: both;"></div>
+		</div>
+		<% if (entry.result.name() != 'ok') { %>
+		<div class="panel-body">
+			<pre>${entry.message?.replace('\n', '<br/>')}</pre>
+		</div>
+		<% } %>
+	</div>
+	<!--<tr><td>${entry.name}</td><td style="${stateStyle(entry.result)}">${stateName(entry.result)}</td></tr>-->
+	<!--<% if (entry.result.name() != 'ok') { %><tr><td colspan='2' style="padding: 5px 15px;font-size: smaller;">${entry.message?.replace('\n', '<br/>')}</td></tr><% } %>-->
+	
 	<% } %>
-</table>
+<!--</table>-->
 <form method='POST' action="?step=${ page.nextPage() }">
 
-<div style='padding-top: 1em'></div>
-<button type="submit">Next</button>
+	<button class="btn btn-default" type="submit">Next</button>
 
 </form>
 ${ util.include('footer') } 

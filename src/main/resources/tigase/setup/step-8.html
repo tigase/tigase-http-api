@@ -1,11 +1,28 @@
 ${ util.include('header', [title:'Setup: ' + page.title]) }
-<h3>Configuration of security features of HTTP REST API</h3>
-<form method='POST' action="?step=${ page.nextPage() }"><% def q1 = page.getQuestion('httpRestApiSecurity'); def q2 = page.getQuestion('httpRestApiKeys'); %>
-<label for="access_type"><b>Select security model of REST API</b></label><br/>
-<input type="radio" name="${q1.getName()}" value="forbidden" ${ q1.isSelected('forbidden') ? 'checked' : ''}>Access forbidden (REST API disabled)<br/>
-<input type="radio" name="${q1.getName()}" value="api_keys" ${ q1.isSelected('api_keys') ? 'checked' : ''}>Access requires on of API keys: <input type="text" name="${q2.getName()}" value="${ q2.getValue() }"/><br/>
-<input type="radio" name="${q1.getName()}" value="open_access" ${ q1.isSelected('open_access') ? 'checked' : ''}>Open access<br/>
-
-<button type="submit">Next</button>
+<form class="form-horizontal" method='POST' action="?step=${ page.nextPage() }"><% def q1 = page.getQuestion('httpRestApiSecurity'); def q2 = page.getQuestion('httpRestApiKeys'); %>
+<div class="panel panel-default">
+    <div class="panel-heading panel-xs">
+<h4>Configuration of security features of HTTP REST API</h4>
+    </div>
+    <div class="panel-body">
+<h5>Select security model of REST API</h5>
+    <div class="radio">
+        <label>
+            <input type="radio" name="${q1.getName()}" value="forbidden" ${ q1.isSelected('forbidden') ? 'checked' : ''}>Access forbidden (REST API disabled)
+        </label>
+    </div>
+    <div class="radio">
+        <label>
+            <input type="radio" name="${q1.getName()}" value="api_keys" ${ q1.isSelected('api_keys') ? 'checked' : ''}>Access requires API keys: <input class="form-control" type="text" name="${q2.getName()}" value="${ q2.getValue() }"/>
+        </label>
+    </div>
+    <div class="radio">
+        <label>
+            <input type="radio" name="${q1.getName()}" value="open_access" ${ q1.isSelected('open_access') ? 'checked' : ''}>Open access
+        </label>
+    </div>
+    </div>
+</div>
+    <button class="btn btn-default" type="submit">Next</button>
 </form>
-${ util.include('footer') } 
+${ util.include('footer') }

@@ -1,5 +1,17 @@
 ${ util.include('header', [title:'Setup: ' + page.title]) }
-<h3>This panel offer advanced configuration options. Please do not change them unless you know what you are doing.</h3>
+<% def fieldFn = { q, label, valueControl -> %>
+<div class="form-group">
+    <label class="col-sm-4 control-label" for='${q.getName()}'><%= label %></label>
+    <div class="col-sm-8">
+        <% valueControl(q); %>
+    </div>
+</div>
+<% } %>
+<div class="panel panel-default">
+    <div class="panel-heading panel-xs">
+<h4>This panel offer advanced configuration options. Please do not change them unless you know what you are doing.</h4>
+    </div>
+</div>
 <script>
 	var checkACS = function() {
 		var acsRequired = false;
@@ -40,43 +52,58 @@ ${ util.include('header', [title:'Setup: ' + page.title]) }
 
             var error = sel > 1;
             list.forEach(function(cmpId) {
-                var el = document.getElementById('id-' + cmpId + '-error');
+                var el = document.getElementById('id-' + cmpId);
                 if (el) {
-                    el.style.display = error ? "inline" : "none";
+                    if (error) {
                     var listCopy = list.slice();
                     listCopy = listCopy.map(function(id) {
                         return document.getElementById('id-' + id);
                     });
                     listCopy = listCopy.filter(function(x) { return !!x; });
-                    listCopy = listCopy.map(function(x) { return x.previousElementSibling.innerHTML; });
-                    el.innerHTML = '<br/>Only one of components ' + listCopy.join(', ') + ' should be active at the same time!';
+                    listCopy = listCopy.map(function(x) { return x.parentElement.previousElementSibling.innerHTML; });
+                    el.nextElementSibling.innerHTML = 'Only one of components ' + listCopy.join(', ') + ' should be active at the same time!';
+                    } else {
+                    el.nextElementSibling.innerHTML = null;
+                    }
                 }
             });
         });
 
 	};
 </script>
-<form method='POST' action="?step=${ page.nextPage() }">
-<div style='padding-top: 1em'></div>
-<h3>Select optional components to run:</h3><% page.getOptionalComponents().each { %>
-<label for='${it.getName()}'>${it.getLabel()}</label>
-<input name='${it.getName()}' type='checkbox' id='id-${it.getBeanName()}' ${ it.isSelected(it.getBeanName()) ? 'checked' : '' } onclick='checkComponent();'/><span style="color: red; display: none;" id="id-${it.getBeanName()}-error"></span>
-<br/>
-<div style='padding-top: 1em'></div>
+<form class="form-horizontal" method='POST' action="?step=${ page.nextPage() }">
+    <div class="panel panel-default">
+        <div class="panel-heading panel-xs">
+            <h4>Select optional components to run:</h4>
+        </div>
+        <div class="panel-body">
+<% page.getOptionalComponents().each { %>
+    <% fieldFn(it, it.getLabel(), { q1 -> %>
+    <input class="form-control" name='${q1.getName()}' type='checkbox' id='id-${q1.getBeanName()}' ${ q1.isSelected(it.getBeanName()) ? 'checked' : '' } onclick='checkComponent();'/>
+    <span style='color: red; font-size:0.8em;'></span>
+    <% }); %>
 <% } %>
-<h3>Cluster configuration</h3><% def q = page.getQuestion('clusterMode') %>
-<label for='${q.getName()}'>Do you want your server to run in the cluster mode?</label>
-<input name='${q.getName()}' id="clusterMode" type='checkbox' ${ q.isSelected("true") ? 'checked' : '' } onclick='
-checkACS();
-'/>
-<br/>
-<div style='padding-top: 1em'></div><% q = page.getQuestion('acsComponent') %>
+        </div>
+    </div>
+    <form class="form-horizontal" method='POST' action="?step=${ page.nextPage() }">
+        <div class="panel panel-default">
+            <div class="panel-heading panel-xs">
+                <h4>Cluster configuration</h4>
+            </div>
+            <div class="panel-body">
+<% def q = page.getQuestion('clusterMode') %>
+    <% fieldFn(q, "Do you want your server to run in the cluster mode?", { q1 -> %>
+    <input class="form-control" name='${q1.getName()}' id="clusterMode" type='checkbox' ${ q1.isSelected("true") ? 'checked' : '' } onclick='checkACS();'/>
+    <% }); %>
 
-<label for='${q.getName()}'>Tigase Advanced Clustering Strategy (ACS) Component</label>
-<input name='${q.getName()}' id='acsComponent' type="checkbox" ${ q.isSelected("true") ? "" : "disabled"} ${ q.isSelected("true") ? 'checked' : '' } /><span id="acs-warn" style="color: red; display: none;"><br/>Warning: Tigase ACS is required for PubSub and MUC components to work and cannot be disabled!</span>
-	   
-<div style='padding-top: 1em'></div>
-<button type="submit">Next</button>
+    <% q = page.getQuestion('acsComponent') %>
+    <% fieldFn(q, "Tigase Advanced Clustering Strategy (ACS) Component", { q1 -> %>
+        <input name='${q1.getName()}' id='acsComponent' type="checkbox" ${ q1.isSelected("true") ? "" : "disabled"} ${ q1.isSelected("true") ? 'checked' : '' } /><span id="acs-warn" style="color: red; display: none;"><br/>Warning: Tigase ACS is required for PubSub and MUC components to work and cannot be disabled!</span>
+    <% }); %>
+            </div>
+        </div>
+    
+<button class="btn btn-default" type="submit">Next</button>
 
 </form>
 <script>

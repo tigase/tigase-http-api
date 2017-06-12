@@ -29,17 +29,29 @@
 	defPlugins = defPlugins.collectEntries { [it.key, it.label] };
 %>
 ${ util.include('header', [title:'Setup: ' + page.title]) }
-<h3>Please selecte/deselect plugins to be loaded by the server.</h3>
-<form method='POST' action="?step=${ page.nextPage() }">
-<% page.getPlugins().each { %>
-<label for='${it.getName()}'>${it.getLabel() ?: defPlugins[it.getBeanName()] ?: it.getBeanName()}</label>
-<input name='${it.getName()}' type='checkbox' ${ it.mayBeChanged() ? "" : "disabled" } ${ (it.mayBeEnabled() && it.isSelected(it.getBeanName())) ? "checked" : "" } /><% if (!it.mayBeEnabled()) { %><span style="color: red;">${it.getCause()}</span><% } %>
-<br/>
-<div style='padding-top: 1em'></div>
+<% def fieldFn = { q, label, valueControl -> %>
+<div class="form-group">
+	<label class="col-sm-6 control-label" for='${q.getName()}'><%= label %></label>
+	<div class="col-sm-6">
+		<% valueControl(q); %>
+	</div>
+</div>
 <% } %>
-	   
-<div style='padding-top: 1em'></div>
-<button type="submit">Next</button>
+<div class="panel panel-default">
+	<div class="panel-heading panel-xs">
+		<h4>Please select/deselect plugins to be loaded by the server.</h4>
+	</div>
+	<div class="panel-body">
+<form class="form-horizontal" method='POST' action="?step=${ page.nextPage() }">
+<% page.getPlugins().each { %>
+	<% fieldFn(it, it.getLabel() ?: defPlugins[it.getBeanName()] ?: it.getBeanName(), { q1 -> %>
+	<input class="form-control" name='${q1.getName()}' type='checkbox' ${ q1.mayBeChanged() ? "" : "disabled" } ${ (q1.mayBeEnabled() && q1.isSelected(q1.getBeanName())) ? "checked" : "" } /><% if (!q1.mayBeEnabled()) { %><span style="color: red;">${q1.getCause()}</span><% } %>
+	<% }); %>
+<% } %>
+	</div>
+</div>
+
+<button class="btn btn-default" type="submit">Next</button>
 
 </form>
 ${ util.include('footer') } 
