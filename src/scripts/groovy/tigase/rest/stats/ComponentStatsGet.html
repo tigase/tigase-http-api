@@ -63,24 +63,32 @@ ${ util.include('header', [title: result?.stats?.component + ' statistics',
 		}
    }
  %>
-<table>
-	<tr><td>
+<!--<table>-->
+	<!--<tr><td>-->
+<div class="row">
 		<canvas id="packetsRecvSent" width="180" height="400"></canvas>
 		<div id='packetsRecvSent-legend'></div>
-	</td>	
+	<!--</td>	-->
+</div>
 <% if (userConnections) { %>
-	<td><canvas id="userConnections" width="180" height="400"></canvas><div id='userConnections-legend'></div></td>
-	<td><canvas id="userSessions" width="180" height="400"></canvas><div id='userSessions-legend'></div></td>
-	<td colspan='3'><canvas id="processors" width="800" height="400"></canvas><div id='processors-legend'></div></td>
+<div class="row">
+	<div class="col-sm-2">
+		<canvas id="userConnections" width="180" height="400"></canvas><div id='userConnections-legend'></div>
+	</div>
+	<div class="col-sm-2">
+		<canvas id="userSessions" width="180" height="400"></canvas><div id='userSessions-legend'></div>
+	</div>
+	<div class="col-sm-8">
+		<canvas id="processors" width="800" height="400"></canvas><div id='processors-legend'></div>
+	</div>
+</div>
 <% } %>
-	</tr>
-	<tr><td colspan="6">
-		<canvas id="packetsPerInThread" width="1400" height="300"></canvas>	
-	</td></tr>
-	<tr><td colspan="6">
-		<canvas id="packetsPerOutThread" width="1400" height="300"></canvas>	
-	</td></tr>	
-</table>
+<div class="row">
+	<canvas id="packetsPerInThread" width="1300" height="300"></canvas>
+</div>
+<div class="row">
+	<canvas id="packetsPerOutThread" width="1300" height="300"></canvas>
+</div>
 
 <% 
 	def packetsRecvSent = [

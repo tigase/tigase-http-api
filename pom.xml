@@ -236,6 +236,7 @@
 				<targetPath>scripts</targetPath>
 				<includes>
 					<include>**/*.groovy</include>
+					<include>**/*.js</include>
 					<include>**/*.html</include>
 				</includes>
 			</resource>
@@ -249,6 +250,8 @@
 			<resource>
 				<directory>src/main/resources/</directory>
 				<includes>
+					<include>**/*.css</include>
+					<include>**/*.js</include>
 					<include>**/*.html</include>
 				</includes>
 			</resource>

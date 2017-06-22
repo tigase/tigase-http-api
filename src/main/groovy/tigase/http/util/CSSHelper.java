@@ -54,9 +54,9 @@ public class CSSHelper {
 						sb.append(line);
 						sb.append("\n");
 					}
+					return sb.toString();
 				}
 			}
 		}
-		return null;
 	}
 }

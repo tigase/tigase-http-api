@@ -70,7 +70,11 @@ ${ util.include('header', [title: tigase.util.DNSResolverFactory.getInstance().g
 		<td style="margin:0px;vertical-align:top; background-color: lightgray; padding: 8px;">
 			<h3>Components:</h3>
 			<ul style='padding: 0px;width: 150px;'><% compNames.each { %>
-				<li style='padding:0px; margin: 0px; display:block;'><a style="display:block;" href='${it}'>${it}</a></li>
+				<% def keyParam = '';
+				if (request.getParameter("api-key") != null) {
+					keyParam = '?api-key=' + request.getParameter("api-key");
+				} %>
+				<li style='padding:0px; margin: 0px; display:block;'><a style="display:block;" href='${it}${keyParam}'>${it}</a></li>
 			<% } %></ul>
 		</td>
 		<td>

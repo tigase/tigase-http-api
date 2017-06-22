@@ -27,6 +27,7 @@ import groovy.text.Template;
 import tigase.http.DeploymentInfo;
 import tigase.http.HttpMessageReceiver;
 import tigase.http.ServletInfo;
+import tigase.http.util.CSSHelper;
 import tigase.kernel.beans.Bean;
 import tigase.kernel.beans.selector.ConfigType;
 import tigase.kernel.beans.selector.ConfigTypeEnum;
@@ -39,6 +40,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 /**
  * Created by andrzej on 28.05.2016.
@@ -159,6 +161,18 @@ public class IndexModule extends AbstractModule {
 
 			Map model = new HashMap();
 			model.put("deployments", deploymentInfoList);
+			Map<String, Object> util = new HashMap<>();
+			Function<String, String> tmp = (path) -> {
+				String content = null;
+				try {
+					content = CSSHelper.getCssFileContent(path);
+				} catch (Exception ex) {}
+				if (content == null)
+					return "";
+				return "<style>" + content + "</style>";
+			};
+			util.put("inlineCss", tmp);
+			model.put("util", util);
 			Writable w = template.make(model);
 			w.writeTo(out);
 

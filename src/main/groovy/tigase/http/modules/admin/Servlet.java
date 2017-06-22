@@ -27,6 +27,7 @@ import groovy.text.Template;
 import org.codehaus.groovy.control.CompilationFailedException;
 import tigase.http.ServiceImpl;
 import tigase.http.api.Service;
+import tigase.http.util.CSSHelper;
 import tigase.server.Command;
 import tigase.server.Packet;
 import tigase.util.TigaseStringprepException;
@@ -44,12 +45,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -63,7 +67,10 @@ public class Servlet extends HttpServlet {
 	
 	public static final String MODULE_ID_KEY = "module-id-key";
 	public static final String SCRIPTS_DIR_KEY = "scripts-dir";
-	
+
+	private final GStringTemplateEngine templateEngine = new GStringTemplateEngine();
+
+	private Template template = null;
 	private Service service = null;
 	private File scriptsDir = null;
 	
@@ -180,15 +187,25 @@ public class Servlet extends HttpServlet {
 	}
 	
 	private void generateResult(final AsyncContext asyncCtx, final Map model) throws IOException, CompilationFailedException, ClassNotFoundException {
-		GStringTemplateEngine templateEngine = new GStringTemplateEngine();
-		File file = new File(scriptsDir, "template.html");
-		Template template = templateEngine.createTemplate(file);
 		Map context = new HashMap();
-		context.put("imports", new ArrayList());
 		context.put("model", model);
 		context.put("request", asyncCtx.getRequest());
 		context.put("response", asyncCtx.getResponse());
-				
+
+		Map<String, Object> util = new HashMap<>();
+		Function<String, String> tmp = (path) -> {
+			String content = null;
+			try {
+				content = CSSHelper.getCssFileContent(path);
+			} catch (Exception ex) {}
+			if (content == null)
+				return "";
+			return "<style>" + content + "</style>";
+		};
+		util.put("inlineCss", tmp);
+		context.put("util", util);
+
+		loadTemplate();
 		Writable result = template.make(context);
 		result.writeTo(asyncCtx.getResponse().getWriter());
 		asyncCtx.complete();
@@ -417,6 +434,17 @@ public class Servlet extends HttpServlet {
 					break;
 			}
 		});
+	}
+
+	private void loadTemplate() throws IOException, ClassNotFoundException {
+		String path = "tigase/admin/index.html";
+		File indexFile = new File(path);
+		if (indexFile.exists()) {
+			template = templateEngine.createTemplate(indexFile);
+		} else {
+			InputStream is = getClass().getResourceAsStream("/" + path);
+			template = templateEngine.createTemplate(new InputStreamReader(is));
+		}
 	}
 	
 	private interface Callback<T> { 

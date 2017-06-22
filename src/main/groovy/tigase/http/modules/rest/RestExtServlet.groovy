@@ -22,6 +22,7 @@
 package tigase.http.modules.rest
 
 import tigase.http.rest.Handler
+import tigase.http.util.CSSHelper
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -149,6 +150,11 @@ class RestExtServlet extends RestServlet {
 				return temp.make(map);
 			}, getFile: { name ->
 				return new File(scriptsDir, name);
+			}, inlineCss: { String path ->
+				String content = CSSHelper.getCssFileContent(path);
+				if (content == null)
+					return "";
+				return "<style>" + content + "</style>";
 			}
 		];
 		templateParams = [request:request, response:response, result:result, util:util];

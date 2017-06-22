@@ -1,4 +1,6 @@
 package tigase.rest.users
+
+import tigase.http.rest.Service
 /*
  * Tigase HTTP API
  * Copyright (C) 2004-2013 "Tigase, Inc." <office@tigase.com>
@@ -20,9 +22,6 @@ package tigase.rest.users
  * Last modified by $Author$
  * $Date$
  */
-import tigase.http.rest.Service
-import tigase.xmpp.BareJID
-
 /**
  * Class implements ability to retrieve by service administrator list of registered accounts for domain
  * Handles requests for /rest/users/domain where domain is name of domain for which we want to retrieve list of users
@@ -49,7 +48,7 @@ Example response will look like this:
             def repo = service.getUserRepository().getRepo(domain);
             if (!repo) callback(null);
             def users = repo.getUsers().findAll { it.getDomain() == domain };
-            callback([users:[items:users, count:users.size()]]);
+            callback([users:[items:users, count:users.size(), domain: domain]]);
         }
     }
 

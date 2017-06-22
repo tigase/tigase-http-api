@@ -1,14 +1,30 @@
 ${ util.include('header', [title:'User details']) }
-<table style="margin: auto;">
-<tr>
-<td>
-<img style="max-height: 100px; max-width: 100px;" src="${util.link("/avatar/" + result?.user?.jid)}" />
-</td>
-<td>
-<b>User:   </b>${result?.user?.jid}<br/>
-<b>Domain: </b>${result?.user?.domain}<br/>
-<b>UID:    <b/>${result?.user?.uid}<br/>
-</td>
-</tr>
-</table>
+<div class="col-sm-6" style="float: none; margin: 0 auto;">
+    <div class="panel panel-default">
+        <div class="panel-heading panel-xs">
+            <h4>User details: ${result?.user?.jid}</h4>
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-sm-4">
+                    <img style="max-height: 100px; max-width: 100px;" src="${util.link("/avatar/" + result?.user?.jid)}" />
+                </div>
+                <div class="col-sm-8">
+                    <div class="row">
+                        <div class="col-sm-3"><h5>User</h5></div>
+                        <div class="col-sm-9"><h5>${result?.user?.jid}</h5></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-3"><h5>Domain</h5></div>
+                        <div class="col-sm-9"><h5>${result?.user?.domain}</h5></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-3"><h5>UID</h5></div>
+                        <div class="col-sm-9"><h5>${result?.user?.uid}</h5></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 ${ util.include('footer') }

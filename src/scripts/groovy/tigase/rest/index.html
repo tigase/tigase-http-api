@@ -15,7 +15,8 @@ var toggleVisibility = function(id, group) {
 	el.style.display = 'inline-block';
 }
 </script>
-<div style="width: 80%; clear: both; margin: 0.5em 10%;">
+<div class="panel">
+	<div class="panel-body">
 This is a list of currently available and installed features of REST API.<br/>
 To see details of each request, click on this item and it will expand showing description of usage.<br/>
 <br/>
@@ -24,6 +25,7 @@ However by different format may be used. Currently Tigase XMPP Server supports J
 To use JSON format you need to pass <em>application/json</em> as <em>type</em> url paramter of HTTP request or by passing same value as value of <em>Content-Type</em> HTTP request header.<br/>
 To ensure use of XML format you need to pass <em>application/xml</em> as <em>type</em> url paramter of HTTP request or by passing same value as value of <em>Content-Type</em> HTTP request header.<br/>
 <br/><u><strong>Note:</strong></u> If no <em>type</em> attribute is passed and <em>Content-Type</em> is set to <em>text/html</em> then response may not be sent in form of JSON or XML but in user readable form of HTML web page.<br/>
+</div>
 </div>
 <div>
 <% 
@@ -36,7 +38,7 @@ def colors = [
 def servlets = [];
 servlets.addAll(result.service.module.restServlets);
 servlets = servlets.findAll { it.handlers.values().find { !it.isEmpty() } }
-servlets.sort { it.getServletContext()?.getContextPath() } 
+servlets.sort { it.getServletContext()?.getContextPath() }.unique { servlet -> servlet.getServletContext()?.getContextPath() }
 servlets.each { 
 	def prefix = request.getContextPath() + it.getInitParameter("mapping").replace("/*","");
 	def handlers = [];

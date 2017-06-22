@@ -1,11 +1,23 @@
 ${ util.include('header', [title:'Account confirmation']) }
-<table style="margin: auto;">
+<div class="col-sm-6" style="float: none; margin: 0 auto;">
 <% if (result.account) { %>
-<tr><td><h2>Account confirmation successful.</h2></td></tr>
-<tr><td><h3>Your new account ${result?.account?.jid} is now active!</h3></td></tr>
+        <div class="panel panel-success">
+            <div class="panel-heading panel-xs">
+                <h4>Account confirmation successful.</h4>
+            </div>
+            <div class="panel-body">
+                <h4>Your new account ${result?.account?.jid} is now active!</h4>
+            </div>
+        </div>
 <% } else { %>
-<tr><td><h2>Account confirmation failure.</h2></td></tr>
-<tr><td><h3>Error: ${result?.error?.message}</h3></td></tr>
+    <div class="panel panel-danger">
+        <div class="panel-heading panel-xs">
+            <h4>Account confirmation failure.</h4>
+        </div>
+        <div class="panel-body">
+            <h4>Error: ${result?.error?.message}</h4>
+        </div>
+    </div>
 <% } %>
-</table>
+</div>
 ${ util.include('footer') }
