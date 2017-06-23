@@ -120,6 +120,7 @@ public class ApiKeyRepository extends UserRepoRepository<ApiKeyItem> {
 	}
 
 	@Override
+	@Deprecated
 	public void initRepository(String resource_uri, Map<String, String> params) throws DBInitException {
 		// Nothing to do
 	}

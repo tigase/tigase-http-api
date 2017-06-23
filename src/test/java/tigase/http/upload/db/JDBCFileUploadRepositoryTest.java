@@ -26,6 +26,7 @@ import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.MethodSorters;
 import org.junit.runners.model.Statement;
+import tigase.component.exceptions.RepositoryException;
 import tigase.db.*;
 import tigase.db.util.SchemaLoader;
 import tigase.xmpp.JID;
@@ -111,7 +112,7 @@ public class JDBCFileUploadRepositoryTest {
 	}
 
 	@Before
-	public void setup() throws DBInitException, InstantiationException, IllegalAccessException, SQLException, ClassNotFoundException {
+	public void setup() throws RepositoryException, InstantiationException, IllegalAccessException, SQLException, ClassNotFoundException {
 		if (uri == null)
 			return;
 
