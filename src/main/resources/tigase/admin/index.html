@@ -86,7 +86,7 @@
 										<div class="col-sm-offset-3 col-sm-9">
 											<div class="checkbox">
 												<label>
-													<input type="checkbox" name='${formField.getAttribute("var")}'><%= formField.getAttribute('label') ?: formField.getAttribute("var") %></input>
+													<input type="checkbox" name='${formField.getAttribute("var")}' ${(formField.getChildCData('field/value') == 'true' || formField.getChildCData('field/value') == '1') ? 'checked' : ''}><%= formField.getAttribute('label') ?: formField.getAttribute("var") %></input>
 												</label>
 											</div>
 										</div>
