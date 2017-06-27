@@ -27,6 +27,7 @@ import tigase.server.xmppsession.SessionManager;
 import tigase.util.setup.BeanDefinition;
 import tigase.util.setup.SetupHelper;
 import tigase.util.ui.console.CommandlineParameter;
+import tigase.xmpp.BareJID;
 import tigase.xmpp.XMPPImplIfc;
 
 import java.io.IOException;
@@ -248,12 +249,15 @@ public class Setup {
 
 	private class AdminsQuestion extends SingleAnswerQuestion {
 		AdminsQuestion(String id, Config config) {
-			super(id, ()-> Arrays.stream(config.admins).collect(
+			super(id, ()-> Arrays.stream(config.admins).map(jid -> jid.toString()).collect(
 					Collectors.joining(",")), admins -> {
-				if (admins != null) {
-					config.admins = admins.split(",");
+				if (admins != null && !admins.trim().isEmpty()) {
+					config.admins = Stream.of(admins.split(","))
+							.map(str -> str.trim())
+							.map(str -> BareJID.bareJIDInstanceNS(str))
+							.toArray(BareJID[]::new);
 				} else {
-					config.admins = new String[0];
+					config.admins = new BareJID[0];
 				}
 			});
 		}
@@ -494,6 +498,9 @@ public class Setup {
 				SchemaManager schemaManager = new SchemaManager();
 				schemaManager.setConfig(configStr);
 				schemaManager.setDbRootCredentials(config.dbProperties.getProperty("rootUser"), config.dbProperties.getProperty("rootPass"));
+				if (config.admins != null) {
+					schemaManager.setAdmins(Arrays.asList(config.admins), config.adminPwd);
+				}
 
 				return schemaManager.loadSchemas();
 			} catch (IOException e) {
