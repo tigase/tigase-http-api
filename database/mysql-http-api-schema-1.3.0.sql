@@ -24,7 +24,7 @@ create table if not exists tig_hfu_slots (
         filename varchar(255) not null,
         filesize bigint not null,
         content_type varchar(128),
-        ts timestamp,
+        ts timestamp(6),
         status smallint,
 
         primary key (slot_id)
@@ -89,7 +89,7 @@ call TigAddIndexIfNotExists('tig_hfu_slots', 'tig_hfu_slots_domain_ts_index', 0,
 
 
 -- QUERY START:
-drop function if exists Tig_HFU_AllocateSlot;
+drop procedure  if exists Tig_HFU_AllocateSlot;
 -- QUERY END:
 
 -- QUERY START:
@@ -112,12 +112,12 @@ delimiter //
 
 -- looks like usage of _filename is restriced on MySQL
 -- QUERY START:
-create function Tig_HFU_AllocateSlot(_slotId varchar(60) CHARSET utf8, _uploader varchar(2049) CHARSET utf8, _domain varchar(1024) CHARSET utf8, _res varchar(1024) CHARSET utf8, _filename1 varchar(255) CHARSET utf8, _filesize bigint, _contentType varchar(128) CHARSET utf8) returns varchar(60) CHARSET utf8
+create procedure  Tig_HFU_AllocateSlot(_slotId varchar(60) CHARSET utf8, _uploader varchar(2049) CHARSET utf8, _domain varchar(1024) CHARSET utf8, _res varchar(1024) CHARSET utf8, _filename1 varchar(255) CHARSET utf8, _filesize bigint, _contentType varchar(128) CHARSET utf8)
 begin
     insert into tig_hfu_slots( slot_id, uploader, domain, res, filename, filesize, content_type, ts, status )
-        values (_slotId, _uploader, _domain, _res, _filename1, _filesize, _contentType, now(), 0);
+        values (_slotId, _uploader, _domain, _res, _filename1, _filesize, _contentType, now(6), 0);
 
-    return _slotId;
+    select _slotId as slotId;
 end //
 -- QUERY END:
 
@@ -140,7 +140,7 @@ end //
 -- QUERY END:
 
 -- QUERY START:
-create procedure Tig_HFU_ListExpiredSlots(_domain varchar(1024) CHARSET utf8, _ts timestamp, _limit int)
+create procedure Tig_HFU_ListExpiredSlots(_domain varchar(1024) CHARSET utf8, _ts timestamp(6), _limit int)
 begin
     select uploader, slot_id, filename, filesize, content_type, ts
         from tig_hfu_slots
@@ -151,7 +151,7 @@ end //
 -- QUERY END:
 
 -- QUERY START:
-create procedure Tig_HFU_RemoveExpiredSlots(_domain varchar(1024) CHARSET utf8, _ts timestamp, _limit int)
+create procedure Tig_HFU_RemoveExpiredSlots(_domain varchar(1024) CHARSET utf8, _ts timestamp(6), _limit int)
 begin
     drop temporary table if exists tig_hfu_expired_slots_temp;
     create temporary table tig_hfu_expired_slots_temp

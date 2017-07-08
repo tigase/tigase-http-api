@@ -34,7 +34,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -166,7 +166,7 @@ public class JDBCFileUploadRepository implements FileUploadRepository<DataReposi
 						String filename = rs.getString(3);
 						long filesize = rs.getLong(4);
 						String contentType = rs.getString(5);
-						Date ts = rs.getTimestamp(6);
+						Date ts = repo.getTimestamp(rs, 6);
 
 						return new Slot(jid, slotId, filename, filesize, contentType, ts);
 					}
@@ -189,7 +189,7 @@ public class JDBCFileUploadRepository implements FileUploadRepository<DataReposi
 			synchronized (stmt) {
 				try {
 					stmt.setString(1, domain.getDomain());
-					stmt.setTimestamp(2, new Timestamp(before.toEpochSecond(ZoneOffset.UTC) * 1000));
+					repo.setTimestamp(stmt, 2, new Timestamp(before.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
 					stmt.setInt(3, limit);
 
 					rs = stmt.executeQuery();
@@ -218,7 +218,7 @@ public class JDBCFileUploadRepository implements FileUploadRepository<DataReposi
 			synchronized (stmt) {
 				try {
 					stmt.setString(1, domain.getDomain());
-					stmt.setTimestamp(2, new Timestamp(before.toEpochSecond(ZoneOffset.UTC) * 1000));
+					repo.setTimestamp(stmt,2, new Timestamp(before.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
 					stmt.setInt(3, limit);
 
 					stmt.execute();

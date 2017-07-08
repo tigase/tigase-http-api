@@ -73,7 +73,7 @@ CREATE PROCEDURE [dbo].[Tig_HFU_AllocateSlot]
 AS
 BEGIN
     INSERT INTO tig_hfu_slots( slot_id, uploader, domain, res, filename, filesize, content_type, ts, status )
-        VALUES (@_slotId, @_uploader, @_domain, @_res, @_filename, @_filesize, @_contentType, GETDATE(), 0);
+        VALUES (@_slotId, @_uploader, @_domain, @_res, @_filename, @_filesize, @_contentType, GETUTCDATE(), 0);
 
     SELECT @_slotId as slot_id;
 END

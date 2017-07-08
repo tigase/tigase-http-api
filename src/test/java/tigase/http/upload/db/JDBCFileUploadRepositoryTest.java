@@ -154,14 +154,14 @@ public class JDBCFileUploadRepositoryTest {
 
 	@Test
 	public void test_4_listExpiredSlots() throws TigaseDBException {
-		List<FileUploadRepository.Slot> slots = repo.listExpiredSlots(uploader.getBareJID(), testStart, 10);
+		List<FileUploadRepository.Slot> slots = repo.listExpiredSlots(uploader.getBareJID(), LocalDateTime.now(), 10);
 		assertEquals(1, slots.size());
 	}
 
 	@Test
 	public void test_5_removeExpiredSlots() throws TigaseDBException {
-		repo.removeExpiredSlots(uploader.getBareJID(), testStart, 10);
-		List<FileUploadRepository.Slot> slots = repo.listExpiredSlots(uploader.getBareJID(), testStart, 10);
+		repo.removeExpiredSlots(uploader.getBareJID(), LocalDateTime.now(), 10);
+		List<FileUploadRepository.Slot> slots = repo.listExpiredSlots(uploader.getBareJID(), LocalDateTime.now(), 10);
 		assertEquals(0, slots.size());
 	}
 }

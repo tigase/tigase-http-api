@@ -24,11 +24,16 @@ create table if not exists tig_hfu_slots (
         filename varchar(255) not null,
         filesize bigint not null,
         content_type varchar(128),
-        ts timestamp,
+        ts timestamp with time zone,
         status smallint,
 
         primary key (slot_id)
 );
+-- QUERY END:
+
+-- QUERY START:
+alter table tig_hfu_slots
+    alter column ts type timestamp with time zone;
 -- QUERY END:
 
 -- QUERY START:
@@ -62,16 +67,27 @@ end;
 $$ LANGUAGE 'plpgsql';
 -- QUERY END:
 
+-- QUERY START:
 create or replace function Tig_HFU_UpdateSlot(_slotId varchar(60))
 returns void as $$
     update tig_hfu_slots
         set status = 1
         where slot_id = _slotId;
 $$ LANGUAGE 'sql';
+-- QUERY END:
+
+-- QUERY START:
+do $$
+begin
+if exists( select 1 from pg_proc where proname = lower('Tig_HFU_GetSlot') and pg_get_function_result(oid) = 'TABLE(uploader character varying, slot_id character varying, filename character varying, filesize bigint, content_type character varying, ts timestamp without time zone)') then
+    drop function Tig_HFU_GetSlot(character varying);
+end if;
+end$$;
+-- QUERY END:
 
 -- QUERY START:
 create or replace function Tig_HFU_GetSlot(_slotId varchar(60))
-returns table( uploader varchar(2049), slot_id varchar(60), filename varchar(255), filesize bigint, content_type varchar(128), ts timestamp ) as $$
+returns table( uploader varchar(2049), slot_id varchar(60), filename varchar(255), filesize bigint, content_type varchar(128), ts timestamp with time zone ) as $$
     select uploader, slot_id, filename, filesize, content_type, ts
         from tig_hfu_slots
         where slot_id = _slotId;
@@ -79,8 +95,17 @@ $$ LANGUAGE 'sql';
 -- QUERY END:
 
 -- QUERY START:
-create or replace function Tig_HFU_ListExpiredSlots(_domain varchar(1024), _ts timestamp, _limit int)
-returns table( uploader varchar(2049), slot_id varchar(60), filename varchar(255), filesize bigint, content_type varchar(128), ts timestamp ) as $$
+do $$
+begin
+if exists( select 1 from pg_proc where proname = lower('Tig_HFU_ListExpiredSlots') and pg_get_function_result(oid) = 'TABLE(uploader character varying, slot_id character varying, filename character varying, filesize bigint, content_type character varying, ts timestamp without time zone)') then
+    drop function Tig_HFU_ListExpiredSlots(character varying, timestamp without time zone, integer);
+end if;
+end$$;
+-- QUERY END:
+
+-- QUERY START:
+create or replace function Tig_HFU_ListExpiredSlots(_domain varchar(1024), _ts timestamp with time zone, _limit int)
+returns table( uploader varchar(2049), slot_id varchar(60), filename varchar(255), filesize bigint, content_type varchar(128), ts timestamp with time zone) as $$
     select uploader, slot_id, filename, filesize, content_type, ts
         from tig_hfu_slots
         where domain = _domain
@@ -90,7 +115,16 @@ $$ LANGUAGE 'sql';
 -- QUERY END:
 
 -- QUERY START:
-create or replace function Tig_HFU_RemoveExpiredSlots(_domain varchar(1024), _ts timestamp, _limit int)
+do $$
+begin
+if exists( select 1 from pg_proc where proname = lower('Tig_HFU_RemoveExpiredSlots') and pg_get_function_arguments(oid) = '_domain character varying, _ts timestamp without time zone, _limit integer') then
+    drop function Tig_HFU_RemoveExpiredSlots(character varying, timestamp without time zone, integer);
+end if;
+end$$;
+-- QUERY END:
+
+-- QUERY START:
+create or replace function Tig_HFU_RemoveExpiredSlots(_domain varchar(1024), _ts timestamp with time zone, _limit int)
 returns void as $$
 begin
     drop table if exists tig_hfu_expired_slots_temp;
