@@ -20,6 +20,7 @@
 package tigase.http.modules.setup;
 
 import tigase.conf.ConfigBuilder;
+import tigase.conf.ConfigHolder;
 import tigase.conf.ConfigWriter;
 import tigase.db.util.SchemaLoader;
 import tigase.kernel.beans.config.AbstractBeanConfigurator;
@@ -179,9 +180,9 @@ public class Config {
 
 	public void saveConfig() throws IOException {
 		Map<String, Object> props = getConfigurationInMap();
-		File f = new File("etc/init.properties");
+		File f = new File(ConfigHolder.TDSL_CONFIG_FILE_DEF);
 		if (f.exists()) {
-			File bf = new File("etc/init.properties");
+			File bf = new File(ConfigHolder.TDSL_CONFIG_FILE_DEF);
 			if (!bf.exists()) {
 				bf.createNewFile();
 			}

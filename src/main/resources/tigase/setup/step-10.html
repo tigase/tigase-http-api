@@ -10,7 +10,7 @@ ${ util.include('header', [title:'Setup: ' + page.title]) }
             <label class="control-label" for='config'>Configuration created during installation:</label>
             <textarea class="form-control" name='config' rows=20 cols=80>${ setup.config.getConfigurationInDSL() }</textarea>
         </div>
-        <h4>Do you wish to save this config to <i>etc/init.properties</i> file?</h4>
+        <h4>Do you wish to save this config to <i>etc/config.tdsl</i> file?</h4>
     </div>
 </div>
 <button class="btn btn-default" type="submit">Save</button>

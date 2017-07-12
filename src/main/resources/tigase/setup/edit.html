@@ -3,8 +3,8 @@ def saved = request.getParameter("config");
 def error = null;
 if (saved) {
     try {
-        def initFile = new File("etc/init.properties");
-        initFile.renameTo(new File("etc/init.properties.bak"));
+        def initFile = new File("etc/config.tdsl");
+        initFile.renameTo(new File("etc/config.tdsl.bak"));
         initFile.setText(saved);
         title = "Configuration updated";
     } catch (Throwable ex) {
@@ -36,9 +36,9 @@ ${ util.include('header', [title:'Setup: ' + title]) }
             </div>
             <div class="panel-body">
 <textarea class="form-control" name='config' rows=40 cols=140 style="width: 100%">
-<%= saved ?: new File("etc/init.properties").getText() %>
+<%= saved ?: new File("etc/config.tdsl").getText() %>
 </textarea>
-                <h4>Do you wish to save this configuration to <i>etc/init.properties</i> file?</h4>
+                <h4>Do you wish to save this configuration to <i>etc/config.tdsl</i> file?</h4>
             </div>
         </div>
         <button class="btn btn-default" type="submit" style="margin-top: 1em; margin-left: 100px;">Save</button>
@@ -50,7 +50,7 @@ ${ util.include('header', [title:'Setup: ' + title]) }
         <h4>Configuration file was successfully updated with new configuration.</h4>
     </div>
     <div class="panel-body">
-        <h4>File with old configuration was backed up as <i>init.properties.bak</i>.<br/><br/>Please restart server to apply new configuration.</h4>
+        <h4>File with old configuration was backed up as <i>config.tdsl.bak</i>.<br/><br/>Please restart server to apply new configuration.</h4>
     </div>
 </div>
 <% } %>
