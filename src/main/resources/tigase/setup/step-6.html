@@ -7,7 +7,7 @@ ${ util.include('header', [title:'Setup: ' + page.title]) }
 <form method='POST' action="?step=${ page.nextPage() }">
 <% page.getQuestions().each { q -> %>
     <div class="form-group">
-        <% if (q.getName().endsWith("useSSL")) { %>
+        <% if (q.getName().endsWith("useSSL") || q.getName().endsWith("useLegacyDatetimeCode")) { %>
         <label class="col-sm-6 control-label" style="margin-left: -15px; padding-top: 7px;" for='${q.getName()}'><%= q.getLabel() %></label>
         <div class="col-sm-6">
             <input class="form-control" type='checkbox' size='30' name='${q.getName()}' <% if (q.isSelected("true")) { %>checked<% } %> />
