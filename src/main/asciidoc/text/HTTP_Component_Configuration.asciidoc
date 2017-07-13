@@ -1,0 +1,204 @@
+= Tigase HTTP API
+:author: Daniel Wisnewski & Andrzej Wójcik
+:version: v2.0 July 2016. Reformatted for v7.2.0.
+:date: 2015-23-08 10:13
+
+:toc:
+:numbered:
+:website: http://www.tigase.org
+
+Welcome to the Tigase HTTP API users guide.  The HTTP API allows you to manage, configure, chat, and send commands to Tigase server using a simple, easy-to-use interface right from your browser!
+We will guide you through setup, running, and going through some features of the HTTP API.
+
+== Setup & Configuration
+Tigase will by default start with the http servlet active and running.
+Tigase will try to start a standalone Jetty HTTP server at port 8080 and start up the default modules, including `RestModule` which will add context for REST API in the /rest path.
+`RestModule` will also load all groovy scripts located in `scripts/rest/&#42;` directories and will bind them to proper actions for the `/rest/&#42;` paths.
+
+*NOTE:* Scripts that handle HTTP requests are available in the component repository in `src/scriopts/groovy/tigase/rest/` directory.
+
+[[httpCompProp]]
+=== Component Properties
+Here are some additional properties for the `HttpMessageReceiver` component that can be set in the config.tdsl file.
+
+==== Ports
+Sets a comma separated list of ports on which the HTTP server will listen for connections. Default is 8080.  This configurations sets ports 8080, 9050, and 2011.
+[source,dsl]
+-----
+httpServer {
+    connections {
+        2011 {
+            active = true
+        }
+        8080 {
+            active = true
+        }
+        9050 {
+            active = true
+        }
+    }
+}
+-----
+
+==== ssl socket port
+Sets the port for SSL connections, this configuration sets port 2222 as the SSL socket port.
+[source,dsl]
+-----
+http (class: tigase.http.HttpMessageReceiver) {
+    2222 {
+        socket = 'ssl'
+    }
+}
+-----
+
+==== http domain
+This sets the domain name of the SSL certificate from Tigase XMPP certificate store, also sets the port to 2222 to listen for HTTPS connections.
+[source,dsl]
+-----
+http (class: tigase.http.HttpMessageReceiver) {
+    2222 {
+        domain = 'example.com'
+    }
+}
+-----
+
+==== server class
+Sets the name of the class used to manage the HTTP server.
+[source,dsl]
+-----
+http (class: tigase.http.HttpMessageReceiver) {
+    'server-class' = '?'
+}
+-----
+Currently there are the following options:
+
+- `tigase.http.jetty.JettyStandaloneHttpServer` - Starts standalone Jetty HTTP Server instance *(requires Tigase HTTP API - Jetty HTTP Server)* +
+- `tigase.http.jetty.JettyOSGIHttpServer` - Uses Jetty HTTP Server instance available as OSGi service (may be used only in OSGi envoirment) *(require Tigase HTTP API - Jetty HTTP Server)* +
+- `tigase.http.java.JavaStandaloneHttpServer` - Uses `HttpServer` provided by Java JDK to start standalone HTTP server (may not work on JDK from every JDK provider). +
+
+==== threads
+Sets the number of threads available for HTTP component. Default is 4.
+[source,dsl]
+-----
+httpServer {
+    threads = '12'
+}
+-----
+
+==== request-timeout
+Sets the timeout time in ms for threads to close on inactive connections. Default is 60 seconds.
+[source,dsl]
+-----
+httpServer {
+    'request-timeout' = '60'
+}
+-----
+
+=== Modules
+Tigase's REST Component comes with two modules that can be enabled, disabled, and configured separately.
+Common settings for modules for component properties are used in the following format: `component_name (module: value) {}`
+the following settings are available for both listed modules:
+
+- `active` - Boolean values true/false to enable or disable the module.
+- `context-path` - Path of HTTP context under which the module should be available.
+- `vhosts` - Comma separated list of virtual hosts for which the module should be available. If not configured, the module will be available for all vhosts.
+
+[[restModuleConfig]]]
+==== Rest Module
+This is the Module that provides support for the REST API.
+Available properties:
+
+- `rest-scripts-dir` - Provides ability to specify path to scripts processing REST requests if you do not wish to use default (scripts/rest).
+- `api-keys` - Comma separated list of strings which would be possible to use as keys to pass `api-key` parameter to request authorization for request execution. If nothing is passed, then no request will be allowed. To allow any request, this property needs to be set using the following:
+
+This setting is used to provide API-keys that will provide access to the REST module. By default all access to REST module is blocked and nobody can access REST interface.
+
+To allow access for specific clients you should create a list of API keys here and add one of the API keys listed here as the `api-key` HTTP request parameter sent to server. You can also allow anyone to access REST API by setting this to `open_access`, however this may leave your server vulnerable.
+
+While configuring the API key, it is possible to set specific api keys for specific domains or vhosts.  These API keys will only be valid for the specified vhost and the path that matches the configured value.  For example:
+
+.Example of API keys
+[source,properties]
+----
+api-keys = [
+    'test1',
+    'test2:domain=api.example.com;rest.example.com:regex=/rest/*',
+    'open_access:regex=/rest/test/.*'
+]
+----
+does the following:
+
+. sets API key `test1` which will be valid for any vhost and for any request.
+. sets API key `test2` which will be valid only for requests to vhost `api.example.com` or `rest.example.com` and with a path matching the regular expression `/rest/*`
+. sets open to everyone access to any domain/vhost with a request path matching the regular expression `/rest/test/.*`
+
+Requests made to the HTTP service must conclude with one of the listed keys: `http://localhost:8080/rest/adhoc/sess-man@domain.com?api-key=test1`
+
+===== Example
+Configure API keys for the REST module:
+
+[source,java]
+----
+http {
+    rest {
+        api-keys = [
+            'test1',
+            'test2:domain=api.example.com;rest.example.com:regex=/rest/*',
+            'open_access:regex=/rest/test/.*'
+        ]
+    }
+}
+----
+
+
+=== DNS Web Service module
+For web based XMPP clients it is not possible to execute DNS SRV requests to find address of XMPP server hosting for particular domain.
+To solve this the DNS Web Service module was created.
+
+It handles incoming HTTP GET request and using passed `domain` and `callback` HTTP parameters executes DNS requests as specified in link:https://xmpp.org/extensions/xep-0156.html[XEP-0156: Discovering Alternative XMPP Connection Methods].
+Results are returned in JSON format for easy processing by web based XMPP client.
+
+By default it is deployed at `dns-webservice`
+
+==== Parameters
+domain:: Domain name to look for XMPP SRV client records.
+callback:: Due to security reasons web based client may not be able to access some DNS Web Service due to cross-domain AJAX requests. Passing optional `callback` parameter sets name of callback for JSONP requests and results proper response in JSONP format.
+
+==== Discover way to connect to XMPP server hosting `sure.im` domain.
+Sending HTTP GET request to `http://our-xmpp-server:8080/dns-webservice/?domain=sure.im&version=2` you will receive following response:
+
+[source,java]
+----
+{
+  domain: 'sure.im',
+  c2s: [
+    {
+      host: 'tigase.me',
+      ip: ['198.100.157.101','198.100.157.103','198.100.153.203'],
+      port: 5222,
+      priority: 5
+    }
+  ],
+  bosh: [
+    {url:'http://blue.sure.im:5280/bosh'},
+    {url:'http://green.sure.im:5280/bosh'},
+    {url:'http://orange.sure.im:5280/bosh'}
+  ],
+  websocket: [
+    {url:'ws://blue.sure.im:5290/'},
+    {url:'ws://green.sure.im:5290/'},
+    {url:'ws://orange.sure.im:5290/'}
+  ]
+}
+----
+
+As you can see in here we have names and IP address of XMPP servers hosting `sure.im` domain as well as list of URI for establishing connections using BOSH or WebSocket.
+
+This module is activated by default.  However, if you are operating in a test environment where you may not have SRV and A records setup to the domain you are using, you may want to disable this in your config.tdsl file with the following line:
+[source,dsl]
+----
+rest {
+    'dns-webservice' (active: false) {}
+}
+----
+

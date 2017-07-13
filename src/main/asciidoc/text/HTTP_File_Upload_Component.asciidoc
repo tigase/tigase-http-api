@@ -1,10 +1,9 @@
-
 [[XEP0363]]
 = HTTP File Upload component
 :author: Andrzej Wójcik
 :date: 2016-08-21 13:28
 
-Tigase's HTTP File Upload component is an implementation of http://xmpp.org/extensions/xep-0363.html:[XEP-0363: HTTP File Upload] specification.  This allows file transfer between XMPP clients by uploading a file to HTTP server and sending only link to download file to recipient.
+Tigase's HTTP File Upload component is an implementation of link:http://xmpp.org/extensions/xep-0363.html:[XEP-0363 HTTP File Upload] specification.  This allows file transfer between XMPP clients by uploading a file to HTTP server and sending only link to download file to recipient.
 
 This implementation makes use of the HTTP server used by Tigase XMPP Server and Tigase HTTP API component to provide web server for file upload and download.
 
