@@ -1,29 +1,34 @@
 [[httpApiAvailComp]]
-== Available modules
+= Available modules
 :author: Andrzej Wójcik
 :date: 2016-08-21 13:28
 
-=== Admin UI module
+:toc:
+:numbered:
+:website: http://www.tigase.org
+
+
+== Admin UI module
 This is very simple module for administration of Tigase XMPP Server using HTTP browser.
 It allows administrators to execute ad-hoc commands from HTTP browser allowing to change some configuration options at runtime.
 It can be accessed by pointing your browser to http://server.address:8080/admin/ and logging in with admin credentials.
 
-=== Index module
+== Index module
 This module is deployed at `/` by default and provides list of installed and available modules for the virtual host when requested.
 
-=== REST module
+== REST module
 This module provides REST-like API for accessing Tigase XMPP Server. It uses Groovy scripts to process HTTP requests and prepare responses.
 
-=== Server status module
+== Server status module
 WARNING: This module is still a work in progress!
 
 This module is designed to present current server status and report possible issues.
 
-=== Setup module
+== Setup module
 Module is created to act as a web based installer and configuration utility for Tigase XMPP Server.
 Allows you to modify basic Tigase XMPP Server settings, ie. related to database access.
 Changes may be saved to configuration file from this module.
 
-=== Web UI module
+== Web UI module
 This module contains full web client based on http://www.tigase.net/content/jaxmpp-library:[Tigase JaXMPP] client library allowing user to chat, manage contacts list (roster), browse message archive, etc.
 For more information on this module, consult the link:http://docs.tigase.org/tigase-server/snapshot/Administration_Guide/html/#_use_of_the_http_api[Administration Guide].

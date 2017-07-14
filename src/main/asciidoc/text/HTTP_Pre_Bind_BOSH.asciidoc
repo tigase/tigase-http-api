@@ -1,3 +1,4 @@
+[[boshPreBind]]
 = BOSH HTTP Pre-Binding
 :author: unknown
 :version: v1.0

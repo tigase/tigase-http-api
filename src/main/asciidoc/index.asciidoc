@@ -1,26 +1,18 @@
 = Tigase HTTP API
-Tigase Team <team@tigase.net>
+
+:author: Tigase Team <team@tigase.net>
 :toc:
 :numbered:
-:website: http://tigase.net
-:Date: 2016-08-21
 
 :leveloffset: 1
 
 Welcome to Tigase HTTP API component guide
 
 include::text/HTTP_API_Component.asciidoc[]
-
 include::text/HTTP_API_Component_modules.asciidoc[]
-
 include::text/HTTP_File_Upload_Component.asciidoc[]
-
 include::text/HTTP_Server.asciidoc[]
-
 include::text/HTTP_Pre_Bind_BOSH.asciidoc[]
-
 include::text/REST_API_Usage_Examples.asciidoc[]
-
 include::text/UI_Guide_Admin.asciidoc[]
-
 include::text/UI_Guide_Client.asciidoc[]

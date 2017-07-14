@@ -1,8 +1,8 @@
 [[RESTUseageExamples]]
 = REST API Usage Examples
-:author: Andrzej Wójcik
+:author: Andrzej Wojcik
 :date: 2017-03-03 10:22
-:version: v12.0 November 2016
+:version: v2.0 November 2016
 
 :toc:
 :numbered:

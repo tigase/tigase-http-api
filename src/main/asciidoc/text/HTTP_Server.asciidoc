@@ -3,6 +3,10 @@
 :author: Andrzej Wójcik
 :date: 2016-08-21 13:28
 
+:toc:
+:numbered:
+:website: http://www.tigase.org
+
 HTTP server instance is provided as `httpServer` by default.
 The server will only be active and enabled if either the HTTP API component or HTTP File Upload component is enabled.
 This project uses the default implementation of an http server provided by link:https://docs.oracle.com/javase/8/docs/jre/api/net/httpserver/spec/com/sun/net/httpserver/package-summary.html[HttpServer] found embedded in Java JDK.

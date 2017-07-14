@@ -3,6 +3,10 @@
 :author: Andrzej Wójcik
 :date: 2016-08-21 13:28
 
+:toc:
+:numbered:
+:website: http://www.tigase.org
+
 Tigase's HTTP API component uses the REST module and Groovy scripts responsible for handling and processing incoming HTTP.  The end result is Tigase's REST API.
 This API may be useful for various integration scenarios.
 
