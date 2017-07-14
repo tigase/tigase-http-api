@@ -5,6 +5,8 @@ Tigase Team <team@tigase.net>
 :website: http://tigase.net
 :Date: 2016-08-21
 
+:leveloffset: 1
+
 Welcome to Tigase HTTP API component guide
 
 include::text/HTTP_API_Component.asciidoc[]
