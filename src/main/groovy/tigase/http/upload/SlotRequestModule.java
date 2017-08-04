@@ -41,7 +41,7 @@ import tigase.xmpp.Authorization;
 @Bean(name = "slotRequestModule", parent = FileUploadComponent.class, active = true)
 public class SlotRequestModule implements Module {
 
-	private static final String XMLNS = "urn:xmpp:http:upload";
+	private static final String XMLNS = "urn:xmpp:http:upload:0";
 
 	private static final Criteria CRITERIA = ElementCriteria.name("iq").add(ElementCriteria.name("request", XMLNS));
 	private static final String[] FEATURES = { XMLNS };
@@ -71,9 +71,9 @@ public class SlotRequestModule implements Module {
 		try {
 			Element request = packet.getElement().getChild("request", XMLNS);
 
-			filename = XMLUtils.unescape(request.getChild("filename").getCData());
-			size = Long.parseLong(request.getChild("size").getCData());
-			contentType = request.getChild("content-type").getCData();
+			filename = XMLUtils.unescape(request.getAttributeStaticStr("filename"));
+			size = Long.parseLong(request.getAttributeStaticStr("size"));
+			contentType = request.getAttributeStaticStr("content-type");
 		} catch (NullPointerException ex) {
 			throw new ComponentException(Authorization.BAD_REQUEST, null, ex);
 		}
@@ -88,8 +88,8 @@ public class SlotRequestModule implements Module {
 
 		Element slot = new Element("slot");
 		slot.setXMLNS(XMLNS);
-		slot.addChild(new Element("put", XMLUtils.escape(uploadURI)));
-		slot.addChild(new Element("get", XMLUtils.escape(downloadURI)));
+		slot.addChild(new Element("put", new String[] { "url" }, new String[] { XMLUtils.escape(uploadURI) }));
+		slot.addChild(new Element("get", new String[] { "url" }, new String[] { XMLUtils.escape(downloadURI) }));
 
 		Packet result = packet.okResult(slot, 0);
 

@@ -70,6 +70,7 @@ public class FileServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		try {
+			resp.setHeader("Access-Control-Allow-Origin", "*");
 			UriFormat uriFormat = context.logic.getDownloadURIFormat();
 
 			Matcher m = uriFormat.parsePath(req.getPathInfo().substring(1));
@@ -116,8 +117,19 @@ public class FileServlet extends HttpServlet {
 	}
 
 	@Override
+	protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		super.doOptions(req, resp);
+		resp.setHeader("Access-Control-Allow-Origin", "*");
+		resp.setHeader("Access-Control-Allow-Methods", "PUT, GET, OPTIONS");
+		resp.setHeader("Access-Control-Allow-Headers", "Content-Type");
+		resp.setHeader("Access-Control-Max-Age", "86400");
+		resp.setStatus(200);
+	}
+
+	@Override
 	protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		try {
+			resp.setHeader("Access-Control-Allow-Origin", "*");
 			UriFormat uriFormat = context.logic.getUploadURIFormat();
 
 			Matcher m = uriFormat.parsePath(req.getPathInfo().substring(1));

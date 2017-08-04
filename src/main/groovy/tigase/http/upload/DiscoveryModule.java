@@ -34,7 +34,7 @@ import tigase.xmpp.JID;
 @Bean(name = DiscoveryModule.ID, parent = FileUploadComponent.class, active = true)
 public class DiscoveryModule extends tigase.component.modules.impl.DiscoveryModule {
 
-	private static final String XMLNS = "urn:xmpp:http:upload";
+	private static final String XMLNS = "urn:xmpp:http:upload:0";
 
 	@Inject
 	private Logic logic;
