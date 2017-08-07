@@ -103,6 +103,11 @@ public class FileServlet extends HttpServlet {
 				if (inChannel == null) {
 					resp.sendError(404);
 				} else {
+					resp.setHeader("Content-Length", String.valueOf(slot.filesize));
+					resp.setHeader("Content-Disposition", "attachment; filename=\"" + slot.filename + "\"");
+					if (slot.contentType != null) {
+						resp.setHeader("Content-Type", slot.contentType);
+					}
 					resp.setStatus(200);
 					transferData(inChannel, outChannel);
 				}
@@ -110,6 +115,49 @@ public class FileServlet extends HttpServlet {
 				resp.sendError(500, "Internal Server Error");
 				log.log(Level.FINE, "Exception during processing request", ex);
 			}
+		} catch (Throwable ex) {
+			resp.sendError(500, "Internal Server Error");
+			log.log(Level.FINE, "Exception during processing request", ex);
+		}
+	}
+
+	@Override
+	protected void doHead(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		try {
+			resp.setHeader("Access-Control-Allow-Origin", "*");
+			UriFormat uriFormat = context.logic.getDownloadURIFormat();
+
+			Matcher m = uriFormat.parsePath(req.getPathInfo().substring(1));
+
+			if (!m.matches()) {
+				resp.sendError(404);
+				return;
+			}
+
+			BareJID uploader = null;
+			if (uriFormat.hasGroup("jid")) {
+				String jidStr = m.group("jid");
+				uploader = jidStr.isEmpty() ? null : BareJID.bareJIDInstanceNS(jidStr);
+			} else if (uriFormat.hasGroup("domain")) {
+				String domain = m.group("domain");
+				uploader = domain.isEmpty() ? null : BareJID.bareJIDInstanceNS(domain);
+			}
+
+			String slotId = m.group("slotId");
+			String filename = m.group("filename");
+
+			FileUploadRepository.Slot slot = context.repo.getSlot(uploader, slotId);
+			if (slot == null) {
+				resp.sendError(404);
+				return;
+			}
+
+			resp.setHeader("Content-Length", String.valueOf(slot.filesize));
+			if (slot.contentType != null) {
+				resp.setHeader("Content-Type", slot.contentType);
+			}
+
+			resp.setStatus(200);
 		} catch (Throwable ex) {
 			resp.sendError(500, "Internal Server Error");
 			log.log(Level.FINE, "Exception during processing request", ex);
