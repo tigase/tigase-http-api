@@ -119,7 +119,7 @@ class RestExtServlet extends RestServlet {
 		if (type == "text/html" || type == 'application/x-www-form-urlencoded') {
 			def templates = handlerTemplates[route];
 			if (log.isLoggable(Level.FINEST)) {
-				log.log(Level.WARNING, "looking for template for " + route + " and method " + request.getMethod() 
+				log.log(Level.FINEST, "looking for template for " + route + " and method " + request.getMethod()
 					+ " got " + (templates ? templates[request.getMethod()] : null) + " from " + handlerTemplates.size());
 			}
 			if (templates && templates[request.getMethod()]) {
