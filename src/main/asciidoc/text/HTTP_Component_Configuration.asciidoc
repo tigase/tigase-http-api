@@ -1,8 +1,7 @@
 [[httpAPI]]]
 = Tigase HTTP API
-:author: Daniel Wisnewski & Andrzej Wójcik
+:author: Daniel Wisnewski & Andrzej Wï¿½jcik
 :version: v2.0 July 2016. Reformatted for v7.2.0.
-:date: 2015-23-08 10:13
 
 :toc:
 :numbered:
@@ -202,4 +201,3 @@ rest {
     'dns-webservice' (active: false) {}
 }
 ----
-

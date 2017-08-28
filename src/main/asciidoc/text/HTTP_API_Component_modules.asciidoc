@@ -1,7 +1,7 @@
 [[httpApiAvailComp]]
 = Available modules
 :author: Andrzej Wójcik
-:date: 2016-08-21 13:28
+:version: v2.0 August 2016. Reformatted for v7.2.0.
 
 :toc:
 :numbered:

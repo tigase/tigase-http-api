@@ -1,8 +1,7 @@
 [[adminUI]]
 = Admin UI Guide
 :author: Daniel Wisnewski
-:version: v2.0 Sept 2015
-:date: 2015-02-09 10:28
+:version: v2.0 August 2017. Reformatted for v7.2.0.
 
 :toc:
 :numbered:
