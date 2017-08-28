@@ -4,9 +4,8 @@
 :toc:
 :numbered:
 
-:leveloffset: 1
-
 include::text/HTTP_API_Component.asciidoc[]
+:leveloffset: 2
 include::text/HTTP_API_Component_modules.asciidoc[]
 include::text/HTTP_File_Upload_Component.asciidoc[]
 include::text/HTTP_Server.asciidoc[]
