@@ -79,7 +79,7 @@ public class JDBCFileUploadRepositoryTest {
 			SchemaLoader.Parameters params = loader.createParameters();
 			params.parseUri(uri);
 			params.setDbRootCredentials(null, null);
-			loader.init(params);
+			loader.init(params, Optional.empty());
 			loader.validateDBConnection();
 			loader.validateDBExists();
 			Assert.assertEquals(SchemaLoader.Result.ok, loader.loadSchema(PROJECT_ID, VERSION));

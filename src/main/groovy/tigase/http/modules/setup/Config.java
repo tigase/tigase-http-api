@@ -127,7 +127,7 @@ public class Config {
 		SchemaLoader loader = SchemaLoader.newInstance(dbType);
 		SchemaLoader.Parameters parameters = loader.createParameters();
 		parameters.setProperties(props);
-		loader.init(parameters);
+		loader.init(parameters, Optional.empty());
 		return loader.getDBUri();
 	}
 
