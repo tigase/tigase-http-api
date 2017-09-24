@@ -2,7 +2,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<!--<packet.version>5.2.0</packet.version>-->
 		<dir>target</dir>
 		<maven.build.timestamp.format>yyyy-MM-dd/HH:mm:ss</maven.build.timestamp.format>
 		<gmavenProviderSelection>2.0</gmavenProviderSelection>
@@ -181,6 +180,7 @@
 						<Implementation-Version>${project.version}-b${gitVersion}/${buildNumber}</Implementation-Version>
 						<Implementation-Build>${gitVersion}/${buildNumber} (${maven.build.timestamp})</Implementation-Build>
 						<Tigase-Version>${project.version}-b${gitVersion}</Tigase-Version>
+						<Tigase-Required-Dependencies>tigase.server=${project.dependencies[0].version}</Tigase-Required-Dependencies>
 						<Bundle-Activator>tigase.http.Activator</Bundle-Activator>
 						<DynamicImport-Package>'*'</DynamicImport-Package>
 						<Import-Package>!junit.*,!sun.*,!com.sun.*,*</Import-Package>
@@ -508,27 +508,21 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>tigase</groupId>
+			<artifactId>tigase-server</artifactId>
+			<version>7.2.0-SNAPSHOT</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.osgi.core</artifactId>
 			<version>1.4.0</version>
 			<scope>compile</scope>
 		</dependency>
-<!--		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-server</artifactId>
-			<version>8.1.9.v20130131</version>
-			<scope>compile</scope>
-		</dependency> -->
 		<dependency>
 			<groupId>org.codehaus.groovy</groupId>
 			<artifactId>groovy-all</artifactId>
 			<version>${groovyVersion}</version>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>tigase</groupId>
-			<artifactId>tigase-server</artifactId>
-			<version>7.2.0-SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
