@@ -192,6 +192,7 @@
 						<Implementation-Version>${project.version}-b${gitVersion}/${buildNumber}</Implementation-Version>
 						<Implementation-Build>${gitVersion}/${buildNumber} (${maven.build.timestamp})</Implementation-Build>
 						<Tigase-Version>${project.version}-b${gitVersion}</Tigase-Version>
+						<Tigase-Required-Dependencies>tigase.http=${project.dependencies[3].version}</Tigase-Required-Dependencies>
 						<Bundle-Activator>tigase.http.Activator</Bundle-Activator>
 						<DynamicImport-Package>'*'</DynamicImport-Package>
 						<Import-Package>!junit.*,!sun.*,!com.sun.*,*</Import-Package>
