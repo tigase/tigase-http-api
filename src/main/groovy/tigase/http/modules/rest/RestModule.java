@@ -212,12 +212,19 @@ public class RestModule extends AbstractModule {
     }	
 
 	public static File[] getGroovyFiles( File scriptsDirFile) {
-		return scriptsDirFile.listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File file, String s) {
-                return s.endsWith("groovy");
-            }
-        });
+		if (scriptsDirFile.exists()) {
+			return scriptsDirFile.listFiles(new FilenameFilter() {
+				@Override
+				public boolean accept(File file, String s) {
+					return s.endsWith("groovy");
+				}
+			});
+		} else {
+			if (log.isLoggable(Level.WARNING)) {
+				log.log(Level.WARNING, "scripts directory {0} does not exist!", scriptsDirFile);
+			}
+			return new File[0];
+		}
 	}
 
 	public Kernel getKernel() {
