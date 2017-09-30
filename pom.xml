@@ -5,7 +5,7 @@
 		<dir>target</dir>
 		<maven.build.timestamp.format>yyyy-MM-dd/HH:mm:ss</maven.build.timestamp.format>
 		<gmavenProviderSelection>2.0</gmavenProviderSelection>
-		<groovyVersion>2.4.3</groovyVersion>
+		<groovyVersion>2.4.12</groovyVersion>
 
 		<sign-keystore>/path/to/jks.keystore</sign-keystore>
 		<sign-alias>alias</sign-alias>
