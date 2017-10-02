@@ -43,7 +43,7 @@ import static org.junit.Assert.assertNotNull;
 public class JDBCFileUploadRepositoryTest {
 
 	private static final String PROJECT_ID = "http-api";
-	private static final String VERSION = "1.3.0";
+	private static final String VERSION = "2.0.0";
 
 	private static String uri = System.getProperty("testDbUri");
 

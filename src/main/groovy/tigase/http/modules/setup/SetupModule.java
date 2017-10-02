@@ -94,7 +94,11 @@ public class SetupModule extends AbstractBareModule
 				if (authRepository == null)
 					return false;
 				BareJID jid = BareJID.bareJIDInstance(user);
-				return authRepository.plainAuth(jid, password);
+				String expPassword = authRepository.getPassword(jid);
+				if (expPassword == null || password == null) {
+					return false;
+				}
+				return expPassword.equals(password);
 			}
 
 		};

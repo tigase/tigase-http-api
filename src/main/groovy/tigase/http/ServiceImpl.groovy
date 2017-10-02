@@ -84,7 +84,11 @@ public class ServiceImpl<T extends Module> implements Service<T>, tigase.http.re
 
 	boolean checkCredentials(String user, String password) throws TigaseStringprepException, TigaseDBException, AuthorizationException {
 		BareJID jid = BareJID.bareJIDInstance(user);
-		return module.getAuthRepository().plainAuth(jid, password);
+		String expPassword = module.getAuthRepository().getPassword(jid)
+		if (expPassword == null || password == null) {
+			return false;
+		}
+		return expPassword.equals(password);
 	}
 	
 	T getModule() {
