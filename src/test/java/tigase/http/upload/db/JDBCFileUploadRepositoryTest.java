@@ -70,6 +70,7 @@ public class JDBCFileUploadRepositoryTest {
 		}
 	};
 
+	private DataSource dataSource;
 	private FileUploadRepository repo;
 
 	@BeforeClass
@@ -116,9 +117,10 @@ public class JDBCFileUploadRepositoryTest {
 		if (uri == null)
 			return;
 
-		DataRepository dataRepo = RepositoryFactory.getDataRepository(null, uri, new HashMap<>());
+		dataSource = RepositoryFactory.getRepoClass(DataSource.class, uri).newInstance();
+		dataSource.initRepository(uri, new HashMap<>());
 		repo = DataSourceHelper.getDefaultClass(FileUploadRepository.class, uri).newInstance();
-		repo.setDataSource(dataRepo);
+		repo.setDataSource(dataSource);
 	}
 
 	@After
