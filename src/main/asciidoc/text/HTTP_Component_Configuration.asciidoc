@@ -1,6 +1,6 @@
 [[httpAPI]]]
 = Tigase HTTP API
-:author: Daniel Wisnewski & Andrzej W�jcik
+:author: Daniel Wisnewski & Andrzej Wójcik
 :version: v2.0 July 2016. Reformatted for v7.2.0.
 
 :toc:
