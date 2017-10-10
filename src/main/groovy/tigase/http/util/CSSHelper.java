@@ -43,7 +43,7 @@ public class CSSHelper {
 		if (Files.exists(path)) {
 			return Files.readAllLines(path, StandardCharsets.UTF_8).stream().collect(Collectors.joining("\n"));
 		} else {
-			try (InputStream is = CSSHelper.class.getResourceAsStream("/"+path)) {
+			try (InputStream is = CSSHelper.class.getResourceAsStream("/"+pathStr)) {
 				if (is == null) {
 					return null;
 				}
