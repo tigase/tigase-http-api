@@ -23,6 +23,7 @@
 package tigase.http.java;
 
 import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpsServer;
 import tigase.db.AuthorizationException;
 import tigase.db.TigaseDBException;
 import tigase.http.api.Service;
@@ -262,7 +263,7 @@ public class DummyServletRequest implements HttpServletRequest {
 
 	@Override
 	public boolean isSecure() {
-		return false;
+		return exchange.getHttpContext().getServer() instanceof HttpsServer;
 	}
 
 	@Override
@@ -460,7 +461,17 @@ public class DummyServletRequest implements HttpServletRequest {
 	public StringBuffer getRequestURL() {
 		StringBuffer buf = new StringBuffer();
 		try {
-			buf.append(exchange.getRequestURI().toURL().toExternalForm());
+			if (exchange.getRequestURI().isAbsolute()) {
+				buf.append(exchange.getRequestURI().toURL().toExternalForm());
+			} else {
+				if (isSecure()) {
+					buf.append("https");
+				} else {
+					buf.append("http");
+				}
+				buf.append("://").append(getServerName());
+				buf.append(exchange.getRequestURI().getPath());
+			}
 		} catch (MalformedURLException ex) {
 			Logger.getLogger(DummyServletRequest.class.getName()).log(Level.FINE, "could not read request URL", ex);
 		}

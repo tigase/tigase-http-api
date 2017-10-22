@@ -21,6 +21,7 @@
  */
 package tigase.http.modules.setup;
 
+import tigase.auth.credentials.Credentials;
 import tigase.db.AuthRepository;
 import tigase.db.AuthorizationException;
 import tigase.db.TigaseDBException;
@@ -94,11 +95,12 @@ public class SetupModule extends AbstractBareModule
 				if (authRepository == null)
 					return false;
 				BareJID jid = BareJID.bareJIDInstance(user);
-				String expPassword = authRepository.getPassword(jid);
-				if (expPassword == null || password == null) {
+				Credentials credentials = authRepository.
+						getCredentials(jid, Credentials.DEFAULT_USERNAME);
+				if (credentials == null) {
 					return false;
 				}
-				return expPassword.equals(password);
+				return credentials.getFirst().verifyPlainPassword(password);
 			}
 
 		};

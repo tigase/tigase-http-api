@@ -23,6 +23,7 @@
 package tigase.http
 
 import groovy.transform.CompileStatic
+import tigase.auth.credentials.Credentials
 import tigase.db.AuthRepository
 import tigase.db.AuthorizationException
 import tigase.db.TigaseDBException
@@ -84,11 +85,12 @@ public class ServiceImpl<T extends Module> implements Service<T>, tigase.http.re
 
 	boolean checkCredentials(String user, String password) throws TigaseStringprepException, TigaseDBException, AuthorizationException {
 		BareJID jid = BareJID.bareJIDInstance(user);
-		String expPassword = module.getAuthRepository().getPassword(jid)
-		if (expPassword == null || password == null) {
+		Credentials credentials = module.getAuthRepository().
+				getCredentials(jid, Credentials.DEFAULT_USERNAME);
+		if (credentials == null) {
 			return false;
 		}
-		return expPassword.equals(password);
+		return credentials.getFirst().verifyPlainPassword(password);
 	}
 	
 	T getModule() {
