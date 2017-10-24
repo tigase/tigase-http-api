@@ -10,7 +10,8 @@
 Welcome to the Tigase HTTP API users guide.  The HTTP API allows you to manage, configure, chat, and send commands to Tigase server using a simple, easy-to-use interface right from your browser!
 We will guide you through setup, running, and going through some features of the HTTP API.
 
-== Setup & Configuration
+*Setup & Configuration*
+
 Tigase will by default start with the http servlet active and running.
 Tigase will try to start a standalone Jetty HTTP server at port 8080 and start up the default modules, including `RestModule` which will add context for REST API in the /rest path.
 `RestModule` will also load all groovy scripts located in `scripts/rest/&#42;` directories and will bind them to proper actions for the `/rest/&#42;` paths.
@@ -18,10 +19,10 @@ Tigase will try to start a standalone Jetty HTTP server at port 8080 and start u
 *NOTE:* Scripts that handle HTTP requests are available in the component repository in `src/scriopts/groovy/tigase/rest/` directory.
 
 [[httpCompProp]]
-=== Component Properties
+== Component Properties
 Here are some additional properties for the `HttpMessageReceiver` component that can be set in the config.tdsl file.
 
-==== Ports
+=== Ports
 Sets a comma separated list of ports on which the HTTP server will listen for connections. Default is 8080.  This configurations sets ports 8080, 9050, and 2011.
 [source,dsl]
 -----
@@ -40,7 +41,7 @@ httpServer {
 }
 -----
 
-==== ssl socket port
+=== ssl socket port
 Sets the port for SSL connections, this configuration sets port 2222 as the SSL socket port.
 [source,dsl]
 -----
@@ -51,7 +52,7 @@ http (class: tigase.http.HttpMessageReceiver) {
 }
 -----
 
-==== http domain
+=== http domain
 This sets the domain name of the SSL certificate from Tigase XMPP certificate store, also sets the port to 2222 to listen for HTTPS connections.
 [source,dsl]
 -----
@@ -62,7 +63,7 @@ http (class: tigase.http.HttpMessageReceiver) {
 }
 -----
 
-==== server class
+=== server class
 Sets the name of the class used to manage the HTTP server.
 [source,dsl]
 -----
@@ -76,7 +77,7 @@ Currently there are the following options:
 - `tigase.http.jetty.JettyOSGIHttpServer` - Uses Jetty HTTP Server instance available as OSGi service (may be used only in OSGi envoirment) *(require Tigase HTTP API - Jetty HTTP Server)* +
 - `tigase.http.java.JavaStandaloneHttpServer` - Uses `HttpServer` provided by Java JDK to start standalone HTTP server (may not work on JDK from every JDK provider). +
 
-==== threads
+=== threads
 Sets the number of threads available for HTTP component. Default is 4.
 [source,dsl]
 -----
@@ -85,7 +86,7 @@ httpServer {
 }
 -----
 
-==== request-timeout
+=== request-timeout
 Sets the timeout time in ms for threads to close on inactive connections. Default is 60 seconds.
 [source,dsl]
 -----
@@ -94,7 +95,7 @@ httpServer {
 }
 -----
 
-=== Modules
+== Modules
 Tigase's REST Component comes with two modules that can be enabled, disabled, and configured separately.
 Common settings for modules for component properties are used in the following format: `component_name (module: value) {}`
 the following settings are available for both listed modules:
@@ -104,7 +105,7 @@ the following settings are available for both listed modules:
 - `vhosts` - Comma separated list of virtual hosts for which the module should be available. If not configured, the module will be available for all vhosts.
 
 [[restModuleConfig]]]
-==== Rest Module
+=== Rest Module
 This is the Module that provides support for the REST API.
 Available properties:
 
@@ -134,7 +135,7 @@ does the following:
 
 Requests made to the HTTP service must conclude with one of the listed keys: `http://localhost:8080/rest/adhoc/sess-man@domain.com?api-key=test1`
 
-===== Example
+==== Example
 Configure API keys for the REST module:
 
 [source,java]
@@ -151,7 +152,7 @@ http {
 ----
 
 
-=== DNS Web Service module
+== DNS Web Service module
 For web based XMPP clients it is not possible to execute DNS SRV requests to find address of XMPP server hosting for particular domain.
 To solve this the DNS Web Service module was created.
 
@@ -160,11 +161,11 @@ Results are returned in JSON format for easy processing by web based XMPP client
 
 By default it is deployed at `dns-webservice`
 
-==== Parameters
+=== Parameters
 domain:: Domain name to look for XMPP SRV client records.
 callback:: Due to security reasons web based client may not be able to access some DNS Web Service due to cross-domain AJAX requests. Passing optional `callback` parameter sets name of callback for JSONP requests and results proper response in JSONP format.
 
-==== Discover way to connect to XMPP server hosting `sure.im` domain.
+=== Discover way to connect to XMPP server hosting `sure.im` domain.
 Sending HTTP GET request to `http://our-xmpp-server:8080/dns-webservice/?domain=sure.im&version=2` you will receive following response:
 
 [source,java]
@@ -201,3 +202,26 @@ rest {
     'dns-webservice' (active: false) {}
 }
 ----
+
+== Enabling password reset mechanism
+It is possible to provide users with a mechanism for a password change in case if they forgot their password to the XMPP account.
+To do that you need to have `tigase-extras.jar` in your classpath (it is part of `-dist-max` distribution package), enable `mailer` and `account-email-password-resetter`.
+
+.Example configuration
+[source,tdsl]
+----
+account-email-password-resetter () {}
+mailer (class: tigase.extras.mailer.Mailer) {
+    'mailer-from-address' = 'email-address@to-send-emails-from'
+    'mailer-smtp-host' = 'smtp.email.server.com'
+    'mailer-smtp-password' = 'password-for-email-account'
+    'mailer-smtp-port' = '587' # Email server SMTP port
+    'mailer-smtp-username' = 'username-for-email-account'
+}
+----
+
+NOTE: You need to replace example configuration parameters with correct ones.
+
+With this configuration in place and after restart of Tigase XMPP Server at url http://localhost:8080/rest/user/resetPassword will be available web form which may be used for password reset.
+
+NOTE: This mechanism will only work if user provided real email address during account registration and if user still remembers and has access to email address used during registration.
