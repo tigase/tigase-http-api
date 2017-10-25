@@ -147,3 +147,6 @@ end;
 $$ LANGUAGE 'plpgsql';
 -- QUERY END:
 
+-- QUERY START:
+select TigSetComponentVersion('http-api', '2.0.0');
+-- QUERY END:

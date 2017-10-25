@@ -82,3 +82,7 @@ create procedure Tig_HFU_RemoveExpiredSlots(domain varchar(1024), ts timestamp, 
         MODIFIES SQL DATA
         EXTERNAL NAME 'tigase.http.upload.db.derby.StoredProcedures.removeExpiredSlots';
 -- QUERY END:
+
+-- QUERY START:
+call TigSetComponentVersion('http-api', '2.0.0');
+-- QUERY END:

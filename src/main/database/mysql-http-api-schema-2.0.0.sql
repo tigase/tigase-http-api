@@ -171,3 +171,7 @@ begin
     drop temporary table tig_hfu_expired_slots_temp;
 end //
 -- QUERY END:
+
+-- QUERY START:
+call TigSetComponentVersion('http-api', '2.0.0');
+-- QUERY END:

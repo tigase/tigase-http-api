@@ -234,6 +234,7 @@ public class JDBCFileUploadRepository implements FileUploadRepository<DataReposi
 	@Override
 	public void setDataSource(DataRepository dataSource) {
 		try {
+			dataSource.checkSchemaVersion( this );
 			dataSource.initPreparedStatement(ALLOCATE_SLOT_QUERY, ALLOCATE_SLOT_QUERY);
 			dataSource.initPreparedStatement(UPDATE_SLOT_QUERY, UPDATE_SLOT_QUERY);
 			dataSource.initPreparedStatement(GET_SLOT_QUERY, GET_SLOT_QUERY);
