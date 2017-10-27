@@ -28,7 +28,7 @@ import org.eclipse.jetty.security.MappedLoginService
 import org.eclipse.jetty.server.UserIdentity
 import org.eclipse.jetty.util.security.Password
 import tigase.http.api.Service
-import tigase.xmpp.BareJID
+import tigase.xmpp.jid.BareJID
 
 import javax.security.auth.Subject
 import javax.servlet.ServletRequest
