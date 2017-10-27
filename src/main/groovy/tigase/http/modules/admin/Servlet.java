@@ -30,11 +30,11 @@ import tigase.http.api.Service;
 import tigase.http.util.CSSHelper;
 import tigase.server.Command;
 import tigase.server.Packet;
-import tigase.util.TigaseStringprepException;
+import tigase.util.stringprep.TigaseStringprepException;
 import tigase.xml.Element;
 import tigase.xml.XMLUtils;
-import tigase.xmpp.BareJID;
-import tigase.xmpp.JID;
+import tigase.xmpp.jid.BareJID;
+import tigase.xmpp.jid.JID;
 import tigase.xmpp.StanzaType;
 
 import javax.servlet.AsyncContext;

@@ -33,8 +33,8 @@ import tigase.http.api.Service
 import tigase.http.modules.AbstractBareModule
 import tigase.http.modules.Module
 import tigase.server.Packet
-import tigase.util.TigaseStringprepException
-import tigase.xmpp.BareJID
+import tigase.util.stringprep.TigaseStringprepException
+import tigase.xmpp.jid.BareJID
 
 @CompileStatic
 public class ServiceImpl<T extends Module> implements Service<T>, tigase.http.rest.Service {

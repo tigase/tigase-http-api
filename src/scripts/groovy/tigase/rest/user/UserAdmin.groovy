@@ -25,7 +25,7 @@ import tigase.http.rest.Service
 import tigase.server.Iq
 import tigase.server.Packet
 import tigase.xml.Element
-import tigase.xmpp.BareJID
+import tigase.xmpp.jid.BareJID
 import tigase.xmpp.StanzaType
 
 /**

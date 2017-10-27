@@ -27,7 +27,7 @@ import tigase.server.xmppsession.SessionManager;
 import tigase.util.setup.BeanDefinition;
 import tigase.util.setup.SetupHelper;
 import tigase.util.ui.console.CommandlineParameter;
-import tigase.xmpp.BareJID;
+import tigase.xmpp.jid.BareJID;
 import tigase.xmpp.XMPPImplIfc;
 
 import java.io.IOException;

@@ -24,7 +24,7 @@ package tigase.http.upload.store;
 import tigase.http.upload.FileUploadComponent;
 import tigase.kernel.beans.Bean;
 import tigase.kernel.beans.config.ConfigField;
-import tigase.xmpp.BareJID;
+import tigase.xmpp.jid.BareJID;
 
 import java.io.IOException;
 import java.nio.channels.FileChannel;

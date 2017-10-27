@@ -27,7 +27,7 @@ import tigase.http.coders.JsonCoder
 import tigase.http.coders.XmlCoder
 import tigase.http.rest.Handler
 import tigase.http.rest.Service
-import tigase.xmpp.BareJID
+import tigase.xmpp.jid.BareJID
 
 import javax.servlet.ServletConfig
 import javax.servlet.annotation.WebServlet

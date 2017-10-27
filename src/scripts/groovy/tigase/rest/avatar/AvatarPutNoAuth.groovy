@@ -21,7 +21,7 @@ package tigase.rest.avatar
  * $Date$
  */
 import tigase.http.rest.Service
-import tigase.xmpp.BareJID
+import tigase.xmpp.jid.BareJID
 import tigase.util.Base64;
 import tigase.xml.DomBuilderHandler
 import tigase.xml.SimpleParser

@@ -35,8 +35,8 @@ import tigase.server.Packet;
 import tigase.server.script.CommandIfc;
 import tigase.stats.StatisticsList;
 import tigase.xml.Element;
-import tigase.xmpp.BareJID;
-import tigase.xmpp.JID;
+import tigase.xmpp.jid.BareJID;
+import tigase.xmpp.jid.JID;
 
 import javax.script.Bindings;
 import java.util.Collections;

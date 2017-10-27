@@ -28,8 +28,8 @@ import tigase.db.TigaseDBException;
 import tigase.db.beans.MDRepositoryBean;
 import tigase.http.upload.FileUploadComponent;
 import tigase.kernel.beans.Bean;
-import tigase.xmpp.BareJID;
-import tigase.xmpp.JID;
+import tigase.xmpp.jid.BareJID;
+import tigase.xmpp.jid.JID;
 
 import java.time.LocalDateTime;
 import java.util.List;

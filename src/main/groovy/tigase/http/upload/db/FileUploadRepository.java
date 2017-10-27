@@ -24,8 +24,8 @@ package tigase.http.upload.db;
 import tigase.db.DataSource;
 import tigase.db.DataSourceAware;
 import tigase.db.TigaseDBException;
-import tigase.xmpp.BareJID;
-import tigase.xmpp.JID;
+import tigase.xmpp.jid.BareJID;
+import tigase.xmpp.jid.JID;
 
 import java.time.LocalDateTime;
 import java.util.Date;

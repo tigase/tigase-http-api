@@ -22,7 +22,7 @@
 package tigase.http.upload.logic;
 
 import tigase.component.exceptions.ComponentException;
-import tigase.xmpp.JID;
+import tigase.xmpp.jid.JID;
 
 import java.time.Duration;
 

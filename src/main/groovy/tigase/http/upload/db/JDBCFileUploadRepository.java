@@ -26,8 +26,8 @@ import tigase.db.Repository;
 import tigase.db.TigaseDBException;
 import tigase.http.db.Schema;
 import tigase.kernel.beans.config.ConfigField;
-import tigase.xmpp.BareJID;
-import tigase.xmpp.JID;
+import tigase.xmpp.jid.BareJID;
+import tigase.xmpp.jid.JID;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

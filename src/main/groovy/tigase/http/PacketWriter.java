@@ -23,7 +23,7 @@ package tigase.http;
 
 import tigase.http.modules.Module;
 import tigase.server.Packet;
-import tigase.xmpp.JID;
+import tigase.xmpp.jid.JID;
 
 public interface PacketWriter {
 	

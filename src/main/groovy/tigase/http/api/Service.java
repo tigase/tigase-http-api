@@ -29,8 +29,8 @@ import tigase.db.UserRepository;
 import tigase.http.PacketWriter.Callback;
 import tigase.http.modules.Module;
 import tigase.server.Packet;
-import tigase.util.TigaseStringprepException;
-import tigase.xmpp.BareJID;
+import tigase.util.stringprep.TigaseStringprepException;
+import tigase.xmpp.jid.BareJID;
 
 public interface Service<T extends Module> {
 	

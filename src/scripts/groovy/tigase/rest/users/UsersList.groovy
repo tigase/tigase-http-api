@@ -21,7 +21,6 @@ package tigase.rest.users
  * $Date$
  */
 import tigase.http.rest.Service
-import tigase.xmpp.BareJID
 
 /**
  * Class implements ability to retrieve by service administrator list of registered accounts

@@ -30,7 +30,7 @@ import tigase.kernel.beans.config.ConfigAlias;
 import tigase.kernel.beans.config.ConfigAliases;
 import tigase.kernel.beans.selector.ConfigType;
 import tigase.kernel.beans.selector.ConfigTypeEnum;
-import tigase.xmpp.BareJID;
+import tigase.xmpp.jid.BareJID;
 
 import java.util.Map;
 

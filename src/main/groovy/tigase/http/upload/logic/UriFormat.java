@@ -21,7 +21,7 @@
  */
 package tigase.http.upload.logic;
 
-import tigase.xmpp.JID;
+import tigase.xmpp.jid.JID;
 
 import java.util.HashSet;
 import java.util.regex.Matcher;

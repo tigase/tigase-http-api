@@ -27,8 +27,9 @@ import tigase.kernel.beans.config.AbstractBeanConfigurator;
 import tigase.kernel.beans.selector.ConfigType;
 import tigase.kernel.beans.selector.ConfigTypeEnum;
 import tigase.server.xmppsession.SessionManager;
+import tigase.util.dns.DNSResolverFactory;
 import tigase.util.setup.SetupHelper;
-import tigase.xmpp.BareJID;
+import tigase.xmpp.jid.BareJID;
 import tigase.xmpp.XMPPImplIfc;
 
 import java.io.*;
@@ -43,8 +44,8 @@ public class Config {
 	private String acsName = "";
 	protected boolean acs = true;
 	private ConfigTypeEnum configType = ConfigTypeEnum.DefaultMode;
-	protected String[] virtualDomains = new String[] { tigase.util.DNSResolverFactory.getInstance().getDefaultHost() };
-	protected BareJID[] admins = new BareJID[] { BareJID.bareJIDInstanceNS("admin@" + tigase.util.DNSResolverFactory.getInstance().getDefaultHost()) };
+	protected String[] virtualDomains = new String[] {DNSResolverFactory.getInstance().getDefaultHost() };
+	protected BareJID[] admins = new BareJID[] { BareJID.bareJIDInstanceNS("admin@" + DNSResolverFactory.getInstance().getDefaultHost()) };
 	protected String adminPwd = "tigase";
 	private String dbType = null;
 	protected boolean advancedConfig = false;

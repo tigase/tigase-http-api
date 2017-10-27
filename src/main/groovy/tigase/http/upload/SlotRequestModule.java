@@ -30,7 +30,7 @@ import tigase.http.upload.logic.Logic;
 import tigase.kernel.beans.Bean;
 import tigase.kernel.beans.Inject;
 import tigase.server.Packet;
-import tigase.util.TigaseStringprepException;
+import tigase.util.stringprep.TigaseStringprepException;
 import tigase.xml.Element;
 import tigase.xml.XMLUtils;
 import tigase.xmpp.Authorization;

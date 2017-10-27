@@ -28,7 +28,7 @@ import tigase.kernel.beans.Initializable;
 import tigase.kernel.beans.Inject;
 import tigase.kernel.beans.UnregisterAware;
 import tigase.kernel.beans.config.ConfigurationChangedAware;
-import tigase.xmpp.BareJID;
+import tigase.xmpp.jid.BareJID;
 
 public abstract class AbstractModule extends AbstractBareModule implements Module, Initializable, ConfigurationChangedAware, UnregisterAware {
 

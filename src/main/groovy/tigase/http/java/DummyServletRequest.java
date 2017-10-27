@@ -28,8 +28,8 @@ import tigase.db.AuthorizationException;
 import tigase.db.TigaseDBException;
 import tigase.http.api.Service;
 import tigase.util.Base64;
-import tigase.util.TigaseStringprepException;
-import tigase.xmpp.BareJID;
+import tigase.util.stringprep.TigaseStringprepException;
+import tigase.xmpp.jid.BareJID;
 
 import javax.servlet.*;
 import javax.servlet.http.*;

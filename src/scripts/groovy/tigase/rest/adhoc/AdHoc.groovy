@@ -22,13 +22,10 @@ package tigase.rest.adhoc
  * $Date$
  */
 import tigase.http.rest.Service
-import tigase.server.Command
 import tigase.server.Iq
 import tigase.server.Packet
-import tigase.util.Base64
 import tigase.xml.Element
-import tigase.xmpp.BareJID
-import tigase.xmpp.JID
+import tigase.xmpp.jid.BareJID
 import tigase.xmpp.StanzaType
 
 import java.util.logging.Logger

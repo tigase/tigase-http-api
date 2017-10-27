@@ -29,7 +29,7 @@ import org.junit.runners.model.Statement;
 import tigase.component.exceptions.RepositoryException;
 import tigase.db.*;
 import tigase.db.util.SchemaLoader;
-import tigase.xmpp.JID;
+import tigase.xmpp.jid.JID;
 
 import java.io.File;
 import java.sql.SQLException;

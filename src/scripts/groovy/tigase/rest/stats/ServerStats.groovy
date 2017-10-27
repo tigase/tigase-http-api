@@ -25,11 +25,8 @@ import tigase.http.rest.Service
 import tigase.server.Command
 import tigase.server.Iq
 import tigase.server.Packet
-import tigase.util.Base64
-import tigase.util.DNSResolverFactory
+import tigase.util.dns.DNSResolverFactory
 import tigase.xml.Element
-import tigase.xmpp.BareJID
-import tigase.xmpp.JID
 import tigase.xmpp.StanzaType
 
 /**

@@ -29,7 +29,7 @@ import tigase.http.upload.store.Store;
 import tigase.kernel.beans.Bean;
 import tigase.kernel.beans.Inject;
 import tigase.kernel.core.Kernel;
-import tigase.xmpp.BareJID;
+import tigase.xmpp.jid.BareJID;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;

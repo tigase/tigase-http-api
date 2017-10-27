@@ -25,7 +25,7 @@ package tigase.rest.user
 import tigase.http.rest.Service
 import tigase.kernel.beans.Bean
 import tigase.kernel.beans.Inject
-import tigase.xmpp.BareJID
+import tigase.xmpp.jid.BareJID
 import tigase.xmpp.impl.JabberIqRegister
 
 /**

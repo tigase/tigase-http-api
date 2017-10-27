@@ -34,8 +34,8 @@ import tigase.http.modules.AbstractBareModule;
 import tigase.kernel.beans.Bean;
 import tigase.kernel.beans.selector.ConfigType;
 import tigase.kernel.beans.selector.ConfigTypeEnum;
-import tigase.util.TigaseStringprepException;
-import tigase.xmpp.BareJID;
+import tigase.util.stringprep.TigaseStringprepException;
+import tigase.xmpp.jid.BareJID;
 
 /**
  * Created by andrzej on 06.04.2017.

@@ -26,7 +26,7 @@ import tigase.http.rest.Service
 import tigase.kernel.beans.Bean
 import tigase.kernel.beans.Inject
 import tigase.util.Token
-import tigase.xmpp.BareJID
+import tigase.xmpp.jid.BareJID
 
 import javax.servlet.http.HttpServletRequest
 

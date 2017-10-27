@@ -21,7 +21,7 @@
  */
 package tigase.http.upload.store;
 
-import tigase.xmpp.BareJID;
+import tigase.xmpp.jid.BareJID;
 
 import java.io.IOException;
 import java.nio.channels.ReadableByteChannel;

@@ -30,10 +30,10 @@ import tigase.http.upload.store.Store;
 import tigase.kernel.beans.Bean;
 import tigase.kernel.beans.Inject;
 import tigase.kernel.beans.config.ConfigField;
-import tigase.util.DNSResolverFactory;
+import tigase.util.dns.DNSResolverFactory;
 import tigase.vhosts.VHostManager;
 import tigase.xmpp.Authorization;
-import tigase.xmpp.JID;
+import tigase.xmpp.jid.JID;
 
 import java.io.IOException;
 import java.time.Duration;
