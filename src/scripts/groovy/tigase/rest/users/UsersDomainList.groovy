@@ -1,9 +1,8 @@
-package tigase.rest.users
-
-import tigase.http.rest.Service
 /*
+ * UsersDomainList.groovy
+ *
  * Tigase HTTP API
- * Copyright (C) 2004-2013 "Tigase, Inc." <office@tigase.com>
+ * Copyright (C) 2004-2017 "Tigase, Inc." <office@tigase.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,11 +16,11 @@ import tigase.http.rest.Service
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://www.gnu.org/licenses/.
- *
- * $Rev$
- * Last modified by $Author$
- * $Date$
  */
+
+package tigase.rest.users
+
+import tigase.http.rest.Service
 /**
  * Class implements ability to retrieve by service administrator list of registered accounts for domain
  * Handles requests for /rest/users/domain where domain is name of domain for which we want to retrieve list of users
