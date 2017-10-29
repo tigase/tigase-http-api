@@ -34,79 +34,92 @@ import java.security.Principal
 import java.util.logging.Level
 import java.util.logging.Logger
 
-public class TigasePlainLoginService implements LoginService {
+public class TigasePlainLoginService
+		implements LoginService {
 
-    private static final Logger log = Logger.getLogger(TigasePlainLoginService.class.getCanonicalName());
+	private static final Logger log = Logger.getLogger(TigasePlainLoginService.class.getCanonicalName());
 
-    def identityService = new DefaultIdentityService();
+	def identityService = new DefaultIdentityService();
 
 	Service service = null;
-	
+
 	public TigasePlainLoginService(Service service) {
 		this.service = service;
 	}
-	
-    @Override
-    String getName() {
-        return "TigasePlain";
-    }
 
-    @Override
-    UserIdentity login(String s, Object o, ServletRequest request) {
-        String cred = null;
-        if (o instanceof String) cred = (String) o;
-        if (o instanceof Password) cred = ((Password) o).toString();
+	@Override
+	String getName() {
+		return "TigasePlain";
+	}
 
-        if (cred != null) {
-            // decode credential
-            BareJID jid = BareJID.bareJIDInstance(s);
+	@Override
+	UserIdentity login(String s, Object o, ServletRequest request) {
+		String cred = null;
+		if (o instanceof String) {
+			cred = (String) o
+		};
+		if (o instanceof Password) {
+			cred = ((Password) o).toString()
+		};
 
-            // authenticate using Tigase authentication repository
-            boolean authOk = false;
-            try { authOk = getService().checkCredentials(s, cred); } catch (ex) {  log.log(Level.FINE, "not authorized used = " + jid, ex); }
+		if (cred != null) {
+			// decode credential
+			BareJID jid = BareJID.bareJIDInstance(s);
 
-            // we are authenticated so set correct authentication principal
-            if (authOk) {
-                Principal p = new MappedLoginService.KnownUser(s, null);
+			// authenticate using Tigase authentication repository
+			boolean authOk = false;
+			try {
+				authOk = getService().checkCredentials(s, cred);
+			} catch (ex) {
+				log.log(Level.FINE, "not authorized used = " + jid, ex);
+			}
 
-                Subject subject = new Subject();
-                subject.getPrincipals().add(p);
-                subject.setReadOnly();
+			// we are authenticated so set correct authentication principal
+			if (authOk) {
+				Principal p = new MappedLoginService.KnownUser(s, null);
 
-                def roles = ["user"];
+				Subject subject = new Subject();
+				subject.getPrincipals().add(p);
+				subject.setReadOnly();
 
-                // add admin role if user is in admins list
-                if (getService().isAdmin(jid)) roles.add("admin");
+				def roles = [ "user" ];
 
-                return getIdentityService().newUserIdentity(subject, p, roles.toArray(new String[0]));
-            }
-        }
+				// add admin role if user is in admins list
+				if (getService().isAdmin(jid)) {
+					roles.add("admin")
+				};
 
-        return null  //To change body of implemented methods use File | Settings | File Templates.
-    }
+				return getIdentityService().newUserIdentity(subject, p, roles.toArray(new String[0]));
+			}
+		}
 
-    @Override
-    boolean validate(UserIdentity userIdentity) {
-        // validate if user identity is valid
-        return getService().getUserRepository().getUserUID(BareJID.bareJIDInstance(userIdentity.getUserPrincipal().getName())) > 0;
-    }
+		return null  //To change body of implemented methods use File | Settings | File Templates.
+	}
 
-    @Override
-    IdentityService getIdentityService() {
-        return identityService;
-    }
+	@Override
+	boolean validate(UserIdentity userIdentity) {
+		// validate if user identity is valid
+		return getService().
+				getUserRepository().
+				getUserUID(BareJID.bareJIDInstance(userIdentity.getUserPrincipal().getName())) > 0;
+	}
 
-    @Override
-    void setIdentityService(IdentityService identityService2) {
-        identityService = identityService2;
-    }
+	@Override
+	IdentityService getIdentityService() {
+		return identityService;
+	}
 
-    @Override
-    void logout(UserIdentity userIdentity) {
-    }
+	@Override
+	void setIdentityService(IdentityService identityService2) {
+		identityService = identityService2;
+	}
 
-    Service getService() {
-        return service;
-    }
+	@Override
+	void logout(UserIdentity userIdentity) {
+	}
+
+	Service getService() {
+		return service;
+	}
 
 }

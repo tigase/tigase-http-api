@@ -44,20 +44,20 @@ import static tigase.http.jetty.JettyHttpServerHelper.CONTEXT_KEY;
 import static tigase.http.jetty.JettyHttpServerHelper.createServletContextHandler;
 
 /**
- * This implementation embeds Jetty HTTP Server by starting separate instance
- * which is configured and managed by Tigase.
- * 
+ * This implementation embeds Jetty HTTP Server by starting separate instance which is configured and managed by
+ * Tigase.
+ *
  * @author andrzej
  */
 @Bean(name = "httpServer", exportable = true, active = true)
-public class JettyStandaloneHttpServer extends AbstractHttpServer implements Initializable, UnregisterAware {
+public class JettyStandaloneHttpServer
+		extends AbstractHttpServer
+		implements Initializable, UnregisterAware {
 
 	private static final Logger log = Logger.getLogger(JettyStandaloneHttpServer.class.getCanonicalName());
-
-	private Server server = new Server();
 	private final ContextHandlerCollection contexts = new ContextHandlerCollection();
-
 	private List<DeploymentInfo> deploymentInfos = new CopyOnWriteArrayList<>();
+	private Server server = new Server();
 
 	@Override
 	public List<DeploymentInfo> listDeployed() {
@@ -81,25 +81,6 @@ public class JettyStandaloneHttpServer extends AbstractHttpServer implements Ini
 		deploymentInfos.remove(deployment);
 	}
 
-
-	protected void deploy(ServletContextHandler ctx) {
-		contexts.addHandler(ctx);
-		try {
-			ctx.start();
-		} catch (Exception ex) {
-			log.log(Level.SEVERE, "Exception deploying http context " + ctx.getContextPath(), ex);
-		}
-	}
-
-	protected void undeploy(ServletContextHandler ctx) {
-		contexts.removeHandler(ctx);
-		try {
-			ctx.stop();
-		} catch (Exception ex) {
-			log.log(Level.SEVERE, "Exception undeploying http context " + ctx.getContextPath(), ex);
-		}
-	}
-
 	@Override
 	public void beforeUnregister() {
 		try {
@@ -116,6 +97,24 @@ public class JettyStandaloneHttpServer extends AbstractHttpServer implements Ini
 			server.start();
 		} catch (Exception ex) {
 			log.log(Level.SEVERE, "Exception starting internal HTTP server", ex);
+		}
+	}
+
+	protected void deploy(ServletContextHandler ctx) {
+		contexts.addHandler(ctx);
+		try {
+			ctx.start();
+		} catch (Exception ex) {
+			log.log(Level.SEVERE, "Exception deploying http context " + ctx.getContextPath(), ex);
+		}
+	}
+
+	protected void undeploy(ServletContextHandler ctx) {
+		contexts.removeHandler(ctx);
+		try {
+			ctx.stop();
+		} catch (Exception ex) {
+			log.log(Level.SEVERE, "Exception undeploying http context " + ctx.getContextPath(), ex);
 		}
 	}
 
@@ -186,21 +185,12 @@ public class JettyStandaloneHttpServer extends AbstractHttpServer implements Ini
 		return connector;
 	}
 
-	@Bean(name = "connections", parent = JettyStandaloneHttpServer.class, active = true, exportable = true)
-	public static class PortsConfigBean extends AbstractHttpServer.PortsConfigBean {
-
-		@Override
-		public Class<?> getDefaultBeanClass() {
-			return PortConfigBean.class;
-		}
-	}
-
-	public static class PortConfigBean extends AbstractHttpServer.PortConfigBean {
-
-		@Inject
-		private JettyStandaloneHttpServer serverManager;
+	public static class PortConfigBean
+			extends AbstractHttpServer.PortConfigBean {
 
 		private ServerConnector connector = null;
+		@Inject
+		private JettyStandaloneHttpServer serverManager;
 
 		@Override
 		public void beforeUnregister() {
@@ -224,6 +214,16 @@ public class JettyStandaloneHttpServer extends AbstractHttpServer implements Ini
 		public void beanConfigurationChanged(Collection<String> changedFields) {
 			beforeUnregister();
 			initialize();
+		}
+	}
+
+	@Bean(name = "connections", parent = JettyStandaloneHttpServer.class, active = true, exportable = true)
+	public static class PortsConfigBean
+			extends AbstractHttpServer.PortsConfigBean {
+
+		@Override
+		public Class<?> getDefaultBeanClass() {
+			return PortConfigBean.class;
 		}
 	}
 

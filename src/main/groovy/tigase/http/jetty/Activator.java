@@ -22,7 +22,8 @@ package tigase.http.jetty;
 import org.osgi.framework.BundleContext;
 import tigase.osgi.AbstractActivator;
 
-public class Activator extends AbstractActivator {
+public class Activator
+		extends AbstractActivator {
 
 	private static BundleContext context;
 

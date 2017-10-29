@@ -39,46 +39,22 @@ import static tigase.http.jetty.JettyHttpServerHelper.CONTEXT_KEY;
 import static tigase.http.jetty.JettyHttpServerHelper.createServletContextHandler;
 
 /**
- * This implementation uses Jetty HTTP Server instance exising in OSGi environment
- * to deploy Tigase HTTP API web apps on it.
+ * This implementation uses Jetty HTTP Server instance exising in OSGi environment to deploy Tigase HTTP API web apps on
+ * it.
  *
  * @author andrzej
  */
-public class JettyOSGiHttpServer implements HttpServerIfc {
+public class JettyOSGiHttpServer
+		implements HttpServerIfc {
 
 	private static final Logger log = Logger.getLogger(JettyOSGiHttpServer.class.getCanonicalName());
-	
+
 	private final BundleContext context;
-	private final ConcurrentHashMap<String,ServiceRegistration> registeredContexts = new ConcurrentHashMap<String,ServiceRegistration>();
+	private final ConcurrentHashMap<String, ServiceRegistration> registeredContexts = new ConcurrentHashMap<String, ServiceRegistration>();
 	private List<DeploymentInfo> deploymentInfos = new CopyOnWriteArrayList<>();
 
 	public JettyOSGiHttpServer() {
 		context = Activator.getContext();
-	}
-	
-	protected void deploy(ServletContextHandler ctx) {
-		String contextPath = ctx.getContextPath();
-		
-		Hashtable props = new Hashtable();
-		props.put("contextFilePath", "/etc/tigase-http-context.xml");
-		ServiceRegistration registration = context.registerService(ContextHandler.class.getName(), ctx, props);
-		if (registration == null) {
-			log.log(Level.SEVERE, "registration failed for {0}", contextPath);
-		}
-		registeredContexts.put(contextPath, registration);
-	}
-
-	protected void undeploy(ServletContextHandler ctx) {
-		String contextPath = ctx.getContextPath();
-		try {		
-			ServiceRegistration registration = registeredContexts.get(contextPath);
-			if (registration != null) {
-				registration.unregister();
-			}
-		}
-		catch (Exception ex) {
-			log.log(Level.SEVERE, "exception during unregistration of context = " + contextPath, ctx);
-		}
 	}
 
 	@Override
@@ -121,6 +97,30 @@ public class JettyOSGiHttpServer implements HttpServerIfc {
 			undeploy(context);
 		}
 		deploymentInfos.remove(deployment);
+	}
+
+	protected void deploy(ServletContextHandler ctx) {
+		String contextPath = ctx.getContextPath();
+
+		Hashtable props = new Hashtable();
+		props.put("contextFilePath", "/etc/tigase-http-context.xml");
+		ServiceRegistration registration = context.registerService(ContextHandler.class.getName(), ctx, props);
+		if (registration == null) {
+			log.log(Level.SEVERE, "registration failed for {0}", contextPath);
+		}
+		registeredContexts.put(contextPath, registration);
+	}
+
+	protected void undeploy(ServletContextHandler ctx) {
+		String contextPath = ctx.getContextPath();
+		try {
+			ServiceRegistration registration = registeredContexts.get(contextPath);
+			if (registration != null) {
+				registration.unregister();
+			}
+		} catch (Exception ex) {
+			log.log(Level.SEVERE, "exception during unregistration of context = " + contextPath, ctx);
+		}
 	}
 
 }

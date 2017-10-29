@@ -49,11 +49,13 @@ public class JettyHttpServerHelper {
 		}
 		Service service = deployment.getService();
 		if (service != null) {
-			context.getSecurityHandler().setLoginService(new tigase.http.jetty.security.TigasePlainLoginService(service));
+			context.getSecurityHandler()
+					.setLoginService(new tigase.http.jetty.security.TigasePlainLoginService(service));
 		}
 		context.setContextPath(deployment.getContextPath());
-		if (deployment.getClassLoader() != null)
+		if (deployment.getClassLoader() != null) {
 			context.setClassLoader(deployment.getClassLoader());
+		}
 		String[] vhosts = deployment.getVHosts();
 		if (vhosts != null && vhosts.length > 0) {
 			context.setVirtualHosts(vhosts);
