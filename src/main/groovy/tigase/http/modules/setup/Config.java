@@ -30,8 +30,8 @@ import tigase.kernel.beans.selector.ConfigTypeEnum;
 import tigase.server.xmppsession.SessionManager;
 import tigase.util.dns.DNSResolverFactory;
 import tigase.util.setup.SetupHelper;
-import tigase.xmpp.jid.BareJID;
 import tigase.xmpp.XMPPImplIfc;
+import tigase.xmpp.jid.BareJID;
 
 import java.io.*;
 import java.util.*;
@@ -41,23 +41,51 @@ import java.util.stream.Collectors;
  * Created by andrzej on 30.03.2017.
  */
 public class Config {
-	
-	private String acsName = "";
+
 	protected boolean acs = true;
-	private ConfigTypeEnum configType = ConfigTypeEnum.DefaultMode;
-	protected String[] virtualDomains = new String[] {DNSResolverFactory.getInstance().getDefaultHost() };
-	protected BareJID[] admins = new BareJID[] { BareJID.bareJIDInstanceNS("admin@" + DNSResolverFactory.getInstance().getDefaultHost()) };
 	protected String adminPwd = "tigase";
-	private String dbType = null;
+	protected BareJID[] admins = new BareJID[]{
+			BareJID.bareJIDInstanceNS("admin@" + DNSResolverFactory.getInstance().getDefaultHost())};
 	protected boolean advancedConfig = false;
 	protected boolean clusterMode = false;
-
+	protected Properties dbProperties = new Properties();
+	protected SetupHelper.HttpSecurity httpSecurity = new SetupHelper.HttpSecurity();
 	protected Set<String> optionalComponents = new HashSet<>();
 	protected Set<String> plugins = new HashSet<>();
+	protected String[] virtualDomains = new String[]{DNSResolverFactory.getInstance().getDefaultHost()};
+	private String acsName = "";
+	private ConfigTypeEnum configType = ConfigTypeEnum.DefaultMode;
+	private String dbType = null;
 
-	protected Properties dbProperties = new Properties();
+	private static AbstractBeanConfigurator.BeanDefinition addBean(Map<String, Object> props,
+																   AbstractBeanConfigurator.BeanDefinition def) {
+		props.put(def.getBeanName(), def);
+		return def;
+	}
 
-	protected SetupHelper.HttpSecurity httpSecurity = new SetupHelper.HttpSecurity();
+	private static AbstractBeanConfigurator.BeanDefinition createBean(String name) {
+		return createBean(name, true);
+	}
+
+	private static AbstractBeanConfigurator.BeanDefinition createBean(String name, boolean active) {
+		return createBean(name, active, null);
+	}
+
+	private static AbstractBeanConfigurator.BeanDefinition createBean(String name, boolean active, Class cls) {
+		AbstractBeanConfigurator.BeanDefinition def = new AbstractBeanConfigurator.BeanDefinition();
+		def.setBeanName(name);
+		def.setActive(active);
+		if (cls != null) {
+			def.setClazzName(cls.getCanonicalName());
+		}
+		return def;
+	}
+
+	private static AbstractBeanConfigurator.BeanDefinition setBeanProperty(AbstractBeanConfigurator.BeanDefinition def,
+																		   String key, Object val) {
+		def.put(key, val);
+		return def;
+	}
 
 	public Config() {
 		setConfigType(ConfigTypeEnum.DefaultMode);
@@ -86,7 +114,8 @@ public class Config {
 		plugins = SetupHelper.getAvailableProcessors(SessionManager.class, XMPPImplIfc.class)
 				.stream()
 				.filter(def -> def.isActive())
-				.filter(def -> this.configType == ConfigTypeEnum.DefaultMode || this.configType == ConfigTypeEnum.SessionManagerMode)
+				.filter(def -> this.configType == ConfigTypeEnum.DefaultMode ||
+						this.configType == ConfigTypeEnum.SessionManagerMode)
 				.filter(def -> {
 					ConfigType ct = (ConfigType) def.getClazz().getAnnotation(ConfigType.class);
 					return ct == null || Arrays.asList(ct.value()).contains(this.configType.name());
@@ -104,12 +133,12 @@ public class Config {
 		this.dbProperties.setProperty("dbType", type);
 	}
 
-	public void setACS(boolean acs) {
-		this.acs = acs;
-	}
-
 	public boolean getACS() {
 		return acs;
+	}
+
+	public void setACS(boolean acs) {
+		this.acs = acs;
 	}
 
 	public String getAcsName() {
@@ -121,8 +150,9 @@ public class Config {
 	}
 
 	public String getDatabaseUri() {
-		if (dbType == null)
+		if (dbType == null) {
 			return null;
+		}
 
 		Properties props = getSchemaLoaderProperties();
 
@@ -139,8 +169,9 @@ public class Config {
 
 	public Map<String, Object> getConfigurationInMap() throws IOException {
 		ConfigBuilder builder = SetupHelper.generateConfig(configType, getDatabaseUri(), clusterMode, acs,
-														   Optional.of(optionalComponents), Optional.empty(), Optional.of(plugins),
-														   virtualDomains, Optional.ofNullable(admins),
+														   Optional.of(optionalComponents), Optional.empty(),
+														   Optional.of(plugins), virtualDomains,
+														   Optional.ofNullable(admins),
 														   Optional.ofNullable(httpSecurity));
 		return builder.build();
 	}
@@ -150,34 +181,6 @@ public class Config {
 		StringWriter w = new StringWriter();
 		new ConfigWriter().write(w, props);
 		return w.toString();
-	}
-
-	private static AbstractBeanConfigurator.BeanDefinition addBean(Map<String, Object> props, AbstractBeanConfigurator.BeanDefinition def) {
-		props.put(def.getBeanName(), def);
-		return def;
-	}
-
-	private static AbstractBeanConfigurator.BeanDefinition createBean(String name) {
-		return createBean(name, true);
-	}
-
-	private static AbstractBeanConfigurator.BeanDefinition createBean(String name, boolean active) {
-		return createBean(name, active, null);
-	}
-
-	private static AbstractBeanConfigurator.BeanDefinition createBean(String name, boolean active, Class cls) {
-		AbstractBeanConfigurator.BeanDefinition def = new AbstractBeanConfigurator.BeanDefinition();
-		def.setBeanName(name);
-		def.setActive(active);
-		if (cls != null) {
-			def.setClazzName(cls.getCanonicalName());
-		}
-		return def;
-	}
-
-	private static AbstractBeanConfigurator.BeanDefinition setBeanProperty(AbstractBeanConfigurator.BeanDefinition def, String key, Object val) {
-		def.put(key, val);
-		return def;
 	}
 
 	public void saveConfig() throws IOException {
@@ -200,5 +203,5 @@ public class Config {
 		}
 		new ConfigWriter().write(f, props);
 	}
-	
+
 }

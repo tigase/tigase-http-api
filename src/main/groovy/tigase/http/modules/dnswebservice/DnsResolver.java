@@ -19,40 +19,59 @@
  */
 package tigase.http.modules.dnswebservice;
 
+import tigase.util.cache.SimpleCache;
+
+import javax.naming.NamingException;
+import javax.naming.directory.Attribute;
+import javax.naming.directory.Attributes;
+import javax.naming.directory.DirContext;
+import javax.naming.directory.InitialDirContext;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.naming.NamingException;
-import javax.naming.directory.Attribute;
-import javax.naming.directory.Attributes;
-import javax.naming.directory.DirContext;
-import javax.naming.directory.InitialDirContext;
-import tigase.util.cache.SimpleCache;
 
 /**
- *
  * @author andrzej
  */
 public class DnsResolver {
 
 	private static final long DNS_CACHE_TIME = 1000 * 60;
 	//private static ConcurrentMap<String, DnsItem> cache = new ConcurrentHashMap<String, DnsItem>();
-	private static Map<String, Future<DnsItem>> cache = Collections
-			.synchronizedMap(new SimpleCache<String, Future<DnsItem>>(500, DNS_CACHE_TIME));
+	private static Map<String, Future<DnsItem>> cache = Collections.synchronizedMap(
+			new SimpleCache<String, Future<DnsItem>>(500, DNS_CACHE_TIME));
 	private static ExecutorService executor = Executors.newCachedThreadPool();
+
+	private static List<DnsEntry> addressesToDnsEntries(InetAddress[] addrs, int port, int priority) {
+		List<DnsEntry> entries = new ArrayList<DnsEntry>();
+		Map<String, List<String>> hostnameToIps = new HashMap<String, List<String>>();
+		for (InetAddress addr : addrs) {
+			try {
+				InetAddress host = InetAddress.getByAddress(addr.getAddress());
+				String hostname = host.getHostName();
+				List<String> tmp = hostnameToIps.get(hostname);
+				if (tmp == null) {
+					tmp = new ArrayList<String>();
+					hostnameToIps.put(hostname, tmp);
+				}
+				tmp.add(addr.getHostAddress());
+			} catch (UnknownHostException ex) {
+			}
+		}
+
+		for (String host : hostnameToIps.keySet()) {
+			List<String> ipsList = hostnameToIps.get(host);
+			String[] ips = ipsList.toArray(new String[ipsList.size()]);
+			DnsEntry entry = new DnsEntry(host, port, ips, priority);
+			entries.add(entry);
+		}
+		return entries;
+	}
 
 	public static DnsItem get(String domain) {
 		try {
@@ -71,11 +90,46 @@ public class DnsResolver {
 			}
 
 			return item.get();
-		}
-		catch (Exception ex) {
+		} catch (Exception ex) {
 			cache.remove(domain);
 		}
 		return null;
+	}
+
+	public static void main(String[] argv) {
+		get("hi-low.eu");
+	}
+
+	private static DnsEntry parseSrvEntry(String str) throws UnknownHostException {
+		String[] parts = str.split(" ");
+		int priority = 0;
+		int weight = 0;
+		int port = 5222;
+		String host = parts[3];
+		if (host.endsWith(".")) {
+			host = host.substring(0, host.length() - 1);
+		}
+
+		try {
+			priority = Integer.parseInt(parts[0]);
+		} catch (Exception ex) {
+		}
+		try {
+			weight = Integer.parseInt(parts[1]);
+		} catch (Exception ex) {
+		}
+		try {
+			port = Integer.parseInt(parts[2]);
+		} catch (Exception ex) {
+		}
+
+		InetAddress[] addrs = InetAddress.getAllByName(host);
+		String[] ips = new String[addrs.length];
+		for (int i = 0; i < addrs.length; i++) {
+			ips[i] = addrs[i].getHostAddress();
+		}
+		return new DnsEntry(host, port, ips, priority);
+		//return addressesToDnsEntries(addrs, port, priority);
 	}
 
 	private static DnsItem resolve(String domain) {
@@ -107,44 +161,6 @@ public class DnsResolver {
 				}
 			}
 		}
-	}
-
-	private static DnsEntry[] resolveC2S(DirContext ctx, String domain) {
-		try {
-			Attributes attrs = ctx.getAttributes("_xmpp-client._tcp." + domain, new String[]{"SRV"});
-			Attribute attr = attrs.get("SRV");
-
-			if (attr != null && attr.size() > 0) {
-				List<DnsEntry> entries = new ArrayList<DnsEntry>();
-				for (int i = 0; i < attr.size(); i++) {
-					String str = attr.get(i).toString();
-					try {
-						DnsEntry entry = parseSrvEntry(str);
-						entries.add(entry);
-					} catch (UnknownHostException ex) {
-						// we ignore this record if we get UnknownHostException
-					}
-				}
-				return entries.toArray(new DnsEntry[entries.size()]);
-			}
-		} catch (NamingException ex) {
-			// no SRV record for domain - we need to go by A record for domain
-		}
-
-		try {
-			InetAddress[] addrs = InetAddress.getAllByName(domain);
-			//List<DnsEntry> entries = addressesToDnsEntries(addrs, 5222, 0);			
-			//return entries.toArray(new DnsEntry[entries.size()]);
-			String[] ips = new String[addrs.length];
-			for (int i = 0; i < addrs.length; i++) {
-				ips[i] = addrs[i].getHostAddress();
-			}
-			return new DnsEntry[]{new DnsEntry(domain, 5222, ips, 0)};
-		} catch (UnknownHostException ex) {
-			// even no A record for domain - we need to ignore this domain
-		}
-
-		return null;
 	}
 
 	private static DnsEntry[] resolveBosh(DirContext ctx, String domain, DnsEntry[] c2sEntries) {
@@ -211,6 +227,44 @@ public class DnsResolver {
 		return null;
 	}
 
+	private static DnsEntry[] resolveC2S(DirContext ctx, String domain) {
+		try {
+			Attributes attrs = ctx.getAttributes("_xmpp-client._tcp." + domain, new String[]{"SRV"});
+			Attribute attr = attrs.get("SRV");
+
+			if (attr != null && attr.size() > 0) {
+				List<DnsEntry> entries = new ArrayList<DnsEntry>();
+				for (int i = 0; i < attr.size(); i++) {
+					String str = attr.get(i).toString();
+					try {
+						DnsEntry entry = parseSrvEntry(str);
+						entries.add(entry);
+					} catch (UnknownHostException ex) {
+						// we ignore this record if we get UnknownHostException
+					}
+				}
+				return entries.toArray(new DnsEntry[entries.size()]);
+			}
+		} catch (NamingException ex) {
+			// no SRV record for domain - we need to go by A record for domain
+		}
+
+		try {
+			InetAddress[] addrs = InetAddress.getAllByName(domain);
+			//List<DnsEntry> entries = addressesToDnsEntries(addrs, 5222, 0);
+			//return entries.toArray(new DnsEntry[entries.size()]);
+			String[] ips = new String[addrs.length];
+			for (int i = 0; i < addrs.length; i++) {
+				ips[i] = addrs[i].getHostAddress();
+			}
+			return new DnsEntry[]{new DnsEntry(domain, 5222, ips, 0)};
+		} catch (UnknownHostException ex) {
+			// even no A record for domain - we need to ignore this domain
+		}
+
+		return null;
+	}
+
 	private static DnsEntry[] resolveWebSocket(DirContext ctx, String domain, DnsEntry[] c2sEntries) {
 		try {
 			Attributes attrs = ctx.getAttributes("_xmppconnect." + domain, new String[]{"TXT"});
@@ -252,75 +306,15 @@ public class DnsResolver {
 		return null;
 	}
 
-	private static List<DnsEntry> addressesToDnsEntries(InetAddress[] addrs, int port, int priority) {
-		List<DnsEntry> entries = new ArrayList<DnsEntry>();
-		Map<String, List<String>> hostnameToIps = new HashMap<String, List<String>>();
-		for (InetAddress addr : addrs) {
-			try {
-				InetAddress host = InetAddress.getByAddress(addr.getAddress());
-				String hostname = host.getHostName();
-				List<String> tmp = hostnameToIps.get(hostname);
-				if (tmp == null) {
-					tmp = new ArrayList<String>();
-					hostnameToIps.put(hostname, tmp);
-				}
-				tmp.add(addr.getHostAddress());
-			} catch (UnknownHostException ex) {
-			}
-		}
-
-		for (String host : hostnameToIps.keySet()) {
-			List<String> ipsList = hostnameToIps.get(host);
-			String[] ips = ipsList.toArray(new String[ipsList.size()]);
-			DnsEntry entry = new DnsEntry(host, port, ips, priority);
-			entries.add(entry);
-		}
-		return entries;
-	}
-
-	private static DnsEntry parseSrvEntry(String str) throws UnknownHostException {
-		String[] parts = str.split(" ");
-		int priority = 0;
-		int weight = 0;
-		int port = 5222;
-		String host = parts[3];
-		if (host.endsWith("."))
-			host = host.substring(0, host.length()-1);
-		
-		try {
-			priority = Integer.parseInt(parts[0]);
-		} catch (Exception ex) {
-		}
-		try {
-			weight = Integer.parseInt(parts[1]);
-		} catch (Exception ex) {
-		}
-		try {
-			port = Integer.parseInt(parts[2]);
-		} catch (Exception ex) {
-		}
-
-		InetAddress[] addrs = InetAddress.getAllByName(host);
-		String[] ips = new String[addrs.length];
-		for (int i = 0; i < addrs.length; i++) {
-			ips[i] = addrs[i].getHostAddress();
-		}
-		return new DnsEntry(host, port, ips, priority);
-		//return addressesToDnsEntries(addrs, port, priority);
-	}
-
-	public static void main(String[] argv) {
-		get("hi-low.eu");
-	}
-	
-	private static class ResolverTask implements Callable<DnsItem> {
+	private static class ResolverTask
+			implements Callable<DnsItem> {
 
 		private final String domain;
-		
+
 		public ResolverTask(String domain) {
 			this.domain = domain;
 		}
-		
+
 		@Override
 		public DnsItem call() throws Exception {
 			return DnsResolver.resolve(domain);

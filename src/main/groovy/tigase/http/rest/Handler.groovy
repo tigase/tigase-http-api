@@ -21,87 +21,82 @@ package tigase.http.rest
 
 abstract class Handler {
 
-    public static class Result {
-        public String contentType;
-        public byte[] data;
-    }
+	public static class Result {
+
+		public String contentType;
+		public byte[] data;
+	}
 
 	String pathName = null;
-	def getSourceFile = { 
+	def getSourceFile = {
 		return new File(pathName);
 	}
-	
-    /**
-     * true if requests require authentication
-     */
-    def authRequired = { api_key -> return requiredRole != null }
-
-    /**
-     * false if handler requires plain content
-     */
-    def decodeContent = true;
-
-    /**
-     * regular expression to match request
-     */
-    def regex = null;
 
 	/**
-	 * true if requests require valid API-KEY
-	 */
+	 * true if requests require authentication*/
+	def authRequired = { api_key -> return requiredRole != null }
+
+	/**
+	 * false if handler requires plain content*/
+	def decodeContent = true;
+
+	/**
+	 * regular expression to match request*/
+	def regex = null;
+
+	/**
+	 * true if requests require valid API-KEY	*/
 	def apiKey = true;
 
-    /**
-     * name of role required to execute
-     */
-    String requiredRole = null;
+	/**
+	 * name of role required to execute*/
+	String requiredRole = null;
 
-    /**
-     * true if requests will be handler in asynchroniously
-     */
-    def isAsync = false;
+	/**
+	 * true if requests will be handler in asynchroniously*/
+	def isAsync = false;
 
-    // all functions below should return value directly by calling callback
+	// all functions below should return value directly by calling callback
 
-    /**
-     * Retrive item closure
-     *
-     * @param service instance
-     * @param callback closure with results to return
-     * @param user jid - passed only if authentication is required, if not then parameter is omitted
-     * @param... additional parameters
-     */
-    def execGet = null;
+	/**
+	 * Retrive item closure
+	 *
+	 * @param service instance
+	 * @param callback closure with results to return
+	 * @param user jid - passed only if authentication is required, if not then parameter is omitted
+	 * @param... additional parameters
+	 */
+	def execGet = null;
 
-    /**
-     * Insert item closure
-     *
-     * @param service instance
-     * @param callback closure with results to return
-     * @param user jid - passed only if authentication is required, if not then parameter is omitted
-     * @param request content
-     * @param... additional parameters
-     */
-    def execPut = null;
-    /**
-     * Update item closure
-     *
-     * @param service instance
-     * @param callback closure with results to return
-     * @param user jid - passed only if authentication is required, if not then parameter is omitted
-     * @param request content
-     * @param... additional parameters
-     */
-    def execPost = null;
-    /**
-     * Remove item closure
-     *
-     * @param service instance
-     * @param callback closure with results to return
-     * @param user jid - passed only if authentication is required, if not then parameter is omitted
-     * @param... additional parameters
-     */
-    def execDelete = null;
+	/**
+	 * Insert item closure
+	 *
+	 * @param service instance
+	 * @param callback closure with results to return
+	 * @param user jid - passed only if authentication is required, if not then parameter is omitted
+	 * @param request content
+	 * @param... additional parameters
+	 */
+	def execPut = null;
+	/**
+	 * Update item closure
+	 *
+	 * @param service instance
+	 * @param callback closure with results to return
+	 * @param user jid - passed only if authentication is required, if not then parameter is omitted
+	 * @param request content
+	 * @param... additional parameters
+	 */
+	def execPost = null;
+	/**
+	 * Remove item closure
+	 *
+	 * @param service instance
+	 * @param callback closure with results to return
+	 * @param user jid - passed only if authentication is required, if not then parameter is omitted
+	 * @param... additional parameters
+	 */
+	def execDelete = null;
 
 	def regexDescription = null;
 	def description = null;

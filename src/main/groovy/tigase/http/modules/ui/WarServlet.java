@@ -34,21 +34,20 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 /**
- * This class implements support for deploying static content in form of a compressed
- * archive in WAR format.
- * 
+ * This class implements support for deploying static content in form of a compressed archive in WAR format.
+ *
  * @author andrzej
  */
-public class WarServlet extends HttpServlet {
-	
-	private static final Logger log = Logger.getLogger(WarServlet.class.getCanonicalName());
-	
+public class WarServlet
+		extends HttpServlet {
+
 	public static final String WAR_PATH_KEY = "war-path";
+	private static final Logger log = Logger.getLogger(WarServlet.class.getCanonicalName());
 	private ZipFile war;
-	
-    @Override
-    public void init() throws ServletException {
-        super.init();
+
+	@Override
+	public void init() throws ServletException {
+		super.init();
 		ServletConfig cfg = super.getServletConfig();
 		String warPath = cfg.getInitParameter(WAR_PATH_KEY);
 		try {
@@ -57,23 +56,27 @@ public class WarServlet extends HttpServlet {
 			log.log(Level.FINE, "Could not initialize servlet, wrong path " + warPath + " to WAR archive?", ex);
 		}
 	}
-	
+
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		URI uri = URI.create(req.getRequestURI());
 		String path = uri.getPath();
 		if (log.isLoggable(Level.FINEST)) {
-			log.log(Level.FINEST, "got request for {0} and servlet path {1} context {2}", 
+			log.log(Level.FINEST, "got request for {0} and servlet path {1} context {2}",
 					new Object[]{path, req.getServletPath(), req.getContextPath()});
 		}
-		if (path.startsWith(req.getContextPath()))
+		if (path.startsWith(req.getContextPath())) {
 			path = path.substring(req.getContextPath().length());
-		if (path.startsWith(req.getServletPath()))
+		}
+		if (path.startsWith(req.getServletPath())) {
 			path = path.substring(req.getServletPath().length());
-		if (path.isEmpty() || path.equals("/"))
+		}
+		if (path.isEmpty() || path.equals("/")) {
 			path = "index.html";
-		while (path.startsWith("/"))
+		}
+		while (path.startsWith("/")) {
 			path = path.substring(1);
+		}
 		if (log.isLoggable(Level.FINEST)) {
 			log.log(Level.FINEST, "converted to request for file from relative path {0}", path);
 		}
@@ -85,7 +88,7 @@ public class WarServlet extends HttpServlet {
 		byte[] buf = new byte[4096];
 		try (InputStream in = war.getInputStream(e)) {
 			OutputStream out = resp.getOutputStream();
-			
+
 			int read;
 			while ((read = in.read(buf)) != -1) {
 				out.write(buf, 0, read);

@@ -32,19 +32,10 @@ import java.io.FilenameFilter;
 /**
  * Created by andrzej on 05.08.2016.
  */
-@Bean(name = "ui", parent = HttpMessageReceiver.class, active = true, selectors = { UIModule.UIModuleSelector.class })
+@Bean(name = "ui", parent = HttpMessageReceiver.class, active = true, selectors = {UIModule.UIModuleSelector.class})
 @ConfigType(ConfigTypeEnum.DefaultMode)
-public class UIModule extends WebModule {
-
-	public UIModule() {
-		File warFile = getWarFile();
-		this.warPath = warFile.getAbsolutePath();
-	}
-
-	@Override
-	public String getDescription() {
-		return "Web UI XMPP client and management utility";
-	}
+public class UIModule
+		extends WebModule {
 
 	public static File getWarFile() {
 		File[] files = new File("jars").listFiles(new FilenameFilter() {
@@ -56,7 +47,18 @@ public class UIModule extends WebModule {
 		return (files != null && files.length > 0) ? files[0] : null;
 	}
 
-	public static class UIModuleSelector implements BeanSelector {
+	public UIModule() {
+		File warFile = getWarFile();
+		this.warPath = warFile.getAbsolutePath();
+	}
+
+	@Override
+	public String getDescription() {
+		return "Web UI XMPP client and management utility";
+	}
+
+	public static class UIModuleSelector
+			implements BeanSelector {
 
 		@Override
 		public boolean shouldRegister(Class clazz, Kernel kernel) {

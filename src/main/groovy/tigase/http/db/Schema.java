@@ -26,5 +26,5 @@ public class Schema {
 
 	public static final String HTTP_UPLOAD_SCHEMA_ID = "http-api";
 	public static final String HTTP_UPLOAD_SCHEMA_NAME = "Tigase HTTP API - File Upload";
-	
+
 }

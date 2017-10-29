@@ -37,32 +37,30 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
  * @author andrzej
  */
-public class RequestHandler implements HttpHandler {
+public class RequestHandler
+		implements HttpHandler {
 
 	private static final Logger log = Logger.getLogger(RequestHandler.class.getCanonicalName());
 
 	private static final AtomicInteger counter = new AtomicInteger(0);
-
-	private final String contextPath;
-	private final Map<String,HttpServlet> servlets = new ConcurrentHashMap<String,HttpServlet>();
-	private final Service service;
-	private final Timer timer;
-
 	private static final ThreadLocal<Integer> executionTimeout = ThreadLocal.withInitial(() -> 60 * 1000);
-
 	private static final Comparator<String> COMPARATOR = new Comparator<String>() {
 		@Override
 		public int compare(String o1, String o2) {
 			int val1 = o1.length() - o1.replace("/", "").length(); // 3
 			int val2 = o2.length() - o2.replace("/", "").length(); // 5
-			if (val2 != val1)
+			if (val2 != val1) {
 				return val2 - val1;
+			}
 			return Integer.compare(o2.length(), o1.length());
 		}
 	};
+	private final String contextPath;
+	private final Service service;
+	private final Map<String, HttpServlet> servlets = new ConcurrentHashMap<String, HttpServlet>();
+	private final Timer timer;
 
 	public static void setExecutionTimeout(Integer timeout) {
 		executionTimeout.set(timeout);
@@ -77,7 +75,7 @@ public class RequestHandler implements HttpHandler {
 			registerServlet(servletInfo);
 		}
 	}
-	
+
 	@Override
 	public void handle(final HttpExchange he) throws IOException {
 		DummyServletRequest req = null;
@@ -107,16 +105,19 @@ public class RequestHandler implements HttpHandler {
 					HttpServlet servlet = servlets.get(key);
 					if (servlet != null) {
 						String servletPath = key.substring(contextPath.length(), key.length());
-						if (servletPath.isEmpty())
+						if (servletPath.isEmpty()) {
 							servletPath = "/";
-						req = new DummyServletRequest(he, contextPath, servletPath, service, timer, executionTimeout.get());
+						}
+						req = new DummyServletRequest(he, contextPath, servletPath, service, timer,
+													  executionTimeout.get());
 						resp = new DummyServletResponse(he);
 						if (key.endsWith(path) && !key.equals("/")) {
 							String query = req.getQueryString();
-							if (query == null || query.isEmpty())
+							if (query == null || query.isEmpty()) {
 								resp.sendRedirect(req.getRequestURI() + "/");
-							else
+							} else {
 								resp.sendRedirect(req.getRequestURI() + "/?" + query);
+							}
 							return;
 						}
 						servlet.service(req, resp);
@@ -163,15 +164,16 @@ public class RequestHandler implements HttpHandler {
 		}
 		tt.cancel();
 	}
-	
+
 	private void registerServlet(ServletInfo info) {
 		try {
 			HttpServlet servlet = info.getServletClass().newInstance();
 			ServletConfig cfg = new ServletCfg(info.getInitParams());
 			servlet.init(cfg);
 			for (String mapping : info.getMappings()) {
-				if (mapping.endsWith("/"))
-					mapping = mapping.substring(0, mapping.length()-1);
+				if (mapping.endsWith("/")) {
+					mapping = mapping.substring(0, mapping.length() - 1);
+				}
 //				if ("/".equals(contextPath)) {
 //					servlets.put(mapping.replace("/*", ""), servlet);
 //				} else {
@@ -182,15 +184,16 @@ public class RequestHandler implements HttpHandler {
 			Logger.getLogger(RequestHandler.class.getName()).log(Level.WARNING, null, ex);
 		}
 	}
-	
-	private class ServletCfg implements ServletConfig {
 
-		private final Map<String,String> params = new HashMap<String,String>();
-		
-		public ServletCfg(Map<String,String> map) {
+	private class ServletCfg
+			implements ServletConfig {
+
+		private final Map<String, String> params = new HashMap<String, String>();
+
+		public ServletCfg(Map<String, String> map) {
 			params.putAll(map);
 		}
-		
+
 		@Override
 		public String getServletName() {
 			return null;
@@ -210,6 +213,6 @@ public class RequestHandler implements HttpHandler {
 		public Enumeration<String> getInitParameterNames() {
 			return null;
 		}
-		
+
 	}
 }

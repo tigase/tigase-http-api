@@ -27,22 +27,27 @@ import javax.servlet.http.HttpServlet;
 import java.util.List;
 
 /**
- *
  * @author andrzej
  */
-public interface HttpServerIfc extends RegistrarBean {
+public interface HttpServerIfc
+		extends RegistrarBean {
 
 	@Deprecated
 	public static final String HTTP_PORT_KEY = "port";
+
 	public static final String HTTP_PORTS_KEY = "ports";
+
 	public static final int DEF_HTTP_PORT_VAL = 8080;
+
 	public static final String PORT_SOCKET_KEY = "socket";
+
 	public static final String PORT_DOMAIN_KEY = "domain";
 //	public static final String HTTP2_ENABLED_KEY = "http2";
 
 	List<DeploymentInfo> listDeployed();
 
 	void deploy(DeploymentInfo deployment);
+
 	void undeploy(DeploymentInfo deployment);
 
 	default DeploymentInfo deployment() {
@@ -54,6 +59,7 @@ public interface HttpServerIfc extends RegistrarBean {
 	}
 
 	List<Integer> getHTTPPorts();
+
 	List<Integer> getHTTPSPorts();
 
 }

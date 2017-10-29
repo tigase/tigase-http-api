@@ -19,22 +19,25 @@
  */
 package tigase.http.modules.rest;
 
-import java.util.Queue;
-import javax.script.Bindings;
 import tigase.server.Command;
 import tigase.server.Iq;
 import tigase.server.Packet;
 import tigase.server.script.CommandIfc;
 import tigase.stats.StatisticHolderImpl;
 
-public class ReloadHandlersCmd extends StatisticHolderImpl implements CommandIfc {
+import javax.script.Bindings;
+import java.util.Queue;
+
+public class ReloadHandlersCmd
+		extends StatisticHolderImpl
+		implements CommandIfc {
 
 	private final RestModule module;
-	
+
 	public ReloadHandlersCmd(RestModule restModule) {
 		module = restModule;
 	}
-	
+
 	@Override
 	public Bindings getBindings() {
 		return null;
@@ -49,14 +52,15 @@ public class ReloadHandlersCmd extends StatisticHolderImpl implements CommandIfc
 	public String getDescription() {
 		return "Reload REST HTTP script handlers";
 	}
-	
+
 	@Override
 	public String getGroup() {
 		return "Configuration";
 	}
 
 	@Override
-	public void init(String id, String description, String group) {}
+	public void init(String id, String description, String group) {
+	}
 
 	@Override
 	public boolean isAdminOnly() {
@@ -64,14 +68,15 @@ public class ReloadHandlersCmd extends StatisticHolderImpl implements CommandIfc
 	}
 
 	@Override
-	public void runCommand(Iq packet, Bindings binds, Queue<Packet> results) {		
+	public void setAdminOnly(boolean adminOnly) {
+	}
+
+	@Override
+	public void runCommand(Iq packet, Bindings binds, Queue<Packet> results) {
 		module.start();
 		Packet result = packet.commandResult(Command.DataType.result);
 		Command.addNote(result, "Script handlers reloaded");
 		results.add(result);
 	}
 
-	@Override
-	public void setAdminOnly(boolean adminOnly) {}
-	
 }

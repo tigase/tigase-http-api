@@ -29,7 +29,8 @@ import tigase.xmpp.jid.BareJID
 import javax.servlet.http.HttpServletRequest
 
 @Bean(name = "password-reset-token", active = true)
-class ResetPasswordTokenHandler extends tigase.http.rest.Handler {
+class ResetPasswordTokenHandler
+		extends tigase.http.rest.Handler {
 
 	@Inject(nullAllowed = true)
 	private PasswordResetterIfc[] resetters;
@@ -43,7 +44,7 @@ class ResetPasswordTokenHandler extends tigase.http.rest.Handler {
 		apiKey = false;
 		execGet = { Service service, callback, String token ->
 			if (resetters == null) {
-				callback([error: "Password resetting is disabled. Please contact server administrator."])
+				callback([ error: "Password resetting is disabled. Please contact server administrator." ])
 				return;
 			}
 
@@ -57,17 +58,17 @@ class ResetPasswordTokenHandler extends tigase.http.rest.Handler {
 			});
 
 			if (resetter == null) {
-				callback([error: "This link is not valid"]);
+				callback([ error: "This link is not valid" ]);
 				return;
 			}
 
 			BareJID jid = Token.parse(token).getJid();
-			callback([jid: jid, action: 'form']);
+			callback([ jid: jid, action: 'form' ]);
 		}
 
 		execPost = { Service service, callback, HttpServletRequest request, String token ->
 			if (resetters == null) {
-				callback([error: "Password resetting is disabled. Please contact server administrator."])
+				callback([ error: "Password resetting is disabled. Please contact server administrator." ])
 				return;
 			}
 
@@ -84,11 +85,11 @@ class ResetPasswordTokenHandler extends tigase.http.rest.Handler {
 				}
 			});
 
-			def errors = [];
+			def errors = [ ];
 			def action = 'form';
 
 			if (resetter == null) {
-				callback([error: "This link is not valid"]);
+				callback([ error: "This link is not valid" ]);
 				return;
 			} else {
 				if (p1 != null && p2 != null && p1.equals(p2)) {
@@ -101,7 +102,7 @@ class ResetPasswordTokenHandler extends tigase.http.rest.Handler {
 				}
 			}
 
-			callback([jid: jid, action: action, errors: errors]);
+			callback([ jid: jid, action: action, errors: errors ]);
 		}
 	}
 

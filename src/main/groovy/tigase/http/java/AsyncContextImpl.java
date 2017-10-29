@@ -30,25 +30,25 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
  * @author andrzej
  */
-public class AsyncContextImpl extends TimerTask implements AsyncContext {
+public class AsyncContextImpl
+		extends TimerTask
+		implements AsyncContext {
 
 	private static final Logger log = Logger.getLogger(AsyncContextImpl.class.getCanonicalName());
-
+	private final HttpExchange exchange;
 	private final ServletRequest req;
 	private final ServletResponse resp;
-	private final HttpExchange exchange;
 	private final Timer timer;
-	
+
 	public AsyncContextImpl(ServletRequest req, ServletResponse resp, HttpExchange exchange, Timer timer) {
 		this.req = req;
 		this.resp = resp;
 		this.exchange = exchange;
 		this.timer = timer;
 	}
-	
+
 	@Override
 	public ServletRequest getRequest() {
 		return req;
@@ -93,27 +93,30 @@ public class AsyncContextImpl extends TimerTask implements AsyncContext {
 
 	@Override
 	public void addListener(AsyncListener al) {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+		throw new UnsupportedOperationException(
+				"Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 	}
 
 	@Override
 	public void addListener(AsyncListener al, ServletRequest sr, ServletResponse sr1) {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+		throw new UnsupportedOperationException(
+				"Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 	}
 
 	@Override
 	public <T extends AsyncListener> T createListener(Class<T> type) throws ServletException {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-	}
-
-	@Override
-	public void setTimeout(long timeout) {
-		timer.schedule(this, timeout);
+		throw new UnsupportedOperationException(
+				"Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 	}
 
 	@Override
 	public long getTimeout() {
 		return this.scheduledExecutionTime();
+	}
+
+	@Override
+	public void setTimeout(long timeout) {
+		timer.schedule(this, timeout);
 	}
 
 	@Override

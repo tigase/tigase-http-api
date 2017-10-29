@@ -34,10 +34,12 @@ import java.util.List;
  * Created by andrzej on 08.08.2016.
  */
 @Bean(name = "repo", exportable = true, active = true)
-public class DummyFileUploadRepository implements FileUploadRepository {
+public class DummyFileUploadRepository
+		implements FileUploadRepository {
 
 	@Override
-	public Slot allocateSlot(JID sender, String slotId, String filename, long filesize, String contentType) throws TigaseDBException {
+	public Slot allocateSlot(JID sender, String slotId, String filename, long filesize, String contentType)
+			throws TigaseDBException {
 		return new Slot(sender.getBareJID(), slotId, filename, filesize, contentType, new Date());
 	}
 
@@ -51,7 +53,8 @@ public class DummyFileUploadRepository implements FileUploadRepository {
 	}
 
 	@Override
-	public List<FileUploadRepository.Slot> listExpiredSlots(BareJID domain, LocalDateTime before, int limit) throws TigaseDBException {
+	public List<FileUploadRepository.Slot> listExpiredSlots(BareJID domain, LocalDateTime before, int limit)
+			throws TigaseDBException {
 		return Collections.emptyList();
 	}
 
@@ -64,9 +67,11 @@ public class DummyFileUploadRepository implements FileUploadRepository {
 		// nothing to do
 	}
 
-	public class Slot extends FileUploadRepository.Slot {
+	public class Slot
+			extends FileUploadRepository.Slot {
 
-		public Slot(BareJID uploader, String slotId, String filename, long filesize, String contentType, Date timestamp) {
+		public Slot(BareJID uploader, String slotId, String filename, long filesize, String contentType,
+					Date timestamp) {
 			super(uploader, slotId, filename, filesize, contentType, timestamp);
 		}
 

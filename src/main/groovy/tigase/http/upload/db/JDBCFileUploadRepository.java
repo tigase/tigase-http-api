@@ -40,12 +40,13 @@ import java.util.List;
 /**
  * Created by andrzej on 07.08.2016.
  */
-@Repository.Meta( supportedUris = { "jdbc:[^:]+:.*" } )
+@Repository.Meta(supportedUris = {"jdbc:[^:]+:.*"})
 @Repository.SchemaId(id = Schema.HTTP_UPLOAD_SCHEMA_ID, name = Schema.HTTP_UPLOAD_SCHEMA_NAME)
-public class JDBCFileUploadRepository implements FileUploadRepository<DataRepository> {
+public class JDBCFileUploadRepository
+		implements FileUploadRepository<DataRepository> {
 
 	private static final String DEF_ALLOCATE_SLOT = "{ call Tig_HFU_AllocateSlot(?, ?, ?, ?, ?, ?, ?) }";
-//	private static final String DEF_GET_TRANSFER_USED = "{ call Tig_HFU_GetTransferUsed(?, ?, ?, ?) }";
+	//	private static final String DEF_GET_TRANSFER_USED = "{ call Tig_HFU_GetTransferUsed(?, ?, ?, ?) }";
 	private static final String DEF_UPDATE_SLOT = "{ call Tig_HFU_UpdateSlot(?) }";
 	private static final String DEF_GET_SLOT = "{ call Tig_HFU_GetSlot(?) }";
 	private static final String DEF_LIST_EXPIRED_SLOTS = "{ call Tig_HFU_ListExpiredSlots(?,?,?) }";
@@ -59,16 +60,12 @@ public class JDBCFileUploadRepository implements FileUploadRepository<DataReposi
 
 //	@ConfigField(desc = "Query to calculate used transfer", alias = "get-transfer-used-query")
 //	private String GET_TRANSFER_USED_QUERY = DEF_GET_TRANSFER_USED;
-
-	@ConfigField(desc = "Query to update slot on file upload", alias = "update-slot-query")
-	private String UPDATE_SLOT_QUERY = DEF_UPDATE_SLOT;
-
 	@ConfigField(desc = "Query to list expired slots", alias = "list-expired-slots-query")
 	private String LIST_EXPIRED_SLOTS_QUERY = DEF_LIST_EXPIRED_SLOTS;
-
 	@ConfigField(desc = "Query to remove expired slots", alias = "remove-expired-slots-query")
 	private String REMOVE_EXPIRED_SLOTS_QUERY = DEF_REMOVE_EXPIRED_SLOTS;
-
+	@ConfigField(desc = "Query to update slot on file upload", alias = "update-slot-query")
+	private String UPDATE_SLOT_QUERY = DEF_UPDATE_SLOT;
 	private DataRepository repo;
 
 //	@Override
@@ -100,7 +97,8 @@ public class JDBCFileUploadRepository implements FileUploadRepository<DataReposi
 //	}
 
 	@Override
-	public Slot allocateSlot(JID sender, String slotId, String filename, long filesize, String contentType) throws TigaseDBException {
+	public Slot allocateSlot(JID sender, String slotId, String filename, long filesize, String contentType)
+			throws TigaseDBException {
 		BareJID bareJid = sender.getBareJID();
 		try {
 			PreparedStatement stmt = repo.getPreparedStatement(bareJid, ALLOCATE_SLOT_QUERY);
@@ -187,7 +185,8 @@ public class JDBCFileUploadRepository implements FileUploadRepository<DataReposi
 			synchronized (stmt) {
 				try {
 					stmt.setString(1, domain.getDomain());
-					repo.setTimestamp(stmt, 2, new Timestamp(before.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
+					repo.setTimestamp(stmt, 2,
+									  new Timestamp(before.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
 					stmt.setInt(3, limit);
 
 					rs = stmt.executeQuery();
@@ -216,7 +215,8 @@ public class JDBCFileUploadRepository implements FileUploadRepository<DataReposi
 			synchronized (stmt) {
 				try {
 					stmt.setString(1, domain.getDomain());
-					repo.setTimestamp(stmt,2, new Timestamp(before.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
+					repo.setTimestamp(stmt, 2,
+									  new Timestamp(before.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
 					stmt.setInt(3, limit);
 
 					stmt.execute();
@@ -232,7 +232,7 @@ public class JDBCFileUploadRepository implements FileUploadRepository<DataReposi
 	@Override
 	public void setDataSource(DataRepository dataSource) {
 		try {
-			dataSource.checkSchemaVersion( this );
+			dataSource.checkSchemaVersion(this);
 			dataSource.initPreparedStatement(ALLOCATE_SLOT_QUERY, ALLOCATE_SLOT_QUERY);
 			dataSource.initPreparedStatement(UPDATE_SLOT_QUERY, UPDATE_SLOT_QUERY);
 			dataSource.initPreparedStatement(GET_SLOT_QUERY, GET_SLOT_QUERY);

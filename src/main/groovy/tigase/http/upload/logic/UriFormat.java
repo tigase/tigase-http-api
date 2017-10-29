@@ -30,10 +30,9 @@ import java.util.regex.Pattern;
  */
 public class UriFormat {
 
-	private final String template;
-	private final Pattern pattern;
-
 	private final HashSet<String> groups = new HashSet<>();
+	private final Pattern pattern;
+	private final String template;
 
 	public UriFormat(String format) {
 		this.template = format;
@@ -44,8 +43,9 @@ public class UriFormat {
 		int filenameIdx = format.indexOf("{filename}");
 
 		int idx = Math.min(slotIdx, filenameIdx);
-		if (idx < 0)
+		if (idx < 0) {
 			throw new RuntimeException("Invalid URI format - must contain {slotId} and {filename}");
+		}
 
 		groups.add("slotId");
 		groups.add("filename");
@@ -61,16 +61,23 @@ public class UriFormat {
 		}
 
 		String infoTemp = format.substring(idx).replace("/", "\\/");
-		infoTemp = infoTemp.replace("{userJid}", "(?<jid>[^/]+)").replace("{slotId}", "(?<slotId>[^/]+)").replace("{filename}", "(?<filename>[^/]+)");
+		infoTemp = infoTemp.replace("{userJid}", "(?<jid>[^/]+)")
+				.replace("{slotId}", "(?<slotId>[^/]+)")
+				.replace("{filename}", "(?<filename>[^/]+)");
 
 		pattern = Pattern.compile(infoTemp);
 	}
 
-	public String formatUri(DefaultLogic.HttpProtocol protocol, String serverName, int port, JID requester, String slotId, String filename) {
+	public String formatUri(DefaultLogic.HttpProtocol protocol, String serverName, int port, JID requester,
+							String slotId, String filename) {
 		String format = template;
-		return format.replace("{proto}", protocol.name()).replace("{serverName}", serverName).replace("{port}", String.valueOf(port))
-				.replace("{domain}", requester.getDomain()).replace("{userJid}", requester.getBareJID().toString())
-				.replace("{slotId}", slotId).replace("{filename}", filename);
+		return format.replace("{proto}", protocol.name())
+				.replace("{serverName}", serverName)
+				.replace("{port}", String.valueOf(port))
+				.replace("{domain}", requester.getDomain())
+				.replace("{userJid}", requester.getBareJID().toString())
+				.replace("{slotId}", slotId)
+				.replace("{filename}", filename);
 	}
 
 	public Matcher parsePath(String path) {

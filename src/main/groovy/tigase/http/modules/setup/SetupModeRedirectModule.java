@@ -40,7 +40,8 @@ import tigase.xmpp.jid.BareJID;
  */
 @Bean(name = "setupRedirect", parent = HttpMessageReceiver.class, active = true)
 @ConfigType(ConfigTypeEnum.SetupMode)
-public class SetupModeRedirectModule extends AbstractBareModule {
+public class SetupModeRedirectModule
+		extends AbstractBareModule {
 
 	private DeploymentInfo httpDeployment;
 	private ServiceImpl service;
@@ -88,9 +89,8 @@ public class SetupModeRedirectModule extends AbstractBareModule {
 			}
 
 			@Override
-			public boolean checkCredentials(String user, String password) throws TigaseStringprepException,
-																				 TigaseDBException,
-																				 AuthorizationException {
+			public boolean checkCredentials(String user, String password)
+					throws TigaseStringprepException, TigaseDBException, AuthorizationException {
 				return true;
 			}
 
@@ -98,12 +98,17 @@ public class SetupModeRedirectModule extends AbstractBareModule {
 
 		super.start();
 
-		httpDeployment = httpServer.deployment().setClassLoader(this.getClass().getClassLoader())
-				.setContextPath(contextPath).setService(service).setDeploymentName("Setup").setDeploymentDescription(getDescription());
+		httpDeployment = httpServer.deployment()
+				.setClassLoader(this.getClass().getClassLoader())
+				.setContextPath(contextPath)
+				.setService(service)
+				.setDeploymentName("Setup")
+				.setDeploymentDescription(getDescription());
 		if (vhosts != null) {
 			httpDeployment.setVHosts(vhosts);
 		}
-		ServletInfo servletInfo = httpServer.servlet("SetupModeRedirectServlet", SetupModeRedirectServlet.class).addInitParam("module", uuid);
+		ServletInfo servletInfo = httpServer.servlet("SetupModeRedirectServlet", SetupModeRedirectServlet.class)
+				.addInitParam("module", uuid);
 		servletInfo.addMapping("/*");
 		httpDeployment.addServlets(servletInfo);
 		httpServer.deploy(httpDeployment);

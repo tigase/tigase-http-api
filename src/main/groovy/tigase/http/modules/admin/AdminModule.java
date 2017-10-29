@@ -36,29 +36,28 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
  * @author andrzej
  */
 @Bean(name = "admin", parent = HttpMessageReceiver.class, active = true)
-@ConfigType({ConfigTypeEnum.DefaultMode, ConfigTypeEnum.SessionManagerMode, ConfigTypeEnum.ConnectionManagersMode, ConfigTypeEnum.ComponentMode})
-public class AdminModule extends AbstractModule {
+@ConfigType({ConfigTypeEnum.DefaultMode, ConfigTypeEnum.SessionManagerMode, ConfigTypeEnum.ConnectionManagersMode,
+			 ConfigTypeEnum.ComponentMode})
+public class AdminModule
+		extends AbstractModule {
 
 	private static final String DEF_SCRIPTS_DIR_VAL = "scripts/admin";
-	
-	private static final String SCRIPTS_DIR_KEY = "admin-scripts-dir";
-	
-	private static final String DESCRIPTION = "Admin console - support for management of server using simple HTTP console";
 
+	private static final String SCRIPTS_DIR_KEY = "admin-scripts-dir";
+
+	private static final String DESCRIPTION = "Admin console - support for management of server using simple HTTP console";
+	private DeploymentInfo httpDeployment = null;
 	@ConfigField(desc = "Scripts directory", alias = SCRIPTS_DIR_KEY)
 	private String scriptsDir = DEF_SCRIPTS_DIR_VAL;
-
-	private DeploymentInfo httpDeployment = null;
 
 	@Override
 	public String getDescription() {
 		return DESCRIPTION;
 	}
-	
+
 	@Override
 	public void start() {
 		if (httpDeployment != null) {
@@ -66,8 +65,11 @@ public class AdminModule extends AbstractModule {
 		}
 
 		super.start();
-		httpDeployment = httpServer.deployment().setClassLoader(this.getClass().getClassLoader())
-				.setContextPath(contextPath).setService(new tigase.http.ServiceImpl(this)).setDeploymentName("Admin console")
+		httpDeployment = httpServer.deployment()
+				.setClassLoader(this.getClass().getClassLoader())
+				.setContextPath(contextPath)
+				.setService(new tigase.http.ServiceImpl(this))
+				.setDeploymentName("Admin console")
 				.setDeploymentDescription(getDescription());
 		if (vhosts != null) {
 			httpDeployment.setVHosts(vhosts);
@@ -93,14 +95,14 @@ public class AdminModule extends AbstractModule {
 		servletInfo = httpServer.servlet("StaticServlet", StaticFileServlet.class);
 		servletInfo.addInitParam(StaticFileServlet.DIRECTORY_KEY, new File(scriptsDirFile, "static").getAbsolutePath())
 				.addMapping("/static/*");
-		httpDeployment.addServlets(servletInfo);		
-		
+		httpDeployment.addServlets(servletInfo);
+
 		httpServer.deploy(httpDeployment);
 	}
 
 	@Override
 	public void stop() {
-		if (httpDeployment != null) { 
+		if (httpDeployment != null) {
 			httpServer.undeploy(httpDeployment);
 			httpDeployment = null;
 		}

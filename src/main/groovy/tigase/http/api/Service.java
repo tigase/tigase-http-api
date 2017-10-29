@@ -31,14 +31,21 @@ import tigase.util.stringprep.TigaseStringprepException;
 import tigase.xmpp.jid.BareJID;
 
 public interface Service<T extends Module> {
-	
+
 	void sendPacket(Packet packet, Long timeout, Callback closure);
-    void sendPacket(Packet packet, Long timeout, Closure closure);
-    UserRepository getUserRepository();
-    AuthRepository getAuthRepository();
-    boolean isAdmin(BareJID user);
+
+	void sendPacket(Packet packet, Long timeout, Closure closure);
+
+	UserRepository getUserRepository();
+
+	AuthRepository getAuthRepository();
+
+	boolean isAdmin(BareJID user);
+
 	boolean isAllowed(String key, String domain, String path);
-	boolean checkCredentials(String user, String password) throws TigaseStringprepException, TigaseDBException, AuthorizationException;
+
+	boolean checkCredentials(String user, String password)
+			throws TigaseStringprepException, TigaseDBException, AuthorizationException;
 
 	T getModule();
 }

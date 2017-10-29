@@ -45,27 +45,22 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Created by andrzej on 28.03.2017.
  */
-public abstract class AbstractBareModule extends AbstractHttpModule implements Module,
-																	  Initializable,
-																	  ConfigurationChangedAware,
-																	  UnregisterAware {
+public abstract class AbstractBareModule
+		extends AbstractHttpModule
+		implements Module, Initializable, ConfigurationChangedAware, UnregisterAware {
 
-	private static final ConcurrentHashMap<String,AbstractBareModule> modules = new ConcurrentHashMap<>();
-
+	private static final ConcurrentHashMap<String, AbstractBareModule> modules = new ConcurrentHashMap<>();
+	protected CommandManager commandManager = new CommandManager(this);
 	@ConfigField(desc = "Module name")
 	protected String name;
-	private JID jid;
-	private PacketWriter writer;
-
-	private ServiceEntity serviceEntity = null;
-	protected CommandManager commandManager = new CommandManager(this);
-
 	private String componentName;
+	private JID jid;
+	private ServiceEntity serviceEntity = null;
+	private PacketWriter writer;
 
 	public static <T extends Module> T getModuleByUUID(String uuid) {
 		return (T) modules.get(uuid);
 	}
-
 
 	@Override
 	public String getName() {
@@ -83,20 +78,25 @@ public abstract class AbstractBareModule extends AbstractHttpModule implements M
 	}
 
 	@Override
-	public boolean addOutPacket(Packet packet, Integer timeout, PacketWriter.Callback callback){
+	public boolean addOutPacket(Packet packet, Integer timeout, PacketWriter.Callback callback) {
 		return writer.write(this, packet, timeout, callback);
 	}
 
 	@Override
-	public void everyHour() {}
+	public void everyHour() {
+	}
+
 	@Override
-	public void everyMinute() {}
+	public void everyMinute() {
+	}
+
 	@Override
-	public void everySecond() {}
+	public void everySecond() {
+	}
 
 	@Override
 	public String[] getFeatures() {
-		return new String[] {Command.XMLNS };
+		return new String[]{Command.XMLNS};
 	}
 
 	@Override
@@ -116,15 +116,14 @@ public abstract class AbstractBareModule extends AbstractHttpModule implements M
 	public List<Element> getDiscoItems(String node, JID jid, JID from) {
 		if (jid.getLocalpart() == null) {
 			return Collections.singletonList(serviceEntity.getDiscoItem(node, getName() + "@" + jid.toString()));
-		}
-		else {
+		} else {
 			if (node != null) {
 				if (node.equals("http://jabber.org/protocol/commands") && this.isAdmin(from.getBareJID())) {
 					List<Element> result = new LinkedList<Element>();
 					for (CommandIfc comm : commandManager.getCommands()) {
-						result.add(new Element("item", new String[] { "node", "name", "jid" },
-											   new String[] { comm.getCommandId(),
-															  comm.getDescription(), jid.toString() }));
+						result.add(new Element("item", new String[]{"node", "name", "jid"},
+											   new String[]{comm.getCommandId(), comm.getDescription(),
+															jid.toString()}));
 					}
 					return result;
 				}
@@ -147,7 +146,7 @@ public abstract class AbstractBareModule extends AbstractHttpModule implements M
 	public void setStatisticsPrefix(String prefix) {
 
 	}
-	
+
 	@Override
 	public void statisticExecutedIn(long executionTime) {
 
@@ -169,7 +168,7 @@ public abstract class AbstractBareModule extends AbstractHttpModule implements M
 	public boolean isAdmin(BareJID user) {
 		return writer.isAdmin(JID.jidInstance(user));
 	}
-	
+
 	@Override
 	public void start() {
 		modules.put(uuid, this);

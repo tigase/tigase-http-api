@@ -40,19 +40,16 @@ import java.util.concurrent.CopyOnWriteArrayList;
 /**
  * Created by andrzej on 06.08.2016.
  */
-public abstract class AbstractHttpServer implements HttpServerIfc {
-
-	@Inject(bean = "sslContextContainer")
-	protected SSLContextContainerIfc sslContextContainer;
-
-	@Inject
-	protected PortsConfigBean portsConfigBean;
-
-	protected Kernel kernel;
+public abstract class AbstractHttpServer
+		implements HttpServerIfc {
 
 	protected List<Integer> httpPorts = new CopyOnWriteArrayList<>();
 	protected List<Integer> httpsPorts = new CopyOnWriteArrayList<>();
-
+	protected Kernel kernel;
+	@Inject
+	protected PortsConfigBean portsConfigBean;
+	@Inject(bean = "sslContextContainer")
+	protected SSLContextContainerIfc sslContextContainer;
 
 	@Override
 	public List<Integer> getHTTPPorts() {
@@ -77,15 +74,37 @@ public abstract class AbstractHttpServer implements HttpServerIfc {
 		this.kernel = null;
 	}
 
-	public abstract static class PortsConfigBean implements RegistrarBeanWithDefaultBeanClass, Initializable {
+	public abstract static class PortConfigBean
+			implements ConfigurationChangedAware, UnregisterAware, Initializable {
 
-		@Inject(nullAllowed = true)
-		private PortConfigBean[] portsBeans;
+		@ConfigField(desc = "Certificate for domain is SSL or TLS is enabled")
+		private String domain;
+		@ConfigField(desc = "Port")
+		private Integer name;
+		@ConfigField(desc = "Socket type")
+		private SocketType socket = SocketType.plain;
 
-		@ConfigField(desc = "Ports to enable", alias = "ports")
-		private HashSet<Integer> ports;
+		public int getPort() {
+			return name;
+		}
+
+		public SocketType getSocket() {
+			return socket;
+		}
+
+		public String getDomain() {
+			return domain;
+		}
+	}
+
+	public abstract static class PortsConfigBean
+			implements RegistrarBeanWithDefaultBeanClass, Initializable {
 
 		private Kernel kernel;
+		@ConfigField(desc = "Ports to enable", alias = "ports")
+		private HashSet<Integer> ports;
+		@Inject(nullAllowed = true)
+		private PortConfigBean[] portsBeans;
 
 		public PortsConfigBean() {
 
@@ -116,33 +135,7 @@ public abstract class AbstractHttpServer implements HttpServerIfc {
 				}
 			}
 
-
 			register(kernel);
-		}
-	}
-
-
-	public abstract static class PortConfigBean implements ConfigurationChangedAware, UnregisterAware, Initializable {
-
-		@ConfigField(desc = "Port")
-		private Integer name;
-
-		@ConfigField(desc = "Socket type")
-		private SocketType socket = SocketType.plain;
-
-		@ConfigField(desc = "Certificate for domain is SSL or TLS is enabled")
-		private String domain;
-
-		public int getPort() {
-			return name;
-		}
-
-		public SocketType getSocket() {
-			return socket;
-		}
-
-		public String getDomain() {
-			return domain;
 		}
 	}
 

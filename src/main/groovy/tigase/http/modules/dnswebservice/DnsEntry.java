@@ -20,13 +20,13 @@
 package tigase.http.modules.dnswebservice;
 
 public class DnsEntry {
-	
+
 	private String host;
 	private String[] ips;
 	private int port;
 	private int priority;
 	private String url;
-	
+
 	public DnsEntry(String host, int port, String[] ips, int priority) {
 		this.host = host;
 		this.port = port;
@@ -34,7 +34,7 @@ public class DnsEntry {
 		this.priority = priority;
 		this.url = null;
 	}
-	
+
 	public DnsEntry(String url, int priority) {
 		this.url = url;
 		this.priority = priority;
@@ -42,25 +42,25 @@ public class DnsEntry {
 		this.port = 0;
 		this.ips = null;
 	}
-	
+
 	public String getHost() {
 		return host;
 	}
-	
+
 	public int getPort() {
 		return port;
 	}
-	
+
 	public String[] getIPs() {
 		return ips;
 	}
-	
+
 	public int getPriority() {
 		return priority;
 	}
-	
+
 	public String getURL() {
 		return url;
 	}
-	
+
 }

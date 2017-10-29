@@ -28,23 +28,22 @@ import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Pattern;
 
-public class ApiKeyItem extends RepositoryItemAbstract {
+public class ApiKeyItem
+		extends RepositoryItemAbstract {
 
 	private static final String ELEM_NAME = "api-key";
 	private static final String KEY_ATTR = "key";
-	private static final String[] REGEX_PATH = { ELEM_NAME, "regex" };
-	
+	private static final String[] REGEX_PATH = {ELEM_NAME, "regex"};
+
 	private static final String API_KEY_LABEL = "API Key";
-	private static final String REGEX_LABEL = "Regular expressions (only request"
-			+ " matching any of following regular expressions will be allowed, "
-			+ "if no regular expression is set then request to any path is allowed)";
+	private static final String REGEX_LABEL =
+			"Regular expressions (only request" + " matching any of following regular expressions will be allowed, " +
+					"if no regular expression is set then request to any path is allowed)";
 	private static final String DOMAIN_LABEL = "Domains for which this key works";
-			
-	
-	private String key;
 	private HashSet<String> domains = new HashSet<String>();
+	private String key;
 	private List<Pattern> regexs = new CopyOnWriteArrayList<Pattern>();
-	
+
 	@Override
 	public String getElemName() {
 		return ELEM_NAME;
@@ -57,11 +56,10 @@ public class ApiKeyItem extends RepositoryItemAbstract {
 
 	@Override
 	public void addCommandFields(Packet packet) {
-		Command.addFieldValue(packet, API_KEY_LABEL, 
-				key == null ? UUID.randomUUID().toString() : key);
+		Command.addFieldValue(packet, API_KEY_LABEL, key == null ? UUID.randomUUID().toString() : key);
 		List<String> regexValues = new ArrayList<String>();
-		if (!regexs.isEmpty()) {			
-			for (Pattern regex : this.regexs) {				
+		if (!regexs.isEmpty()) {
+			for (Pattern regex : this.regexs) {
 				regexValues.add(regex.pattern());
 			}
 		}
@@ -72,19 +70,20 @@ public class ApiKeyItem extends RepositoryItemAbstract {
 		}
 		Command.addFieldMultiValue(packet, DOMAIN_LABEL, domainValues);
 	}
-	
+
 	@Override
 	public void initFromCommand(Packet packet) {
 		super.initFromCommand(packet);
-		
+
 		key = Command.getFieldValue(packet, API_KEY_LABEL);
 		String[] regexs = Command.getFieldValues(packet, REGEX_LABEL);
 		if (regexs != null) {
 			for (String regex : regexs) {
-				if (regex.isEmpty())
+				if (regex.isEmpty()) {
 					continue;
+				}
 				this.regexs.add(Pattern.compile(regex));
-			}			
+			}
 		}
 		String[] domains = Command.getFieldValues(packet, DOMAIN_LABEL);
 		if (domains != null) {
@@ -93,13 +92,13 @@ public class ApiKeyItem extends RepositoryItemAbstract {
 			}
 		}
 	}
-	
+
 	@Override
 	public void initFromElement(Element elem) {
-		if (elem.getName() != ELEM_NAME)
-			throw new IllegalArgumentException("Incorrect element name, expected: " +
-					ELEM_NAME);
-		
+		if (elem.getName() != ELEM_NAME) {
+			throw new IllegalArgumentException("Incorrect element name, expected: " + ELEM_NAME);
+		}
+
 		super.initFromElement(elem);
 		key = elem.getAttributeStaticStr(KEY_ATTR);
 		List<Element> children = elem.getChildren();
@@ -109,12 +108,12 @@ public class ApiKeyItem extends RepositoryItemAbstract {
 					this.domains.add(tigase.xml.XMLUtils.unescape(child.getCData()));
 				}
 				if (child.getName().equals("regex")) {
-					this.regexs.add(Pattern.compile(tigase.xml.XMLUtils.unescape(child.getCData())));				
+					this.regexs.add(Pattern.compile(tigase.xml.XMLUtils.unescape(child.getCData())));
 				}
 			}
 		}
 	}
-	
+
 	@Override
 	public void initFromPropertyString(String propString) {
 		String[] props = propString.split(":");
@@ -122,20 +121,22 @@ public class ApiKeyItem extends RepositoryItemAbstract {
 		for (String prop : props) {
 			if (prop.startsWith("domain")) {
 				String[] v = prop.split("=");
-				if (!v[1].isEmpty())
+				if (!v[1].isEmpty()) {
 					this.domains.addAll(Arrays.asList(v[1].split(";")));
+				}
 			}
 			if (prop.startsWith("regex")) {
 				String[] v = prop.split("=");
-				if (!v[1].isEmpty())
+				if (!v[1].isEmpty()) {
 					Arrays.asList(v[1].split(";")).forEach(regex -> regexs.add(Pattern.compile(regex)));
+				}
 			}
 		}
 	}
 
 	@Override
 	public Element toElement() {
-		Element elem =  super.toElement();
+		Element elem = super.toElement();
 		elem.setAttribute(KEY_ATTR, key);
 		for (Pattern regex : regexs) {
 			String pattern = regex.pattern();
@@ -146,7 +147,7 @@ public class ApiKeyItem extends RepositoryItemAbstract {
 		}
 		return elem;
 	}
-	
+
 	@Override
 	public String toPropertyString() {
 		StringBuilder sb = new StringBuilder();
@@ -177,25 +178,28 @@ public class ApiKeyItem extends RepositoryItemAbstract {
 		}
 		return sb.toString();
 	}
-	
+
 	public boolean isAllowed(String key, String path) {
 		return this.isAllowed(key, "default", path);
 	}
-	
+
 	public boolean isAllowed(String key, String domain, String path) {
 		if (this.key.equals(key)) {
 			if (!this.domains.isEmpty()) {
-				if (!this.domains.contains(domain))
+				if (!this.domains.contains(domain)) {
 					return false;
+				}
 			}
-			if (this.regexs.isEmpty())
+			if (this.regexs.isEmpty()) {
 				return true;
+			}
 			for (Pattern regex : regexs) {
-				if (regex.matcher(path).matches())
+				if (regex.matcher(path).matches()) {
 					return true;
+				}
 			}
 		}
 		return false;
 	}
-	
+
 }

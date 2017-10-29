@@ -33,24 +33,23 @@ import tigase.xmpp.jid.BareJID;
 import java.util.Map;
 
 @Bean(name = "repository", parent = AbstractModule.class, active = true)
-@ConfigAliases({
-	@ConfigAlias(field = "items", alias = "api-keys")
-})
-@ConfigType({ConfigTypeEnum.DefaultMode, ConfigTypeEnum.SessionManagerMode, ConfigTypeEnum.ConnectionManagersMode, ConfigTypeEnum.ComponentMode})
-public class ApiKeyRepository extends UserRepoRepository<ApiKeyItem> {
+@ConfigAliases({@ConfigAlias(field = "items", alias = "api-keys")})
+@ConfigType({ConfigTypeEnum.DefaultMode, ConfigTypeEnum.SessionManagerMode, ConfigTypeEnum.ConnectionManagersMode,
+			 ConfigTypeEnum.ComponentMode})
+public class ApiKeyRepository
+		extends UserRepoRepository<ApiKeyItem> {
 
-	private static final String GEN_API_KEYS = "--api-keys";
 	public static final String API_KEYS_KEY = "api-keys";
-	
+	private static final String GEN_API_KEYS = "--api-keys";
 	private boolean openAccess = false;
-	
+
 	private BareJID repoUserJid;
 
 	@Override
 	public BareJID getRepoUser() {
 		return repoUserJid;
 	}
-	
+
 	public void setRepoUser(BareJID repoUserJid) {
 		this.repoUserJid = repoUserJid;
 	}
@@ -69,7 +68,7 @@ public class ApiKeyRepository extends UserRepoRepository<ApiKeyItem> {
 	public String getItemsListPKey() {
 		return API_KEYS_KEY;
 	}
-	
+
 	@Override
 	public String getPropertyKey() {
 		return GEN_API_KEYS;
@@ -82,20 +81,23 @@ public class ApiKeyRepository extends UserRepoRepository<ApiKeyItem> {
 
 	public boolean isAllowed(String key, String domain, String path) {
 		// allow access for anyone if there is no api key defined
-		if (openAccess)
+		if (openAccess) {
 			return true;
-		
+		}
+
 		// if supplied key is null we need to check if for this domain 
 		// or path open_access is not set
-		if (key == null)
+		if (key == null) {
 			key = "open_access";
-				
+		}
+
 		ApiKeyItem item = getItem(key);
-		
+
 		// if there is no such key as supplied key we deny access
-		if (item == null)
+		if (item == null) {
 			return false;
-		
+		}
+
 		// if item exists it will check if access for path is 
 		// allowed for supplied key
 		return item.isAllowed(key, domain, path);

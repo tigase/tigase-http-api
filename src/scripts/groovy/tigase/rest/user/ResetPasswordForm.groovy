@@ -36,7 +36,8 @@ import javax.servlet.http.HttpServletRequest
 import java.security.MessageDigest
 
 @Bean(name = "password-reset-form", active = true)
-class ResetPasswordFormHandler extends tigase.http.rest.Handler {
+class ResetPasswordFormHandler
+		extends tigase.http.rest.Handler {
 
 	private Random random = new Random();
 
@@ -58,13 +59,13 @@ class ResetPasswordFormHandler extends tigase.http.rest.Handler {
 		apiKey = false;
 		execGet = { Service service, callback ->
 			if (resetters == null) {
-				callback([error: "Password resetting is disabled. Please contact server administrator."])
+				callback([ error: "Password resetting is disabled. Please contact server administrator." ])
 				return;
 			}
-			callback([captcha: generateCaptcha()]);
+			callback([ captcha: generateCaptcha() ]);
 		}
 		execPost = { Service service, callback, HttpServletRequest request ->
-			def errors = [];
+			def errors = [ ];
 			String jidStr = request.getParameter("jid");
 			BareJID jid = null;
 			if (jidStr != null && !jidStr.trim().isEmpty()) {
@@ -93,7 +94,7 @@ class ResetPasswordFormHandler extends tigase.http.rest.Handler {
 				if (!validateCaptcha(id, captchaQuery, result)) {
 					errors.add("Provided captcha result is invalid!");
 				}
-				captcha = [id: id, captcha: captchaQuery];
+				captcha = [ id: id, captcha: captchaQuery ];
 			}
 
 			try {
@@ -117,7 +118,7 @@ class ResetPasswordFormHandler extends tigase.http.rest.Handler {
 				}
 			}
 
-			callback([jid: jidStr, email: email, errors: errors, captcha: captcha]);
+			callback([ jid: jidStr, email: email, errors: errors, captcha: captcha ]);
 		}
 	}
 
@@ -131,16 +132,16 @@ class ResetPasswordFormHandler extends tigase.http.rest.Handler {
 		if (!captchaRequired) {
 			return null;
 		}
-		
+
 		def x = random.nextInt(31) + 1;
 		def y = random.nextInt(31) + 1;
 
 		if (random.nextBoolean()) {
-			def result = x+y;
+			def result = x + y;
 			String captcha = "$x + $y";
 			String id = Algorithms.bytesToHex(
 					MessageDigest.getInstance("SHA1").digest((captcha + " = " + result).getBytes("UTF-8")));
-			return [id: id, captcha: captcha];
+			return [ id: id, captcha: captcha ];
 		} else {
 			if (y > x) {
 				def t = x;
@@ -151,12 +152,13 @@ class ResetPasswordFormHandler extends tigase.http.rest.Handler {
 			String captcha = "$x - $y";
 			String id = Algorithms.bytesToHex(
 					MessageDigest.getInstance("SHA1").digest((captcha + " = " + result).getBytes("UTF-8")));
-			return [id: id, captcha: captcha];
+			return [ id: id, captcha: captcha ];
 		}
 	}
 
 	boolean validateCaptcha(String id, String captcha, String result) {
 		return Algorithms.bytesToHex(
-				MessageDigest.getInstance("SHA1").digest((captcha + " = " + result.trim()).getBytes("UTF-8"))).equals(id);
+				MessageDigest.getInstance("SHA1").digest((captcha + " = " + result.trim()).getBytes("UTF-8"))).
+				equals(id);
 	}
 }

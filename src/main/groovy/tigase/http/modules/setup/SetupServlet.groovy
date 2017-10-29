@@ -35,47 +35,48 @@ import javax.servlet.http.HttpServletResponse
 import java.util.concurrent.ConcurrentHashMap
 import java.util.logging.Level
 import java.util.logging.Logger
+
 /**
  *
  * @author andrzej
  */
 @CompileStatic
-public class SetupServlet extends HttpServlet {
-	
+public class SetupServlet
+		extends HttpServlet {
+
 	private static final Logger log = Logger.getLogger(SetupServlet.class.getCanonicalName());
-	
+
 	private final TemplateEngine templateEngine = new GStringTemplateEngine();
-	
-	private final Map<String,Template> templates = new ConcurrentHashMap<>();
-	
+
+	private final Map<String, Template> templates = new ConcurrentHashMap<>();
+
 	//private final Map config = [test:1];
 	private final Setup setup = new Setup();
-	
+
 	private SetupModule setupModule;
 
 	@Override
-    public void init() throws ServletException {
+	public void init() throws ServletException {
 		super.init();
 		ServletConfig cfg = super.getServletConfig();
 		String moduleUUID = cfg.getInitParameter("module");
 		setupModule = (SetupModule) AbstractBareModule.getModuleByUUID(moduleUUID);
 		loadTemplates();
 	}
-	
-    @Override
-    public void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        try {
-            processRequest(request, response);
-        }
-        catch (Exception ex) {
-            log.log(Level.SEVERE, "exception processing request", ex);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        }
-    }
-	
+
+	@Override
+	public void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		try {
+			processRequest(request, response);
+		} catch (Exception ex) {
+			log.log(Level.SEVERE, "exception processing request", ex);
+			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		}
+	}
+
 	protected void processRequest(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		
+
 		if (!request.isUserInRole('admin') && !request.authenticate(response)) {
 			return;
 		}
@@ -83,10 +84,12 @@ public class SetupServlet extends HttpServlet {
 		loadTemplates();
 
 		Template t = null;
-		Map templateParams = [request:request, response:response, servlet:this];
-		if (setupModule.getAuthRepository() == null || ((setupModule.getAuthRepository() instanceof AuthRepositoryMDImpl) && !((AuthRepositoryMDImpl) setupModule.getAuthRepository()).getRepo(null)))  {
+		Map templateParams = [ request: request, response: response, servlet: this ];
+		if (setupModule.getAuthRepository() == null ||
+				((setupModule.getAuthRepository() instanceof AuthRepositoryMDImpl) &&
+						!((AuthRepositoryMDImpl) setupModule.getAuthRepository()).getRepo(null))) {
 			templateParams["setup"] = setup;
-			String step  = request.getParameter("step");
+			String step = request.getParameter("step");
 			int i = 1;
 			if (step != null) {
 				i = Integer.parseInt(step);
@@ -94,7 +97,7 @@ public class SetupServlet extends HttpServlet {
 
 			t = templates.get("step" + i);
 			if (i > 1 && "POST".equals(request.getMethod())) {
-				Setup.Page page = setup.getPage(i-1);
+				Setup.Page page = setup.getPage(i - 1);
 				page.setValues(request.getParameterMap());
 			}
 			Setup.Page page = setup.getPage(i);
@@ -105,36 +108,38 @@ public class SetupServlet extends HttpServlet {
 			t = templates.get("edit");
 			templateParams.put("currentStep", "edit");
 		}
-		templateParams.put("util", [
-				link: { String url ->
-					if (request.getParameter("api-key")) {
-						return request.getContextPath() + url + (url.contains("?") ? "&" : "?") + "api-key=" + request.getParameter("api-key");
-					} else {
-						return request.getContextPath() + url;
-					}
-				}, include: { String name, Map params = null ->
-					def temp = templates[name];
-					if (temp == null)
-						return "";
-					def map = [:];
-					map.putAll(templateParams);
-					if (params != null) map.putAll(params);
-					return temp.make(map);
-				}, inlineCss: { String path ->
-					String content = CSSHelper.getCssFileContent(path);
-					if (content == null)
-						return "";
-			        return "<style>" + content + "</style>";
-				}
-				]);
+		templateParams.put("util", [ link: { String url ->
+			if (request.getParameter("api-key")) {
+				return request.getContextPath() + url + (url.contains("?") ? "&" : "?") + "api-key=" +
+						request.getParameter("api-key");
+			} else {
+				return request.getContextPath() + url;
+			}
+		}, include                       : { String name, Map params = null ->
+			def temp = templates[name];
+			if (temp == null) {
+				return ""
+			};
+			def map = [ : ];
+			map.putAll(templateParams);
+			if (params != null) {
+				map.putAll(params)
+			};
+			return temp.make(map);
+		}, inlineCss                     : { String path ->
+			String content = CSSHelper.getCssFileContent(path);
+			if (content == null) {
+				return ""
+			};
+			return "<style>" + content + "</style>";
+		} ]);
 		Writable w = t.make(templateParams);
-		
+
 		w.writeTo(response.getWriter());
 	}
-	
-	
+
 	private void loadTemplates() {
-		int i=1;
+		int i = 1;
 		boolean loaded = true;
 		while (loaded) {
 			try {
@@ -148,7 +153,7 @@ public class SetupServlet extends HttpServlet {
 			}
 			i++;
 		}
-		["header", "footer", "index", "edit"].each { String file ->
+		[ "header", "footer", "index", "edit" ].each { String file ->
 			try {
 				String templateSrc = load(file, null, "html");
 				Template template = templateEngine.createTemplate(templateSrc);
@@ -158,7 +163,7 @@ public class SetupServlet extends HttpServlet {
 			}
 		}
 	}
-	
+
 	private String load(String prefix, Integer i, String suffix) throws IOException {
 		String path = "tigase/setup/" + prefix + (i == null ? "" : ("-" + i)) + "." + suffix;
 		File f = new File(path);
@@ -166,11 +171,12 @@ public class SetupServlet extends HttpServlet {
 		if (f.exists()) {
 			is = new FileInputStream(new File(path));
 		} else {
-			is = getClass().getResourceAsStream("/"+path);
+			is = getClass().getResourceAsStream("/" + path);
 		}
-		if (is == null)
-			throw new IOException("Resource not found");
-		
+		if (is == null) {
+			throw new IOException("Resource not found")
+		};
+
 		char[] buf = new char[1024];
 		StringBuilder sb = new StringBuilder();
 		Reader r = new InputStreamReader(is);

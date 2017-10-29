@@ -22,8 +22,8 @@ package tigase.http.coders;
 
 public interface Coder {
 
-    String encode(Object obj);
+	String encode(Object obj);
 
-    Object decode(String str);
+	Object decode(String str);
 
 }

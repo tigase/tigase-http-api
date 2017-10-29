@@ -30,17 +30,16 @@ import java.util.logging.Logger;
 import static tigase.http.modules.ui.WarServlet.WAR_PATH_KEY;
 
 /**
- *
  * @author andrzej
  */
 @Bean(name = "webModule", active = true)
-public class WebModule extends AbstractModule {
+public class WebModule
+		extends AbstractModule {
 
 	private static final Logger log = Logger.getLogger(WebModule.class.getCanonicalName());
-	
-	private DeploymentInfo deployment = null;
 	@ConfigField(desc = "Path to WAR file", alias = WAR_PATH_KEY)
 	protected String warPath;
+	private DeploymentInfo deployment = null;
 
 	@Override
 	public String getDescription() {
@@ -52,17 +51,18 @@ public class WebModule extends AbstractModule {
 		if (deployment != null) {
 			stop();
 		}
-		
+
 		super.start();
-		
+
 		if (warPath != null) {
 			deployment = httpServer.deployment()
 					.setClassLoader(this.getClass().getClassLoader())
 					.setContextPath(contextPath)
 					.setDeploymentName("User interface")
 					.setDeploymentDescription(getDescription())
-					.addServlets(httpServer.servlet("WarServlet", WarServlet.class).addMapping("/*")
-							.addInitParam(WAR_PATH_KEY, warPath));
+					.addServlets(httpServer.servlet("WarServlet", WarServlet.class)
+										 .addMapping("/*")
+										 .addInitParam(WAR_PATH_KEY, warPath));
 			if (vhosts != null) {
 				deployment.setVHosts(vhosts);
 			}
@@ -80,5 +80,5 @@ public class WebModule extends AbstractModule {
 			deployment = null;
 		}
 		super.stop();
-	}	
+	}
 }

@@ -35,280 +35,277 @@ import javax.servlet.http.HttpServletResponse
 import java.util.logging.Level
 import java.util.logging.Logger
 
-@WebServlet(asyncSupported=true)
-public class RestServlet extends HttpServlet {
+@WebServlet(asyncSupported = true)
+public class RestServlet
+		extends HttpServlet {
 
 	public static String REST_MODULE_KEY = "rest-module-uuid";
 	public static String SCRIPTS_DIR_KEY = "script-dir";
-	
-    def log = Logger.getLogger(RestServlet.class.getCanonicalName())
-    def methods = ["GET", "POST", "PUT", "DELETE"];
-    def handlers = [:];
 
-    Coder xmlCoder = new XmlCoder();
-    Coder jsonCoder = new JsonCoder();
+	def log = Logger.getLogger(RestServlet.class.getCanonicalName())
+	def methods = [ "GET", "POST", "PUT", "DELETE" ];
+	def handlers = [ : ];
+
+	Coder xmlCoder = new XmlCoder();
+	Coder jsonCoder = new JsonCoder();
 
 	Service<RestModule> service = null;
 	File scriptsDir = null;
-	
-    @Override
-    public void init() {
-        super.init()
+
+	@Override
+	public void init() {
+		super.init()
 		ServletConfig cfg = super.getServletConfig();
 		String moduleName = cfg.getInitParameter(REST_MODULE_KEY);
 		service = new ServiceImpl<RestModule>(moduleName);
 		scriptsDir = new File(cfg.getInitParameter(SCRIPTS_DIR_KEY));
-		
+
 		File[] scriptFiles = RestModule.getGroovyFiles(scriptsDir);
-		
+
 		loadHandlers(scriptFiles);
-		
+
 		service.getModule().registerRestServlet(this);
-    }
+	}
 
-    public void loadHandlers(File[] scriptFiles) {
-        if (scriptFiles != null) {
-            def listOfHandlers = HandlersLoader.getInstance().loadHandlers(service.getModule().getKernel(), scriptFiles.toList());
+	public void loadHandlers(File[] scriptFiles) {
+		if (scriptFiles != null) {
+			def listOfHandlers = HandlersLoader.getInstance().
+					loadHandlers(service.getModule().getKernel(), scriptFiles.toList());
 
-            def newHandlers = [:];
-            methods.each { method ->
-                newHandlers[method] = listOfHandlers.findAll { it."exec${method.toLowerCase().capitalize()}" != null }
-            }
+			def newHandlers = [ : ];
+			methods.each { method ->
+				newHandlers[method] = listOfHandlers.findAll { it."exec${method.toLowerCase().capitalize()}" != null }
+			}
 
-            handlers = newHandlers;
+			handlers = newHandlers;
 
-            if (log.isLoggable(Level.INFO)) {
-                log.info("loaded ${listOfHandlers.size()} handlers")
-            }
-        }
-    }	
+			if (log.isLoggable(Level.INFO)) {
+				log.info("loaded ${listOfHandlers.size()} handlers")
+			}
+		}
+	}
 
-    /**
-     * Should return mapping of requests to methods
-     */
-    def getHandlers = { method ->
-        return handlers[method];
-    }
+	/**
+	 * Should return mapping of requests to methods*/
+	def getHandlers = { method -> return handlers[method];
+	}
 
-    @Override
-    public void service(HttpServletRequest request, HttpServletResponse response) {
-        processRequest(request, response);
-    }
+	@Override
+	public void service(HttpServletRequest request, HttpServletResponse response) {
+		processRequest(request, response);
+	}
 
-    /**
-     * Parse request URI and find closure with matching regex
-     *
-     * @param request
-     * @param response
-     */
-    def processRequest(HttpServletRequest request, HttpServletResponse response) {
-        String method = request.getMethod();
+	/**
+	 * Parse request URI and find closure with matching regex
+	 *
+	 * @param request
+	 * @param response
+	 */
+	def processRequest(HttpServletRequest request, HttpServletResponse response) {
+		String method = request.getMethod();
 
-        def routings = getHandlers(method);
+		def routings = getHandlers(method);
 
-        def prefix = request.getServletPath();
+		def prefix = request.getServletPath();
 
-        prefix = request.getContextPath() + prefix
+		prefix = request.getContextPath() + prefix
 
 		def apiKey = request.getParameter("api-key") ?: request.getHeader("Api-Key");
 
-        String localUri = request.getRequestURI().replace(prefix, "");
+		String localUri = request.getRequestURI().replace(prefix, "");
 
-        if (log.isLoggable(Level.FINEST)) {
-            log.finest("checking routings = " + routings + " for prefix = " + prefix + " and uri = " + localUri)
-        }
+		if (log.isLoggable(Level.FINEST)) {
+			log.finest("checking routings = " + routings + " for prefix = " + prefix + " and uri = " + localUri)
+		}
 
-        boolean handled = false;
-        routings.each { Handler handler ->
-            if (log.isLoggable(Level.FINEST)) {
-                log.finest("checking localUri = " + localUri + ", prefix = " + prefix + ", regex = " + handler.regex);
-            }
+		boolean handled = false;
+		routings.each { Handler handler ->
+			if (log.isLoggable(Level.FINEST)) {
+				log.finest("checking localUri = " + localUri + ", prefix = " + prefix + ", regex = " + handler.regex);
+			}
 
-            // check if regex matches
-            def matcher = (localUri =~ handler.regex)
-            if (matcher.matches()) {
-                if (log.isLoggable(Level.FINEST)) {
-                    log.finest("found handler")
-                }
+			// check if regex matches
+			def matcher = (localUri =~ handler.regex)
+			if (matcher.matches()) {
+				if (log.isLoggable(Level.FINEST)) {
+					log.finest("found handler")
+				}
 
-                def params = matcher[0];
-                // first element is uri - removing
-                if (params instanceof String)
-                    params = []
-                else
-                    params.remove(0);
+				def params = matcher[0];
+				// first element is uri - removing
+				if (params instanceof String) {
+					params = [ ]
+				} else {
+					params.remove(0)
+				};
 
 				def fullPath = request.getRequestURI();
 				def host = request.getServerName();
 				if (handler.apiKey && !service.isAllowed(apiKey, host, fullPath)) {
-					response.sendError(HttpServletResponse.SC_FORBIDDEN, "To access URI = '" + fullPath + "' a valid api key is required");
+					response.sendError(HttpServletResponse.SC_FORBIDDEN,
+									   "To access URI = '" + fullPath + "' a valid api key is required");
 					return;
 				}
 
-                // if authentication is required check if user is in proper role
-                if (handler.authRequired(apiKey) && (!request.isUserInRole(handler.requiredRole) && !request.authenticate(response))) {
-                    handled = true;
-                    return;
-                }
+				// if authentication is required check if user is in proper role
+				if (handler.authRequired(apiKey) &&
+						(!request.isUserInRole(handler.requiredRole) && !request.authenticate(response))) {
+					handled = true;
+					return;
+				}
 
 				// prepare for execution
-                if (handler.isAsync) {
-                    executeAsync(request, response, handler, params);
-                }
-                else {
-                    execute(request, response, handler, params, null);
-                }
+				if (handler.isAsync) {
+					executeAsync(request, response, handler, params);
+				} else {
+					execute(request, response, handler, params, null);
+				}
 
-                handled = true;
-            }
-        }
+				handled = true;
+			}
+		}
 
-        // if request is not handled return 404
-        if (!handled) {
-            if (log.isLoggable(Level.FINEST)) {
-                log.finest("request not handled")
-            }
+		// if request is not handled return 404
+		if (!handled) {
+			if (log.isLoggable(Level.FINEST)) {
+				log.finest("request not handled")
+			}
 
-            response.sendError(HttpServletResponse.SC_NOT_FOUND);
-        }
-    }
+			response.sendError(HttpServletResponse.SC_NOT_FOUND);
+		}
+	}
 
-    /**
-     * Prepare for execution of async closure
-     *
-     * @param request
-     * @param response
-     * @param route
-     * @param reqParams
-     * @return
-     */
-    def executeAsync(HttpServletRequest request, HttpServletResponse response, def route, def reqParams) {
-        def asyncCtx = request.startAsync(request, response);
-        execute(asyncCtx.getRequest(), asyncCtx.getResponse(), route, reqParams, asyncCtx);
-    }
+	/**
+	 * Prepare for execution of async closure
+	 *
+	 * @param request
+	 * @param response
+	 * @param route
+	 * @param reqParams
+	 * @return
+	 */
+	def executeAsync(HttpServletRequest request, HttpServletResponse response, def route, def reqParams) {
+		def asyncCtx = request.startAsync(request, response);
+		execute(asyncCtx.getRequest(), asyncCtx.getResponse(), route, reqParams, asyncCtx);
+	}
 
-    /**
-     * Prepare for execution of closure (decode parameters) and execute closure
-     *
-     * @param request
-     * @param response
-     * @param route
-     * @param reqParams
-     * @param asyncCtx
-     * @return
-     */
-    def execute(HttpServletRequest request, HttpServletResponse response, Handler route, def reqParams, def asyncCtx) {
+	/**
+	 * Prepare for execution of closure (decode parameters) and execute closure
+	 *
+	 * @param request
+	 * @param response
+	 * @param route
+	 * @param reqParams
+	 * @param asyncCtx
+	 * @return
+	 */
+	def execute(HttpServletRequest request, HttpServletResponse response, Handler route, def reqParams, def asyncCtx) {
 		long start = System.currentTimeMillis();
-        def prefix = request.getServletPath();
-        prefix = request.getContextPath() + prefix
-		
-        String type = request.getContentType();
-        String requestContent = null;
+		def prefix = request.getServletPath();
+		prefix = request.getContextPath() + prefix
 
-        def callback = { result ->
+		String type = request.getContentType();
+		String requestContent = null;
+
+		def callback = { result ->
 			long end = System.currentTimeMillis();
-			executedIn(prefix + route.regex.toString(), end-start);
-            if (result == null) {
-                // no response - nothing to send so there was nothing
-                response.sendError(HttpServletResponse.SC_NOT_FOUND);
-            }
-            else {
-                // handle result
-                if (result instanceof Closure) {
-                    // we want to handle request/response - a lot of data to handle (streaming)
-                    result(request, response);
-                }
-                else if (result instanceof String) {
-                    // send result string
-                    response.getWriter().write(result);
-                }
-                else if (result instanceof byte[]) {
-                    // send bytes of data
-                    response.getOutputStream().write(result);
-                }
-                else if (result instanceof Handler.Result) {
-                    // send response with set type and data
-                    response.setContentType(result.contentType);
-                    response.setContentLength(result.data.length);
-                    response.getOutputStream().write(result.data);
-                }
-                else {
+			executedIn(prefix + route.regex.toString(), end - start);
+			if (result == null) {
+				// no response - nothing to send so there was nothing
+				response.sendError(HttpServletResponse.SC_NOT_FOUND);
+			} else {
+				// handle result
+				if (result instanceof Closure) {
+					// we want to handle request/response - a lot of data to handle (streaming)
+					result(request, response);
+				} else if (result instanceof String) {
+					// send result string
+					response.getWriter().write(result);
+				} else if (result instanceof byte[]) {
+					// send bytes of data
+					response.getOutputStream().write(result);
+				} else if (result instanceof Handler.Result) {
+					// send response with set type and data
+					response.setContentType(result.contentType);
+					response.setContentLength(result.data.length);
+					response.getOutputStream().write(result.data);
+				} else {
 					encodeResults(request, response, route, reqParams, result);
-                }
-            }
-			
-            if (asyncCtx) {
-                asyncCtx.complete();
-            }
-        }
+				}
+			}
 
-        def params = [service, callback];
+			if (asyncCtx) {
+				asyncCtx.complete();
+			}
+		}
 
-        if (route.requiredRole != null) {
-            params.add(request.getUserPrincipal() ? BareJID.bareJIDInstance(request.getUserPrincipal().getName()) : null);
-        }
+		def params = [ service, callback ];
 
-        if (type != null && request.getContentLength() > 0) {
-					if (route.decodeContent && (type.contains("/xml") || type.contains("/json"))) {
-                requestContent = request.getReader().getText()
+		if (route.requiredRole != null) {
+			params.add(
+					request.getUserPrincipal() ? BareJID.bareJIDInstance(request.getUserPrincipal().getName()) : null);
+		}
 
-                if (log.isLoggable(Level.FINEST)) {
-                    log.finest("received content = " + requestContent + "of type = " + type)
-                }
+		if (type != null && request.getContentLength() > 0) {
+			if (route.decodeContent && (type.contains("/xml") || type.contains("/json"))) {
+				requestContent = request.getReader().getText()
 
-                def parsed = null;
+				if (log.isLoggable(Level.FINEST)) {
+					log.finest("received content = " + requestContent + "of type = " + type)
+				}
 
-                // decoding request content
-                if (type.contains("json")) {
-                    parsed = jsonCoder.decode(requestContent);
-                }
-                else {
-                    parsed = xmlCoder.decode(requestContent);
-                }
+				def parsed = null;
 
-                if (log.isLoggable(Level.FINEST)) {
-                    log.finest("parsed received content = " + parsed)
-                }
+				// decoding request content
+				if (type.contains("json")) {
+					parsed = jsonCoder.decode(requestContent);
+				} else {
+					parsed = xmlCoder.decode(requestContent);
+				}
 
-                params.add(parsed)
-            }
-            else {
-                // pass request if we have content but it is none of JSON or XML
-                // or handler requires not decoded content
-                params.add(request);
-            }
-        }
+				if (log.isLoggable(Level.FINEST)) {
+					log.finest("parsed received content = " + parsed)
+				}
 
-        params.addAll(reqParams)
+				params.add(parsed)
+			} else {
+				// pass request if we have content but it is none of JSON or XML
+				// or handler requires not decoded content
+				params.add(request);
+			}
+		}
+
+		params.addAll(reqParams)
 
 		if (log.isLoggable(Level.FINEST)) {
 			log.finest("got calling with params = " + params.toString())
 		}
 
-        def method = request.getMethod().toLowerCase().capitalize()
+		def method = request.getMethod().toLowerCase().capitalize()
 
-        // Call exact closure
-        route."exec$method".call(params);
-    }
-	
+		// Call exact closure
+		route."exec$method".call(params);
+	}
+
 	def executedIn(String route, long executionTime) {
 		service.getModule().executedIn(route, executionTime)
 	}
 
-	def encodeResults(HttpServletRequest request, HttpServletResponse response, Handler route, def reqParams, def result ) {
+	def encodeResults(HttpServletRequest request, HttpServletResponse response, Handler route, def reqParams,
+					  def result) {
 		// send output data enconded with XML or JSON
 		String type = request.getContentType();
 		String output = null;
-		type = request.getContentType() ?: (request.getContentType() ?: (request.getParameter("type") ?: "application/xml"));
+		type = request.getContentType() ?:
+			   (request.getContentType() ?: (request.getParameter("type") ?: "application/xml"));
 		if (type.contains("application/json")) {
 			response.setContentType("application/json");
 			output = jsonCoder.encode(result);
-		}
-		else {
+		} else {
 			response.setContentType("application/xml");
 			output = xmlCoder.encode(result);
 		}
-		response.getWriter().write(output);		
+		response.getWriter().write(output);
 	}
-	
+
 }

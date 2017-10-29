@@ -49,7 +49,9 @@ public interface Store {
 	 * @param uploader
 	 * @param slotId
 	 * @param filename
+	 *
 	 * @return
+	 *
 	 * @throws IOException
 	 */
 	ReadableByteChannel getContent(BareJID uploader, String slotId, String filename) throws IOException;
@@ -62,15 +64,18 @@ public interface Store {
 	 * @param filename
 	 * @param size
 	 * @param source
+	 *
 	 * @throws IOException
 	 */
-	void setContent(BareJID uploader, String slotId, String filename, long size, ReadableByteChannel source) throws IOException;
+	void setContent(BareJID uploader, String slotId, String filename, long size, ReadableByteChannel source)
+			throws IOException;
 
 	/**
 	 * Method removes content of slot
 	 *
 	 * @param uploader
 	 * @param slotId
+	 *
 	 * @throws IOException
 	 */
 	void remove(BareJID uploader, String slotId) throws IOException;

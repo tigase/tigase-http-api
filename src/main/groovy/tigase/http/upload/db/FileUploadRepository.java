@@ -32,7 +32,8 @@ import java.util.List;
 /**
  * Created by andrzej on 07.08.2016.
  */
-public interface FileUploadRepository<DS extends DataSource> extends DataSourceAware<DS> {
+public interface FileUploadRepository<DS extends DataSource>
+		extends DataSourceAware<DS> {
 
 	/**
 	 * Create slot in database for file upload.
@@ -42,17 +43,22 @@ public interface FileUploadRepository<DS extends DataSource> extends DataSourceA
 	 * @param filename
 	 * @param filesize
 	 * @param contentType
+	 *
 	 * @return slotId - may be changed by repository implementation
+	 *
 	 * @throws TigaseDBException
 	 */
-	Slot allocateSlot(JID sender, String slotId, String filename, long filesize, String contentType) throws TigaseDBException;
+	Slot allocateSlot(JID sender, String slotId, String filename, long filesize, String contentType)
+			throws TigaseDBException;
 
 	/**
 	 * Looks for slot for particular sender with exact slot id, file name and file size
 	 *
 	 * @param sender
 	 * @param slotId
+	 *
 	 * @return slot id - if slot exists and file name and size match
+	 *
 	 * @throws TigaseDBException
 	 */
 	void updateSlot(BareJID sender, String slotId) throws TigaseDBException;
@@ -62,6 +68,7 @@ public interface FileUploadRepository<DS extends DataSource> extends DataSourceA
 	 *
 	 * @param sender
 	 * @param slotId
+	 *
 	 * @return
 	 */
 	Slot getSlot(BareJID sender, String slotId) throws TigaseDBException;
@@ -71,7 +78,9 @@ public interface FileUploadRepository<DS extends DataSource> extends DataSourceA
 	 *
 	 * @param domain
 	 * @param limit
+	 *
 	 * @return
+	 *
 	 * @throws TigaseDBException
 	 */
 	List<Slot> listExpiredSlots(BareJID domain, LocalDateTime before, int limit) throws TigaseDBException;
@@ -82,19 +91,22 @@ public interface FileUploadRepository<DS extends DataSource> extends DataSourceA
 	 * @param domain
 	 * @param before
 	 * @param limit
+	 *
 	 * @throws TigaseDBException
 	 */
 	void removeExpiredSlots(BareJID domain, LocalDateTime before, int limit) throws TigaseDBException;
 
 	class Slot {
-		public final BareJID uploader;
-		public final String slotId;
+
+		public final String contentType;
 		public final String filename;
 		public final long filesize;
-		public final String contentType;
+		public final String slotId;
 		public final Date timestamp;
+		public final BareJID uploader;
 
-		public Slot(BareJID uploader, String slotId, String filename, long filesize, String contentType, Date timestamp) {
+		public Slot(BareJID uploader, String slotId, String filename, long filesize, String contentType,
+					Date timestamp) {
 			this.uploader = uploader;
 			this.slotId = slotId;
 			this.filename = filename;
@@ -104,7 +116,8 @@ public interface FileUploadRepository<DS extends DataSource> extends DataSourceA
 		}
 
 		public boolean matches(String slotId, long filesize, String contentType) {
-			return (this.slotId.equals(slotId) && this.filesize == filesize) && (this.contentType == null || this.contentType.equals(contentType));
+			return (this.slotId.equals(slotId) && this.filesize == filesize) &&
+					(this.contentType == null || this.contentType.equals(contentType));
 		}
 
 	}

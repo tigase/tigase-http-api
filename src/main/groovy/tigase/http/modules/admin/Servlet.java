@@ -31,9 +31,9 @@ import tigase.server.Packet;
 import tigase.util.stringprep.TigaseStringprepException;
 import tigase.xml.Element;
 import tigase.xml.XMLUtils;
+import tigase.xmpp.StanzaType;
 import tigase.xmpp.jid.BareJID;
 import tigase.xmpp.jid.JID;
-import tigase.xmpp.StanzaType;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.ServletConfig;
@@ -56,54 +56,81 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
  * @author andrzej
  */
-public class Servlet extends HttpServlet {
-	
-	private static final Logger log = Logger.getLogger(Servlet.class.getCanonicalName());
-	
+public class Servlet
+		extends HttpServlet {
+
 	public static final String MODULE_ID_KEY = "module-id-key";
 	public static final String SCRIPTS_DIR_KEY = "scripts-dir";
-
+	private static final Logger log = Logger.getLogger(Servlet.class.getCanonicalName());
+	private static final String DISCO_ITEMS_XMLNS = "http://jabber.org/protocol/disco#items";
+	private static final String ADHOC_COMMANDS_XMLNS = "http://jabber.org/protocol/commands";
 	private final GStringTemplateEngine templateEngine = new GStringTemplateEngine();
-
-	private Template template = null;
-	private Service service = null;
 	private File scriptsDir = null;
-	
-    @Override
-    public void init() throws ServletException {
-        super.init();
+	private Service service = null;
+	private Template template = null;
+
+	@Override
+	public void init() throws ServletException {
+		super.init();
 		ServletConfig cfg = super.getServletConfig();
 		String moduleName = cfg.getInitParameter(MODULE_ID_KEY);
 		service = new ServiceImpl(moduleName);
 		scriptsDir = new File(cfg.getInitParameter(SCRIPTS_DIR_KEY));
 	}
-	
-    @Override
-    public void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        try {
-            processRequest(request, response);
-        }
-        catch (Exception ex) {
-            log.log(Level.FINE, "exception processing request", ex);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        }
-    }
-	
-    private void processRequest(final HttpServletRequest request, final HttpServletResponse response) throws TigaseStringprepException, IOException, ServletException {
-		if (request.getUserPrincipal() == null && !request.authenticate(response)){
+
+	@Override
+	public void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		try {
+			processRequest(request, response);
+		} catch (Exception ex) {
+			log.log(Level.FINE, "exception processing request", ex);
+			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	public void processRequestStep(final HttpServletRequest request, final AsyncContext asyncCtx, final Map model,
+								   final JID jid, final String node, final List<Element> formFields)
+			throws TigaseStringprepException {
+		executeAdhocForm(request.getUserPrincipal(), jid, node, formFields,
+						 (Command.DataType formType1, List<Element> formFields1) -> {
+							 int iteration = model.containsKey("iteration") ? (Integer) model.get("iteration") : 1;
+							 if (formType1 == Command.DataType.form &&
+									 ((requestHasValuesForFields(formFields1, request) && (iteration < 10)) ||
+											 (iteration == 1 && "POST".equals(request.getMethod())))) {
+								 setFieldValuesFromRequest(formFields1, request, iteration);
+								 model.put("iteration", ++iteration);
+								 try {
+									 processRequestStep(request, asyncCtx, model, jid, node, formFields1);
+								 } catch (TigaseStringprepException ex) {
+									 log.log(Level.FINE, "exception processing HTTP request", ex);
+								 }
+							 } else {
+								 model.put("formFields", formFields1);
+								 try {
+									 generateResult(asyncCtx, model);
+								 } catch (Exception ex) {
+									 log.log(Level.FINE, "exception processing HTTP request", ex);
+								 }
+							 }
+						 });
+
+	}
+
+	private void processRequest(final HttpServletRequest request, final HttpServletResponse response)
+			throws TigaseStringprepException, IOException, ServletException {
+		if (request.getUserPrincipal() == null && !request.authenticate(response)) {
 			// user not authenticated but authentication is required for this servlet
 			return;
 		}
-		
+
 		final AsyncContext asyncCtx = request.startAsync(request, response);
-		
+
 		final Map model = new HashMap();
 		retrieveComponentsCommands(request.getUserPrincipal(), (List<Map> commands) -> {
-		    model.put("commands", commands);
-			
+			model.put("commands", commands);
+
 			try {
 				String node = request.getParameter("_node");
 				String jidStr = request.getParameter("_jid");
@@ -120,7 +147,7 @@ public class Servlet extends HttpServlet {
 //							}
 //						} else {
 //							setFieldValuesFromRequest(formFields, request);
-//							
+//
 //							try {
 //								executeAdhocForm(request.getUserPrincipal(), jid, node, formFields, (Command.DataType formType1, List<Element> formFields1) -> {
 //									if (formType1 == Command.DataType.form && requestHasValuesForFields(formFields1, request)) {
@@ -159,32 +186,10 @@ public class Servlet extends HttpServlet {
 				log.log(Level.FINE, "exception processing HTTP request", ex);
 			}
 		});
-	}	
-	
-	public void processRequestStep(final HttpServletRequest request, final AsyncContext asyncCtx, final Map model, final JID jid, final String node, final List<Element> formFields) throws TigaseStringprepException {
-		executeAdhocForm(request.getUserPrincipal(), jid, node, formFields, (Command.DataType formType1, List<Element> formFields1) -> {
-			int iteration = model.containsKey("iteration") ? (Integer) model.get("iteration") : 1;
-			if (formType1 == Command.DataType.form && ((requestHasValuesForFields(formFields1, request) && (iteration < 10)) || (iteration == 1 && "POST".equals(request.getMethod())))) {
-				setFieldValuesFromRequest(formFields1, request, iteration);
-				model.put("iteration", ++iteration);
-				try {
-					processRequestStep(request, asyncCtx, model, jid, node, formFields1);
-				} catch (TigaseStringprepException ex) {
-					log.log(Level.FINE, "exception processing HTTP request", ex);
-				}
-			} else {
-				model.put("formFields", formFields1);
-				try {
-					generateResult(asyncCtx, model);
-				} catch (Exception ex) {
-					log.log(Level.FINE, "exception processing HTTP request", ex);
-				}
-			}
-		});
-		
 	}
-	
-	private void generateResult(final AsyncContext asyncCtx, final Map model) throws IOException, CompilationFailedException, ClassNotFoundException {
+
+	private void generateResult(final AsyncContext asyncCtx, final Map model)
+			throws IOException, CompilationFailedException, ClassNotFoundException {
 		Map context = new HashMap();
 		context.put("model", model);
 		context.put("request", asyncCtx.getRequest());
@@ -195,9 +200,11 @@ public class Servlet extends HttpServlet {
 			String content = null;
 			try {
 				content = CSSHelper.getCssFileContent(path);
-			} catch (Exception ex) {}
-			if (content == null)
+			} catch (Exception ex) {
+			}
+			if (content == null) {
 				return "";
+			}
 			return "<style>" + content + "</style>";
 		};
 		util.put("inlineCss", tmp);
@@ -208,38 +215,37 @@ public class Servlet extends HttpServlet {
 		result.writeTo(asyncCtx.getResponse().getWriter());
 		asyncCtx.complete();
 	}
-	
-	private static final String DISCO_ITEMS_XMLNS = "http://jabber.org/protocol/disco#items";
-	private static final String ADHOC_COMMANDS_XMLNS = "http://jabber.org/protocol/commands";
-	
-	
-	private void executeAdhocForm(final Principal principal, JID componentJid, String node, List<Element> formFields, final CallbackExecuteForm<List<Element>> callback) throws TigaseStringprepException {
+
+	private void executeAdhocForm(final Principal principal, JID componentJid, String node, List<Element> formFields,
+								  final CallbackExecuteForm<List<Element>> callback) throws TigaseStringprepException {
 		Element iqEl = new Element("iq");
 		iqEl.setXMLNS("jabber:client");
 		iqEl.setAttribute("from", principal.getName());
 		iqEl.setAttribute("type", StanzaType.set.name());
 		iqEl.setAttribute("to", componentJid.toString());
-		
+
 		Element commandEl = new Element("command");
 		commandEl.setXMLNS(ADHOC_COMMANDS_XMLNS);
 		commandEl.setAttribute("node", node);
 		iqEl.addChild(commandEl);
-		
+
 		if (formFields != null) {
-			Element x = new Element("x", new String[] { "xmlns", "type" }, new String[] { "jabber:x:data", "submit" });
+			Element x = new Element("x", new String[]{"xmlns", "type"}, new String[]{"jabber:x:data", "submit"});
 			formFields.forEach((Element formField) -> x.addChild(formField));
 			commandEl.addChild(x);
 		}
-		
+
 		Packet iq = Packet.packetInstance(iqEl);
 		service.sendPacket(iq, null, (Packet result) -> {
-			Element xEl = result.getElement().findChildStaticStr(new String[] { "iq", "command", "x"});
+			Element xEl = result.getElement().findChildStaticStr(new String[]{"iq", "command", "x"});
 			List<Element> fields = xEl == null ? new ArrayList<>() : xEl.getChildren();
 			final Command.DataType formType = (xEl != null && xEl.getAttributeStaticStr("type") != null)
-					? Command.DataType.valueOf(xEl.getAttributeStaticStr("type")) : Command.DataType.result;
+											  ? Command.DataType.valueOf(xEl.getAttributeStaticStr("type"))
+											  : Command.DataType.result;
 			fields.forEach((Element e) -> {
-				if (e.getName() != "field")
+				if (e.getName() != "field") {
 					return;
+				}
 				if (e.getAttributeStaticStr("type") == null) {
 					e.setAttribute("type", formType == Command.DataType.form ? "text-single" : "fixed");
 				}
@@ -250,8 +256,9 @@ public class Servlet extends HttpServlet {
 			callback.call(formType, fields);
 		});
 	}
-	
-	private void retrieveComponentsCommands(final Principal principal, final Callback<List<Map>> callback) throws TigaseStringprepException {
+
+	private void retrieveComponentsCommands(final Principal principal, final Callback<List<Map>> callback)
+			throws TigaseStringprepException {
 		retrieveComponents(principal, (List<JID> componentJids) -> {
 			final AtomicInteger counter = new AtomicInteger(componentJids.size());
 			final List<Map> commands = new ArrayList();
@@ -259,20 +266,23 @@ public class Servlet extends HttpServlet {
 				try {
 					retrieveComponentCommands(principal, jid, (List<Map> componentCommands) -> {
 						synchronized (commands) {
-							if (componentCommands != null)
+							if (componentCommands != null) {
 								commands.addAll(componentCommands);
+							}
 						}
 						if (counter.decrementAndGet() == 0) {
 							callback.call(commands);
 						}
-					});	} catch (TigaseStringprepException ex) {
+					});
+				} catch (TigaseStringprepException ex) {
 					Logger.getLogger(Servlet.class.getName()).log(Level.FINE, null, ex);
 				}
 			});
-		});		
+		});
 	}
-	
-	private void retrieveComponents(Principal principal, Callback<List<JID>> callback) throws TigaseStringprepException {
+
+	private void retrieveComponents(Principal principal, Callback<List<JID>> callback)
+			throws TigaseStringprepException {
 		long start = System.currentTimeMillis();
 		Element iqEl = new Element("iq");
 		iqEl.setXMLNS("jabber:client");
@@ -280,54 +290,62 @@ public class Servlet extends HttpServlet {
 		BareJID jid = BareJID.bareJIDInstance(principal.getName());
 		iqEl.setAttribute("type", StanzaType.get.name());
 		iqEl.setAttribute("to", jid.getDomain());
-		
+
 		Element queryEl = new Element("query");
 		queryEl.setXMLNS(DISCO_ITEMS_XMLNS);
 		iqEl.addChild(queryEl);
-		
+
 		Packet iq = Packet.packetInstance(iqEl);
-		
+
 		service.sendPacket(iq, 1L, (Packet result) -> {
-			if (log.isLoggable(Level.FINEST))
+			if (log.isLoggable(Level.FINEST)) {
 				log.log(Level.FINEST, "discovery of components took {0}ms", (System.currentTimeMillis() - start));
+			}
 			if (result == null || result.getType() != StanzaType.result) {
 				log.fine("discovery of components failed");
 				callback.call(null);
 				return;
 			}
-			
-			List<JID> jids = result.getElement().getChild("query", DISCO_ITEMS_XMLNS).mapChildren((Element item) -> JID.jidInstanceNS(item.getAttributeStaticStr("jid")));
+
+			List<JID> jids = result.getElement()
+					.getChild("query", DISCO_ITEMS_XMLNS)
+					.mapChildren((Element item) -> JID.jidInstanceNS(item.getAttributeStaticStr("jid")));
 			callback.call(jids);
 		});
 	}
-	
-	private void retrieveComponentCommands(Principal principal, JID componentJid, Callback<List<Map>> callback) throws TigaseStringprepException {
+
+	private void retrieveComponentCommands(Principal principal, JID componentJid, Callback<List<Map>> callback)
+			throws TigaseStringprepException {
 		long start = System.currentTimeMillis();
 		Element iqEl = new Element("iq");
 		iqEl.setXMLNS("jabber:client");
 		iqEl.setAttribute("from", principal.getName());
 		iqEl.setAttribute("type", StanzaType.get.name());
 		iqEl.setAttribute("to", componentJid.toString());
-		
+
 		Element queryEl = new Element("query");
 		queryEl.setXMLNS(DISCO_ITEMS_XMLNS);
 		queryEl.setAttribute("node", ADHOC_COMMANDS_XMLNS);
 		iqEl.addChild(queryEl);
-		
+
 		Packet iq = Packet.packetInstance(iqEl);
-		
+
 		service.sendPacket(iq, 1L, (Packet result) -> {
-			if (log.isLoggable(Level.FINEST))
-				log.log(Level.FINEST, "discovery of commands of component {0} took {1}ms", new Object[]{componentJid, System.currentTimeMillis() - start});
+			if (log.isLoggable(Level.FINEST)) {
+				log.log(Level.FINEST, "discovery of commands of component {0} took {1}ms",
+						new Object[]{componentJid, System.currentTimeMillis() - start});
+			}
 			if (result == null || result.getType() != StanzaType.result) {
 				log.log(Level.FINE, "discovery of component {0} adhoc commands failed", componentJid);
 				callback.call(null);
 				return;
 			}
-			
-			List<Map> commands = result.getElement().getChild("query", DISCO_ITEMS_XMLNS).mapChildren((Element item) -> item.getAttributes());
+
+			List<Map> commands = result.getElement()
+					.getChild("query", DISCO_ITEMS_XMLNS)
+					.mapChildren((Element item) -> item.getAttributes());
 			callback.call(commands);
-		});		
+		});
 	}
 
 	private boolean requestHasValuesForFields(List<Element> formFields, HttpServletRequest request) {
@@ -336,16 +354,17 @@ public class Servlet extends HttpServlet {
 		List<String> missing = log.isLoggable(Level.FINEST) ? new ArrayList<>() : null;
 		if (formFields != null) {
 			for (Element formField : formFields) {
-				if (formField.getName() != "field")
+				if (formField.getName() != "field") {
 					continue;
-				
+				}
+
 				String type = formField.getAttributeStaticStr("type");
 				if (type == null || "boolean".equals(type) || "fixed".equals(type)) {
 					continue;
 				}
 
-				if (request.getParameter(formField.getAttributeStaticStr("var")) != null
-						|| request.getParameterValues(formField.getAttributeStaticStr("var")) != null) {
+				if (request.getParameter(formField.getAttributeStaticStr("var")) != null ||
+						request.getParameterValues(formField.getAttributeStaticStr("var")) != null) {
 					contains++;
 				} else if (missing != null) {
 					missing.add(formField.getAttributeStaticStr("var"));
@@ -353,39 +372,42 @@ public class Servlet extends HttpServlet {
 				needed++;
 			}
 		}
-	
+
 		if (log.isLoggable(Level.FINEST) && contains != needed && needed > 0) {
 			log.log(Level.FINEST, "for URI = {0} needed field {1} but got {2}, still missing = {3}",
-					new Object[]{ request.getRequestURI() + "?" + request.getQueryString(), needed, contains, missing });
+					new Object[]{request.getRequestURI() + "?" + request.getQueryString(), needed, contains, missing});
 		}
 		return contains == needed && needed > 0;
 	}
-	
+
 	private void setFieldValuesFromRequest(List<Element> formFields, HttpServletRequest request, int iteration) {
-		if (formFields == null)
+		if (formFields == null) {
 			return;
-		
+		}
+
 		formFields.forEach((Element formField) -> {
-			if (formField.getName() != "field")
+			if (formField.getName() != "field") {
 				return;
-			
+			}
+
 			String type = formField.getAttributeStaticStr("type");
-			if (type == null)
+			if (type == null) {
 				return;
+			}
 
 			List<Element> orginalChildren = new ArrayList<>();
 			if (formField.getChildren() != null) {
-				formField.getChildren().forEach((Element oldChild) -> { 
-					if (oldChild != null) { 
+				formField.getChildren().forEach((Element oldChild) -> {
+					if (oldChild != null) {
 						formField.removeChild(oldChild);
 						orginalChildren.add(oldChild);
 					}
 				});
 			}
-			
+
 			String paramName = formField.getAttributeStaticStr("var");
 			String value = null;
-			switch(type) {
+			switch (type) {
 				case "text-multi":
 				case "jid-multi":
 				case "list-multi":
@@ -394,7 +416,7 @@ public class Servlet extends HttpServlet {
 						if (values.length == 1) {
 							values = values[0].replace("\r", "").split("\n");
 						}
-						for (int i=0; i<values.length; i++) {
+						for (int i = 0; i < values.length; i++) {
 							value = values[i];
 							if (value != null) {
 								value = XMLUtils.escape(value);
@@ -444,14 +466,15 @@ public class Servlet extends HttpServlet {
 			template = templateEngine.createTemplate(new InputStreamReader(is));
 		}
 	}
-	
-	private interface Callback<T> { 
-		
+
+	private interface Callback<T> {
+
 		public void call(T result);
-		
+
 	}
-	
+
 	private interface CallbackExecuteForm<T> {
+
 		public void call(Command.DataType formType, T result);
 	}
 }

@@ -46,52 +46,65 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Bean(name = "rest", parent = HttpMessageReceiver.class, active = true)
-@ConfigType({ConfigTypeEnum.DefaultMode, ConfigTypeEnum.SessionManagerMode, ConfigTypeEnum.ConnectionManagersMode, ConfigTypeEnum.ComponentMode})
-public class RestModule extends AbstractModule {
-	
+@ConfigType({ConfigTypeEnum.DefaultMode, ConfigTypeEnum.SessionManagerMode, ConfigTypeEnum.ConnectionManagersMode,
+			 ConfigTypeEnum.ComponentMode})
+public class RestModule
+		extends AbstractModule {
+
 	private static final Logger log = Logger.getLogger(RestModule.class.getCanonicalName());
-	
+
 	private static final String DEF_SCRIPTS_DIR_VAL = "scripts/rest";
-	
+
 	private static final String SCRIPTS_DIR_KEY = "rest-scripts-dir";
-
+	private static final ConcurrentHashMap<String, StatisticHolder> stats = new ConcurrentHashMap<String, StatisticHolder>();
 	private final ReloadHandlersCmd reloadHandlersCmd = new ReloadHandlersCmd(this);
-
 	private DeploymentInfo httpDeployment = null;
-
+	private List<RestServlet> restServlets = new ArrayList<RestServlet>();
 	@ConfigField(desc = "Scripts directory", alias = SCRIPTS_DIR_KEY)
 	private String scriptsDir = DEF_SCRIPTS_DIR_VAL;
 
-	private List<RestServlet> restServlets = new ArrayList<RestServlet>();
-		
-	private static final ConcurrentHashMap<String,StatisticHolder> stats = new ConcurrentHashMap<String, StatisticHolder>();
-	
+	public static File[] getGroovyFiles(File scriptsDirFile) {
+		if (scriptsDirFile.exists()) {
+			return scriptsDirFile.listFiles(new FilenameFilter() {
+				@Override
+				public boolean accept(File file, String s) {
+					return s.endsWith("groovy");
+				}
+			});
+		} else {
+			if (log.isLoggable(Level.WARNING)) {
+				log.log(Level.WARNING, "scripts directory {0} does not exist!", scriptsDirFile);
+			}
+			return new File[0];
+		}
+	}
+
 	@Override
 	public void everyHour() {
 		for (StatisticHolder holder : stats.values()) {
 			holder.everyHour();
-		} 		
+		}
 	}
-	
+
 	@Override
 	public void everyMinute() {
 		for (StatisticHolder holder : stats.values()) {
 			holder.everyMinute();
-		} 	
+		}
 	}
-	
+
 	@Override
 	public void everySecond() {
 		for (StatisticHolder holder : stats.values()) {
 			holder.everySecond();
-		} 		
-	}	
+		}
+	}
 
 	@Override
 	public String getDescription() {
 		return "REST support - handles HTTP REST access using scripts";
 	}
-	
+
 	@Override
 	public void start() {
 		if (httpDeployment != null) {
@@ -99,8 +112,11 @@ public class RestModule extends AbstractModule {
 		}
 
 		super.start();
-		httpDeployment = httpServer.deployment().setClassLoader(this.getClass().getClassLoader())
-				.setContextPath(contextPath).setService(new tigase.http.ServiceImpl(this)).setDeploymentName("REST API")
+		httpDeployment = httpServer.deployment()
+				.setClassLoader(this.getClass().getClassLoader())
+				.setContextPath(contextPath)
+				.setService(new tigase.http.ServiceImpl(this))
+				.setDeploymentName("REST API")
 				.setDeploymentDescription(getDescription());
 		if (vhosts != null) {
 			httpDeployment.setVHosts(vhosts);
@@ -122,7 +138,7 @@ public class RestModule extends AbstractModule {
 				}
 			}
 		}
-		
+
 		try {
 			ServletInfo servletInfo = httpServer.servlet("RestServlet", RestExtServlet.class);
 			servletInfo.addInitParam(RestServlet.REST_MODULE_KEY, uuid)
@@ -132,19 +148,18 @@ public class RestModule extends AbstractModule {
 		} catch (IOException ex) {
 			log.log(Level.FINE, "Exception while scanning for scripts to load", ex);
 		}
-		
-		
+
 		ServletInfo servletInfo = httpServer.servlet("StaticServlet", StaticFileServlet.class);
 		servletInfo.addInitParam(StaticFileServlet.DIRECTORY_KEY, new File(scriptsDirFile, "static").getAbsolutePath())
 				.addMapping("/static/*");
-		httpDeployment.addServlets(servletInfo);		
-		
+		httpDeployment.addServlets(servletInfo);
+
 		httpServer.deploy(httpDeployment);
 	}
 
 	@Override
 	public void stop() {
-		if (httpDeployment != null) { 
+		if (httpDeployment != null) {
 			httpServer.undeploy(httpDeployment);
 			httpDeployment = null;
 		}
@@ -168,61 +183,24 @@ public class RestModule extends AbstractModule {
 	public void getStatistics(String compName, StatisticsList list) {
 		for (StatisticHolder holder : stats.values()) {
 			holder.getStatistics(compName, list);
-		} 
-	}			
-	
+		}
+	}
+
 	public void executedIn(String path, long executionTime) {
 		StatisticHolder holder = stats.get(path);
 		if (holder == null) {
 			StatisticHolder tmp = new StatisticHolderImpl();
 			tmp.setStatisticsPrefix(getName() + ", path=" + path);
 			holder = stats.putIfAbsent(path, tmp);
-			if (holder == null)
+			if (holder == null) {
 				holder = tmp;
+			}
 		}
 		holder.statisticExecutedIn(executionTime);
 	}
-	
+
 	public void statisticExecutedIn(long executionTime) {
-		
-	}
-	
-	protected void registerRestServlet(RestServlet servlet) {
-		restServlets.add(servlet);
-	}
-	
-	protected List<? extends RestServlet> getRestServlets() {
-		return restServlets;
-	}
-	
-    private void startRestServletForDirectory(DeploymentInfo httpDeployment, File scriptsDirFile) 
-			throws IOException {
-        File[] scriptFiles = getGroovyFiles(scriptsDirFile);
 
-        if (scriptFiles != null) {
-			ServletInfo servletInfo = httpServer.servlet("RestServlet", RestExtServlet.class);
-			servletInfo.addInitParam(RestServlet.REST_MODULE_KEY, uuid)
-					.addInitParam(RestServlet.SCRIPTS_DIR_KEY, scriptsDirFile.getCanonicalPath())
-					.addInitParam("mapping", "/" + scriptsDirFile.getName() + "/*")
-					.addMapping("/" + scriptsDirFile.getName() + "/*");
-			httpDeployment.addServlets(servletInfo);
-        }
-    }	
-
-	public static File[] getGroovyFiles( File scriptsDirFile) {
-		if (scriptsDirFile.exists()) {
-			return scriptsDirFile.listFiles(new FilenameFilter() {
-				@Override
-				public boolean accept(File file, String s) {
-					return s.endsWith("groovy");
-				}
-			});
-		} else {
-			if (log.isLoggable(Level.WARNING)) {
-				log.log(Level.WARNING, "scripts directory {0} does not exist!", scriptsDirFile);
-			}
-			return new File[0];
-		}
 	}
 
 	public Kernel getKernel() {
@@ -233,5 +211,26 @@ public class RestModule extends AbstractModule {
 	public void initialize() {
 		super.initialize();
 		commandManager.registerCmd(reloadHandlersCmd);
+	}
+
+	protected void registerRestServlet(RestServlet servlet) {
+		restServlets.add(servlet);
+	}
+
+	protected List<? extends RestServlet> getRestServlets() {
+		return restServlets;
+	}
+
+	private void startRestServletForDirectory(DeploymentInfo httpDeployment, File scriptsDirFile) throws IOException {
+		File[] scriptFiles = getGroovyFiles(scriptsDirFile);
+
+		if (scriptFiles != null) {
+			ServletInfo servletInfo = httpServer.servlet("RestServlet", RestExtServlet.class);
+			servletInfo.addInitParam(RestServlet.REST_MODULE_KEY, uuid)
+					.addInitParam(RestServlet.SCRIPTS_DIR_KEY, scriptsDirFile.getCanonicalPath())
+					.addInitParam("mapping", "/" + scriptsDirFile.getName() + "/*")
+					.addMapping("/" + scriptsDirFile.getName() + "/*");
+			httpDeployment.addServlets(servletInfo);
+		}
 	}
 }

@@ -39,16 +39,14 @@ import java.util.stream.Stream;
  * Created by andrzej on 08.08.2016.
  */
 @Bean(name = "store", parent = FileUploadComponent.class, active = true, exportable = true)
-public class DirectoryStore implements Store {
+public class DirectoryStore
+		implements Store {
 
 	private static final Logger log = Logger.getLogger(DirectoryStore.class.getCanonicalName());
-
-	@ConfigField(desc = "Path for data storage", alias = "path")
-	private String path = "data/upload";
-
 	@ConfigField(desc = "Group user slots in directories", alias = "group-by-user")
 	private boolean groupByUser = false;
-
+	@ConfigField(desc = "Path for data storage", alias = "path")
+	private String path = "data/upload";
 	private Path root = Paths.get(path);
 
 	public void setPath(String path) {
@@ -93,20 +91,23 @@ public class DirectoryStore implements Store {
 		Path slot = prepareSlotPath(uploader, slotId);
 		Path file = slot.resolve(filename);
 
-		if (!Files.exists(file))
+		if (!Files.exists(file)) {
 			return null;
+		}
 
 		return FileChannel.open(file, StandardOpenOption.READ);
 	}
 
 	@Override
-	public void setContent(BareJID uploader, String slotId, String filename, long size, ReadableByteChannel source) throws IOException {
+	public void setContent(BareJID uploader, String slotId, String filename, long size, ReadableByteChannel source)
+			throws IOException {
 		Path slot = prepareSlotPath(uploader, slotId);
 		Path file = slot.resolve(filename);
 
 		Files.createDirectories(slot);
 
-		try (FileChannel destination = FileChannel.open(file, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE)) {
+		try (FileChannel destination = FileChannel.open(file, StandardOpenOption.CREATE_NEW,
+														StandardOpenOption.WRITE)) {
 			destination.transferFrom(source, 0, size);
 		}
 	}
@@ -117,7 +118,6 @@ public class DirectoryStore implements Store {
 
 		removeWithContent(slot);
 	}
-
 
 	protected Path prepareSlotPath(BareJID uploader, String slotId) {
 		Path path = groupByUser ? root.resolve(uploader.toString()) : root;

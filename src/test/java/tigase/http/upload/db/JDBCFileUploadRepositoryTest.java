@@ -25,7 +25,10 @@ import org.junit.runner.Description;
 import org.junit.runners.MethodSorters;
 import org.junit.runners.model.Statement;
 import tigase.component.exceptions.RepositoryException;
-import tigase.db.*;
+import tigase.db.DataSource;
+import tigase.db.DataSourceHelper;
+import tigase.db.RepositoryFactory;
+import tigase.db.TigaseDBException;
 import tigase.db.util.SchemaLoader;
 import tigase.xmpp.jid.JID;
 
@@ -42,16 +45,12 @@ public class JDBCFileUploadRepositoryTest {
 
 	private static final String PROJECT_ID = "http-api";
 	private static final String VERSION = "2.0.0";
-
-	private static String uri = System.getProperty("testDbUri");
-
-	private static JID uploader = null;
-	private static String slotId;
 	private static String filename;
 	private static long filesize;
-
+	private static String slotId;
 	private static LocalDateTime testStart;
-
+	private static JID uploader = null;
+	private static String uri = System.getProperty("testDbUri");
 	@ClassRule
 	public static TestRule rule = new TestRule() {
 		@Override
@@ -70,6 +69,24 @@ public class JDBCFileUploadRepositoryTest {
 
 	private DataSource dataSource;
 	private FileUploadRepository repo;
+
+	@AfterClass
+	public static void cleanDerby() {
+		if (uri.contains("jdbc:derby:")) {
+			File f = new File("derby_test");
+			if (f.exists()) {
+				if (f.listFiles() != null) {
+					Arrays.asList(f.listFiles()).forEach(f2 -> {
+						if (f2.listFiles() != null) {
+							Arrays.asList(f2.listFiles()).forEach(f3 -> f3.delete());
+						}
+						f2.delete();
+					});
+				}
+				f.delete();
+			}
+		}
+	}
 
 	@BeforeClass
 	public static void loadSchema() {
@@ -92,28 +109,12 @@ public class JDBCFileUploadRepositoryTest {
 		testStart = LocalDateTime.now();
 	}
 
-	@AfterClass
-	public static void cleanDerby() {
-		if (uri.contains("jdbc:derby:")) {
-			File f = new File("derby_test");
-			if (f.exists()) {
-				if (f.listFiles() != null) {
-					Arrays.asList(f.listFiles()).forEach(f2 -> {
-						if (f2.listFiles() != null) {
-							Arrays.asList(f2.listFiles()).forEach(f3 -> f3.delete());
-						}
-						f2.delete();
-					});
-				}
-				f.delete();
-			}
-		}
-	}
-
 	@Before
-	public void setup() throws RepositoryException, InstantiationException, IllegalAccessException, SQLException, ClassNotFoundException {
-		if (uri == null)
+	public void setup() throws RepositoryException, InstantiationException, IllegalAccessException, SQLException,
+							   ClassNotFoundException {
+		if (uri == null) {
 			return;
+		}
 
 		dataSource = RepositoryFactory.getRepoClass(DataSource.class, uri).newInstance();
 		dataSource.initRepository(uri, new HashMap<>());
@@ -123,8 +124,9 @@ public class JDBCFileUploadRepositoryTest {
 
 	@After
 	public void tearDown() {
-		if (uri == null)
+		if (uri == null) {
 			return;
+		}
 
 		repo = null;
 	}

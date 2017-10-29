@@ -21,109 +21,108 @@ package tigase.http.coders
 
 import groovy.xml.MarkupBuilder
 
-import java.util.logging.Logger
 import java.util.logging.Level
+import java.util.logging.Logger
 
-public class XmlCoder implements Coder {
+public class XmlCoder
+		implements Coder {
 
-    private static final Logger log = Logger.getLogger(XmlCoder.class.getCanonicalName())
+	private static final Logger log = Logger.getLogger(XmlCoder.class.getCanonicalName())
 
-    @Override
-    String encode(Object obj) {
-        def writer = new StringWriter();
-        def xmlBuilder = new MarkupBuilder(writer);
-        encodeObject(xmlBuilder, obj);
-        return writer.toString()
-    }
+	@Override
+	String encode(Object obj) {
+		def writer = new StringWriter();
+		def xmlBuilder = new MarkupBuilder(writer);
+		encodeObject(xmlBuilder, obj);
+		return writer.toString()
+	}
 
-    @Override
-    public Object decode(String str) {
-        def node = new XmlSlurper().parseText(str);
+	@Override
+	public Object decode(String str) {
+		def node = new XmlSlurper().parseText(str);
 
-        return convertNodeToObject(node, true);
-    }
+		return convertNodeToObject(node, true);
+	}
 
-        private Object convertNodeToObject(def node, def first) {
-        def children = node.children();
-        if (children != null && !children.isEmpty()) {
-            def isList = true;
-            children.each { isList = isList && it.name() == 'item' }
-            if (isList) {
-				if (log.isLoggable(Level.FINEST))
-					log.finest("converting list");
-                def list = [];
-                children.each {
-                    list.add(convertNodeToObject(it, false))
-                }
+	private Object convertNodeToObject(def node, def first) {
+		def children = node.children();
+		if (children != null && !children.isEmpty()) {
+			def isList = true;
+			children.each { isList = isList && it.name() == 'item' }
+			if (isList) {
+				if (log.isLoggable(Level.FINEST)) {
+					log.finest("converting list")
+				};
+				def list = [ ];
+				children.each {
+					list.add(convertNodeToObject(it, false))
+				}
 /*                def map = [:]
                 map[node.name()] = list;
                 return map;*/
-                return list;
-            }
-            else {
-                def map = [:];
-                if (log.isLoggable(Level.FINEST))
-					log.finest("converting map");
-                children.each {
-                    map.put(it.name(), convertNodeToObject(it, false))
-                }
-                if (first) {
-                    if (log.isLoggable(Level.FINEST))
+				return list;
+			} else {
+				def map = [ : ];
+				if (log.isLoggable(Level.FINEST)) {
+					log.finest("converting map")
+				};
+				children.each {
+					map.put(it.name(), convertNodeToObject(it, false))
+				}
+				if (first) {
+					if (log.isLoggable(Level.FINEST)) {
 						log.finest("first node = " + node.name())
-                    def fmap = [:];
-                    fmap.put(node.name(), map);
-                    return fmap;
-                }
-                else {
-                    return map;
-                }
-            }
-        }
-        else {
-            if (node.text() != null)
-                return node.text()
-        }
-        return null;
-    }
+					}
+					def fmap = [ : ];
+					fmap.put(node.name(), map);
+					return fmap;
+				} else {
+					return map;
+				}
+			}
+		} else {
+			if (node.text() != null) {
+				return node.text()
+			}
+		}
+		return null;
+	}
 //    private void encodeList(MarkupBuilder builder, String name, Object obj) {
 //        builder."$name" {
 //            encodeObject(builder, obj);
 //        }
 //    }
 
-    private void encodeObject(MarkupBuilder builder, Object obj) {
-        obj.each { key, value ->
-            if (value instanceof List) {
-                builder."$key" {
-                    value.each { item ->
-                        if (item instanceof Map) {
-                            builder.item {
-                                encodeObject(builder, item);
-                            }
-                        }
-                        else {
-                            if (! (item instanceof Number || item instanceof String)) {
-                                item = item?.toString()
-                            }
+	private void encodeObject(MarkupBuilder builder, Object obj) {
+		obj.each { key, value ->
+			if (value instanceof List) {
+				builder."$key" {
+					value.each { item ->
+						if (item instanceof Map) {
+							builder.item {
+								encodeObject(builder, item);
+							}
+						} else {
+							if (!(item instanceof Number || item instanceof String)) {
+								item = item?.toString()
+							}
 
-                            builder.item(item)
-                        }
-                    }
-                }
-            }
-            else if (value instanceof Map) {
-                builder."$key" {
-                    encodeObject(builder, value);
-                }
-            }
-            else {
-                if (! (value instanceof Number || value instanceof String)) {
-                    value = value?.toString()
-                }
+							builder.item(item)
+						}
+					}
+				}
+			} else if (value instanceof Map) {
+				builder."$key" {
+					encodeObject(builder, value);
+				}
+			} else {
+				if (!(value instanceof Number || value instanceof String)) {
+					value = value?.toString()
+				}
 
-                builder."$key"(value)
-            }
-        }
-    }
+				builder."$key"(value)
+			}
+		}
+	}
 
 }

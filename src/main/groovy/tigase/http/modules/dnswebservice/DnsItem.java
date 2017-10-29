@@ -21,33 +21,32 @@ package tigase.http.modules.dnswebservice;
 
 public class DnsItem {
 
-	private final String domain;
-
-	private final DnsEntry[] c2s;
 	private final DnsEntry[] bosh;
+	private final DnsEntry[] c2s;
+	private final String domain;
 	private final DnsEntry[] websocket;
-	
+
 	public DnsItem(String domain, DnsEntry[] c2s, DnsEntry[] bosh, DnsEntry[] websocket) {
 		this.domain = domain;
 		this.c2s = c2s;
 		this.bosh = bosh;
 		this.websocket = websocket;
 	}
-	
+
 	public String getDomain() {
 		return domain;
 	}
-	
+
 	public DnsEntry[] getC2S() {
 		return c2s;
 	}
-	
+
 	public DnsEntry[] getBosh() {
 		return bosh;
 	}
-	
+
 	public DnsEntry[] getWebSocket() {
 		return websocket;
 	}
-	
+
 }

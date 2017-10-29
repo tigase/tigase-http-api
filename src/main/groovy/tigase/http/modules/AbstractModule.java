@@ -28,16 +28,16 @@ import tigase.kernel.beans.UnregisterAware;
 import tigase.kernel.beans.config.ConfigurationChangedAware;
 import tigase.xmpp.jid.BareJID;
 
-public abstract class AbstractModule extends AbstractBareModule implements Module, Initializable, ConfigurationChangedAware, UnregisterAware {
-
-	@Inject
-	private UserRepository userRepository;
-
-	@Inject
-	private AuthRepository authRepository;
+public abstract class AbstractModule
+		extends AbstractBareModule
+		implements Module, Initializable, ConfigurationChangedAware, UnregisterAware {
 
 	@Inject
 	private ApiKeyRepository apiKeyRepository;
+	@Inject
+	private AuthRepository authRepository;
+	@Inject
+	private UserRepository userRepository;
 
 	public static <T extends Module> T getModuleByUUID(String uuid) {
 		return (T) AbstractBareModule.getModuleByUUID(uuid);
@@ -55,17 +55,17 @@ public abstract class AbstractModule extends AbstractBareModule implements Modul
 	public boolean isRequestAllowed(String key, String domain, String path) {
 		return apiKeyRepository.isAllowed(key, domain, path);
 	}
-	
+
 	@Override
 	public UserRepository getUserRepository() {
 		return userRepository;
 	}
-	
+
 	@Override
 	public AuthRepository getAuthRepository() {
 		return authRepository;
 	}
-	
+
 	@Override
 	public void stop() {
 		super.stop();

@@ -22,15 +22,16 @@ package tigase.http.coders
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 
-class JsonCoder implements Coder {
+class JsonCoder
+		implements Coder {
 
-    @Override
-    public String encode(Object obj) {
-        return new JsonBuilder(obj).toPrettyString();
-    }
+	@Override
+	public String encode(Object obj) {
+		return new JsonBuilder(obj).toPrettyString();
+	}
 
-    @Override
-    public Object decode(String str) {
-        return new JsonSlurper().parseText(str);
-    }
+	@Override
+	public Object decode(String str) {
+		return new JsonSlurper().parseText(str);
+	}
 }

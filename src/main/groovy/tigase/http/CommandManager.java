@@ -19,28 +19,26 @@
  */
 package tigase.http;
 
-import java.util.ArrayDeque;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Logger;
-import javax.script.Bindings;
-
 import tigase.http.modules.Module;
 import tigase.server.Command;
 import tigase.server.Iq;
 import tigase.server.Packet;
 import tigase.server.script.CommandIfc;
 
+import javax.script.Bindings;
+import java.util.ArrayDeque;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
+
 public class CommandManager {
-	
+
 	private static final Logger log = Logger.getLogger(CommandManager.class.getCanonicalName());
-	
-	private Map<String,CommandIfc> scriptCommands = new ConcurrentHashMap<String,CommandIfc>();
-	
 	private Module module;
-	
+	private Map<String, CommandIfc> scriptCommands = new ConcurrentHashMap<String, CommandIfc>();
+
 	public CommandManager(Module module) {
 		this.module = module;
 	}
@@ -48,17 +46,17 @@ public class CommandManager {
 	public Collection<CommandIfc> getCommands() {
 		return scriptCommands.values();
 	}
-	
+
 	public void registerCmd(CommandIfc cmd) {
 		scriptCommands.put(cmd.getCommandId(), cmd);
 	}
-	
+
 	public void unregisterCmd(CommandIfc cmd) {
 		scriptCommands.remove(cmd.getCommandId());
 	}
-	
+
 	public boolean execute(Packet pc) {
-		Iq             iqc    = (Iq) pc;
+		Iq iqc = (Iq) pc;
 		Command.Action action = Command.getAction(iqc);
 
 		if (action == Command.Action.cancel) {
@@ -70,9 +68,9 @@ public class CommandManager {
 			return true;
 		}
 
-		String     strCommand = iqc.getStrCommand();
-		CommandIfc com        = scriptCommands.get(strCommand);
-		
+		String strCommand = iqc.getStrCommand();
+		CommandIfc com = scriptCommands.get(strCommand);
+
 		if (com != null) {
 			Bindings bindings = com.getBindings();
 			if (bindings != null) {
@@ -87,5 +85,5 @@ public class CommandManager {
 		}
 		return false;
 	}
-	
+
 }

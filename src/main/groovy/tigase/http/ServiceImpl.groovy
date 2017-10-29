@@ -35,53 +35,55 @@ import tigase.util.stringprep.TigaseStringprepException
 import tigase.xmpp.jid.BareJID
 
 @CompileStatic
-public class ServiceImpl<T extends Module> implements Service<T>, tigase.http.rest.Service {
+public class ServiceImpl<T extends Module>
+		implements Service<T>, tigase.http.rest.Service {
 
 	private final T module;
-	
+
 	public ServiceImpl(String moduleUUID) {
 		this((T) AbstractBareModule.getModuleByUUID(moduleUUID));
 	}
-	
+
 	public ServiceImpl(T module) {
 		this.module = module;
 	}
-	
+
 	void sendPacket(Packet packet, Long timeout, Callback closure) {
 		if (closure != null) {
 			module.addOutPacket(packet, (Integer) (timeout == null ? null : timeout.intValue()),
-				closure);
-		} else {
-			module.addOutPacket(packet);
-		} 
-	}
-	
-    void sendPacket(Packet packet, Long timeout, Closure closure) {
-		if (closure != null) {
-			module.addOutPacket(packet, (Integer) (timeout == null ? null : timeout.intValue()),
-				new ClosureCallback(closure));
+								closure);
 		} else {
 			module.addOutPacket(packet);
 		}
 	}
-	
-    UserRepository getUserRepository() {
+
+	void sendPacket(Packet packet, Long timeout, Closure closure) {
+		if (closure != null) {
+			module.addOutPacket(packet, (Integer) (timeout == null ? null : timeout.intValue()),
+								new ClosureCallback(closure));
+		} else {
+			module.addOutPacket(packet);
+		}
+	}
+
+	UserRepository getUserRepository() {
 		return module.getUserRepository();
 	}
-	
-    AuthRepository getAuthRepository() {
+
+	AuthRepository getAuthRepository() {
 		return module.getAuthRepository();
 	}
-	
-    boolean isAdmin(BareJID user) {
+
+	boolean isAdmin(BareJID user) {
 		return module.isAdmin(user);
 	}
-	
+
 	boolean isAllowed(String key, String domain, String path) {
 		return module.isRequestAllowed(key, domain, path);
 	}
 
-	boolean checkCredentials(String user, String password) throws TigaseStringprepException, TigaseDBException, AuthorizationException {
+	boolean checkCredentials(String user, String password)
+			throws TigaseStringprepException, TigaseDBException, AuthorizationException {
 		BareJID jid = BareJID.bareJIDInstance(user);
 		Credentials credentials = module.getAuthRepository().
 				getCredentials(jid, Credentials.DEFAULT_USERNAME);
@@ -90,7 +92,7 @@ public class ServiceImpl<T extends Module> implements Service<T>, tigase.http.re
 		}
 		return credentials.getFirst().verifyPlainPassword(password);
 	}
-	
+
 	T getModule() {
 		return module;
 	}

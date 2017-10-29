@@ -32,40 +32,43 @@ import tigase.xmpp.jid.JID;
 import javax.script.Bindings;
 import java.util.List;
 
-public interface Module extends StatisticHolder {
-	
+public interface Module
+		extends StatisticHolder {
+
 	public static final String VHOSTS_KEY = "vhosts";
+
 	public static final String HTTP_SERVER_KEY = "http-server";
+
 	public static final String HTTP_CONTEXT_PATH_KEY = "context-path";
-	
+
 	String getName();
-	
+
 	String getDescription();
-	
+
 	Element getDiscoInfo(String node, boolean isAdmin);
-	
+
 	List<Element> getDiscoItems(String node, JID jid, JID from);
-	
+
 	JID getJid();
-	
+
 	boolean addOutPacket(Packet packet);
-	
+
 	boolean addOutPacket(Packet packet, Integer timeout, Callback callback);
-	
+
 	String[] getFeatures();
-	
+
 	void initBindings(Bindings binds);
-	
+
 	boolean processPacket(Packet packet);
 
 	void init(JID jid, String componentName, PacketWriter writer);
-	
+
 	boolean isRequestAllowed(String key, String domain, String path);
-	
+
 	boolean isAdmin(BareJID user);
-	
+
 	void start();
-	
+
 	void stop();
 
 	UserRepository getUserRepository();

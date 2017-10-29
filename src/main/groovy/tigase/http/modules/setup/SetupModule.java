@@ -39,26 +39,22 @@ import tigase.xmpp.jid.BareJID;
 import java.util.logging.Logger;
 
 /**
- *
  * @author andrzej
  */
 @Bean(name = "setup", parent = HttpMessageReceiver.class, active = true)
-public class SetupModule extends AbstractBareModule
+public class SetupModule
+		extends AbstractBareModule
 		implements Module {
 
 	private static final Logger log = Logger.getLogger(SetupModule.class.getCanonicalName());
-
-	private DeploymentInfo httpDeployment = null;
-
-	private Service service = null;
-
-	@ConfigField(desc = "Allow access to setup for user", alias = "admin-user")
-	private String adminUser = null;
 	@ConfigField(desc = "Allow access to setup with password", alias = "admin-password")
 	private String adminPassword = null;
-
+	@ConfigField(desc = "Allow access to setup for user", alias = "admin-user")
+	private String adminUser = null;
 	@Inject(nullAllowed = true)
 	private AuthRepository authRepo;
+	private DeploymentInfo httpDeployment = null;
+	private Service service = null;
 
 	@Override
 	public String getDescription() {
@@ -75,7 +71,7 @@ public class SetupModule extends AbstractBareModule
 		if (httpDeployment != null) {
 			stop();
 		}
-	
+
 		service = new tigase.http.ServiceImpl(this) {
 
 			@Override
@@ -84,14 +80,17 @@ public class SetupModule extends AbstractBareModule
 			}
 
 			@Override
-			public boolean checkCredentials(String user, String password) throws TigaseStringprepException, TigaseDBException, AuthorizationException {
-				if (adminUser != null && adminPassword != null && adminUser.equals(user) && adminPassword.equals(password)) {
+			public boolean checkCredentials(String user, String password)
+					throws TigaseStringprepException, TigaseDBException, AuthorizationException {
+				if (adminUser != null && adminPassword != null && adminUser.equals(user) &&
+						adminPassword.equals(password)) {
 					return true;
 				}
 
 				AuthRepository authRepository = SetupModule.this.getAuthRepository();
-				if (authRepository == null)
+				if (authRepository == null) {
 					return false;
+				}
 				BareJID jid = BareJID.bareJIDInstance(user);
 				Credentials credentials = authRepository.
 						getCredentials(jid, Credentials.DEFAULT_USERNAME);
@@ -102,11 +101,15 @@ public class SetupModule extends AbstractBareModule
 			}
 
 		};
-		
+
 		super.start();
-		
-		httpDeployment = httpServer.deployment().setClassLoader(this.getClass().getClassLoader())
-				.setContextPath(contextPath).setService(service).setDeploymentName("Setup").setDeploymentDescription(getDescription());
+
+		httpDeployment = httpServer.deployment()
+				.setClassLoader(this.getClass().getClassLoader())
+				.setContextPath(contextPath)
+				.setService(service)
+				.setDeploymentName("Setup")
+				.setDeploymentDescription(getDescription());
 		if (vhosts != null) {
 			httpDeployment.setVHosts(vhosts);
 		}
@@ -115,10 +118,10 @@ public class SetupModule extends AbstractBareModule
 		httpDeployment.addServlets(servletInfo);
 		httpServer.deploy(httpDeployment);
 	}
-	
+
 	@Override
 	public void stop() {
-		if (httpDeployment != null) { 
+		if (httpDeployment != null) {
 			httpServer.undeploy(httpDeployment);
 			httpDeployment = null;
 		}

@@ -34,14 +34,14 @@ import java.util.stream.Collectors;
  * Created by andrzej on 11.06.2017.
  */
 public class CSSHelper {
-	
+
 	public static String getCssFileContent(String pathStr) throws IOException {
 		pathStr = "tigase/assets/css/" + pathStr;
 		Path path = Paths.get(pathStr);
 		if (Files.exists(path)) {
 			return Files.readAllLines(path, StandardCharsets.UTF_8).stream().collect(Collectors.joining("\n"));
 		} else {
-			try (InputStream is = CSSHelper.class.getResourceAsStream("/"+pathStr)) {
+			try (InputStream is = CSSHelper.class.getResourceAsStream("/" + pathStr)) {
 				if (is == null) {
 					return null;
 				}

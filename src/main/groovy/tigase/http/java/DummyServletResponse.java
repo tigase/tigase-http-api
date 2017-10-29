@@ -36,21 +36,25 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
  * @author andrzej
  */
-public class DummyServletResponse implements HttpServletResponse {
+public class DummyServletResponse
+		implements HttpServletResponse {
 
 	private final HttpExchange exchange;
 	private PrintWriter writer;
-	
+
 	public DummyServletResponse(HttpExchange exchange) {
 		this.exchange = exchange;
 	}
-	
+
 	@Override
 	public String getCharacterEncoding() {
 		return "UTF-8";
+	}
+
+	@Override
+	public void setCharacterEncoding(String string) {
 	}
 
 	@Override
@@ -59,12 +63,18 @@ public class DummyServletResponse implements HttpServletResponse {
 	}
 
 	@Override
+	public void setContentType(String string) {
+		exchange.getResponseHeaders().set("Content-Type", string);
+	}
+
+	@Override
 	public ServletOutputStream getOutputStream() throws IOException {
 		return new ServletOutputStream() {
 			@Override
 			public void write(int b) throws IOException {
-				if (exchange.getResponseCode() == -1)
+				if (exchange.getResponseCode() == -1) {
 					sendResponseHeaders(200, 0);
+				}
 				exchange.getResponseBody().write(b);
 			}
 
@@ -82,15 +92,12 @@ public class DummyServletResponse implements HttpServletResponse {
 	@Override
 	public PrintWriter getWriter() throws IOException {
 		if (writer == null) {
-			if (exchange.getResponseCode() == -1)
-					sendResponseHeaders(200, 0);
-			writer =  new PrintWriter(exchange.getResponseBody());	
+			if (exchange.getResponseCode() == -1) {
+				sendResponseHeaders(200, 0);
+			}
+			writer = new PrintWriter(exchange.getResponseBody());
 		}
 		return writer;
-	}
-
-	@Override
-	public void setCharacterEncoding(String string) {
 	}
 
 	@Override
@@ -99,17 +106,12 @@ public class DummyServletResponse implements HttpServletResponse {
 	}
 
 	@Override
-	public void setContentType(String string) {
-		exchange.getResponseHeaders().set("Content-Type", string);
+	public int getBufferSize() {
+		return 0;
 	}
 
 	@Override
 	public void setBufferSize(int i) {
-	}
-
-	@Override
-	public int getBufferSize() {
-		return 0;
 	}
 
 	@Override
@@ -134,12 +136,12 @@ public class DummyServletResponse implements HttpServletResponse {
 	}
 
 	@Override
-	public void setLocale(Locale locale) {
+	public Locale getLocale() {
+		return null;
 	}
 
 	@Override
-	public Locale getLocale() {
-		return null;
+	public void setLocale(Locale locale) {
 	}
 
 	@Override
@@ -156,7 +158,8 @@ public class DummyServletResponse implements HttpServletResponse {
 		try {
 			return URLEncoder.encode(string, "UTF-8");
 		} catch (UnsupportedEncodingException ex) {
-			Logger.getLogger(DummyServletResponse.class.getName()).log(Level.FINE, "could not URLEncode string: " + string, ex);
+			Logger.getLogger(DummyServletResponse.class.getName())
+					.log(Level.FINE, "could not URLEncode string: " + string, ex);
 		}
 		return null;
 	}
@@ -166,7 +169,8 @@ public class DummyServletResponse implements HttpServletResponse {
 		try {
 			return URLEncoder.encode(string, "UTF-8");
 		} catch (UnsupportedEncodingException ex) {
-			Logger.getLogger(DummyServletResponse.class.getName()).log(Level.FINE, "could not URLEncode string: " + string, ex);
+			Logger.getLogger(DummyServletResponse.class.getName())
+					.log(Level.FINE, "could not URLEncode string: " + string, ex);
 		}
 		return null;
 	}
@@ -176,7 +180,8 @@ public class DummyServletResponse implements HttpServletResponse {
 		try {
 			return URLEncoder.encode(string, "UTF-8");
 		} catch (UnsupportedEncodingException ex) {
-			Logger.getLogger(DummyServletResponse.class.getName()).log(Level.FINE, "could not URLEncode string: " + string, ex);
+			Logger.getLogger(DummyServletResponse.class.getName())
+					.log(Level.FINE, "could not URLEncode string: " + string, ex);
 		}
 		return null;
 	}
@@ -186,7 +191,8 @@ public class DummyServletResponse implements HttpServletResponse {
 		try {
 			return URLEncoder.encode(string, "UTF-8");
 		} catch (UnsupportedEncodingException ex) {
-			Logger.getLogger(DummyServletResponse.class.getName()).log(Level.FINE, "could not URLEncode string: " + string, ex);
+			Logger.getLogger(DummyServletResponse.class.getName())
+					.log(Level.FINE, "could not URLEncode string: " + string, ex);
 		}
 		return null;
 	}
@@ -198,8 +204,7 @@ public class DummyServletResponse implements HttpServletResponse {
 			PrintWriter writer = getWriter();
 			writer.write(string);
 			writer.flush();
-		}
-		else {
+		} else {
 			sendResponseHeaders(i, 0);
 		}
 	}
@@ -242,15 +247,6 @@ public class DummyServletResponse implements HttpServletResponse {
 	}
 
 	@Override
-	public void setStatus(int i) {
-		try {
-			sendResponseHeaders(i, 0);
-		} catch (IOException ex) {
-			Logger.getLogger(DummyServletResponse.class.getName()).log(Level.FINE, null, ex);
-		}
-	}
-
-	@Override
 	public void setStatus(int i, String string) {
 		try {
 			sendResponseHeaders(i, 0);
@@ -262,6 +258,15 @@ public class DummyServletResponse implements HttpServletResponse {
 	@Override
 	public int getStatus() {
 		return 200;
+	}
+
+	@Override
+	public void setStatus(int i) {
+		try {
+			sendResponseHeaders(i, 0);
+		} catch (IOException ex) {
+			Logger.getLogger(DummyServletResponse.class.getName()).log(Level.FINE, null, ex);
+		}
 	}
 
 	@Override

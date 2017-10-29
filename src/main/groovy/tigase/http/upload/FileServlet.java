@@ -47,7 +47,8 @@ import java.util.regex.Matcher;
 /**
  * Created by andrzej on 08.08.2016.
  */
-public class FileServlet extends HttpServlet {
+public class FileServlet
+		extends HttpServlet {
 
 	private static final Logger log = Logger.getLogger(FileServlet.class.getCanonicalName());
 

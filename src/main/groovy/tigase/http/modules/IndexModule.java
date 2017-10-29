@@ -44,14 +44,20 @@ import java.util.function.Function;
  * Created by andrzej on 28.05.2016.
  */
 @Bean(name = "index", parent = HttpMessageReceiver.class, active = true)
-@ConfigType({ConfigTypeEnum.DefaultMode, ConfigTypeEnum.SessionManagerMode, ConfigTypeEnum.ConnectionManagersMode, ConfigTypeEnum.ComponentMode})
-public class IndexModule extends AbstractModule {
+@ConfigType({ConfigTypeEnum.DefaultMode, ConfigTypeEnum.SessionManagerMode, ConfigTypeEnum.ConnectionManagersMode,
+			 ConfigTypeEnum.ComponentMode})
+public class IndexModule
+		extends AbstractModule {
 
-	private static final ConcurrentHashMap<String,IndexModule> modules = new ConcurrentHashMap<>();
+	private static final ConcurrentHashMap<String, IndexModule> modules = new ConcurrentHashMap<>();
 
 	private final String uuid = UUID.randomUUID().toString();
 
 	private DeploymentInfo httpDeployment = null;
+
+	public static IndexModule getInstance(String uuid) {
+		return modules.get(uuid);
+	}
 
 	public IndexModule() {
 		contextPath = "/";
@@ -75,8 +81,11 @@ public class IndexModule extends AbstractModule {
 
 		super.start();
 		modules.put(uuid, this);
-		httpDeployment = httpServer.deployment().setClassLoader(this.getClass().getClassLoader())
-				.setContextPath(contextPath).setDeploymentName("Index").setDeploymentDescription(getDescription());
+		httpDeployment = httpServer.deployment()
+				.setClassLoader(this.getClass().getClassLoader())
+				.setContextPath(contextPath)
+				.setDeploymentName("Index")
+				.setDeploymentDescription(getDescription());
 		if (vhosts != null) {
 			httpDeployment.setVHosts(vhosts);
 		}
@@ -99,19 +108,16 @@ public class IndexModule extends AbstractModule {
 		super.stop();
 	}
 
-	public static IndexModule getInstance(String uuid) {
-		return modules.get(uuid);
-	}
-
 	protected List<DeploymentInfo> listDeployments() {
 		return httpServer.listDeployed();
 	}
 
-	public static class IndexServlet extends HttpServlet {
+	public static class IndexServlet
+			extends HttpServlet {
 
 		private IndexModule module;
-		private GStringTemplateEngine templateEngine = new GStringTemplateEngine();
 		private Template template = null;
+		private GStringTemplateEngine templateEngine = new GStringTemplateEngine();
 
 		public IndexServlet() {
 
@@ -122,16 +128,18 @@ public class IndexModule extends AbstractModule {
 			super.init();
 			ServletConfig config = super.getServletConfig();
 			String uuid = config.getInitParameter("module");
-			if (uuid == null)
+			if (uuid == null) {
 				throw new ServletException("Missing module parameter!");
+			}
 
 			module = IndexModule.getInstance(uuid);
-			if (module == null)
+			if (module == null) {
 				throw new ServletException("Not found module for IndexServlet");
+			}
 
 			try {
 				loadTemplate();
-			} catch (IOException|ClassNotFoundException ex) {
+			} catch (IOException | ClassNotFoundException ex) {
 				throw new ServletException("Could not load template", ex);
 			}
 		}
@@ -140,7 +148,7 @@ public class IndexModule extends AbstractModule {
 		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 			try {
 				loadTemplate();
-			} catch (IOException|ClassNotFoundException ex) {
+			} catch (IOException | ClassNotFoundException ex) {
 				throw new ServletException("Could not load template", ex);
 			}
 
@@ -164,9 +172,11 @@ public class IndexModule extends AbstractModule {
 				String content = null;
 				try {
 					content = CSSHelper.getCssFileContent(path);
-				} catch (Exception ex) {}
-				if (content == null)
+				} catch (Exception ex) {
+				}
+				if (content == null) {
 					return "";
+				}
 				return "<style>" + content + "</style>";
 			};
 			util.put("inlineCss", tmp);

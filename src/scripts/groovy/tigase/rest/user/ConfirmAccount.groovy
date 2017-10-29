@@ -23,8 +23,8 @@ package tigase.rest.user
 import tigase.http.rest.Service
 import tigase.kernel.beans.Bean
 import tigase.kernel.beans.Inject
-import tigase.xmpp.jid.BareJID
 import tigase.xmpp.impl.JabberIqRegister
+import tigase.xmpp.jid.BareJID
 
 /**
  * Class implements ability to verify user account, which may be enforced during account
@@ -32,10 +32,10 @@ import tigase.xmpp.impl.JabberIqRegister
  * Handles requests for /rest/user/confirm and executes request for currently authenticated user
  *
  * Example format of content of request or response:
- * <account><jid>user@domain</jid><status>active</status></account>
- */
+ * <account><jid>user@domain</jid><status>active</status></account>*/
 @Bean(name = "account-confirm", active = true)
-class ConfirmAccountHandler extends tigase.http.rest.Handler {
+class ConfirmAccountHandler
+		extends tigase.http.rest.Handler {
 
 	@Inject(nullAllowed = true)
 	private JabberIqRegister.AccountValidator[] validators;
@@ -54,7 +54,8 @@ Example response:
 		apiKey = false;
 		execGet = { Service service, callback, String token ->
 			if (validators == null) {
-				callback([ error: [ message: "Account confirmation is not enabled. Please contact server administrator." ]]);
+				callback(
+						[ error: [ message: "Account confirmation is not enabled. Please contact server administrator." ] ]);
 				return;
 			}
 			BareJID validatedAccount = null;
@@ -68,9 +69,9 @@ Example response:
 			}
 
 			if (validatedAccount != null) {
-				callback([ account: [ jid: "${validatedAccount.toString()}", status: 'active' ]]);
+				callback([ account: [ jid: "${validatedAccount.toString()}", status: 'active' ] ]);
 			} else {
-				callback([ error: [ message: exception?.getMessage() ]]);
+				callback([ error: [ message: exception?.getMessage() ] ]);
 			}
 		}
 	}

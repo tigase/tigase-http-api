@@ -29,7 +29,8 @@ import java.io.IOException;
 /**
  * Created by andrzej on 06.04.2017.
  */
-public class SetupModeRedirectServlet extends HttpServlet {
+public class SetupModeRedirectServlet
+		extends HttpServlet {
 
 	@Override
 	protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

@@ -23,45 +23,44 @@ import javax.servlet.http.HttpServlet;
 import java.util.*;
 
 /**
- *
  * @author andrzej
  */
 public class ServletInfo {
 
+	private final Map<String, String> initParams = new HashMap<String, String>();
+	private final List<String> mappings = new ArrayList<String>();
 	private final String name;
 	private final Class<? extends HttpServlet> servletClass;
-	private final Map<String,String> initParams = new HashMap<String,String>();
-	private final List<String> mappings = new ArrayList<String>();
-	
+
 	public ServletInfo(String name, Class<? extends HttpServlet> servletClass) {
 		this.name = name;
 		this.servletClass = servletClass;
 	}
-	
+
 	public String getName() {
 		return name;
 	}
-	
+
 	public Class<? extends HttpServlet> getServletClass() {
 		return servletClass;
 	}
-	
+
 	public ServletInfo addInitParam(String key, String value) {
-		initParams.put(key,value);
+		initParams.put(key, value);
 		return this;
 	}
-	
-	public Map<String,String> getInitParams() {
+
+	public Map<String, String> getInitParams() {
 		return Collections.unmodifiableMap(initParams);
 	}
-	
+
 	public ServletInfo addMapping(String mapping) {
 		mappings.add(mapping);
 		return this;
 	}
-	
+
 	public List<String> getMappings() {
 		return Collections.unmodifiableList(mappings);
 	}
-	
+
 }

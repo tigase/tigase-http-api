@@ -28,29 +28,27 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 /**
- *
  * @author andrzej
  */
 public class DeploymentInfo {
 
 	private static final Logger log = Logger.getLogger(DeploymentInfo.class.getCanonicalName());
-	
+	private final Map<String, Object> data = new HashMap<String, Object>();
+	private final ArrayList<ServletInfo> servlets = new ArrayList<ServletInfo>();
 	private ClassLoader classLoader = null;
 	private String contextPath = null;
-	private String name;
 	private String description = null;
-	private String[] vhosts = null;
-	private final ArrayList<ServletInfo> servlets = new ArrayList<ServletInfo>();
-	
-	private final Map<String,Object> data = new HashMap<String,Object>();
+	private String name;
 	private Service service;
-	
-	public DeploymentInfo() {}
-		
+	private String[] vhosts = null;
+
+	public DeploymentInfo() {
+	}
+
 	public ClassLoader getClassLoader() {
 		return classLoader;
 	}
-	
+
 	public DeploymentInfo setClassLoader(ClassLoader classLoader) {
 		this.classLoader = classLoader;
 		return this;
@@ -59,7 +57,7 @@ public class DeploymentInfo {
 	public String getContextPath() {
 		return contextPath;
 	}
-	
+
 	public DeploymentInfo setContextPath(String contextPath) {
 		this.contextPath = contextPath;
 		return this;
@@ -77,12 +75,12 @@ public class DeploymentInfo {
 	public String getDeploymentName() {
 		return name;
 	}
-	
+
 	public DeploymentInfo setDeploymentName(String name) {
 		this.name = name;
 		return this;
 	}
-	
+
 	public ServletInfo[] getServlets() {
 		return servlets.toArray(new ServletInfo[servlets.size()]);
 	}
@@ -90,32 +88,32 @@ public class DeploymentInfo {
 	public DeploymentInfo addServlets(ServletInfo... servlets) {
 		this.servlets.addAll(Arrays.asList(servlets));
 		return this;
-	}	
-	
+	}
+
 	public String[] getVHosts() {
 		return this.vhosts;
 	}
-	
+
 	public DeploymentInfo setVHosts(String... vhosts) {
 		this.vhosts = vhosts;
 		return this;
 	}
-	
+
 	public void put(String key, Object value) {
 		this.data.put(key, value);
 	}
-	
+
 	public <T> T get(String key) {
 		return (T) data.get(key);
 	}
-	
+
+	public Service getService() {
+		return service;
+	}
+
 	public DeploymentInfo setService(Service service) {
 		this.service = service;
 		return this;
 	}
-	
-	public Service getService() {
-		return service;
-	}
-	
+
 }

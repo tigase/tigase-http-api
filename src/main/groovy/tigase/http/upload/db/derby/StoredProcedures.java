@@ -31,14 +31,16 @@ public class StoredProcedures {
 
 	private static final Logger log = Logger.getLogger(StoredProcedures.class.getCanonicalName());
 
-	public static void allocateSlot(String slotId, String uploader, String domain, String res, String filename, Long filesize, String contentType, ResultSet[] data) throws SQLException {
+	public static void allocateSlot(String slotId, String uploader, String domain, String res, String filename,
+									Long filesize, String contentType, ResultSet[] data) throws SQLException {
 		Connection conn = DriverManager.getConnection("jdbc:default:connection");
 
 		conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
 
 		try {
-			PreparedStatement stmt = conn.prepareStatement("insert into tig_hfu_slots( slot_id, uploader, domain, res, filename, filesize, content_type, ts, status ) " +
-					"values (?, ?, ?, ?, ?, ?, ?, ?, 0)");
+			PreparedStatement stmt = conn.prepareStatement(
+					"insert into tig_hfu_slots( slot_id, uploader, domain, res, filename, filesize, content_type, ts, status ) " +
+							"values (?, ?, ?, ?, ?, ?, ?, ?, 0)");
 			stmt.setString(1, slotId);
 			stmt.setString(2, uploader);
 			stmt.setString(3, domain);
@@ -56,29 +58,15 @@ public class StoredProcedures {
 		}
 	}
 
-	public static void updateSlot(String slotId) throws SQLException {
-		Connection conn = DriverManager.getConnection("jdbc:default:connection");
-
-		conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-
-		try {
-			PreparedStatement stmt = conn.prepareStatement("update tig_hfu_slots set status = 1 where slot_id = ?");
-			stmt.setString(1, slotId);
-
-			stmt.execute();
-		} finally {
-			conn.close();
-		}
-	}
-
 	public static void getSlot(String slotId, ResultSet[] data) throws SQLException {
 		Connection conn = DriverManager.getConnection("jdbc:default:connection");
 
 		conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
 
 		try {
-			PreparedStatement stmt = conn.prepareStatement("select uploader, slot_id, filename, filesize, content_type, ts " +
-					"from tig_hfu_slots where slot_id = ?");
+			PreparedStatement stmt = conn.prepareStatement(
+					"select uploader, slot_id, filename, filesize, content_type, ts " +
+							"from tig_hfu_slots where slot_id = ?");
 			stmt.setString(1, slotId);
 
 			data[0] = stmt.executeQuery();
@@ -87,17 +75,16 @@ public class StoredProcedures {
 		}
 	}
 
-	public static void listExpiredSlots(String domain, Timestamp ts, Integer max, ResultSet[] data) throws SQLException {
+	public static void listExpiredSlots(String domain, Timestamp ts, Integer max, ResultSet[] data)
+			throws SQLException {
 		Connection conn = DriverManager.getConnection("jdbc:default:connection");
 
 		conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
 
 		try {
-			PreparedStatement stmt = conn.prepareStatement("select uploader, slot_id, filename, filesize, content_type, ts " +
-					"from tig_hfu_slots " +
-					"where domain = ? " +
-					"and ts < ? " +
-					"order by ts offset 0 rows fetch next ? rows only");
+			PreparedStatement stmt = conn.prepareStatement(
+					"select uploader, slot_id, filename, filesize, content_type, ts " + "from tig_hfu_slots " +
+							"where domain = ? " + "and ts < ? " + "order by ts offset 0 rows fetch next ? rows only");
 			stmt.setString(1, domain);
 			stmt.setTimestamp(2, ts);
 			stmt.setInt(3, max);
@@ -115,11 +102,9 @@ public class StoredProcedures {
 
 		try {
 			List<String> slots = new ArrayList<>();
-			PreparedStatement stmt = conn.prepareStatement("select slot_id " +
-					"from tig_hfu_slots " +
-					"where domain = ? " +
-					"and ts < ? " +
-					"order by ts offset 0 rows fetch next ? rows only");
+			PreparedStatement stmt = conn.prepareStatement(
+					"select slot_id " + "from tig_hfu_slots " + "where domain = ? " + "and ts < ? " +
+							"order by ts offset 0 rows fetch next ? rows only");
 			stmt.setString(1, domain);
 			stmt.setTimestamp(2, ts);
 			stmt.setInt(3, max);
@@ -136,10 +121,11 @@ public class StoredProcedures {
 
 				boolean first = true;
 				for (String slot : slots) {
-					if (!first)
+					if (!first) {
 						sb.append(',');
-					else
+					} else {
 						first = false;
+					}
 					sb.append('\'');
 					sb.append(slot);
 					sb.append('\'');
@@ -149,6 +135,21 @@ public class StoredProcedures {
 
 				conn.createStatement().execute(sb.toString());
 			}
+		} finally {
+			conn.close();
+		}
+	}
+
+	public static void updateSlot(String slotId) throws SQLException {
+		Connection conn = DriverManager.getConnection("jdbc:default:connection");
+
+		conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+
+		try {
+			PreparedStatement stmt = conn.prepareStatement("update tig_hfu_slots set status = 1 where slot_id = ?");
+			stmt.setString(1, slotId);
+
+			stmt.execute();
 		} finally {
 			conn.close();
 		}

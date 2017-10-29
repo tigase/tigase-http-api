@@ -37,12 +37,13 @@ import tigase.xmpp.Authorization;
  * Created by andrzej on 06.08.2016.
  */
 @Bean(name = "slotRequestModule", parent = FileUploadComponent.class, active = true)
-public class SlotRequestModule implements Module {
+public class SlotRequestModule
+		implements Module {
 
 	private static final String XMLNS = "urn:xmpp:http:upload:0";
 
 	private static final Criteria CRITERIA = ElementCriteria.name("iq").add(ElementCriteria.name("request", XMLNS));
-	private static final String[] FEATURES = { XMLNS };
+	private static final String[] FEATURES = {XMLNS};
 
 	@Inject
 	private Logic logic;
@@ -76,18 +77,19 @@ public class SlotRequestModule implements Module {
 			throw new ComponentException(Authorization.BAD_REQUEST, null, ex);
 		}
 
-		if (size <= 0)
+		if (size <= 0) {
 			throw new ComponentException(Authorization.BAD_REQUEST, "Invalid file size");
+		}
 
 		String slotId = logic.requestSlot(packet.getStanzaFrom(), filename, size, contentType);
 
-		String uploadURI = logic.getUploadURI(packet.getStanzaFrom(),slotId, filename);
+		String uploadURI = logic.getUploadURI(packet.getStanzaFrom(), slotId, filename);
 		String downloadURI = logic.getDownloadURI(packet.getStanzaFrom(), slotId, filename);
 
 		Element slot = new Element("slot");
 		slot.setXMLNS(XMLNS);
-		slot.addChild(new Element("put", new String[] { "url" }, new String[] { XMLUtils.escape(uploadURI) }));
-		slot.addChild(new Element("get", new String[] { "url" }, new String[] { XMLUtils.escape(downloadURI) }));
+		slot.addChild(new Element("put", new String[]{"url"}, new String[]{XMLUtils.escape(uploadURI)}));
+		slot.addChild(new Element("get", new String[]{"url"}, new String[]{XMLUtils.escape(downloadURI)}));
 
 		Packet result = packet.okResult(slot, 0);
 

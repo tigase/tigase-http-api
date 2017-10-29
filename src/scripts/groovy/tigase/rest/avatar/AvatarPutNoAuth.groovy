@@ -19,77 +19,75 @@
  */
 
 package tigase.rest.avatar
+
 import tigase.http.rest.Service
-import tigase.xmpp.jid.BareJID
-import tigase.util.Base64;
+import tigase.util.Base64
 import tigase.xml.DomBuilderHandler
-import tigase.xml.SimpleParser
 import tigase.xml.Element
+import tigase.xml.SimpleParser
 import tigase.xml.SingletonFactory
+import tigase.xmpp.jid.BareJID
 
 /**
  * Class implements ability to manage users for service administrator
  * Handles requests for /rest/user/user@domain where user@domain is jid
  *
  * Example format of content of request or response:
- * <user><jid>user@domain</jid><password>Paa$$w0rd</password></jid></user>
- */
-class AvatarPutNoAuthHandler extends tigase.http.rest.Handler {
+ * <user><jid>user@domain</jid><password>Paa$$w0rd</password></jid></user>*/
+class AvatarPutNoAuthHandler
+		extends tigase.http.rest.Handler {
 
-    public AvatarPutNoAuthHandler() {
-		description = [
-			regex : "/{user_jid}",
-			PUT : [ info:'Change user avatar', 
-				description: """Changes avatar of user passed as {user_jid} parameter of url. As content of request binary form of image should be passed as it will be used as new avatar of a user.
-"""]
-		]
-        regex = /\/(?:([^@\/]+)@){0,1}([^@\/]+)/
-        isAsync = false
+	public AvatarPutNoAuthHandler() {
+		description = [ regex: "/{user_jid}",
+						PUT  : [ info       : 'Change user avatar',
+								 description: """Changes avatar of user passed as {user_jid} parameter of url. As content of request binary form of image should be passed as it will be used as new avatar of a user.
+""" ] ]
+		regex = /\/(?:([^@\/]+)@){0,1}([^@\/]+)/
+		isAsync = false
 		decodeContent = false
-        execPut = { Service service, callback, request, localPart, domain ->
-            def jid = BareJID.bareJIDInstance(localPart, domain);
-			
+		execPut = { Service service, callback, request, localPart, domain ->
+			def jid = BareJID.bareJIDInstance(localPart, domain);
+
 			InputStream is = request.getInputStream();
-			byte[] data = new byte[3*1024*1024];
+			byte[] data = new byte[3 * 1024 * 1024];
 			int size = 0;
 			int read = 0;
 			while ((read = is.read(data, size, data.length - size)) != -1) {
 				size += read;
 			}
-			
+
 			data = Arrays.copyOf(data, size);
-			
+
 			String mimeType = request.getContentType();
 			String encodedPhoto = Base64.encode(data);
-			
+
 			def userRepo = service.getUserRepository();
-			
+
 			String vCardStr = userRepo.getData(jid, "public/vcard-temp", "vCard", null);
 			def vCardEl = null;
 			def parsed = null;
-			
+
 			if (vCardStr != null && !vCardStr.isEmpty()) {
-				SimpleParser parser   = SingletonFactory.getParserInstance();
+				SimpleParser parser = SingletonFactory.getParserInstance();
 				DomBuilderHandler domHandler = new DomBuilderHandler();
 				def vCardData = vCardStr.toCharArray()
-				parser.parse(domHandler, vCardData, 0, vCardData.length);			
+				parser.parse(domHandler, vCardData, 0, vCardData.length);
 				parsed = domHandler.getParsedElements();
 			}
-				
+
 			if (parsed != null && !parsed.isEmpty()) {
 				vCardEl = parsed.poll();
-			}
-			else {
+			} else {
 				vCardEl = new Element("vCard");
 				vCardEl.setXMLNS("vcard-temp");
 			}
-			
+
 			Element photoEl = vCardEl.getChild("PHOTO");
 			if (photoEl == null) {
 				photoEl = new Element("PHOTO");
 				vCardEl.addChild(photoEl);
 			}
-			
+
 			Element typeEl = photoEl.getChild("TYPE");
 			if (typeEl != null) {
 				photoEl.removeChild(typeEl);
@@ -97,7 +95,7 @@ class AvatarPutNoAuthHandler extends tigase.http.rest.Handler {
 			typeEl = new Element("TYPE");
 			photoEl.addChild(typeEl);
 			typeEl.setCData(mimeType);
-			
+
 			Element binvalEl = photoEl.getChild("BINVAL");
 			if (binvalEl != null) {
 				photoEl.removeChild(binvalEl);
@@ -105,11 +103,11 @@ class AvatarPutNoAuthHandler extends tigase.http.rest.Handler {
 			binvalEl = new Element("BINVAL");
 			photoEl.addChild(binvalEl);
 			binvalEl.setCData(encodedPhoto);
-			
+
 			userRepo.setData(jid, "public/vcard-temp", "vCard", vCardEl.toString());
-			
-            callback([user:[jid:(localPart != null ? "$localPart@$domain" : domain)]]);
-        }
-    }
+
+			callback([ user: [ jid: (localPart != null ? "$localPart@$domain" : domain) ] ]);
+		}
+	}
 
 }

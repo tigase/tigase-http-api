@@ -30,13 +30,13 @@ import tigase.xmpp.jid.JID;
  * Created by andrzej on 06.08.2016.
  */
 @Bean(name = DiscoveryModule.ID, parent = FileUploadComponent.class, active = true)
-public class DiscoveryModule extends tigase.component.modules.impl.DiscoveryModule {
+public class DiscoveryModule
+		extends tigase.component.modules.impl.DiscoveryModule {
 
 	private static final String XMLNS = "urn:xmpp:http:upload:0";
 
 	@Inject
 	private Logic logic;
-
 
 	@Override
 	protected Packet prepareDiscoInfoReponse(Packet packet, JID jid, String node, JID senderJID) {
@@ -52,7 +52,7 @@ public class DiscoveryModule extends tigase.component.modules.impl.DiscoveryModu
 	}
 
 	protected Element getForm() {
-		Element x = new Element("x", new String[] { "type", "xmlns" }, new String[] { "result", "jabber:x:data" });
+		Element x = new Element("x", new String[]{"type", "xmlns"}, new String[]{"result", "jabber:x:data"});
 
 		Element formType = new Element("field");
 		formType.setAttribute("var", "FORM_TYPE");

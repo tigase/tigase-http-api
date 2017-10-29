@@ -19,24 +19,37 @@
  */
 package tigase.http.modules.dnswebservice;
 
-import java.io.IOException;
-import java.io.PrintWriter;
+import tigase.http.modules.dnswebservice.formatters.JsonUtilV1;
+import tigase.http.modules.dnswebservice.formatters.JsonUtilV2;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import tigase.http.modules.dnswebservice.formatters.JsonUtilV1;
-import tigase.http.modules.dnswebservice.formatters.JsonUtilV2;
+import java.io.IOException;
+import java.io.PrintWriter;
 
-public class JsonServlet extends HttpServlet {
+public class JsonServlet
+		extends HttpServlet {
 
 	/**
-	 * Processes requests for both HTTP
-	 * <code>GET</code> and
-	 * <code>POST</code> methods.
+	 * Returns a short description of the servlet.
+	 *
+	 * @return a String containing servlet description
+	 */
+	@Override
+	public String getServletInfo() {
+		return "Short description";
+	}// </editor-fold>
+
+	// <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
+
+	/**
+	 * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
 	 *
 	 * @param request servlet request
 	 * @param response servlet response
+	 *
 	 * @throws ServletException if a servlet-specific error occurs
 	 * @throws IOException if an I/O error occurs
 	 */
@@ -46,17 +59,15 @@ public class JsonServlet extends HttpServlet {
 		PrintWriter out = response.getWriter();
 		String domain = request.getParameter("domain");
 		String callback = request.getParameter("callback");
-		int version = (request.getParameter("version") == null) ? 1 
-				: Integer.parseInt(request.getParameter("version"));
+		int version = (request.getParameter("version") == null) ? 1 : Integer.parseInt(request.getParameter("version"));
 		if (version > 2) {
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 		}
 		try {
 			DnsItem item = DnsResolver.get(domain);
 			if (item == null) {
-				response.sendError(HttpServletResponse.SC_NOT_FOUND);				
-			}
-			else {
+				response.sendError(HttpServletResponse.SC_NOT_FOUND);
+			} else {
 				StringBuilder sb = new StringBuilder(1000);
 				if (callback != null) {
 					sb.append(callback);
@@ -80,13 +91,12 @@ public class JsonServlet extends HttpServlet {
 		}
 	}
 
-	// <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
 	/**
-	 * Handles the HTTP
-	 * <code>GET</code> method.
+	 * Handles the HTTP <code>GET</code> method.
 	 *
 	 * @param request servlet request
 	 * @param response servlet response
+	 *
 	 * @throws ServletException if a servlet-specific error occurs
 	 * @throws IOException if an I/O error occurs
 	 */
@@ -97,11 +107,11 @@ public class JsonServlet extends HttpServlet {
 	}
 
 	/**
-	 * Handles the HTTP
-	 * <code>POST</code> method.
+	 * Handles the HTTP <code>POST</code> method.
 	 *
 	 * @param request servlet request
 	 * @param response servlet response
+	 *
 	 * @throws ServletException if a servlet-specific error occurs
 	 * @throws IOException if an I/O error occurs
 	 */
@@ -110,14 +120,4 @@ public class JsonServlet extends HttpServlet {
 			throws ServletException, IOException {
 		processRequest(request, response);
 	}
-
-	/**
-	 * Returns a short description of the servlet.
-	 *
-	 * @return a String containing servlet description
-	 */
-	@Override
-	public String getServletInfo() {
-		return "Short description";
-	}// </editor-fold>
 }

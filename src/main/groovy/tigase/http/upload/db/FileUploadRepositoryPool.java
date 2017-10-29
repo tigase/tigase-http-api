@@ -36,10 +36,13 @@ import java.util.List;
  * Created by andrzej on 10.08.2016.
  */
 @Bean(name = "repositoryPool", parent = FileUploadComponent.class, active = true, exportable = true)
-public class FileUploadRepositoryPool<R extends FileUploadRepository<DataSource>> extends MDRepositoryBean<R> implements FileUploadRepository {
+public class FileUploadRepositoryPool<R extends FileUploadRepository<DataSource>>
+		extends MDRepositoryBean<R>
+		implements FileUploadRepository {
 
 	@Override
-	public Slot allocateSlot(JID sender, String slotId, String filename, long filesize, String contentType) throws TigaseDBException {
+	public Slot allocateSlot(JID sender, String slotId, String filename, long filesize, String contentType)
+			throws TigaseDBException {
 		return getRepository(sender.getDomain()).allocateSlot(sender, slotId, filename, filesize, contentType);
 	}
 
@@ -55,8 +58,9 @@ public class FileUploadRepositoryPool<R extends FileUploadRepository<DataSource>
 		} else {
 			for (FileUploadRepository repo : getRepositories().values()) {
 				Slot slot = repo.getSlot(null, slotId);
-				if (slot != null)
+				if (slot != null) {
 					return slot;
+				}
 			}
 		}
 		return null;
@@ -78,16 +82,17 @@ public class FileUploadRepositoryPool<R extends FileUploadRepository<DataSource>
 	}
 
 	@Override
-	protected Class findClassForDataSource(DataSource dataSource) throws DBInitException {
-		return DataSourceHelper.getDefaultClass(FileUploadRepository.class, dataSource.getResourceUri());
-	}
-
-	@Override
 	public Class<?> getDefaultBeanClass() {
 		return FileUploadRepositoryConfigBean.class;
 	}
 
-	public static class FileUploadRepositoryConfigBean extends MDRepositoryConfigBean<FileUploadRepository<DataSource>> {
+	@Override
+	protected Class findClassForDataSource(DataSource dataSource) throws DBInitException {
+		return DataSourceHelper.getDefaultClass(FileUploadRepository.class, dataSource.getResourceUri());
+	}
+
+	public static class FileUploadRepositoryConfigBean
+			extends MDRepositoryConfigBean<FileUploadRepository<DataSource>> {
 
 	}
 }

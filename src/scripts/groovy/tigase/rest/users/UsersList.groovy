@@ -19,6 +19,7 @@
  */
 
 package tigase.rest.users
+
 import tigase.http.rest.Service
 
 /**
@@ -26,27 +27,25 @@ import tigase.http.rest.Service
  * Handles requests for /rest/users/
  *
  * Example format of content of response:
- * <users><items><item>user1@domain</item><item>user2@domain</item></items><count>2</count></users>
- */
-class UsersHandler extends tigase.http.rest.Handler {
+ * <users><items><item>user1@domain</item><item>user2@domain</item></items><count>2</count></users>*/
+class UsersHandler
+		extends tigase.http.rest.Handler {
 
-    public UsersHandler() {
-		description = [
-			regex : "/",
-			GET : [ info:'Retrieve list of registered user jids', 
-				description: """Request do not require any parameters and returns list of all registered user accounts on this server (for all vhosts).
+	public UsersHandler() {
+		description = [ regex: "/",
+						GET  : [ info       : 'Retrieve list of registered user jids',
+								 description: """Request do not require any parameters and returns list of all registered user accounts on this server (for all vhosts).
 
 Example response will look like this:
 \${util.formatData([users:[items:['user1@example.com','user2@example.com','user1@example2.com'],count:3]])}
-"""]
-		];
-        regex = /\//
-        requiredRole = "admin"
-        isAsync = false
-        execGet = { Service service, callback, jid ->
-            def users = service.getUserRepository().getUsers()
-            callback([users:[items:users, count:users.size()]]);
-        }
-    }
+""" ] ];
+		regex = /\//
+		requiredRole = "admin"
+		isAsync = false
+		execGet = { Service service, callback, jid ->
+			def users = service.getUserRepository().getUsers()
+			callback([ users: [ items: users, count: users.size() ] ]);
+		}
+	}
 
 }

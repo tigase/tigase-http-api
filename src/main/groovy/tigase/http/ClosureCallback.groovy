@@ -22,17 +22,18 @@ package tigase.http
 
 import tigase.server.Packet
 
-class ClosureCallback implements PacketWriter.Callback {
-	
+class ClosureCallback
+		implements PacketWriter.Callback {
+
 	Closure closure;
-	
+
 	public ClosureCallback(Closure closure) {
 		this.closure = closure;
 	}
-	
+
 	public void onResult(Packet packet) {
 		closure.call(packet);
 	}
-	
+
 }
 

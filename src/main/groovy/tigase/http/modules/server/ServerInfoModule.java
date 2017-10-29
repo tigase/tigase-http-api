@@ -31,12 +31,13 @@ import tigase.kernel.beans.selector.ConfigTypeEnum;
 import java.io.File;
 
 /**
- *
  * @author andrzej
  */
 @Bean(name = "server", parent = HttpMessageReceiver.class, active = true)
-@ConfigType({ConfigTypeEnum.DefaultMode, ConfigTypeEnum.SessionManagerMode, ConfigTypeEnum.ConnectionManagersMode, ConfigTypeEnum.ComponentMode})
-public class ServerInfoModule extends AbstractModule {
+@ConfigType({ConfigTypeEnum.DefaultMode, ConfigTypeEnum.SessionManagerMode, ConfigTypeEnum.ConnectionManagersMode,
+			 ConfigTypeEnum.ComponentMode})
+public class ServerInfoModule
+		extends AbstractModule {
 
 	private DeploymentInfo httpDeployment = null;
 
@@ -52,29 +53,32 @@ public class ServerInfoModule extends AbstractModule {
 		}
 
 		super.start();
-		httpDeployment = httpServer.deployment().setClassLoader(this.getClass().getClassLoader())
-				.setContextPath(contextPath).setDeploymentName("Server").setDeploymentDescription(getDescription());
+		httpDeployment = httpServer.deployment()
+				.setClassLoader(this.getClass().getClassLoader())
+				.setContextPath(contextPath)
+				.setDeploymentName("Server")
+				.setDeploymentDescription(getDescription());
 		if (vhosts != null) {
 			httpDeployment.setVHosts(vhosts);
 		}
-		
+
 		ServletInfo servletInfo = httpServer.servlet("StaticServlet", StaticFileServlet.class);
 		servletInfo.addInitParam(StaticFileServlet.DIRECTORY_KEY, new File("logs").getAbsolutePath())
 				.addInitParam(StaticFileServlet.INDEX_KEY, "/server-info.html")
 				.addInitParam(StaticFileServlet.ALLOWED_PATTERN_KEY, "/server-info\\.html")
 				.addMapping("/*");
-		httpDeployment.addServlets(servletInfo);		
-		
+		httpDeployment.addServlets(servletInfo);
+
 		httpServer.deploy(httpDeployment);
 	}
-	
+
 	@Override
 	public void stop() {
-		if (httpDeployment != null) { 
+		if (httpDeployment != null) {
 			httpServer.undeploy(httpDeployment);
 			httpDeployment = null;
 		}
 		super.stop();
-	}	
-	
+	}
+
 }

@@ -29,13 +29,13 @@ public class JsonUtilV2 {
 		format(sb, item);
 		return sb.toString();
 	}
-	
+
 	public static void format(StringBuilder sb, DnsItem item) {
 		if (item == null) {
 			sb.append("null");
 			return;
 		}
-			
+
 		sb.append("{ domain: '");
 		sb.append(item.getDomain());
 		sb.append("', c2s: [");
@@ -45,24 +45,25 @@ public class JsonUtilV2 {
 		sb.append("], websocket: [");
 		format(sb, item.getWebSocket());
 		sb.append("]");
-		
+
 		sb.append("}");
 	}
-	
+
 	public static void format(StringBuilder sb, DnsEntry[] entries) {
 		if (entries != null && entries.length > 0) {
-			for (int i=0; i<entries.length; i++) {
-				if (i>0)
+			for (int i = 0; i < entries.length; i++) {
+				if (i > 0) {
 					sb.append(",");
-				
+				}
+
 				format(sb, entries[i]);
 			}
 		}
 	}
-	
+
 	public static void format(StringBuilder sb, DnsEntry entry) {
 		sb.append("{");
-		int i=0;
+		int i = 0;
 		if (entry.getHost() != null) {
 			sb.append("host: '");
 			sb.append(entry.getHost());
@@ -70,13 +71,15 @@ public class JsonUtilV2 {
 			i++;
 		}
 		if (entry.getIPs() != null) {
-			if (i>0)
+			if (i > 0) {
 				sb.append(",");
+			}
 			sb.append("ip: [");
-			int j=0;
+			int j = 0;
 			for (String ip : entry.getIPs()) {
-				if (j>0)
+				if (j > 0) {
 					sb.append(",");
+				}
 				sb.append("'");
 				sb.append(ip);
 				sb.append("'");
@@ -86,23 +89,26 @@ public class JsonUtilV2 {
 			i++;
 		}
 		if (entry.getPort() != 0) {
-			if (i>0)
+			if (i > 0) {
 				sb.append(",");
+			}
 			sb.append("port: ");
 			sb.append(entry.getPort());
 			i++;
 		}
 		if (entry.getURL() != null) {
-			if (i>0)				
+			if (i > 0) {
 				sb.append(",");
+			}
 			sb.append("url:'");
 			sb.append(entry.getURL());
 			sb.append("'");
 			i++;
 		}
 		if (entry.getPriority() != 0) {
-			if (i>0)
+			if (i > 0) {
 				sb.append(",");
+			}
 			sb.append("priority: ");
 			sb.append(entry.getPriority());
 		}

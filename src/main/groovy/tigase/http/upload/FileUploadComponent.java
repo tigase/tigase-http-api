@@ -31,7 +31,8 @@ import tigase.kernel.core.Kernel;
  */
 @Bean(name = "upload", parent = Kernel.class, active = false)
 @ConfigType(ConfigTypeEnum.DefaultMode)
-public class FileUploadComponent extends AbstractKernelBasedComponent {
+public class FileUploadComponent
+		extends AbstractKernelBasedComponent {
 
 	@Inject
 	private HttpModule httpModule;

@@ -43,25 +43,25 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
  * @author andrzej
  */
-public class DummyServletRequest implements HttpServletRequest {
+public class DummyServletRequest
+		implements HttpServletRequest {
 
-	private final HttpExchange exchange;
-	private final Map<String,String[]> params;
-	
-	private final String servletPath;
 	private final String contextPath;
-	private final Service service;
-	private final Timer timer;
+	private final HttpExchange exchange;
 	private final Integer executionTimeout;
+	private final Map<String, String[]> params;
+	private final Service service;
+	private final String servletPath;
+	private final Timer timer;
 	private AsyncContext async;
 	private String characterEncoding = "UTF-8";
 	private Principal principal;
 	private BufferedReader reader;
-	
-	public DummyServletRequest(HttpExchange exchange, String contextPath, String servletPath, Service service, Timer timer, Integer executionTimeout) {
+
+	public DummyServletRequest(HttpExchange exchange, String contextPath, String servletPath, Service service,
+							   Timer timer, Integer executionTimeout) {
 		this.exchange = exchange;
 		this.params = new HashMap<>();
 		String query = exchange.getRequestURI().getRawQuery();
@@ -75,7 +75,8 @@ public class DummyServletRequest implements HttpServletRequest {
 				exchange.getRequestBody().read(data);
 				decodeParamsFromString(new String(data), params);
 			} catch (IOException ex) {
-				Logger.getLogger(DummyServletRequest.class.getName()).log(Level.FINE, "could not read parameters from input stream", ex);
+				Logger.getLogger(DummyServletRequest.class.getName())
+						.log(Level.FINE, "could not read parameters from input stream", ex);
 			}
 		}
 		this.contextPath = contextPath;
@@ -84,31 +85,7 @@ public class DummyServletRequest implements HttpServletRequest {
 		this.timer = timer;
 		this.executionTimeout = executionTimeout;
 	}
-	
-	private void decodeParamsFromString(String query, Map<String, String[]> params) {
-		for (String part : query.split("&")) {
-			String[] val = part.split("=");
-			try {
-				String k = URLDecoder.decode(val[0], "UTF-8");
-				String v = val.length == 1 ? "" : URLDecoder.decode(val[1], "UTF-8");
-				if (params.containsKey(k)) {
-//					if (params.get(k) instanceof String[]) {
-						String[] oldV = params.get(k);
-						oldV = Arrays.copyOf(oldV, oldV.length + 1);
-						oldV[oldV.length - 1] = v;
-						params.put(k, oldV);
-//					} else {
-//						params.put(k, new String[] { (String)params.get(k), v });
-//					}
-				} else {
-					params.put(k, new String[] { v });
-				}
-			} catch (UnsupportedEncodingException ex) {
-				Logger.getLogger(DummyServletRequest.class.getName()).log(Level.FINE, "could not decode URLEncoded paramters", ex);
-			}
-		}	
-	}
-	
+
 	@Override
 	public Object getAttribute(String string) {
 		return null;
@@ -132,8 +109,9 @@ public class DummyServletRequest implements HttpServletRequest {
 	@Override
 	public int getContentLength() {
 		String contentLength = exchange.getRequestHeaders().getFirst("Content-Length");
-		if (contentLength == null || contentLength.isEmpty())
+		if (contentLength == null || contentLength.isEmpty()) {
 			return 0;
+		}
 		return Integer.parseInt(contentLength);
 	}
 
@@ -374,8 +352,9 @@ public class DummyServletRequest implements HttpServletRequest {
 	@Override
 	public String getPathInfo() {
 		int start = contextPath.length() + servletPath.length();
-		if (servletPath.endsWith("/"))
+		if (servletPath.endsWith("/")) {
 			start -= 1;
+		}
 		return getRequestURI().substring(start);
 	}
 
@@ -402,13 +381,15 @@ public class DummyServletRequest implements HttpServletRequest {
 	@Override
 	public boolean isUserInRole(String role) {
 		Principal principal = getUserPrincipal();
-		if ("user".equals(role))
+		if ("user".equals(role)) {
 			return principal != null;
-		try {
-			if ("admin".equals(role))
-				return principal != null && service.isAdmin(BareJID.bareJIDInstance(principal.getName()));
 		}
-		catch (Exception ex) {}
+		try {
+			if ("admin".equals(role)) {
+				return principal != null && service.isAdmin(BareJID.bareJIDInstance(principal.getName()));
+			}
+		} catch (Exception ex) {
+		}
 		return false;
 	}
 
@@ -430,10 +411,11 @@ public class DummyServletRequest implements HttpServletRequest {
 							public String getName() {
 								return jid;
 							}
-						};						
+						};
 					}
-				} catch (TigaseStringprepException |TigaseDBException |AuthorizationException ex) {
-					Logger.getLogger(DummyServletRequest.class.getName()).log(Level.FINEST, "could not authorize user", ex);
+				} catch (TigaseStringprepException | TigaseDBException | AuthorizationException ex) {
+					Logger.getLogger(DummyServletRequest.class.getName())
+							.log(Level.FINEST, "could not authorize user", ex);
 				}
 			}
 		}
@@ -542,26 +524,55 @@ public class DummyServletRequest implements HttpServletRequest {
 
 	@Override
 	public String changeSessionId() {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+		throw new UnsupportedOperationException(
+				"Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 	}
 
 	@Override
 	public <T extends HttpUpgradeHandler> T upgrade(Class<T> type) throws IOException, ServletException {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+		throw new UnsupportedOperationException(
+				"Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 	}
 
 	@Override
 	public long getContentLengthLong() {
 		String contentLength = exchange.getRequestHeaders().getFirst("Content-Length");
-		if (contentLength == null || contentLength.isEmpty())
+		if (contentLength == null || contentLength.isEmpty()) {
 			return 0;
+		}
 		return Long.parseLong(contentLength);
 	}
-	
-	private class IteratorEnumerator<T,K extends Iterator<T>> implements Enumeration<T> {
-		
+
+	private void decodeParamsFromString(String query, Map<String, String[]> params) {
+		for (String part : query.split("&")) {
+			String[] val = part.split("=");
+			try {
+				String k = URLDecoder.decode(val[0], "UTF-8");
+				String v = val.length == 1 ? "" : URLDecoder.decode(val[1], "UTF-8");
+				if (params.containsKey(k)) {
+//					if (params.get(k) instanceof String[]) {
+					String[] oldV = params.get(k);
+					oldV = Arrays.copyOf(oldV, oldV.length + 1);
+					oldV[oldV.length - 1] = v;
+					params.put(k, oldV);
+//					} else {
+//						params.put(k, new String[] { (String)params.get(k), v });
+//					}
+				} else {
+					params.put(k, new String[]{v});
+				}
+			} catch (UnsupportedEncodingException ex) {
+				Logger.getLogger(DummyServletRequest.class.getName())
+						.log(Level.FINE, "could not decode URLEncoded paramters", ex);
+			}
+		}
+	}
+
+	private class IteratorEnumerator<T, K extends Iterator<T>>
+			implements Enumeration<T> {
+
 		private final Iterator<T> iter;
-		
+
 		public IteratorEnumerator(Iterator<T> iter) {
 			this.iter = iter;
 		}
@@ -575,6 +586,6 @@ public class DummyServletRequest implements HttpServletRequest {
 		public T nextElement() {
 			return iter.next();
 		}
-		
+
 	}
 }

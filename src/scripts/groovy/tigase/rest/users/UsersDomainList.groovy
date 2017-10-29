@@ -21,34 +21,35 @@
 package tigase.rest.users
 
 import tigase.http.rest.Service
+
 /**
  * Class implements ability to retrieve by service administrator list of registered accounts for domain
  * Handles requests for /rest/users/domain where domain is name of domain for which we want to retrieve list of users
  *
  * Example format of content of response:
- * <users><items><item>user1@domain</item><item>user2@domain</item></items><count>2</count></users>
- */
-class UsersDomainHandler extends tigase.http.rest.Handler {
+ * <users><items><item>user1@domain</item><item>user2@domain</item></items><count>2</count></users>*/
+class UsersDomainHandler
+		extends tigase.http.rest.Handler {
 
-    public UsersDomainHandler() {
-		description = [
-			regex : "/{domain}",
-			GET : [ info:'Retrieve list of registered user jids for domain', 
-				description: """Request requires name of domain as parameter {domain} and returns list of all registered user accounts for this domain.
+	public UsersDomainHandler() {
+		description = [ regex: "/{domain}",
+						GET  : [ info       : 'Retrieve list of registered user jids for domain',
+								 description: """Request requires name of domain as parameter {domain} and returns list of all registered user accounts for this domain.
 
 Example response will look like this:
 \${util.formatData([users:[items:['user1@example.com','user2@example.com','user3@example.com'],count:3]])}
-"""]
-		];		
-        regex = /\/([^@\/]+)/
-        requiredRole = "admin"
-        isAsync = false
-        execGet = { Service service, callback, jid, domain ->
-            def repo = service.getUserRepository().getRepo(domain);
-            if (!repo) callback(null);
-            def users = repo.getUsers().findAll { it.getDomain() == domain };
-            callback([users:[items:users, count:users.size(), domain: domain]]);
-        }
-    }
+""" ] ];
+		regex = /\/([^@\/]+)/
+		requiredRole = "admin"
+		isAsync = false
+		execGet = { Service service, callback, jid, domain ->
+			def repo = service.getUserRepository().getRepo(domain);
+			if (!repo) {
+				callback(null)
+			};
+			def users = repo.getUsers().findAll { it.getDomain() == domain };
+			callback([ users: [ items: users, count: users.size(), domain: domain ] ]);
+		}
+	}
 
 }

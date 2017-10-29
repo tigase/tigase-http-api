@@ -39,23 +39,21 @@ import static tigase.http.modules.Module.VHOSTS_KEY;
 /**
  * Created by andrzej on 08.08.2016.
  */
-public abstract class AbstractHttpModule implements UnregisterAware, Initializable, RegistrarBean, ConfigurationChangedAware {
+public abstract class AbstractHttpModule
+		implements UnregisterAware, Initializable, RegistrarBean, ConfigurationChangedAware {
 
 	private static final Map<String, Kernel> kernels = new ConcurrentHashMap<>();
-
-	public static final Kernel getKernel(String id) {
-	 	return kernels.get(id);
-	}
-
-	@Inject
-	protected HttpServerIfc httpServer;
-
+	protected final String uuid = UUID.randomUUID().toString();
 	@ConfigField(desc = "Context path", alias = HTTP_CONTEXT_PATH_KEY)
 	protected String contextPath = null;
+	@Inject
+	protected HttpServerIfc httpServer;
 	@ConfigField(desc = "List of vhosts", alias = VHOSTS_KEY)
 	protected String[] vhosts = null;
 
-	protected final String uuid = UUID.randomUUID().toString();
+	public static final Kernel getKernel(String id) {
+		return kernels.get(id);
+	}
 
 	public abstract void start();
 
@@ -83,8 +81,9 @@ public abstract class AbstractHttpModule implements UnregisterAware, Initializab
 
 	@Override
 	public void beanConfigurationChanged(Collection<String> changedFields) {
-		if (httpServer == null)
+		if (httpServer == null) {
 			return;
+		}
 
 		start();
 	}

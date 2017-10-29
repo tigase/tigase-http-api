@@ -47,48 +47,42 @@ import java.util.regex.Pattern;
  * Created by andrzej on 07.08.2016.
  */
 @Bean(name = "logic", parent = FileUploadComponent.class, active = true, exportable = true)
-public class DefaultLogic implements Logic {
+public class DefaultLogic
+		implements Logic {
 
 	private static final Logger log = Logger.getLogger(DefaultLogic.class.getCanonicalName());
 
-	@ConfigField(desc = "Allow file upload for local clients", alias = "local-only")
-	private boolean localOnly = true;
-
-	@ConfigField(desc = "Maximal file size allowed for transfer", alias = "max-file-size")
-	private long maxFileSize = 5 *  1024 * 1024;
-
-	@ConfigField(desc = "Upload URI format", alias = "upload-uri-format")
-	private UriFormat uploadUriFormat = new UriFormat("{proto}://{serverName}:{port}/upload/{userJid}/{slotId}/{filename}");
-
+	public static enum HttpProtocol {
+		http,
+		https
+	}
 	@ConfigField(desc = "Download URI format", alias = "download-uri-format")
 	private UriFormat downloadUriFormat = new UriFormat("{proto}://{serverName}:{port}/upload/{slotId}/{filename}");
-
-	@ConfigField(desc = "Port")
-	private Integer port = null;
-
-	@ConfigField(desc = "Protocol")
-	private HttpProtocol protocol = null;
-
-	@ConfigField(desc = "HTTP server domain name", alias = "server-name")
-	private String serverName = DNSResolverFactory.getInstance().getDefaultHost();
-
-	@ConfigField(desc = "Remove old uploads - period", alias = "expiration-period")
-	private Duration expirationPeriod = Duration.ZERO;
-
 	@ConfigField(desc = "Remove old uploads - expiration time", alias = "expiration")
 	private Duration expiration = Duration.ofDays(30);
-
-	@Inject
-	private VHostManager vHostManager;
-
-	@Inject
-	private FileUploadRepository repo;
-
-	@Inject
-	private Store store;
-
+	@ConfigField(desc = "Remove old uploads - period", alias = "expiration-period")
+	private Duration expirationPeriod = Duration.ZERO;
 	@Inject
 	private HttpServerIfc httpServer;
+	@ConfigField(desc = "Allow file upload for local clients", alias = "local-only")
+	private boolean localOnly = true;
+	@ConfigField(desc = "Maximal file size allowed for transfer", alias = "max-file-size")
+	private long maxFileSize = 5 * 1024 * 1024;
+	@ConfigField(desc = "Port")
+	private Integer port = null;
+	@ConfigField(desc = "Protocol")
+	private HttpProtocol protocol = null;
+	@Inject
+	private FileUploadRepository repo;
+	@ConfigField(desc = "HTTP server domain name", alias = "server-name")
+	private String serverName = DNSResolverFactory.getInstance().getDefaultHost();
+	@Inject
+	private Store store;
+	@ConfigField(desc = "Upload URI format", alias = "upload-uri-format")
+	private UriFormat uploadUriFormat = new UriFormat(
+			"{proto}://{serverName}:{port}/upload/{userJid}/{slotId}/{filename}");
+	@Inject
+	private VHostManager vHostManager;
 
 	public String getUploadUriFormat() {
 		return this.uploadUriFormat.getFormat();
@@ -112,12 +106,15 @@ public class DefaultLogic implements Logic {
 	}
 
 	@Override
-	public String requestSlot(JID requester, String filename, long filesize, String contentType) throws ComponentException {
-		if (localOnly && !vHostManager.isLocalDomain(requester.getDomain()))
+	public String requestSlot(JID requester, String filename, long filesize, String contentType)
+			throws ComponentException {
+		if (localOnly && !vHostManager.isLocalDomain(requester.getDomain())) {
 			throw new ComponentException(Authorization.NOT_ALLOWED, "Only local XMPP users may use this service");
+		}
 
 		if (maxFileSize < filesize) {
-			throw new ComponentException(Authorization.NOT_ACCEPTABLE, "File too large. The maximum allowed file size is " + maxFileSize + " bytes");
+			throw new ComponentException(Authorization.NOT_ACCEPTABLE,
+										 "File too large. The maximum allowed file size is " + maxFileSize + " bytes");
 		}
 
 		String slotId = generateSlotId();
@@ -160,7 +157,8 @@ public class DefaultLogic implements Logic {
 		LocalDateTime expiredBefore = LocalDateTime.now(ZoneId.of("Z")).minus(expirationTime);
 		for (JID vhost : vHostManager.getAllVHosts()) {
 			try {
-				List<FileUploadRepository.Slot> removedSlots = repo.listExpiredSlots(vhost.getBareJID(), expiredBefore, limit);
+				List<FileUploadRepository.Slot> removedSlots = repo.listExpiredSlots(vhost.getBareJID(), expiredBefore,
+																					 limit);
 				for (FileUploadRepository.Slot slot : removedSlots) {
 					store.remove(slot.uploader, slot.slotId);
 				}
@@ -171,22 +169,6 @@ public class DefaultLogic implements Logic {
 				log.log(Level.FINE, "removal of slot failed", ex);
 			}
 		}
-	}
-
-	private Pattern compileToUriMatcher(String format) {
-		int jidIdx = format.indexOf("{userJid}");
-		int slotIdx = format.indexOf("{slotId}");
-		int filenameIdx = format.indexOf("{filename}");
-
-		int idx = Math.min(slotIdx, filenameIdx);
-		if (jidIdx > -1) {
-			idx = Math.min(idx, jidIdx);
-		}
-
-		String infoTemp = format.substring(idx).replace("/", "\\/");
-		infoTemp = infoTemp.replace("{userJid}", "(?<jid>[^/]+)").replace("{slotId}", "(?<slotId>[^/]+)").replace("{filename}", "(?<filename>[^/]+)");
-
-		return Pattern.compile(infoTemp);
 	}
 
 	protected String generateURI(UriFormat format, JID requester, String slotId, String filename) {
@@ -208,16 +190,29 @@ public class DefaultLogic implements Logic {
 		}
 
 		if (port == null || protocol == null) {
-			throw new RuntimeException("Could not detect port and schema to use - possible misconfiguration of HTTP server");
+			throw new RuntimeException(
+					"Could not detect port and schema to use - possible misconfiguration of HTTP server");
 		}
 
 		return format.formatUri(protocol, serverName, port, requester, slotId, filename);
 	}
 
+	private Pattern compileToUriMatcher(String format) {
+		int jidIdx = format.indexOf("{userJid}");
+		int slotIdx = format.indexOf("{slotId}");
+		int filenameIdx = format.indexOf("{filename}");
 
-	public static enum HttpProtocol {
-		http,
-		https
+		int idx = Math.min(slotIdx, filenameIdx);
+		if (jidIdx > -1) {
+			idx = Math.min(idx, jidIdx);
+		}
+
+		String infoTemp = format.substring(idx).replace("/", "\\/");
+		infoTemp = infoTemp.replace("{userJid}", "(?<jid>[^/]+)")
+				.replace("{slotId}", "(?<slotId>[^/]+)")
+				.replace("{filename}", "(?<filename>[^/]+)");
+
+		return Pattern.compile(infoTemp);
 	}
 
 }

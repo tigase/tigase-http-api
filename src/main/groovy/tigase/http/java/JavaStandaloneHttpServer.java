@@ -24,7 +24,10 @@ import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsServer;
 import tigase.http.AbstractHttpServer;
 import tigase.http.DeploymentInfo;
-import tigase.kernel.beans.*;
+import tigase.kernel.beans.Bean;
+import tigase.kernel.beans.Initializable;
+import tigase.kernel.beans.Inject;
+import tigase.kernel.beans.UnregisterAware;
 import tigase.kernel.beans.config.ConfigField;
 import tigase.kernel.beans.config.ConfigurationChangedAware;
 import tigase.kernel.beans.selector.ConfigType;
@@ -44,17 +47,16 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Basic implementation of HTTP server based on HttpServer implementation 
- * embedded in JDK. 
- * 
- * May not fully support HTTP implementation but is sufficient for testing 
- * and basic usage.
- * 
+ * Basic implementation of HTTP server based on HttpServer implementation embedded in JDK.
+ * <p>
+ * May not fully support HTTP implementation but is sufficient for testing and basic usage.
+ *
  * @author andrzej
  */
 @Bean(name = "httpServer", parent = Kernel.class, active = true, exportable = true)
-@ConfigType({ConfigTypeEnum.DefaultMode,ConfigTypeEnum.SetupMode})
-public class JavaStandaloneHttpServer extends AbstractHttpServer {
+@ConfigType({ConfigTypeEnum.DefaultMode, ConfigTypeEnum.SetupMode})
+public class JavaStandaloneHttpServer
+		extends AbstractHttpServer {
 
 	private static final Logger log = Logger.getLogger(JavaStandaloneHttpServer.class.getCanonicalName());
 
@@ -86,6 +88,37 @@ public class JavaStandaloneHttpServer extends AbstractHttpServer {
 		return Collections.unmodifiableList(deployments);
 	}
 
+	protected HttpServer createServer(PortConfigBean config) throws IOException {
+		if (config.getSocket() == SocketType.plain) {
+			return HttpServer.create(new InetSocketAddress(config.getPort()), 100);
+		} else {
+			HttpsServer server = HttpsServer.create(new InetSocketAddress(config.getPort()), 100);
+			SSLContext sslContext = sslContextContainer.getSSLContext("TLS", config.getDomain(), false);
+			server.setHttpsConfigurator(new HttpsConfigurator(sslContext));
+			return server;
+		}
+	}
+
+	protected void deploy(HttpServer server) {
+		Collections.unmodifiableList(deployments).forEach(info -> deploy(server, info));
+	}
+
+	protected void deploy(HttpServer server, DeploymentInfo info) {
+		server.createContext(info.getContextPath(), new RequestHandler(info, executor.timer));
+	}
+
+	protected void undeploy(HttpServer server) {
+		Collections.unmodifiableList(deployments).forEach(info -> undeploy(server, info));
+	}
+
+	protected void undeploy(HttpServer server, DeploymentInfo info) {
+		try {
+			server.removeContext(info.getContextPath());
+		} catch (IllegalArgumentException ex) {
+			log.log(Level.FINEST, "deployment context " + info.getContextPath() + " already removed");
+		}
+	}
+
 	private void registerServer(HttpServer server) {
 		synchronized (servers) {
 			servers.add(server);
@@ -113,54 +146,23 @@ public class JavaStandaloneHttpServer extends AbstractHttpServer {
 		}
 	}
 
-	protected HttpServer createServer(PortConfigBean config) throws IOException {
-		if (config.getSocket() == SocketType.plain) {
-			return HttpServer.create(new InetSocketAddress(config.getPort()), 100);
-		} else {	
-			HttpsServer server = HttpsServer.create(new InetSocketAddress(config.getPort()), 100);
-			SSLContext sslContext = sslContextContainer.getSSLContext("TLS", config.getDomain(), false);
-			server.setHttpsConfigurator(new HttpsConfigurator(sslContext));
-			return server;
-		}
-	}
-	
-	protected void deploy(HttpServer server) {
-		Collections.unmodifiableList(deployments).forEach(info -> deploy(server, info));
-	}
-
-	protected void deploy(HttpServer server, DeploymentInfo info) {
-		server.createContext(info.getContextPath(), new RequestHandler(info, executor.timer));
-	}
-	
-	protected void undeploy(HttpServer server) {
-		Collections.unmodifiableList(deployments).forEach(info -> undeploy(server, info));
-	}
-
-	protected void undeploy(HttpServer server, DeploymentInfo info) {
-		try {
-			server.removeContext(info.getContextPath());
-		} catch (IllegalArgumentException ex) {
-			log.log(Level.FINEST, "deployment context " + info.getContextPath() + " already removed");
-		}
-	}
-
-	@Bean(name="executor", parent = JavaStandaloneHttpServer.class, active = true, exportable = true)
-	public static class ExecutorWithTimeout implements Executor, Initializable, UnregisterAware, ConfigurationChangedAware {
+	@Bean(name = "executor", parent = JavaStandaloneHttpServer.class, active = true, exportable = true)
+	public static class ExecutorWithTimeout
+			implements Executor, Initializable, UnregisterAware, ConfigurationChangedAware {
 
 		private static final String THREADS_KEY = "threads";
 		private static final String REQUEST_TIMEOUT_KEY = "request-timeout";
-
+		private AtomicInteger counter = new AtomicInteger(0);
 		private ExecutorService executor = null;
-		private Timer timer = null;
-		@ConfigField(desc = "Request timeout", alias = REQUEST_TIMEOUT_KEY)
-		private int timeout = 60 * 1000;
 		@ConfigField(desc = "Number of threads", alias = THREADS_KEY)
 		private int threads = 4;
-		private AtomicInteger counter = new AtomicInteger(0);
-		
+		@ConfigField(desc = "Request timeout", alias = REQUEST_TIMEOUT_KEY)
+		private int timeout = 60 * 1000;
+		private Timer timer = null;
+
 		public ExecutorWithTimeout() {
 		}
-		
+
 		@Override
 		public void execute(final Runnable command) {
 			executor.execute(() -> {
@@ -196,29 +198,19 @@ public class JavaStandaloneHttpServer extends AbstractHttpServer {
 		}
 	}
 
-	@Bean(name = "connections", parent = JavaStandaloneHttpServer.class, active = true, exportable = true)
-	public static class PortsConfigBean extends AbstractHttpServer.PortsConfigBean {
+	public static class PortConfigBean
+			extends AbstractHttpServer.PortConfigBean {
 
-		@Override
-		public Class<?> getDefaultBeanClass() {
-			return JavaStandaloneHttpServer.PortConfigBean.class;
-		}
-
-	}
-
-	public static class PortConfigBean extends AbstractHttpServer.PortConfigBean {
-
+		protected HttpServer httpServer;
+		@Inject(bean = "executor")
+		private ExecutorWithTimeout executor;
 		@Inject
 		private JavaStandaloneHttpServer serverManager;
 
-		@Inject(bean = "executor")
-		private ExecutorWithTimeout executor;
-
-		protected HttpServer httpServer;
-
 		public void beanConfigurationChanged(Collection<String> changedFields) {
-			if (serverManager == null)
+			if (serverManager == null) {
 				return;
+			}
 
 			beforeUnregister();
 			initialize();
@@ -246,5 +238,16 @@ public class JavaStandaloneHttpServer extends AbstractHttpServer {
 				}
 			}
 		}
+	}
+
+	@Bean(name = "connections", parent = JavaStandaloneHttpServer.class, active = true, exportable = true)
+	public static class PortsConfigBean
+			extends AbstractHttpServer.PortsConfigBean {
+
+		@Override
+		public Class<?> getDefaultBeanClass() {
+			return JavaStandaloneHttpServer.PortConfigBean.class;
+		}
+
 	}
 }

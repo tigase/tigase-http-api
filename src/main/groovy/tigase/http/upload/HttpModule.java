@@ -30,7 +30,9 @@ import tigase.kernel.beans.UnregisterAware;
  * Created by andrzej on 08.08.2016.
  */
 @Bean(name = "httpModule", parent = FileUploadComponent.class, active = true)
-public class HttpModule extends AbstractHttpModule implements Initializable, UnregisterAware {
+public class HttpModule
+		extends AbstractHttpModule
+		implements Initializable, UnregisterAware {
 
 	@Inject
 	private FileServlet.FileServletContext context;
@@ -53,7 +55,9 @@ public class HttpModule extends AbstractHttpModule implements Initializable, Unr
 				.setVHosts(vhosts)
 				.setDeploymentName("httpFileUpload")
 				.setDeploymentDescription("XEP-0363: HTTP File Upload")
-				.addServlets(httpServer.servlet("FileServlet", FileServlet.class).addMapping("/*").addInitParam("kernel", uuid));
+				.addServlets(httpServer.servlet("FileServlet", FileServlet.class)
+									 .addMapping("/*")
+									 .addInitParam("kernel", uuid));
 
 		httpServer.deploy(deployment);
 	}

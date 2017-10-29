@@ -27,24 +27,26 @@ import tigase.kernel.beans.selector.ConfigType;
 import tigase.kernel.beans.selector.ConfigTypeEnum;
 
 @Bean(name = "dns-webservice", parent = HttpMessageReceiver.class, active = true)
-@ConfigType({ConfigTypeEnum.DefaultMode, ConfigTypeEnum.SessionManagerMode, ConfigTypeEnum.ConnectionManagersMode, ConfigTypeEnum.ComponentMode})
-public class DnsWebServiceModule extends AbstractModule {
-	
+@ConfigType({ConfigTypeEnum.DefaultMode, ConfigTypeEnum.SessionManagerMode, ConfigTypeEnum.ConnectionManagersMode,
+			 ConfigTypeEnum.ComponentMode})
+public class DnsWebServiceModule
+		extends AbstractModule {
+
 	private DeploymentInfo deployment = null;
 
 	@Override
 	public String getDescription() {
 		return "WebService for DNS resolution";
 	}
-	
+
 	@Override
 	public void start() {
 		if (deployment != null) {
 			stop();
 		}
-		
+
 		super.start();
-		
+
 		deployment = httpServer.deployment()
 				.setClassLoader(this.getClass().getClassLoader())
 				.setContextPath(contextPath)
@@ -66,5 +68,5 @@ public class DnsWebServiceModule extends AbstractModule {
 		}
 		super.stop();
 	}
-	
+
 }

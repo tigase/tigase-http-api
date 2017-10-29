@@ -24,17 +24,17 @@ import tigase.server.Packet;
 import tigase.xmpp.jid.JID;
 
 public interface PacketWriter {
-	
-	public static interface Callback {
-		
-		public void onResult(Packet packet);
-		
-	}
 
 	boolean isAdmin(JID user);
-	
+
 	public boolean write(Module module, Packet packet);
-	
+
 	public boolean write(Module module, Packet packet, Integer timeout, Callback callback);
-		
+
+	public static interface Callback {
+
+		public void onResult(Packet packet);
+
+	}
+
 }
