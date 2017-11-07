@@ -22,6 +22,7 @@ package tigase.http.upload.db;
 import tigase.db.DataRepository;
 import tigase.db.Repository;
 import tigase.db.TigaseDBException;
+import tigase.db.util.RepositoryVersionAware;
 import tigase.http.db.Schema;
 import tigase.kernel.beans.config.ConfigField;
 import tigase.xmpp.jid.BareJID;
@@ -43,7 +44,7 @@ import java.util.List;
 @Repository.Meta(supportedUris = {"jdbc:[^:]+:.*"})
 @Repository.SchemaId(id = Schema.HTTP_UPLOAD_SCHEMA_ID, name = Schema.HTTP_UPLOAD_SCHEMA_NAME)
 public class JDBCFileUploadRepository
-		implements FileUploadRepository<DataRepository> {
+		implements FileUploadRepository<DataRepository>, RepositoryVersionAware {
 
 	private static final String DEF_ALLOCATE_SLOT = "{ call Tig_HFU_AllocateSlot(?, ?, ?, ?, ?, ?, ?) }";
 	//	private static final String DEF_GET_TRANSFER_USED = "{ call Tig_HFU_GetTransferUsed(?, ?, ?, ?) }";
@@ -232,7 +233,6 @@ public class JDBCFileUploadRepository
 	@Override
 	public void setDataSource(DataRepository dataSource) {
 		try {
-			dataSource.checkSchemaVersion(this);
 			dataSource.initPreparedStatement(ALLOCATE_SLOT_QUERY, ALLOCATE_SLOT_QUERY);
 			dataSource.initPreparedStatement(UPDATE_SLOT_QUERY, UPDATE_SLOT_QUERY);
 			dataSource.initPreparedStatement(GET_SLOT_QUERY, GET_SLOT_QUERY);
