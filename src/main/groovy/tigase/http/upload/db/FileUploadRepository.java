@@ -65,34 +65,16 @@ public interface FileUploadRepository<DS extends DataSource>
 
 	/**
 	 * Retrieves information from database about slot
-	 *
-	 * @param sender
-	 * @param slotId
-	 *
-	 * @return
 	 */
 	Slot getSlot(BareJID sender, String slotId) throws TigaseDBException;
 
 	/**
 	 * Retrieves list of ids of expired slots
-	 *
-	 * @param domain
-	 * @param limit
-	 *
-	 * @return
-	 *
-	 * @throws TigaseDBException
 	 */
 	List<Slot> listExpiredSlots(BareJID domain, LocalDateTime before, int limit) throws TigaseDBException;
 
 	/**
 	 * Removes metadata of expired slots
-	 *
-	 * @param domain
-	 * @param before
-	 * @param limit
-	 *
-	 * @throws TigaseDBException
 	 */
 	void removeExpiredSlots(BareJID domain, LocalDateTime before, int limit) throws TigaseDBException;
 

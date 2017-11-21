@@ -31,52 +31,27 @@ public interface Store {
 
 	/**
 	 * Returns number of elements in store
-	 *
-	 * @return
 	 */
 	long count() throws IOException;
 
 	/**
 	 * Returns size used by store
-	 *
-	 * @return
 	 */
 	long size() throws IOException;
 
 	/**
 	 * Method to retrieve content of file from slot
-	 *
-	 * @param uploader
-	 * @param slotId
-	 * @param filename
-	 *
-	 * @return
-	 *
-	 * @throws IOException
 	 */
 	ReadableByteChannel getContent(BareJID uploader, String slotId, String filename) throws IOException;
 
 	/**
 	 * Method to set content of file to slot
-	 *
-	 * @param uploader
-	 * @param slotId
-	 * @param filename
-	 * @param size
-	 * @param source
-	 *
-	 * @throws IOException
 	 */
 	void setContent(BareJID uploader, String slotId, String filename, long size, ReadableByteChannel source)
 			throws IOException;
 
 	/**
 	 * Method removes content of slot
-	 *
-	 * @param uploader
-	 * @param slotId
-	 *
-	 * @throws IOException
 	 */
 	void remove(BareJID uploader, String slotId) throws IOException;
 }
