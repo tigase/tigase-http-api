@@ -41,6 +41,8 @@ import java.util.logging.Logger;
  */
 public class DnsResolver {
 
+	public static final Logger log = Logger.getLogger(DnsResolver.class.getName());
+
 	private static final long DNS_CACHE_TIME = 1000 * 60;
 	//private static ConcurrentMap<String, DnsItem> cache = new ConcurrentHashMap<String, DnsItem>();
 	private static Map<String, Future<DnsItem>> cache = Collections.synchronizedMap(
@@ -165,7 +167,7 @@ public class DnsResolver {
 
 	private static DnsEntry[] resolveBosh(DirContext ctx, String domain, DnsEntry[] c2sEntries) {
 		try {
-			System.out.println("checing bosh for = _xmppconnect." + domain);
+			log.log(Level.FINE, "checking bosh for = _xmppconnect." + domain);
 			Attributes attrs = ctx.getAttributes("_xmppconnect." + domain, new String[]{"TXT"});
 			Attribute attr = attrs.get("TXT");
 
