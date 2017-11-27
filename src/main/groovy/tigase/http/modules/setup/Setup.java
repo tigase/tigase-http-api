@@ -308,7 +308,7 @@ public class Setup {
 
 		@Override
 		protected void setValues(String[] values) {
-			setValue((values == null || values.length == 0) ? null : values[0]);
+			setValue((values == null || values.length == 0) ? null : (values[0].trim().isEmpty() ? null : values[0]));
 		}
 	}
 
@@ -416,7 +416,7 @@ public class Setup {
 						}
 						return val;
 					}, val -> {
-						if (val == null) {
+						if (val == null || val.trim().isEmpty()) {
 							config.dbProperties.remove(o.getFullName().get());
 						} else {
 							config.dbProperties.setProperty(o.getFullName().get(), val);
