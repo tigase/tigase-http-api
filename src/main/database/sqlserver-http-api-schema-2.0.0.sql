@@ -173,6 +173,6 @@ END
 GO
 
 -- QUERY START:
-exec TigSetComponentVersion('http-api', '2.0.0');
+exec TigSetComponentVersion 'http-api', '2.0.0';
 -- QUERY END:
 GO
