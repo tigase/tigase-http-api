@@ -55,15 +55,9 @@ ${ util.include('header', [title:'Setup: ' + page.title]) }
 	}
 }
 ">
-    <% [
-	[ value:'derby', label:'Derby (built-in database)' ],
-	[ value:'mysql', label:'MySQL' ],
-	[ value:'postgresql', label:'PostgreSQL' ],
-	[ value:'sqlserver', label:'SQLServer', warning:'You have selected MS SQL Server as your database. While we provide you, for easy install, with open-source jTDS JDBC driver allowing to connect to MS SQL Server, we recommend using JDBC driver from Microsoft.' ],
-    [ value:'mongodb', label: 'MongoDB' ]
-   ].each {
+    <% tigase.db.util.SchemaLoader.getAllSupportedTypes().each {
  %>
-        <option value='${it.value}' ${ q.isSelected(it.value) ? 'selected' : '' } ${it.warning ? 'warning="' + it.warning + '"' : ''} >${it.label}</option>
+        <option value='${it.name}' ${ (q.isSelected(it.name) && it.isAvailable()) ? 'selected' : '' } ${it.warning ? 'warning="' + it.warning + '"' : ''} ${it.isAvailable() ? '' : 'disabled'} >${it.label}</option>
     <% } %>
     </select><span id='dbTypeWarning' style='color: red; font-size:0.8em;'></span>
     <% }); %>
