@@ -1,7 +1,7 @@
 [[XEP0363]]
 = HTTP File Upload component
 :author: Andrzej Wójcik
-:version: v2.0 August 2016. Reformatted for v7.2.0.
+:version: v2.0 August 2016. Reformatted for v8.0.0.
 
 :toc:
 :numbered:
@@ -44,7 +44,7 @@ Currently following storage providers are available out of the box.
 This storage mechanism places files in subdirectories with names that correspond to the id of http://xmpp.org/extensions/xep-0363.html#intro:[allocated slot].
 If required, it is possible to group all slot directories allocated by single user in a directory containing this user name.
 
-By default there is no redundancy if this store is used in clustered environment. Every file will be sotred on a single cluster node.
+By default there is no redundancy if this store is used in clustered environment. Every file will be stored on a single cluster node.
 
 Available properties:
 

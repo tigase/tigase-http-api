@@ -1,7 +1,7 @@
 [[webClient]]
 = Tigase Web Client
 :author: Daniel Wisnewski
-:version: v2.0 August 2017. Reformatted for v7.2.0.
+:version: v2.0 August 2017. Reformatted for v8.0.0.
 
 :toc:
 :numbered:
@@ -23,7 +23,7 @@ image:images/WebUI-Home.jpg[]
 
 The commands are broken into categories shown here.  All changes made in these sections are instant and should be seen the same as if you were using an external XMPP client like Psi.
 
-*NOTE* The BOSH client will automatically translate all requests to the server name.  In some rare cases this may not be resolvable by the browser and you will be unable to login.  Should that happen, you may disable that feature using the following line in your init.properties:
+*NOTE* The BOSH client will automatically translate all requests to the server name.  In some rare cases this may not be resolvable by the browser and you will be unable to login.  Should that happen, you may disable that feature using the following line in your config.tdsl:
 
 [source,dsl]
 -----
@@ -85,9 +85,9 @@ This section gives you a drop-down menu for components
     component name :: componentInfo{Title=Server, Server version/revision (submission date), Class=component class} For example:
     amp :: componentInfo{Title=Tigase XMPP Server, Version=7.1.0-SNAPSHOT-b3990/574c329f (2015-08-28/10:32:06), Class=tigase.server.amp.AmpComponent}
 
-- *Add* Allows you to activate a component in a similar way you would in the init.properties files. define a name for the component, and the class for the component. Once you click Confirm that component will be active and running.
+- *Add* Allows you to activate a component in a similar way you would in the config.tdsl files. define a name for the component, and the class for the component. Once you click Confirm that component will be active and running.
 
-- *Edit* will allow you to edit details of the selected component. All possible values for the component will be listed, even ones that do not have specific settings. Changes will be immediate, although changes will revert to ones specified in init.properties upon restart.
+- *Edit* will allow you to edit details of the selected component. All possible values for the component will be listed, even ones that do not have specific settings. Changes will be immediate, although changes will revert to ones specified in config.tdsl upon restart.
 
 - *Remove* allows you to remove components from a dropdown list. Components will be removed upon confirmation, however settings will be reverted on server restart.
 
@@ -211,10 +211,10 @@ Enables you to see the contents of any file in the tigase directory. By default 
 logs/tigase.log.0
 
 === Get Configuration File
-If you don't want to type in the location of a configuration file, you can use this prompt to bring up the contents of either tigase.conf or init.properties.
+If you don't want to type in the location of a configuration file, you can use this prompt to bring up the contents of either tigase.conf or config.tdsl.
 
-=== Get init.properties File
-Will output the current init.properties file, this includes any modifications made during the current server session.
+=== Get config.tdsl File
+Will output the current config.tdsl file, this includes any modifications made during the current server session.
 
 === Load Errors
 Will display any errors the server encounters in loading and running. Can be useful if you need to address any issues.

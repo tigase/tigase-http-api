@@ -1,7 +1,7 @@
 [[httpAPI]]]
 = Tigase HTTP API
 :author: Daniel Wisnewski & Andrzej Wójcik
-:version: v2.0 July 2016. Reformatted for v7.2.0.
+:version: v2.0 July 2016. Reformatted for v8.0.0.
 
 :toc:
 :numbered:
@@ -74,7 +74,7 @@ http (class: tigase.http.HttpMessageReceiver) {
 Currently there are the following options:
 
 - `tigase.http.jetty.JettyStandaloneHttpServer` - Starts standalone Jetty HTTP Server instance *(requires Tigase HTTP API - Jetty HTTP Server)* +
-- `tigase.http.jetty.JettyOSGIHttpServer` - Uses Jetty HTTP Server instance available as OSGi service (may be used only in OSGi envoirment) *(require Tigase HTTP API - Jetty HTTP Server)* +
+- `tigase.http.jetty.JettyOSGIHttpServer` - Uses Jetty HTTP Server instance available as OSGi service (may be used only in OSGi environment) *(require Tigase HTTP API - Jetty HTTP Server)* +
 - `tigase.http.java.JavaStandaloneHttpServer` - Uses `HttpServer` provided by Java JDK to start standalone HTTP server (may not work on JDK from every JDK provider). +
 
 === threads

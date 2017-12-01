@@ -1,7 +1,7 @@
 [[httpServer]]
 = HTTP server
 :author: Andrzej Wójcik
-:version: v2.0 August 2016. Reformatted for v7.2.0.
+:version: v2.0 August 2016. Reformatted for v8.0.0.
 
 :toc:
 :numbered:
@@ -63,7 +63,7 @@ httpServer {
 
 [[jettyHttp]]
 === Usage of Jetty HTTP server as HTTP server
-As mentioned before it is possible to use Jetty as HTTP server for improved performence.
+As mentioned before it is possible to use Jetty as HTTP server for improved performance.
 Jetty API can be used in one of two forms: Standalone and OSGi.
 
 ==== Standalone

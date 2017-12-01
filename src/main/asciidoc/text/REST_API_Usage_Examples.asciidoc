@@ -1,7 +1,7 @@
 [[RESTUseageExamples]]
 = REST API Usage Examples
 :author: Andrzej Wojcik
-:version: v2.0 November 2016. Reformatted for v7.2.0.
+:version: v2.0 November 2016. Reformatted for v8.0.0.
 
 :toc:
 :numbered:
@@ -15,7 +15,7 @@ Below are some examples of some of the scripts available for Tigase REST API com
 
 === Retrieving user avatar
 
-Request using GET method for url /rest/avatar/admin@test-domain.com will return an avatar image for user admin@test-domain.com if an avatar is set in user vcard or will otherwise return a http error 404. Example of full url for avatar of user admin@domain.com
+Request using GET method for url /rest/avatar/admin@test-domain.com will return an avatar image for user admin@test-domain.com if an avatar is set in user vCard or will otherwise return a http error 404. Example of full url for avatar of user admin@domain.com
 
 [source,xml]
 -----
@@ -29,7 +29,7 @@ Entering this url in will execute GET request.  It may be possible to use the ur
 ==== Using XML format
 
 To retrieve a list of available adhoc commands, make a request using GET method for `/rest/adhoc/sess-man@domain.com` where `sess-man@domain.com` is jid of component you wish to see commands for.
-For example, entering the following url: http://localhost:8080/rest/adhoc/sess-man@domain.com in your browser will retrieve a list of all ad-hoc commands available at sess-man@domain.com. This action is protected by authentication done using `HTTP Basic Authentication`. Valid credentials will be those of users available in user database of this Tigase XMPP Server instalation (username in barejid form).
+For example, entering the following url: http://localhost:8080/rest/adhoc/sess-man@domain.com in your browser will retrieve a list of all ad-hoc commands available at sess-man@domain.com. This action is protected by authentication done using `HTTP Basic Authentication`. Valid credentials will be those of users available in user database of this Tigase XMPP Server installation (username in barejid form).
 
 Below is example result of that request:
 [source,xml]
@@ -85,7 +85,7 @@ Example result below:
 
 === Retrieving list of active users
 
-==== Uusing XML
+==== Using XML
 
 To execute the command to get a list of active users, make a request using POST method for `/rest/adhoc/sess-man@domain.com` sending the following content (request requires authentication using Basic HTTP Authentication):
 
@@ -226,7 +226,7 @@ As a result server will return following XML:
 </command>
 -----
 
-This will confirm that user `test@domain.com` with resource `resouce` was connected and has been disconnected.
+This will confirm that user `test@domain.com` with resource `resource` was connected and has been disconnected.
 
 If the user was not connected server will return following response:
 
@@ -282,7 +282,7 @@ As a result, the server will return following JSON:
 }
 -----
 
-To confirm that user `test@domain.com` with resource `resouce` was connect and it was disconnected.
+To confirm that user `test@domain.com` with resource `resource` was connect and it was disconnected.
 
 If user was not connected server will return the following response:
 [source,json]

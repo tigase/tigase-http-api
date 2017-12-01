@@ -1,7 +1,7 @@
 [[hTTPAPI]]
 = HTTP API component
 :author: Andrzej Wójcik
-:version: v2.0 August 2016. Reformatted for v7.2.0.
+:version: v2.0 August 2016. Reformatted for v8.0.0.
 
 :toc:
 :numbered:
@@ -54,8 +54,8 @@ http {
 ----
 
 === List of virtual hosts
-This provies the ability to limit modules to be available only on listed virtual hosts, and allows to set context path to `/` for more than one module.
-Property accepts list of strings, which in the case of init.properties file format is list of comma separated domain names and in DSL it is written as list of strings (see xref:complexExample[Complex Example]).
+This provides the ability to limit modules to be available only on listed virtual hosts, and allows to set context path to `/` for more than one module.
+Property accepts list of strings, which in the case of config.tdsl file format is list of comma separated domain names and in DSL it is written as list of strings (see xref:complexExample[Complex Example]).
 
 ==== Example
 Here we want to move the REST module to be available only for requests directed to `api.example.com`

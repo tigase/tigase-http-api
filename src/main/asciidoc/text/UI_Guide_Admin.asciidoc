@@ -1,7 +1,7 @@
 [[adminUI]]
 = Admin UI Guide
 :author: Daniel Wisnewski
-:version: v2.0 August 2017. Reformatted for v7.2.0.
+:version: v2.0 August 2017. Reformatted for v8.0.0.
 
 :toc:
 :numbered:
@@ -94,13 +94,13 @@ This allows you to add new virtual hosts to the XMPP server.  A breakdown of the
 - XEP-0136 retention period: integer of number of days message archives will be set.
 - Trusted JIDs: Comma separated list of JIDs who will be added to the trusted list, these are JIDS that may conduct commands, edit settings, or other secure work without needed secure logins.
 - XEP-0136 retention type: Sets the type of data that retention period will use.  May be User defined (custom number type), Unlimited, or Number of Days.
-- XEP-0136 - store MUC messages: Whether or not to store MUC messages for archiving.  Default is user, which allows users to individually set this setting, otherwise tue/false will override.
+- XEP-0136 - store MUC messages: Whether or not to store MUC messages for archiving.  Default is user, which allows users to individually set this setting, otherwise true/false will override.
 - see-other-host redirection enabled: in servers that have multiple clusters, this feature will help to automatically repopulate the cluster list if one goes down, however if this is unchecked, that list will not change and may attempt to send traffic to a down server.
 - XEP-0136 Default store method: The default section of messages that will be stored in the archive.
 
 === Change user inter-domain communication permission
 Here you can restrict users to be able to communicate on specific domains, this works similar to the domain filtering policy using the same rule sets. For more details, see xref:domainBasedPacketFiltering[Domain Based Packet Filtering] section for rule details and specifics.
-Note that the changes may be made to mutiple JIDs at the same time.
+Note that the changes may be made to multiple JIDs at the same time.
 
 === Connections Time
 Lists the longest and average connection time from clients to servers.
@@ -155,7 +155,7 @@ Here you may set the default configuration for any new pubsub node.  These chang
 This page allows admins to set the default configuration for any new MUC rooms that may be made on the server.
 
 === Delete Monitor Task
-This removes a monitor task from the list of available monitor scripts. This action is not permanent as it will revert to inital settings on server restart.
+This removes a monitor task from the list of available monitor scripts. This action is not permanent as it will revert to initial settings on server restart.
 
 === Delete Node
 Provides a space to remove a node from the server.  It must be the full name of the node, and only one node can be removed at a time.
@@ -177,10 +177,10 @@ Enables you to see the contents of any file in the tigase directory. By default 
 logs/tigase.log.0
 
 === Get Configuration File
-If you don't want to type in the location of a configuration file, you can use this prompt to bring up the contents of either tigase.conf or init.properties.
+If you don't want to type in the location of a configuration file, you can use this prompt to bring up the contents of either tigase.conf or config.tdsl.
 
-=== Get init.properties File
-Will output the current init.properties file, this includes any modifications made during the current server session.
+=== Get config.tdsl File
+Will output the current config.tdsl file, this includes any modifications made during the current server session.
 
 === Get list available commands
 This may be listed multiple times for different components, but this will do as the section suggest and list available commands for that particular component.
@@ -247,11 +247,11 @@ This provides a space for an administrator to manually have a JID subscribe to a
 Here you can unsubscribe users from a particular node.  Users can be a comma separated list.
 
 === Update item configuration
-Typically two entries will be seen for this entry, one for basic-conf and another for vhost-man. They each have their own sections, but provide for a plethora of server options.  Changes to the server are done in realtime, and may not be permanent.
+Typically two entries will be seen for this entry, one for basic-conf and another for vhost-man. They each have their own sections, but provide for a plethora of server options.  Changes to the server are done in real time, and may not be permanent.
 
 ==== basic-conf
 This will prompt a list of nearly every component setting currently available in the Tigase installation.  They are broken down as follows:
-Component/catagory or setting/setting
+Component/category or setting/setting
 So for example, if you wanted to change admins for the eventbus component, you will select 'eventbus/admins'.
 
 Another example might be if you wanted to turn on or off a task in monitor component, lets say disk-checker-task, you would find 'monitor/disk-checker-task/enabled'.

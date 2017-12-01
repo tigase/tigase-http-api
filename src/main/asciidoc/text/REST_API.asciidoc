@@ -1,7 +1,7 @@
 [[httpRestAPI]]
 = REST API
 :author: Andrzej Wójcik
-:version: v2.0  2016. Reformatted for v7.2.0.
+:version: v2.0  2016. Reformatted for v8.0.0.
 
 :toc:
 :numbered:
