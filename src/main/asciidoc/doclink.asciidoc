@@ -1,4 +1,4 @@
-= Tigase HTTP API
+
 
 :author: Tigase Team <team@tigase.net>
 :toc:
