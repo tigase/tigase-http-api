@@ -1,0 +1,7 @@
+// documents linking to development guide
+
+include::text/REST_API.asciidoc[]
+
+include::text/HTTP_API_Scripting.asciidoc[leveloffset=+1]
+
+include::text/REST_API_Usage_Examples.asciidoc[leveloffset=+1]
