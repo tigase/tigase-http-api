@@ -104,7 +104,7 @@ the following settings are available for both listed modules:
 - `context-path` - Path of HTTP context under which the module should be available.
 - `vhosts` - Comma separated list of virtual hosts for which the module should be available. If not configured, the module will be available for all vhosts.
 
-[[restModuleConfig]]]
+[[restModuleConfig]]
 === Rest Module
 This is the Module that provides support for the REST API.
 Available properties:
@@ -136,6 +136,7 @@ does the following:
 Requests made to the HTTP service must conclude with one of the listed keys: `http://localhost:8080/rest/adhoc/sess-man@domain.com?api-key=test1`
 
 ==== Example
+
 Configure API keys for the REST module:
 
 [source,java]
