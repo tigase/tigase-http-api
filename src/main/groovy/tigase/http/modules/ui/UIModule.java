@@ -50,13 +50,9 @@ public class UIModule
 	public UIModule() {
 		File warFile = getWarFile();
 		this.warPath = warFile.getAbsolutePath();
+		this.description = "Web UI XMPP client and management utility";
 	}
-
-	@Override
-	public String getDescription() {
-		return "Web UI XMPP client and management utility";
-	}
-
+	
 	public static class UIModuleSelector
 			implements BeanSelector {
 

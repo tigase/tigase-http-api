@@ -40,10 +40,12 @@ public class WebModule
 	@ConfigField(desc = "Path to WAR file", alias = WAR_PATH_KEY)
 	protected String warPath;
 	private DeploymentInfo deployment = null;
+	@ConfigField(desc = "Description of a module")
+	protected String description = "Simple static WAR deployment module";
 
 	@Override
 	public String getDescription() {
-		return "Simple static WAR deployment module";
+		return description;
 	}
 
 	@Override
