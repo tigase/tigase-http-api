@@ -148,7 +148,11 @@ public class SetupServlet
 				templates.put("step" + i, template);
 				log.log(Level.FINEST, "loaded html template for step " + i);
 			} catch (Exception ex) {
-				log.log(Level.FINEST, "resource file for index = " + i + " was not found and could not be loaded", ex);
+				if (ex instanceof IOException && "Resource not found".equals(ex.getMessage())) {
+					log.log(Level.FINEST, "loaded " + (i-1) + " resource files.")
+				} else {
+					log.log(Level.FINEST, "resource file for index = " + i + " was not found and could not be loaded", ex);
+				}
 				loaded = false;
 			}
 			i++;
