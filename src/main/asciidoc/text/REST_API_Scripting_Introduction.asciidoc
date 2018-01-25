@@ -1,5 +1,5 @@
-[[HTTPApiScripting]]
-= HTTP API Scripting
+[[httpRestAPIScriptionIntroduction]]
+= Scripting introduction
 :author: Andrzej Wójcik
 :version: v2.0 March 2017. Reformatted for v8.0.0.
 
@@ -7,14 +7,12 @@
 :numbered:
 :website: http://tigase.net/
 
-== Scripting introduction
-
 Scripts in the HTTP API component are used for processing all of requests.
 
 To add a new action to the HTTP API component, you will need to create a script written in Groovy for which there will be implementation of class extending `tigase.http.rest.Handler` class.
 The URI of script will be created from the file's location of in the scripts folder. For example, if script `TestHandler` with regular expression will be set to `/test` and will be placed in `scripts/rest/tested`, the handler will be called for using the following URI: `/rest/tested/test`.
 
-=== Properties
+== Properties
 
 If you are extending classes you will need to set following properties:
 
@@ -24,7 +22,7 @@ If you are extending classes you will need to set following properties:
 
 * *isAsync* - If set to true, it will be possible to wait for results, for example waiting for an response IQ stanza.
 
-=== Properties containing closures
+== Properties containing closures
 
 Extended class should also set closures for one or more of following properties: execGet, execPut, execPost, and execDelete depending on which HTTP action or actions you need to support for the URI. *Each closure has a dynamic arguments list*. Below is list of arguments passed to closure which describes how and when the list of arguments changes:
 

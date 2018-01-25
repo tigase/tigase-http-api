@@ -2,6 +2,8 @@
 
 include::text/REST_API.asciidoc[]
 
-include::text/HTTP_API_Scripting.asciidoc[leveloffset=+1]
+include::text/REST_API_Scripting_Introduction.asciidoc[leveloffset=+1]
 
 include::text/REST_API_Usage_Examples.asciidoc[leveloffset=+1]
+
+include::text/HTTP_Pre_Bind_BOSH.asciidoc[leveloffset=+1]

@@ -5,10 +5,11 @@
 include::text/HTTP_API_Component.asciidoc[]
 
 
-include::text/HTTP_Component_Configuration.asciidoc[leveloffset=+1]
 include::text/HTTP_API_Component_modules.asciidoc[leveloffset=+1]
-include::text/HTTP_File_Upload_Component.asciidoc[leveloffset=+1]
-include::text/HTTP_Server.asciidoc[leveloffset=+1]
-include::text/HTTP_Pre_Bind_BOSH.asciidoc[leveloffset=+1]
+include::text/HTTP_API_Component_modules_common_configuration.asciidoc[leveloffset=+1]
+include::text/HTTP_API_Component_modules_configuration.asciidoc[leveloffset=+1]
 include::text/UI_Guide_Admin.asciidoc[leveloffset=+1]
 include::text/UI_Guide_Client.asciidoc[leveloffset=+1]
+
+include::text/HTTP_File_Upload_Component.asciidoc[]
+include::text/HTTP_Server.asciidoc[]

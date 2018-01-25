@@ -33,6 +33,13 @@ socket:::: Sets type of socket used for handling incoming connections. Accepted 
  * `ssl` - port will work in HTTPS mode
 domain:::: This property is used to configure domain name of SSL certificate which should be used by HTTP server running on this port (if `socket` is set to `ssl`). If it is not set then default SSL certificate of Tigase XMPP Server will be used.
 
+=== Additional properties of embedded HTTP server
+With embedded HTTP server, you have a few additional properties within `executor` section, which you can pass to adjust this HTTP server.
+
+executor:: Name of the subsection
+threads::: This property is used to configure the number of threads used to handle HTTP requests, ie. `10`
+request-timeout:::  Property used to set timeout for processing a single HTTP request (in seconds), ie. `30`
+
 == Examples
 Below are few examples for use in DSL based configuration format and older properties based format.
 

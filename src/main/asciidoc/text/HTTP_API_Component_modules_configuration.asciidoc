@@ -1,5 +1,5 @@
 [[httpAPI]]
-= Tigase HTTP API
+= Module specific configuration
 :author: Daniel Wisnewski & Andrzej Wójcik
 :version: v2.0 July 2016. Reformatted for v8.0.0.
 
@@ -7,95 +7,11 @@
 :numbered:
 :website: http://www.tigase.org
 
-Welcome to the Tigase HTTP API users guide.  The HTTP API allows you to manage, configure, chat, and send commands to Tigase server using a simple, easy-to-use interface right from your browser!
-We will guide you through setup, running, and going through some features of the HTTP API.
-
-*Setup & Configuration*
-
-Tigase will by default start with the http servlet active and running.
 Tigase will try to start a standalone Jetty HTTP server at port 8080 and start up the default modules, including `RestModule` which will add context for REST API in the /rest path.
 `RestModule` will also load all groovy scripts located in `scripts/rest/&#42;` directories and will bind them to proper actions for the `/rest/&#42;` paths.
 
 *NOTE:* Scripts that handle HTTP requests are available in the component repository in `src/scriopts/groovy/tigase/rest/` directory.
 
-[[httpCompProp]]
-== Component Properties
-Here are some additional properties for the `HttpMessageReceiver` component that can be set in the config.tdsl file.
-
-=== Ports
-Sets a comma separated list of ports on which the HTTP server will listen for connections. Default is 8080.  This configurations sets ports 8080, 9050, and 2011.
-[source,dsl]
------
-httpServer {
-    connections {
-        2011 {
-            active = true
-        }
-        8080 {
-            active = true
-        }
-        9050 {
-            active = true
-        }
-    }
-}
------
-
-=== ssl socket port
-Sets the port for SSL connections, this configuration sets port 2222 as the SSL socket port.
-[source,dsl]
------
-http (class: tigase.http.HttpMessageReceiver) {
-    2222 {
-        socket = 'ssl'
-    }
-}
------
-
-=== http domain
-This sets the domain name of the SSL certificate from Tigase XMPP certificate store, also sets the port to 2222 to listen for HTTPS connections.
-[source,dsl]
------
-http (class: tigase.http.HttpMessageReceiver) {
-    2222 {
-        domain = 'example.com'
-    }
-}
------
-
-=== server class
-Sets the name of the class used to manage the HTTP server.
-[source,dsl]
------
-http (class: tigase.http.HttpMessageReceiver) {
-    'server-class' = '?'
-}
------
-Currently there are the following options:
-
-- `tigase.http.jetty.JettyStandaloneHttpServer` - Starts standalone Jetty HTTP Server instance *(requires Tigase HTTP API - Jetty HTTP Server)* +
-- `tigase.http.jetty.JettyOSGIHttpServer` - Uses Jetty HTTP Server instance available as OSGi service (may be used only in OSGi environment) *(require Tigase HTTP API - Jetty HTTP Server)* +
-- `tigase.http.java.JavaStandaloneHttpServer` - Uses `HttpServer` provided by Java JDK to start standalone HTTP server (may not work on JDK from every JDK provider). +
-
-=== threads
-Sets the number of threads available for HTTP component. Default is 4.
-[source,dsl]
------
-httpServer {
-    threads = '12'
-}
------
-
-=== request-timeout
-Sets the timeout time in ms for threads to close on inactive connections. Default is 60 seconds.
-[source,dsl]
------
-httpServer {
-    'request-timeout' = '60'
-}
------
-
-== Modules
 Tigase's REST Component comes with two modules that can be enabled, disabled, and configured separately.
 Common settings for modules for component properties are used in the following format: `component_name (module: value) {}`
 the following settings are available for both listed modules:
@@ -105,7 +21,7 @@ the following settings are available for both listed modules:
 - `vhosts` - Comma separated list of virtual hosts for which the module should be available. If not configured, the module will be available for all vhosts.
 
 [[restModuleConfig]]
-=== Rest Module
+== Rest Module
 This is the Module that provides support for the REST API.
 Available properties:
 
@@ -135,7 +51,7 @@ does the following:
 
 Requests made to the HTTP service must conclude with one of the listed keys: `http://localhost:8080/rest/adhoc/sess-man@domain.com?api-key=test1`
 
-==== Example
+=== Example
 
 Configure API keys for the REST module:
 

@@ -1,5 +1,4 @@
 [[RESTUseageExamples]]
-= REST API Usage Examples
 :author: Andrzej Wojcik
 :version: v2.0 November 2016. Reformatted for v8.0.0.
 
@@ -7,13 +6,7 @@
 :numbered:
 :website: http://www.tigase.org
 
-== Usage examples
-
-In the newest version of Tigase HTTP API (v1.2.0 and newer) you may find more a detailed description and examples of adhoc commands at _/rest/_ url of your local Tigase XMPP Server and Tigase HTTP API component installation.
-
-Below are some examples of some of the scripts available for Tigase REST API component.
-
-=== Retrieving user avatar
+= Retrieving user avatar
 
 Request using GET method for url /rest/avatar/admin@test-domain.com will return an avatar image for user admin@test-domain.com if an avatar is set in user vCard or will otherwise return a http error 404. Example of full url for avatar of user admin@domain.com
 
@@ -24,9 +17,9 @@ http://localhost:8080/rest/avatar/admin@domain.com
 
 Entering this url in will execute GET request.  It may be possible to use the url in your browser.
 
-=== Retrieving list of available adhoc commands
+= Retrieving list of available adhoc commands
 
-==== Using XML format
+== Using XML format
 
 To retrieve a list of available adhoc commands, make a request using GET method for `/rest/adhoc/sess-man@domain.com` where `sess-man@domain.com` is jid of component you wish to see commands for.
 For example, entering the following url: http://localhost:8080/rest/adhoc/sess-man@domain.com in your browser will retrieve a list of all ad-hoc commands available at sess-man@domain.com. This action is protected by authentication done using `HTTP Basic Authentication`. Valid credentials will be those of users available in user database of this Tigase XMPP Server installation (username in barejid form).
@@ -53,7 +46,7 @@ Below is example result of that request:
 </items>
 -----
 
-==== Using JSON format
+== Using JSON format
 
 To retrieve a list of available adhoc commands in JSON, we need to pass `Content-Type: application/json` to HTTP header of request or add `type` parameter set to `application/json`.
 Example result below:
@@ -81,11 +74,11 @@ Example result below:
 }
 -----
 
-== Executing example ad-hoc commands
+= Executing example ad-hoc commands
 
-=== Retrieving list of active users
+== Retrieving list of active users
 
-==== Using XML
+=== Using XML
 
 To execute the command to get a list of active users, make a request using POST method for `/rest/adhoc/sess-man@domain.com` sending the following content (request requires authentication using Basic HTTP Authentication):
 
@@ -136,7 +129,7 @@ Below is example result for request presented above:
 </command>
 -----
 
-==== Using JSON
+=== Using JSON
 
 To execute the command to get active users in JSON format, make a request using POST method for /rest/adhoc/sess-man@domain.com sending the following content (this request also requires authentication using Basic HTTP Authentication):
 
@@ -183,12 +176,12 @@ Below is an example result for request presented above:
 }
 -----
 
-=== Ending a user session
+= Ending a user session
 
 To execute the end user session command, make a request using POST method for `/rest/adhoc/sess-man@domain.com`. The Context of what is sent, may differ depending on circumstance.  For example, it may require authentication using _Basic HTTP Authentication_ with admin credentials.
 _sess-man@domain.com_ in URL is the JID of session manager component which usually is in form of _sess-man@domain_ where `domain` is hosted domain name.
 
-==== Using XML
+== Using XML
 
 To execute the command using XML content you need to set HTTP header `Content-Type` to `application/xml`
 
@@ -239,7 +232,7 @@ If the user was not connected server will return following response:
 </command>
 -----
 
-==== Using JSON
+== Using JSON
 
 To execute the command using JSON you will need to set HTTP header `Content-Type` to `application/json`
 
@@ -296,20 +289,20 @@ If user was not connected server will return the following response:
 }
 -----
 
-== Sending any XMPP Stanza
+= Sending any XMPP Stanza
 
 XMPP messages or any other XMPP stanza can be sent using this API by sending an HTTP POST request to (by default) `http://localhost:8080/rest/stream/?api-key=API_KEY` with serialized XMPP stanza as a content, where `API_KEY` is the API key for HTTP API.
 This key is set in xref:restModuleConfig[ _etc/config.tdsl_].
 Also, each request needs to be authorized by sending a valid administrator JID and password as user and password of BASIC HTTP authorization method.
 Content of HTTP request should be encoded in `UTF-8` and `Content-Type` should be set to `application/xml`.
 
-=== Handling of request
+== Handling of request
 
 If the sent XMPP stanza does not contain a `from` attribute, then the HTTP API component will provide it's own JID.
 If `iq` stanza is being sent, and no `from` attribute is set then the received response will be returned as the content of the HTTP response.
 Successful requests will return HTTP response code 200.
 
-=== Examples
+== Examples
 
 .Sending an XMPP message with from set to HTTP API component to full JID
 Data needs to be sent as a HTTP POST request content to `/rest/stream/?api-key=API_KEY` URL of the HTTP API component to deliver the message _Example message 1_ to _test@example.com/resource-1_.
