@@ -60,9 +60,12 @@
 						<% if (1==0) { %></div><% } %>
 						<% model.formFields?.findAll { it.getName() != 'title' && it.getName() != 'instructions' }.each { formField -> %>
 							<% if (formField.getName() == 'reported') {
-							if (table != null) { table = null; %></tbody></table><% }
-								table = formField.getChildren().findAll { it.getName() == 'field' }.collect { it.getAttribute("var") };
+							if (table != null) { table = null; %></tbody></table></div><% }
+								table = formField.getChildren().findAll { it.getName() == 'field' }.collectEntries { [ (it.getAttribute('var')) : ['align' : it.getAttribute('align')] ] };
 								%>
+								<div class="panel panel-default">
+									<% if (formField.getAttribute("label") != null) { %><div class="panel-heading"><h5 class="panel-title"><%= formField.getAttribute("label") %></h5></div><% } %>
+									
 								<table class="table">
 									<thead>
 										<tr>
@@ -72,12 +75,17 @@
 									<tbody>
 							<% } else if (formField.getName() == 'item' ) { %>
 								<tr>
-									<% formField.getChildren().findAll { it.getName() == 'field' }.each { %>
-									<td>${ it.getChildCData('field/value') ?: '' }</td>
+									<% formField.getChildren().findAll { it.getName() == 'field' }.each {
+									def align = table[it.getAttribute('var')]?.align;
+									def style = "";
+									if (align) {
+										style += "text-align: " + align + ";";
+									} %>
+									<td style="${style}">${ it.getChildAttribute('value', 'label') ?: it.getChildCData('field/value') ?: '' }</td>
 									<% } %>
 								</tr>
 							<% } else if (formField.getName() == 'field') { %>
-								<% if (table != null) { table = null; %></tbody></table><% } %>
+								<% if (table != null) { table = null; %></tbody></table></div><% } %>
 								<% def type = formField.getAttribute('type') ?: 'text-single';
 								if (type == 'hidden') { %>
 									<input type='hidden' name="${formField.getAttribute('var')}" value="${formField.getChildCData('field/value') ?: ''}" /><br/>
@@ -132,7 +140,7 @@
 								<% } %>
 							<% } %>
 						<% } %>
-						<% if (table != null) { table = null; %></tbody></table><% } %>
+						<% if (table != null) { table = null; %></tbody></table></div><% } %>
 					</div>
 				</div>
 		
