@@ -81,7 +81,7 @@ Example response:
 		execGet = { Service service, callback, user, localPart, domain ->
 			def jid = BareJID.bareJIDInstance(localPart, domain);
 			def uid = service.getUserRepository().getUserUID(jid);
-			if (uid <= 0) {
+			if (!service.getUserRepository().userExists(jid)) {
 				callback(null);
 			} else {
 				callback([ user: [ jid: "$localPart@$domain", domain: domain, uid: uid ] ]);
@@ -94,7 +94,7 @@ Example response:
 			try {
 				service.getAuthRepository().addUser(jid, password);
 				def uid = service.getUserRepository().getUserUID(jid);
-				if (uid && email) {
+				if (service.getUserRepository().userExists(jid) && email) {
 					service.getUserRepository().setData(jid, "email", email);
 				}
 				callback([ user: [ jid: "$localPart@$domain", domain: domain, uid: uid ] ]);

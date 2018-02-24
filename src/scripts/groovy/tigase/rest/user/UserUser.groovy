@@ -61,7 +61,7 @@ Example response:
 		isAsync = false
 		execGet = { Service service, callback, jid ->
 			def uid = service.getUserRepository().getUserUID(jid);
-			if (uid <= 0) {
+			if (service.getUserRepository().userExists(jid)) {
 				callback(null);
 			} else {
 				callback([ user: [ jid: "${jid.toString()}", domain: jid.getDomain(), uid: uid ] ]);

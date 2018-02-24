@@ -18,10 +18,12 @@ ${ util.include('header', [title:'User details']) }
                         <div class="col-sm-3"><h5>Domain</h5></div>
                         <div class="col-sm-9"><h5>${result?.user?.domain}</h5></div>
                     </div>
+                    <% if (result?.user?.uid) { %>
                     <div class="row">
                         <div class="col-sm-3"><h5>UID</h5></div>
                         <div class="col-sm-9"><h5>${result?.user?.uid}</h5></div>
                     </div>
+                    <% } %>
                 </div>
             </div>
         </div>
