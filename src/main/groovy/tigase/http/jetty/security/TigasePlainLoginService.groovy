@@ -101,7 +101,7 @@ public class TigasePlainLoginService
 		// validate if user identity is valid
 		return getService().
 				getUserRepository().
-				getUserUID(BareJID.bareJIDInstance(userIdentity.getUserPrincipal().getName())) > 0;
+				userExists(BareJID.bareJIDInstance(userIdentity.getUserPrincipal().getName()));
 	}
 
 	@Override
