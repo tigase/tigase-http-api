@@ -167,6 +167,11 @@ public class RestModule
 		Iterator<BeanConfig> it = kernel.getDependencyManager().getBeanConfigs().iterator();
 		while (it.hasNext()) {
 			BeanConfig bc = it.next();
+			if (Kernel.class.isAssignableFrom(bc.getClazz()) ||
+					ApiKeyRepository.class.isAssignableFrom(bc.getClazz()) ||
+					RestModule.class.isAssignableFrom(bc.getClazz())) {
+				continue;
+			}
 			if (bc.getState() == BeanConfig.State.initialized) {
 				try {
 					kernel.unregister(bc.getBeanName());
