@@ -112,7 +112,7 @@ public class RestServlet
 
 		def apiKey = request.getParameter("api-key") ?: request.getHeader("Api-Key");
 
-		String localUri = request.getRequestURI().replace(prefix, "");
+		String localUri = URLDecoder.decode(request.getRequestURI(), "UTF-8").replace(prefix, "");
 
 		if (log.isLoggable(Level.FINEST)) {
 			log.finest("checking routings = " + routings + " for prefix = " + prefix + " and uri = " + localUri)
