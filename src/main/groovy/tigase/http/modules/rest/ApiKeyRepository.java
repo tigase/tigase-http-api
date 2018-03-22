@@ -102,11 +102,7 @@ public class ApiKeyRepository
 		// allowed for supplied key
 		return item.isAllowed(key, domain, path);
 	}
-
-	public void setItems(String[] items) {
-		super.setItems(items);
-	}
-
+	
 	@Override
 	public void setRepo(UserRepository userRepository) {
 		if (getRepoUser() != null) {

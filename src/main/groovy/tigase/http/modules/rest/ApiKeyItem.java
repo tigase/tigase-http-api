@@ -20,6 +20,7 @@
 package tigase.http.modules.rest;
 
 import tigase.db.comp.RepositoryItemAbstract;
+import tigase.kernel.beans.config.ConfigField;
 import tigase.server.Command;
 import tigase.server.Packet;
 import tigase.xml.Element;
@@ -40,13 +41,20 @@ public class ApiKeyItem
 			"Regular expressions (only request" + " matching any of following regular expressions will be allowed, " +
 					"if no regular expression is set then request to any path is allowed)";
 	private static final String DOMAIN_LABEL = "Domains for which this key works";
+	@ConfigField(desc="Domains")
 	private HashSet<String> domains = new HashSet<String>();
 	private String key;
+	@ConfigField(desc="Regexs")
 	private List<Pattern> regexs = new CopyOnWriteArrayList<Pattern>();
 
 	@Override
 	public String getElemName() {
 		return ELEM_NAME;
+	}
+
+	@Override
+	protected void setKey(String key) {
+		this.key = key;
 	}
 
 	@Override
