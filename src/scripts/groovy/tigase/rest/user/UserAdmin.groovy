@@ -84,7 +84,7 @@ Example response:
 			if (!service.getUserRepository().userExists(jid)) {
 				callback(null);
 			} else {
-				callback([ user: [ jid: "$localPart@$domain", domain: domain, uid: uid ] ]);
+				callback([ user: [ jid: jid.toString(), domain: domain, uid: uid ] ]);
 			}
 		}
 		execPut = { Service service, callback, user, content, localPart, domain ->
@@ -97,7 +97,7 @@ Example response:
 				if (service.getUserRepository().userExists(jid) && email) {
 					service.getUserRepository().setData(jid, "email", email);
 				}
-				callback([ user: [ jid: "$localPart@$domain", domain: domain, uid: uid ] ]);
+				callback([ user: [ jid: jid.toString(), domain: domain, uid: uid ] ]);
 			} catch (tigase.db.UserExistsException ex) {
 				callback({ req, resp -> resp.sendError(409, "User exists");
 				});
@@ -150,7 +150,7 @@ Example response:
 					return;
 				}
 
-				callback([ user: [ jid: "$localPart@$domain", domain: domain, uid: uid ] ]);
+				callback([ user: [ jid: jid.toString(), domain: domain, uid: uid ] ]);
 			});
 		}
 		execPost = { Service service, callback, user, content, localPart, domain ->
@@ -158,7 +158,7 @@ Example response:
 			def password = content.user.password;
 			service.getAuthRepository().updatePassword(jid, password)
 			def uid = service.getUserRepository().getUserUID(jid);
-			callback([ user: [ jid: "$localPart@$domain", domain: domain, uid: uid ] ]);
+			callback([ user: [ jid: jid.toString(), domain: domain, uid: uid ] ]);
 		}
 	}
 
