@@ -45,7 +45,7 @@ public class ApiKeyItem
 	private HashSet<String> domains = new HashSet<String>();
 	private String key;
 	@ConfigField(desc="Regexs")
-	private List<Pattern> regexs = new CopyOnWriteArrayList<Pattern>();
+	private CopyOnWriteArrayList<Pattern> regexs = new CopyOnWriteArrayList<Pattern>();
 
 	@Override
 	public String getElemName() {
