@@ -110,7 +110,7 @@
 									<div class="form-group">
 										<label class="col-sm-3 control-label" for='${formField.getAttribute("var")}'><%= formField.getAttribute('label') ?: formField.getAttribute("var") %></label>
 										<div class="col-sm-9">
-											<textarea class="form-control" rows='5' name='${formField.getAttribute("var")}' >${formField.getChildCData('field/value') ?: ''}</textarea>
+											<textarea class="form-control" rows='5' name='${formField.getAttribute("var")}' >${formField.getChildren()?.findAll{el -> el.getName() == 'value'}.collect{el -> el.getCData() ?: ''}.join('\n') ?: ''}</textarea>
 										</div>
 									</div>
 								<% } else if (type == 'list-single' || type == 'list-multi') { %>
