@@ -12,7 +12,11 @@ The Admin User Interface is an HTTP-based interface that sends REST commands to 
 == A Note about REST
 REST stands for REpresentational State Transfer which is a stateless communication method that in our case passes commands using HTTP GET, PUT, POST, and DELETE commands to resources within the Tigase server.
 
+
 == Configuration
+////
+NOTE: This feature is not supported in 8.0.0, should be back in 8.1.0 when #5498 is done
+
 Allows you to list server components and their configurations, as well as manage server components and plugins.
 
 List server/component configuration section covers all the component options including the basic-conf and will allow you to change each setting by changing the values in the field and clicking submit.  All settings are listed by the component name in the dropdown menu either as default, or as defined by --component-name property.
@@ -32,6 +36,8 @@ Here you can List, Add, Edit, and Remove components.
 Managing server plugins allows you to turn on or off plugins from this window VIA check-boxes. Note that the changes are made in real-time.
 
 image:images/admin/admin-manageplugins.jpg[]
+////
+Allows you to configure some of the servers settings, such as message of the day, welcome message or initialize shutdown of the cluster node.
 
 == Example Scripts
 This is a list of script examples that can be run and do menial functions for each component.  They may not have particular value themselves, but are present to be used as reference when writing custom scripts.
@@ -247,17 +253,7 @@ This provides a space for an administrator to manually have a JID subscribe to a
 Here you can unsubscribe users from a particular node.  Users can be a comma separated list.
 
 === Update item configuration
-Typically two entries will be seen for this entry, one for basic-conf and another for vhost-man. They each have their own sections, but provide for a plethora of server options.  Changes to the server are done in real time, and may not be permanent.
-
-==== basic-conf
-This will prompt a list of nearly every component setting currently available in the Tigase installation.  They are broken down as follows:
-Component/category or setting/setting
-So for example, if you wanted to change admins for the eventbus component, you will select 'eventbus/admins'.
-
-Another example might be if you wanted to turn on or off a task in monitor component, lets say disk-checker-task, you would find 'monitor/disk-checker-task/enabled'.
-
-Clicking Submit query will show current status and settings, and possible fields to change.  Most changes done in this manner will be reset to default or as written in init.properties file on server restart.
-
+Typically you will see only one item for vhost-man, but some additional components (ie. ext) may provided them as well. They each have their own sections, but provide for a plethora of server options.  Changes to the server are done in real time, and may not be permanent.
 
 ==== vhost-man
 You will be presented with a list of domains that Tigase is currently hosting, you will be able to change settings for one domain at a time using this function.  Once a domain is selected, you will be able to set or change the following settings:

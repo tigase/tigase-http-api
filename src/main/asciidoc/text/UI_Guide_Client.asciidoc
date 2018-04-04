@@ -76,6 +76,11 @@ image:images/admin/WebUI-Browse-Comp.jpg[]
 This is an advanced window for settings and management for the XMPP server.
 
 === Configuration
+Here you can manage some of the server settings.
+
+////
+NOTE: This feature is not supported in 8.0.0, should be back in 8.1.0 when #5498 is done
+
 ==== List server/component configuration
 From a drop-down menu you can view all the active components, or the server configuration (basic-conf). This is a read-only list of the current settings.
 
@@ -93,6 +98,7 @@ This section gives you a drop-down menu for components
 
 ==== Manage active server plugins
 Here is a list of all available plugins, and you can activate or deactivate them by checking or un-checking each one and clicking confirm. All changes are made in realtime, however changes will be reverted on server restart.
+////
 
 === Notifications
 This section has one simple command: to be able to send a mass message to all logged in users.  You may choose to change the type of message to headline or Normal which will show as a pop-up in most XMPP clients.  Chat messages will open up a chat dialog with users.
