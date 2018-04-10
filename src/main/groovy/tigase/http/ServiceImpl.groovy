@@ -90,7 +90,7 @@ public class ServiceImpl<T extends Module>
 		if (credentials == null) {
 			return false;
 		}
-		return credentials.getFirst().verifyPlainPassword(password);
+		return Optional.ofNullable(credentials.getFirst()).map({ e -> ((Credentials.Entry) e).verifyPlainPassword(password)}).orElse(false);
 	}
 
 	T getModule() {
