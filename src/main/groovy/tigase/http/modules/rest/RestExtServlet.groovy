@@ -101,6 +101,8 @@ class RestExtServlet
 				log.log(Level.WARNING, "could not load template for $src", ex);
 			}
 		}
+
+		generateCodeExamples(allHandlers);
 	}
 
 	@Override
@@ -192,22 +194,7 @@ class RestExtServlet
 				// accessing root of REST service - we should provide info about service here
 				Template template = (Template) includes["index"];
 
-				def result = [ service: service, fillTemplate: { String templateStr, Map params = [ : ] ->
-					if (templateStr == null) {
-						return "No description"
-					};
-					params = prepareParams(request, response, params);
-					Template t = templateEngine.createTemplate(templateStr);
-					Writable writable = t.make(params);
-					StringWriter sw = new StringWriter();
-					writable.writeTo(sw);
-					return sw.toString().
-							replace("<", "&lt;").
-							replace(">", "&gt;").
-							replace("\n", "<br/>").
-							replace("*code*", "<div class='code'>").
-							replace("*/code*", "</div>");
-				} ];
+				def result = [ service: service ];
 				fillResponseWithTemplate(template, request, response, result);
 				return;
 			}
@@ -218,5 +205,44 @@ class RestExtServlet
 			throw new RuntimeException(ex);
 		}
 	}
+
+	def generateCodeExamples(def handlers) {
+		GStringTemplateEngine templateEngine = new GStringTemplateEngine();
+		def params = [util: [ formatData: {
+			data -> return "*code*" + xmlCoder.encode(data).replace(" ", "&nbsp;").trim() + "*/code*";
+		} ]];
+
+		for (Handler handler : handlers) {
+			if (handler.generatedDescription != null) {
+				continue;
+			}
+
+			if (handler.description != null) {
+				handler.generatedDescription = [:];
+				((Map) handler.description).forEach({ k,v ->
+					def value = v;
+					if (k != "regex") {
+						value = [:];
+						value.putAll(v);
+						if (value.description) {
+							Template t = templateEngine.createTemplate(value.description);
+							Writable writable = t.make(params);
+							StringWriter sw = new StringWriter();
+							writable.writeTo(sw);
+							value.description = sw.toString().
+									replace("<", "&lt;").
+									replace(">", "&gt;").
+									replace("\n", "<br/>").
+									replace("*code*", "<div class='code'>").
+									replace("*/code*", "</div>");
+						}
+					}
+					handler.generatedDescription[k] = value;
+				});
+			}
+		}
+		
+	}
+	
 }
 

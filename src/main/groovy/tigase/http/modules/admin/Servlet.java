@@ -66,7 +66,6 @@ public class Servlet
 	private static final Logger log = Logger.getLogger(Servlet.class.getCanonicalName());
 	private static final String DISCO_ITEMS_XMLNS = "http://jabber.org/protocol/disco#items";
 	private static final String ADHOC_COMMANDS_XMLNS = "http://jabber.org/protocol/commands";
-	private final GStringTemplateEngine templateEngine = new GStringTemplateEngine();
 	private File scriptsDir = null;
 	private Service service = null;
 	private Template template = null;
@@ -78,6 +77,11 @@ public class Servlet
 		String moduleName = cfg.getInitParameter(MODULE_ID_KEY);
 		service = new ServiceImpl(moduleName);
 		scriptsDir = new File(cfg.getInitParameter(SCRIPTS_DIR_KEY));
+		try {
+			loadTemplate();
+		} catch (IOException|ClassNotFoundException e) {
+			throw new ServletException(e);
+		}
 	}
 
 	@Override
@@ -210,7 +214,7 @@ public class Servlet
 		util.put("inlineCss", tmp);
 		context.put("util", util);
 
-		loadTemplate();
+		//loadTemplate();
 		Writable result = template.make(context);
 		result.writeTo(asyncCtx.getResponse().getWriter());
 		asyncCtx.complete();
@@ -459,6 +463,7 @@ public class Servlet
 	private void loadTemplate() throws IOException, ClassNotFoundException {
 		String path = "tigase/admin/index.html";
 		File indexFile = new File(path);
+		GStringTemplateEngine templateEngine = new GStringTemplateEngine();
 		if (indexFile.exists()) {
 			template = templateEngine.createTemplate(indexFile);
 		} else {

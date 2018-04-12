@@ -36,12 +36,12 @@ class ResetPasswordTokenHandler
 	private PasswordResetterIfc[] resetters;
 
 	public ResetPasswordTokenHandler() {
-		description = [ regex: "/",
+		description = [ regex: "/resetPassword/{token}",
 						GET  : [ info       : 'Reset password for an account',
 								 description: """""" ] ];
 		regex = /\/resetPassword\/([^\/]+)/
 		isAsync = false;
-		apiKey = false;
+		apiKey = false;                                                                                       
 		execGet = { Service service, callback, String token ->
 			if (resetters == null) {
 				callback([ error: "Password resetting is disabled. Please contact server administrator." ])

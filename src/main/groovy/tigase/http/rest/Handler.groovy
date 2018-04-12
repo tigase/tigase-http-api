@@ -100,4 +100,6 @@ abstract class Handler {
 
 	def regexDescription = null;
 	def description = null;
+
+	def generatedDescription = null;
 }

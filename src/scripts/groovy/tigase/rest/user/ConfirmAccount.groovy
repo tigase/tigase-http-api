@@ -41,7 +41,7 @@ class ConfirmAccountHandler
 	private JabberIqRegister.AccountValidator[] validators;
 
 	public ConfirmAccountHandler() {
-		description = [ regex: "/",
+		description = [ regex: "/confirm/{token}",
 						GET  : [ info       : 'Retrieve details of active user account',
 								 description: """Only required parameter is part of url {user_jid} which is jid of user which account informations you want to retrieve.
 Data will be returned in form of JSON or XML depending on selected format by Accept HTTP header\n\

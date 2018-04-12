@@ -51,7 +51,7 @@ class ResetPasswordFormHandler
 	private boolean captchaRequired = true;
 
 	public ResetPasswordFormHandler() {
-		description = [ regex: "/",
+		description = [ regex: "/resetPassword/",
 						GET  : [ info       : 'Reset password for an account',
 								 description: """""" ] ];
 		regex = /\/resetPassword/

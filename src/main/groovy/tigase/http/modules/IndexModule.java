@@ -117,7 +117,6 @@ public class IndexModule
 
 		private IndexModule module;
 		private Template template = null;
-		private GStringTemplateEngine templateEngine = new GStringTemplateEngine();
 
 		public IndexServlet() {
 
@@ -146,11 +145,11 @@ public class IndexModule
 
 		@Override
 		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-			try {
-				loadTemplate();
-			} catch (IOException | ClassNotFoundException ex) {
-				throw new ServletException("Could not load template", ex);
-			}
+//			try {
+//				loadTemplate();
+//			} catch (IOException | ClassNotFoundException ex) {
+//				throw new ServletException("Could not load template", ex);
+//			}
 
 			PrintWriter out = resp.getWriter();
 			List<DeploymentInfo> deploymentInfoList = new ArrayList<>(module.listDeployments());
@@ -199,6 +198,7 @@ public class IndexModule
 		private void loadTemplate() throws IOException, ClassNotFoundException {
 			String path = "tigase/index/index.html";
 			File indexFile = new File(path);
+			GStringTemplateEngine templateEngine = new GStringTemplateEngine();
 			if (indexFile.exists()) {
 				template = templateEngine.createTemplate(indexFile);
 			} else {

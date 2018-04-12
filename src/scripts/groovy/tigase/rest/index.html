@@ -38,16 +38,23 @@ def colors = [
 def servlets = [];
 servlets.addAll(result.service.module.restServlets);
 servlets = servlets.findAll { it.handlers.values().find { !it.isEmpty() } }
-servlets.sort { it.getServletContext()?.getContextPath() }.unique { servlet -> servlet.getServletContext()?.getContextPath() }
-servlets.each { 
+println("1. servlets: "	+ servlets);
+servlets.sort { it.getServletConfig()?.getInitParameter("mapping") }
+println("2. servlets: "	+ servlets);
+servlets.unique { servlet -> servlet.getServletConfig()?.getInitParameter("mapping") }
+println("3. servlets: "	+ servlets);
+servlets.each {
 	def prefix = request.getContextPath() + it.getInitParameter("mapping").replace("/*","");
 	def handlers = [];
 	it.handlers.values().each { v ->
 		handlers.addAll(v);
 	}
+	println("1. handlers: " + handlers);
 	handlers = handlers.unique();
 	handlers.sort { it.regexDescription ?: it.regex }
+	println("2. handlers: " + handlers);
 	handlers.each { handler ->
+	    println("handler: " + handler);
 		["GET","PUT","POST","DELETE"].each { method ->
 			if (!handler."exec${method.toLowerCase().capitalize()}") 
 				return;
@@ -62,7 +69,7 @@ servlets.each {
 	</div>
 	<div class="description" style="clear:both;background-color: rgba(255,255,255,0.8);width:100%; border-top:1px solid ${color};display:none;" id="${id}">
 		<div style="padding:5px;">
-${result.fillTemplate(handler.description?."$method"?.description)}
+${handler.generatedDescription?."$method"?.description}
 		</div>
 	</div>
 </div>
