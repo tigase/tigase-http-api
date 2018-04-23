@@ -21,11 +21,11 @@ Allows you to list server components and their configurations, as well as manage
 
 List server/component configuration section covers all the component options including the basic-conf and will allow you to change each setting by changing the values in the field and clicking submit.  All settings are listed by the component name in the dropdown menu either as default, or as defined by --component-name property.
 
-image:images/admin/admin-componentconfig.jpg[]
+image:images/admin-componentconfig.jpg[]
 
 Manage active server components allows you to do exactly that, but you can also add and disable components from this interface.
 
-image:images/admin/admin-managecomponent.jpg[]
+image:images/admin-managecomponent.jpg[]
 
 Here you can List, Add, Edit, and Remove components.
 - *List* provides a list of all running components, each with its name, info, and class.
@@ -35,7 +35,7 @@ Here you can List, Add, Edit, and Remove components.
 
 Managing server plugins allows you to turn on or off plugins from this window VIA check-boxes. Note that the changes are made in real-time.
 
-image:images/admin/admin-manageplugins.jpg[]
+image:images/admin-manageplugins.jpg[]
 ////
 Allows you to configure some of the servers settings, such as message of the day, welcome message or initialize shutdown of the cluster node.
 

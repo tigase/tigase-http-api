@@ -19,7 +19,7 @@ It will ask you for a login, any bare JID of users registered with the server wi
 
 Once you have logged in successfully, you will be presented with the following screen.
 
-image:images/admin/WebUI-Home.jpg[]
+image:images/WebUI-Home.jpg[]
 
 The commands are broken into categories shown here.  All changes made in these sections are instant and should be seen the same as if you were using an external XMPP client like Psi.
 
@@ -38,11 +38,11 @@ You may have to specifically designate the bosh URL when using the advanced tag 
 This is the default window, and your main interface for chatting inside XMPP with this server. *NOTE: you can only communicate to users logged onto the current server, or connected clusters*
 Users from your roster will be on the left panel, the right all active discussions and MUCs, as well as the currently selected chat will be available.
 
-image:images/admin/WebUI-Chat.jpg[]
+image:images/WebUI-Chat.jpg[]
 
 Users that are logged in and on your roster will be displayed on the left side. Double-clicking will bring up a new chat window with the user. You can Right-click on them to bring up a sub menu with the following;
 
-image:images/admin/WebUI-Usersubmenu.jpg[]
+image:images/WebUI-Usersubmenu.jpg[]
 
 - *Chat* replicates a double-click and opens a new window for chat.
 - *Modify* brings up a dialogue that allows you to change the JID of the contact, a nickname, and group.
@@ -51,22 +51,22 @@ image:images/admin/WebUI-Usersubmenu.jpg[]
 
 The top right section has a few icons with specific functionality, they are;
 
-image:images/admin/WebUI-Chat-Add-New.jpg[] adds a new user to your roster.
+image:images/WebUI-Chat-Add-New.jpg[] adds a new user to your roster.
 
-image:images/admin/WebUI-Chat-NewMUC.jpg[] creates a new Multi-user chatroom.
+image:images/WebUI-Chat-NewMUC.jpg[] creates a new Multi-user chatroom.
 
-image:images/admin/WebUI-Chat-Profile.jpg[] allows you to edit your user information such as picture and nickname.
+image:images/WebUI-Chat-Profile.jpg[] allows you to edit your user information such as picture and nickname.
 
-image:images/admin/WebUI-Chat-CloseWindow.jpg[] closes the active chat window.
+image:images/WebUI-Chat-CloseWindow.jpg[] closes the active chat window.
 
-image:images/admin/WebUI-Chat-settings.jpg[] provides a place to change your password or publish changes to your user info. *NOTE: you are limited to changing the General fields*
+image:images/WebUI-Chat-settings.jpg[] provides a place to change your password or publish changes to your user info. *NOTE: you are limited to changing the General fields*
 
 == Discovery
 This is your service discovery panel, which breaks down by component in the sidebar. Each component name and its associated JID is listed to help you find what you need. Most components give you an option to Execute commands with a few exceptions allowing browsing and the ability to join a MUC.
 
 *Browse* allows you to dig deeper into certain components; for example list the chatrooms available in the MUC component. At the top of the page the specific JID of the component are you in will be displayed. This is a text field, and can be edited to reflect the JID of the component (or just the server name) to navigate.
 
-image:images/admin/WebUI-Browse-Comp.jpg[]
+image:images/WebUI-Browse-Comp.jpg[]
 
 *Join to Room* will join you to a MUC room that is selected. Alternatively, selecting Join to Room while MUC component is selected, you can join and start a new MUC room.
 
