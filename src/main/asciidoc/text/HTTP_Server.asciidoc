@@ -38,7 +38,7 @@ With embedded HTTP server, you have a few additional properties within `executor
 
 executor:: Name of the subsection
 threads::: This property is used to configure the number of threads used to handle HTTP requests, ie. `10`
-request-timeout:::  Property used to set timeout for processing a single HTTP request (in seconds), ie. `30`
+request-timeout:::  Property used to set timeout for processing a single HTTP request (in milliseconds), ie. `30000`
 
 == Examples
 Below are few examples for use in DSL based configuration format and older properties based format.
