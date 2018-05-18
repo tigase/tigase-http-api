@@ -45,7 +45,7 @@ public class RequestHandler
 	private static final Logger log = Logger.getLogger(RequestHandler.class.getCanonicalName());
 
 	private static final AtomicInteger counter = new AtomicInteger(0);
-	private static final ThreadLocal<Integer> executionTimeout = ThreadLocal.withInitial(() -> 60 * 1000);
+	private static final ThreadLocal<Integer> requestId = new ThreadLocal<>();
 	private static final Comparator<String> COMPARATOR = new Comparator<String>() {
 		@Override
 		public int compare(String o1, String o2) {
@@ -60,13 +60,17 @@ public class RequestHandler
 	private final String contextPath;
 	private final Service service;
 	private final Map<String, HttpServlet> servlets = new ConcurrentHashMap<String, HttpServlet>();
-	private final Timer timer;
+	private final JavaStandaloneHttpServer.ExecutorWithTimeout.Timer timer;
 
-	public static void setExecutionTimeout(Integer timeout) {
-		executionTimeout.set(timeout);
+	public static void setRequestId() {
+		requestId.set(counter.incrementAndGet());
 	}
 
-	public RequestHandler(DeploymentInfo info, Timer timer) {
+	public static Integer getRequestId() {
+		return requestId.get();
+	}
+
+	public RequestHandler(DeploymentInfo info, JavaStandaloneHttpServer.ExecutorWithTimeout.Timer timer) {
 		this.timer = timer;
 		contextPath = info.getContextPath();
 		service = info.getService();
@@ -78,21 +82,12 @@ public class RequestHandler
 
 	@Override
 	public void handle(final HttpExchange he) throws IOException {
+		timer.requestProcessingStarted();
 		DummyServletRequest req = null;
 		DummyServletResponse resp = null;
 
-		final int reqId = counter.incrementAndGet();
-
-		final Thread current = Thread.currentThread();
-		final TimerTask tt = new TimerTask() {
-			@Override
-			public void run() {
-				log.log(Level.WARNING, "request processing time exceeded!" + " for id = " + reqId);
-				current.interrupt();
-			}
-		};
-		timer.schedule(tt, executionTimeout.get());
-
+		final int reqId = getRequestId();
+		
 		boolean exception = false;
 		try {
 			String path = he.getRequestURI().getPath();
@@ -108,8 +103,8 @@ public class RequestHandler
 						if (servletPath.isEmpty()) {
 							servletPath = "/";
 						}
-						req = new DummyServletRequest(he, contextPath, servletPath, service, timer,
-													  executionTimeout.get());
+						req = new DummyServletRequest(he, contextPath, servletPath, service, timer.getScheduledExecutorService(),
+													  timer.requestTimeoutSupplier.get());
 						resp = new DummyServletResponse(he);
 						if (key.endsWith(path) && !key.equals("/")) {
 							String query = req.getQueryString();
@@ -131,7 +126,7 @@ public class RequestHandler
 				he.sendResponseHeaders(404, -1);
 			}
 		} catch (IOException ex) {
-			tt.cancel();
+			timer.requestProcessingFinished();
 			AsyncContext async = req.getAsyncContext();
 			if (async != null && async instanceof AsyncContextImpl) {
 				((AsyncContextImpl) async).cancel();
@@ -162,7 +157,7 @@ public class RequestHandler
 		} else {
 			he.close();
 		}
-		tt.cancel();
+		timer.requestProcessingFinished();
 	}
 
 	private void registerServlet(ServletInfo info) {

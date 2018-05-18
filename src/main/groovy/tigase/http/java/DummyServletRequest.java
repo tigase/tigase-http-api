@@ -39,6 +39,7 @@ import java.net.MalformedURLException;
 import java.net.URLDecoder;
 import java.security.Principal;
 import java.util.*;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -54,14 +55,14 @@ public class DummyServletRequest
 	private final Map<String, String[]> params;
 	private final Service service;
 	private final String servletPath;
-	private final Timer timer;
+	private final ScheduledExecutorService timer;
 	private AsyncContext async;
 	private String characterEncoding = "UTF-8";
 	private Principal principal;
 	private BufferedReader reader;
 
 	public DummyServletRequest(HttpExchange exchange, String contextPath, String servletPath, Service service,
-							   Timer timer, Integer executionTimeout) {
+							   ScheduledExecutorService timer, Integer executionTimeout) {
 		this.exchange = exchange;
 		this.params = new HashMap<>();
 		String query = exchange.getRequestURI().getRawQuery();

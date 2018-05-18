@@ -39,10 +39,9 @@ import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.*;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -158,7 +157,9 @@ public class JavaStandaloneHttpServer
 		private int threads = 4;
 		@ConfigField(desc = "Request timeout", alias = REQUEST_TIMEOUT_KEY)
 		private int timeout = 60 * 1000;
-		private Timer timer = null;
+		@ConfigField(desc = "Accept timeout", alias = "accept-timeout")
+		private int acceptTimeout = 2000;
+		private Timer timer;
 
 		public ExecutorWithTimeout() {
 		}
@@ -166,8 +167,9 @@ public class JavaStandaloneHttpServer
 		@Override
 		public void execute(final Runnable command) {
 			executor.execute(() -> {
-				RequestHandler.setExecutionTimeout(timeout);
+				RequestHandler.setRequestId();
 
+				timer.connectionAccepted();
 				command.run();
 			});
 		}
@@ -175,7 +177,7 @@ public class JavaStandaloneHttpServer
 		@Override
 		public void beforeUnregister() {
 			executor.shutdown();
-			timer.cancel();
+			timer.shutdown();
 		}
 
 		@Override
@@ -183,18 +185,80 @@ public class JavaStandaloneHttpServer
 			if (executor != null) {
 				beforeUnregister();
 			}
-			timer = new Timer();
 			executor = Executors.newFixedThreadPool(threads, r -> {
 				Thread t = new Thread(r);
 				t.setName("http-server-pool-" + counter.incrementAndGet());
 				t.setDaemon(true);
 				return t;
 			});
+			timer = new Timer(this::getAcceptTimeout, this::getTimeout);
 		}
 
 		@Override
 		public void beanConfigurationChanged(Collection<String> changedFields) {
 			initialize();
+		}
+
+		public int getAcceptTimeout() {
+			return acceptTimeout;
+		}
+
+		public int getTimeout() {
+			return timeout;
+		}
+
+		public static class Timer {
+
+			private ThreadLocal<ScheduledFuture> threadTimeouts = new ThreadLocal<>();
+
+			private ScheduledExecutorService executor;
+			private final Supplier<Integer> acceptTimeoutSupplier;
+			public final Supplier<Integer> requestTimeoutSupplier;
+
+			private Timer(Supplier<Integer> acceptTimeoutSupplier, Supplier<Integer> requestTimeoutSupplier) {
+				executor = Executors.newSingleThreadScheduledExecutor();
+				this.acceptTimeoutSupplier = acceptTimeoutSupplier;
+				this.requestTimeoutSupplier = requestTimeoutSupplier;
+			}
+
+			private void shutdown() {
+				executor.shutdown();;
+			}
+
+			public void connectionAccepted() {
+				final Thread currentThread = Thread.currentThread();
+				final int reqId = RequestHandler.getRequestId();
+				threadTimeouts.set(executor.schedule(() -> {
+					log.log(Level.WARNING, "request accept time exceeded!" + " for id = " + reqId);
+					currentThread.interrupt();
+				}, acceptTimeoutSupplier.get(), TimeUnit.MILLISECONDS));
+			}
+
+			public void requestProcessingStarted() {
+				ScheduledFuture timeout = threadTimeouts.get();
+				if (timeout != null) {
+					timeout.cancel(false);
+				}
+
+				final Thread currentThread = Thread.currentThread();
+				final int reqId = RequestHandler.getRequestId();
+				threadTimeouts.set(executor.schedule(() -> {
+					log.log(Level.WARNING, "request processing time exceeded!" + " for id = " + reqId);
+					currentThread.interrupt();
+				}, requestTimeoutSupplier.get(), TimeUnit.MILLISECONDS));
+			}
+
+			public void requestProcessingFinished() {
+				ScheduledFuture timeout = threadTimeouts.get();
+				if (timeout != null) {
+					timeout.cancel(false);
+				}
+			}
+
+			public ScheduledExecutorService getScheduledExecutorService() {
+				return executor;
+			}
+
 		}
 	}
 

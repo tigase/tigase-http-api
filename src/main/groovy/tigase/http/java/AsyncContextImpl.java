@@ -24,8 +24,9 @@ import com.sun.net.httpserver.HttpExchange;
 
 import javax.servlet.*;
 import java.io.IOException;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -33,20 +34,21 @@ import java.util.logging.Logger;
  * @author andrzej
  */
 public class AsyncContextImpl
-		extends TimerTask
 		implements AsyncContext {
 
 	private static final Logger log = Logger.getLogger(AsyncContextImpl.class.getCanonicalName());
 	private final HttpExchange exchange;
 	private final ServletRequest req;
 	private final ServletResponse resp;
-	private final Timer timer;
+	private final ScheduledExecutorService scheduledExecutor;
+	private ScheduledFuture future;
+	private long timeout;
 
-	public AsyncContextImpl(ServletRequest req, ServletResponse resp, HttpExchange exchange, Timer timer) {
+	public AsyncContextImpl(ServletRequest req, ServletResponse resp, HttpExchange exchange, ScheduledExecutorService scheduledExecutor) {
 		this.req = req;
 		this.resp = resp;
 		this.exchange = exchange;
-		this.timer = timer;
+		this.scheduledExecutor = scheduledExecutor;
 	}
 
 	@Override
@@ -111,21 +113,27 @@ public class AsyncContextImpl
 
 	@Override
 	public long getTimeout() {
-		return this.scheduledExecutionTime();
+		return timeout;
 	}
 
 	@Override
 	public void setTimeout(long timeout) {
-		timer.schedule(this, timeout);
+		this.timeout = timeout;
+		this.future = scheduledExecutor.schedule(this::timeout, timeout, TimeUnit.MILLISECONDS);
 	}
 
-	@Override
-	public void run() {
+	private void timeout() {
 		try {
 			exchange.sendResponseHeaders(504, -1);
 		} catch (IOException ex) {
 			log.log(Level.FINEST, " failed to send 504 error", ex);
 		}
 		exchange.close();
+	}
+
+	public void cancel() {
+		if (future != null) {
+			future.cancel(false);
+		}
 	}
 }
