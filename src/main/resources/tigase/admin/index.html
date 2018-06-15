@@ -124,12 +124,38 @@
 										</div>
 									</div>
 								<% } else if (type == 'text-single' || type == 'jid-single') { %>
+									<% def subtype = formField.getAttribute('subtype');
+									if ('datetime' == subtype) {
+										def valueDate = new tigase.util.datetime.TimestampHelper().parseTimestamp(formField.getChildCData('field/value'));
+										def value = valueDate == null ? null : java.time.LocalDateTime.ofInstant(valueDate.toInstant(), java.time.ZoneId.systemDefault());
+									%>
+										<div class="form-group">
+											<label class="col-sm-3 control-label" for='${formField.getAttribute("var")}'><%= formField.getAttribute('label') ?: formField.getAttribute("var") %></label>
+											<div class="col-sm-3">
+												<input class="form-control" type='date' name='${formField.getAttribute("var")}_date' value="${value?.toLocalDate()?.toString() ?: ''}" />
+											</div>
+											<div class="col-sm-2">
+												<input class="form-control" type='time' name='${formField.getAttribute("var")}_time' value="${value?.toLocalTime()?.toString() ?: ''}" />
+											</div>
+											<div class="col-sm-3">
+												<select class="form-control" name='${formField.getAttribute("var")}_tz'>
+													<% def zoneIds = java.util.TimeZone.getAvailableIDs();
+													zoneIds.each { zoneId ->
+                                                        def tz = java.util.TimeZone.getTimeZone(zoneId);
+													%>
+														<option ${(tz == java.util.TimeZone.getDefault()) ? "selected" : ""}><%= zoneId %></option>
+													<% } %>
+												</select>
+											</div>
+										</div>
+									<% } else { %>
 									<div class="form-group">
 										<label class="col-sm-3 control-label" for='${formField.getAttribute("var")}'><%= formField.getAttribute('label') ?: formField.getAttribute("var") %></label>
 										<div class="col-sm-9">
 											<input class="form-control" type='text' size='90' name='${formField.getAttribute("var")}' value="${formField.getChildCData('field/value') ?: ''}" />
 										</div>
 									</div>
+									<% } %>
 								<% } else if (type == 'fixed') { %>
 									<div class="form-group">
 										<label class="col-sm-3 control-label" for='${formField.getAttribute("var")}'><%= formField.getAttribute('label') ?: formField.getAttribute("var") %></label>

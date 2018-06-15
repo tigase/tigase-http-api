@@ -46,10 +46,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.*;
+import java.time.chrono.IsoChronology;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.ResolverStyle;
+import java.time.temporal.TemporalAccessor;
+import java.time.temporal.TemporalField;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -367,11 +371,15 @@ public class Servlet
 					continue;
 				}
 
-				if (request.getParameter(formField.getAttributeStaticStr("var")) != null ||
-						request.getParameterValues(formField.getAttributeStaticStr("var")) != null) {
+				String name = formField.getAttributeStaticStr("var");
+				if (request.getParameter(name) != null ||
+						request.getParameterValues(name) != null) {
+					contains++;
+				} else if (name != null && formField.getAttributeStaticStr(name + "_date") != null
+						&& formField.getAttributeStaticStr(name + "_tz") != null) {
 					contains++;
 				} else if (missing != null) {
-					missing.add(formField.getAttributeStaticStr("var"));
+					missing.add(name);
 				}
 				needed++;
 			}
@@ -398,6 +406,7 @@ public class Servlet
 			if (type == null) {
 				return;
 			}
+			String subtype = formField.getAttributeStaticStr("subtype");
 
 			List<Element> orginalChildren = new ArrayList<>();
 			if (formField.getChildren() != null) {
@@ -454,6 +463,36 @@ public class Servlet
 					if (value != null) {
 						value = XMLUtils.escape(value);
 						formField.addChild(new Element("value", value));
+					} else if ("datetime" == subtype) {
+						value = Optional.ofNullable(request.getParameter(paramName + "_date"))
+								.filter(val -> !val.isEmpty())
+								.orElse(null);
+						if (value != null) {
+							String minutes = Optional.ofNullable(request.getParameter(paramName + "_time"))
+									.filter(val -> !val.isEmpty())
+									.orElse("00:00:00");
+							if (minutes.length() == 5) {
+								minutes += ":00";
+							}
+							TimeZone tz = Optional.ofNullable(request.getParameter(paramName + "_tz"))
+									.filter(val -> !val.isEmpty()).map(val -> TimeZone.getTimeZone(val))
+									.orElse(TimeZone.getTimeZone("UTC"));
+							value += "T" + minutes + "[" + tz.getID() + "]";
+							DateTimeFormatter formatter = new DateTimeFormatterBuilder()
+									.append(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+									.optionalStart()
+									.appendLiteral('[')
+									.parseCaseSensitive()
+									.appendZoneRegionId()
+									.appendLiteral(']')
+									.toFormatter();
+
+							TemporalAccessor x = formatter.parse(value);
+							ZonedDateTime timestamp = LocalDateTime.from(x).atZone(ZoneId.from(x));
+							value = DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(timestamp);
+							value = XMLUtils.escape(value);
+							formField.addChild(new Element("value", value));
+						}
 					}
 					break;
 			}
