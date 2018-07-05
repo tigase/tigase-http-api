@@ -31,7 +31,7 @@ connections:: It is used to group configurations passed to ports
 socket:::: Sets type of socket used for handling incoming connections. Accepted values are:
  * `plain` - port will work in plain HTTP mode *(_default_)*
  * `ssl` - port will work in HTTPS mode
-domain:::: This property is used to configure domain name of SSL certificate which should be used by HTTP server running on this port (if `socket` is set to `ssl`). If it is not set then default SSL certificate of Tigase XMPP Server will be used.
+domain:::: This property is used to configure domain name of SSL certificate which should be used by HTTP server running on this port (if `socket` is set to `ssl`). If it is not set (or it will be omitted) then Tigase XMPP Server will try to use SSL certificate for the host to which client tries to connect. If there will be no SSL certificate for that domain name, then default SSL certificate of Tigase XMPP Server will be used.
 
 === Additional properties of embedded HTTP server
 With embedded HTTP server, you have a few additional properties within `executor` section, which you can pass to adjust this HTTP server.

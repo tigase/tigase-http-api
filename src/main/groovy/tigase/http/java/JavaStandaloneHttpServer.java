@@ -21,6 +21,7 @@ package tigase.http.java;
 
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpsConfigurator;
+import com.sun.net.httpserver.HttpsParameters;
 import com.sun.net.httpserver.HttpsServer;
 import tigase.http.AbstractHttpServer;
 import tigase.http.DeploymentInfo;
@@ -35,7 +36,10 @@ import tigase.kernel.beans.selector.ConfigTypeEnum;
 import tigase.kernel.core.Kernel;
 import tigase.net.SocketType;
 
+import javax.net.ssl.SNIMatcher;
+import javax.net.ssl.SNIServerName;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLParameters;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.*;
@@ -93,7 +97,20 @@ public class JavaStandaloneHttpServer
 		} else {
 			HttpsServer server = HttpsServer.create(new InetSocketAddress(config.getPort()), 100);
 			SSLContext sslContext = sslContextContainer.getSSLContext("TLS", config.getDomain(), false);
-			server.setHttpsConfigurator(new HttpsConfigurator(sslContext));
+			server.setHttpsConfigurator(new HttpsConfigurator(sslContext) {
+				@Override
+				public void configure(HttpsParameters httpsParameters) {
+					super.configure(httpsParameters);
+					SSLParameters sslParameters = this.getSSLContext().getDefaultSSLParameters();
+					sslParameters.setSNIMatchers(Collections.singleton(new SNIMatcher(0) {
+						@Override
+						public boolean matches(SNIServerName sniServerName) {
+							return true;
+						}
+					}));
+					httpsParameters.setSSLParameters(sslParameters);
+				}
+			});
 			return server;
 		}
 	}
