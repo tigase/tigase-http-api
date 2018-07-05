@@ -32,7 +32,7 @@ import tigase.kernel.beans.Inject;
 import tigase.kernel.beans.UnregisterAware;
 import tigase.net.SocketType;
 
-import javax.net.ssl.SSLContext;
+import javax.net.ssl.*;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -158,7 +158,20 @@ public class JettyStandaloneHttpServer
 		} else {
 			String domain = config.getDomain();
 			SSLContext context = sslContextContainer.getSSLContext("TLS", domain, false);
-			SslContextFactory contextFactory = new SslContextFactory();
+			SslContextFactory contextFactory = new SslContextFactory() {
+				@Override
+				public void customize(SSLEngine sslEngine) {
+					super.customize(sslEngine);
+					SSLParameters sslParameters = sslEngine.getSSLParameters();
+					sslParameters.setSNIMatchers(Collections.singleton(new SNIMatcher(0) {
+						@Override
+						public boolean matches(SNIServerName sniServerName) {
+							return true;
+						}
+					}));
+					sslEngine.setSSLParameters(sslParameters);
+				}
+			};
 			contextFactory.setSslContext(context);
 //					if (http2Enabled) {
 //						contextFactory.setCipherComparator(HTTP2Cipher.COMPARATOR);
