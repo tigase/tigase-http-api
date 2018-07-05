@@ -21,6 +21,7 @@ package tigase.http;
 
 import tigase.http.api.HttpServerIfc;
 import tigase.http.modules.Module;
+import tigase.http.stats.HttpStatsCollector;
 import tigase.kernel.beans.Bean;
 import tigase.kernel.beans.Inject;
 import tigase.kernel.beans.RegistrarBean;
@@ -56,6 +57,9 @@ public class HttpMessageReceiver
 	private Map<String, Module> modules = new ConcurrentHashMap<String, Module>();
 	private ConcurrentHashMap<String, Request> pendingRequest = new ConcurrentHashMap<String, Request>();
 	private ScheduledExecutorService scheduler;
+
+	@Inject(nullAllowed = true)
+	private List<HttpStatsCollector> statsCollectors = Collections.emptyList();
 
 	@Override
 	public void everyHour() {
@@ -168,9 +172,8 @@ public class HttpMessageReceiver
 	public void getStatistics(StatisticsList list) {
 		super.getStatistics(list);
 
-		for (Module m : modules.values()) {
-			m.getStatistics(getName(), list);
-		}
+		modules.values().forEach(m -> m.getStatistics(getName(), list));
+		statsCollectors.forEach(col -> col.getStatistics(getName(), list));
 	}
 
 	@Override

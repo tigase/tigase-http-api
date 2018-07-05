@@ -206,6 +206,7 @@ public class RestServlet
 
 		String type = request.getContentType();
 		String requestContent = null;
+		service.getModule().countRequest(request);
 
 		def callback = { result ->
 			long end = System.currentTimeMillis();

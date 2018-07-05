@@ -23,8 +23,10 @@ import tigase.http.DeploymentInfo;
 import tigase.http.HttpMessageReceiver;
 import tigase.http.ServletInfo;
 import tigase.http.modules.AbstractModule;
+import tigase.http.stats.HttpStatsCollector;
 import tigase.http.util.StaticFileServlet;
 import tigase.kernel.beans.Bean;
+import tigase.kernel.beans.Inject;
 import tigase.kernel.beans.config.ConfigField;
 import tigase.kernel.beans.selector.ConfigType;
 import tigase.kernel.beans.selector.ConfigTypeEnum;
@@ -34,11 +36,13 @@ import tigase.stats.StatisticHolder;
 import tigase.stats.StatisticHolderImpl;
 import tigase.stats.StatisticsList;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -62,6 +66,9 @@ public class RestModule
 	private List<RestServlet> restServlets = new ArrayList<RestServlet>();
 	@ConfigField(desc = "Scripts directory", alias = SCRIPTS_DIR_KEY)
 	private String scriptsDir = DEF_SCRIPTS_DIR_VAL;
+
+	@Inject(nullAllowed = true)
+	private List<HttpStatsCollector> statsCollectors = Collections.emptyList();
 
 	public static File[] getGroovyFiles(File scriptsDirFile) {
 		if (scriptsDirFile.exists()) {
@@ -189,6 +196,10 @@ public class RestModule
 		for (StatisticHolder holder : stats.values()) {
 			holder.getStatistics(compName, list);
 		}
+	}
+
+	public void countRequest(HttpServletRequest request) {
+		statsCollectors.forEach(collector -> collector.count(request));
 	}
 
 	public void executedIn(String path, long executionTime) {
