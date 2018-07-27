@@ -52,7 +52,7 @@ public class Config {
 	protected SetupHelper.HttpSecurity httpSecurity = new SetupHelper.HttpSecurity();
 	protected Set<String> optionalComponents = new HashSet<>();
 	protected Set<String> plugins = new HashSet<>();
-	protected String[] virtualDomains = new String[]{DNSResolverFactory.getInstance().getDefaultHost()};
+	protected String defaultVirtualDomain = DNSResolverFactory.getInstance().getDefaultHost();
 	private String acsName = "";
 	private ConfigTypeEnum configType = ConfigTypeEnum.DefaultMode;
 	private String dbType = null;
@@ -170,7 +170,7 @@ public class Config {
 	public Map<String, Object> getConfigurationInMap() throws IOException {
 		ConfigBuilder builder = SetupHelper.generateConfig(configType, getDatabaseUri(), clusterMode, acs,
 														   Optional.of(optionalComponents), Optional.empty(),
-														   Optional.of(plugins), virtualDomains,
+														   Optional.of(plugins), defaultVirtualDomain,
 														   Optional.ofNullable(admins),
 														   Optional.ofNullable(httpSecurity));
 		return builder.build();

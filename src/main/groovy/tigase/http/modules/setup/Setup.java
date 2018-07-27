@@ -55,7 +55,7 @@ public class Setup {
 		pages.add(new Page("Basic Tigase server configuration",
 						   new SingleAnswerQuestion("configType", () -> config.getConfigType().id(),
 													type -> config.setConfigType(ConfigTypeEnum.valueForId(type))),
-						   new VirtualDomainsQuestion("virtualDomains", config), new AdminsQuestion("admins", config),
+						   new VirtualDomainQuestion("virtualDomain", config), new AdminsQuestion("admins", config),
 						   new SingleAnswerQuestion("adminPwd", () -> config.adminPwd, pwd -> config.adminPwd = pwd),
 						   new SingleAnswerQuestion("dbType", () -> config.getDbType(), type -> config.setDbType(type)),
 						   new SingleAnswerQuestion("advancedConfig", () -> String.valueOf(config.advancedConfig),
@@ -74,17 +74,6 @@ public class Setup {
 		pages.add(new DBSetupPage("Database configuration"));
 
 		pages.add(new DBCheckPage("Database connectivity check"));
-
-		pages.add(new Page("HTTP API - REST security configuration", new SingleAnswerQuestion("httpRestApiSecurity",
-																							  () -> config.httpSecurity.restApiSecurity
-																									  .name(),
-																							  val -> config.httpSecurity.restApiSecurity = SetupHelper.RestApiSecurity
-																									  .valueOf(val)),
-						   new SingleAnswerQuestion("httpRestApiKeys",
-													() -> Arrays.stream(config.httpSecurity.restApiKeys)
-															.collect(Collectors.joining(",")),
-													(val) -> config.httpSecurity.restApiKeys =
-															val == null ? new String[0] : val.split(","))));
 
 		pages.add(new Page("Setup security", new SingleAnswerQuestion("setupUser", () -> config.httpSecurity.setupUser,
 																	  user -> config.httpSecurity.setupUser = user),
@@ -520,16 +509,12 @@ public class Setup {
 		}
 	}
 
-	private class VirtualDomainsQuestion
+	private class VirtualDomainQuestion
 			extends SingleAnswerQuestion {
 
-		VirtualDomainsQuestion(String id, Config config) {
-			super(id, () -> Arrays.stream(config.virtualDomains).collect(Collectors.joining(",")), vhosts -> {
-				if (vhosts != null) {
-					config.virtualDomains = vhosts.split(",");
-				} else {
-					config.virtualDomains = new String[0];
-				}
+		VirtualDomainQuestion(String id, Config config) {
+			super(id, () -> Optional.ofNullable(config.defaultVirtualDomain).orElse(""), vhost -> {
+				config.defaultVirtualDomain = vhost;
 			});
 		}
 	}

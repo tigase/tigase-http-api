@@ -1,21 +1,19 @@
 ${ util.include('header', [title:'Setup: ' + page.title]) }
-<form method='POST' action="?step=${ page.nextPage() }"><% def q = page.getQuestion('setupUser'); %>
+<form method='POST' action="?step=${ page.nextPage() }"><% def q = page.getQuestion('saveConfig'); %>
 <div class="panel panel-default">
-	<div class="panel-heading panel-xs">
-		<h4>Security of setup.</h4>
-	</div>
-	<div class="panel-body">
-<p>By default Tigase XMPP Server is configured to allow access to this setup page only user authorized by JID and password listed as admins.</p>
-<p>However in rare conditions it may be impossible to access database for authentication. In this case we use separate admin credentials stored in <i>etc/config.tdsl</i> file.</p>
-<p>Please enter username and password you wish to use in this situation. If you leave it blank, setup will be inaccessible without connection to database.</p>
-	<label for='${q.getName()}'>Username:</label>
-	<input name='${q.getName()}' type='text' value="${q.getValue() ?: ''}" /><br/>
-	<div style='padding-top: 1em'></div><% q = page.getQuestion('setupPassword'); %>
-	<label for='${q.getName()}'>Password:</label>
-	<input name='${q.getName()}' type='password' value="${q.getValue() ?: ''}"/><br/>
-	<div style='padding-top: 1em'></div>
-	</div>
+    <div class="panel-heading panel-xs">
+        <h4>Installation of Tigase XMPP Server is almost finished.</h4>
+    </div>
+    <div class="panel-body">
+        <input type='hidden' name='${q.getName()}' value='true'/>
+        <div class="form-group">
+            <label class="control-label" for='config'>Configuration created during installation:</label>
+            <textarea class="form-control" name='config' rows=20 cols=80>${ setup.config.getConfigurationInDSL() }</textarea>
+        </div>
+        <h4>Do you wish to save this config to <i>etc/config.tdsl</i> file?</h4>
+    </div>
 </div>
-<button class="btn btn-default" type="submit">Next</button>
+<button class="btn btn-default" type="submit">Save</button>
+
 </form>
-${ util.include('footer') }
+${ util.include('footer') } 

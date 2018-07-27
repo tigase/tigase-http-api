@@ -28,8 +28,8 @@ ${ util.include('header', [title:'Setup: ' + page.title]) }
     </select>
     <% }); %>
 
-    <% q = page.getQuestion('virtualDomains') %>
-    <% fieldFn(q, "Your XMPP (Jabber) domains", { q1 -> %>
+    <% q = page.getQuestion('virtualDomain') %>
+    <% fieldFn(q, "Your XMPP (Jabber) default domain", { q1 -> %>
     <input class="form-control" name='${q.getName()}' type='text' size='30' value='${q.getValue()}' />
     <% }); %>
 

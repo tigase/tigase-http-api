@@ -1,28 +1,21 @@
 ${ util.include('header', [title:'Setup: ' + page.title]) }
-<form class="form-horizontal" method='POST' action="?step=${ page.nextPage() }"><% def q1 = page.getQuestion('httpRestApiSecurity'); def q2 = page.getQuestion('httpRestApiKeys'); %>
+<form method='POST' action="?step=${ page.nextPage() }"><% def q = page.getQuestion('setupUser'); %>
 <div class="panel panel-default">
-    <div class="panel-heading panel-xs">
-<h4>Configuration of security features of HTTP REST API</h4>
-    </div>
-    <div class="panel-body">
-<h5>Select security model of REST API</h5>
-    <div class="radio">
-        <label>
-            <input type="radio" name="${q1.getName()}" value="forbidden" ${ q1.isSelected('forbidden') ? 'checked' : ''}>Access forbidden (REST API disabled)
-        </label>
-    </div>
-    <div class="radio">
-        <label>
-            <input type="radio" name="${q1.getName()}" value="api_keys" ${ q1.isSelected('api_keys') ? 'checked' : ''}>Access requires API keys: <input class="form-control" type="text" name="${q2.getName()}" value="${ q2.getValue() }"/>
-        </label>
-    </div>
-    <div class="radio">
-        <label>
-            <input type="radio" name="${q1.getName()}" value="open_access" ${ q1.isSelected('open_access') ? 'checked' : ''}>Open access
-        </label>
-    </div>
-    </div>
+	<div class="panel-heading panel-xs">
+		<h4>Security of setup.</h4>
+	</div>
+	<div class="panel-body">
+<p>By default Tigase XMPP Server is configured to allow access to this setup page only user authorized by JID and password listed as admins.</p>
+<p>However in rare conditions it may be impossible to access database for authentication. In this case we use separate admin credentials stored in <i>etc/init.properties</i> file.</p>
+<p>Please enter username and password you wish to use in this situation. If you leave it blank, setup will be inaccessible without connection to database.</p>
+	<label for='${q.getName()}'>Username:</label>
+	<input name='${q.getName()}' type='text' value="${q.getValue() ?: ''}" /><br/>
+	<div style='padding-top: 1em'></div><% q = page.getQuestion('setupPassword'); %>
+	<label for='${q.getName()}'>Password:</label>
+	<input name='${q.getName()}' type='password' value="${q.getValue() ?: ''}"/><br/>
+	<div style='padding-top: 1em'></div>
+	</div>
 </div>
-    <button class="btn btn-default" type="submit">Next</button>
+<button class="btn btn-default" type="submit">Next</button>
 </form>
 ${ util.include('footer') }
