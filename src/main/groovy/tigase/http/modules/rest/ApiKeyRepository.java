@@ -24,8 +24,6 @@ import tigase.db.UserRepository;
 import tigase.db.comp.UserRepoRepository;
 import tigase.http.modules.AbstractModule;
 import tigase.kernel.beans.Bean;
-import tigase.kernel.beans.config.ConfigAlias;
-import tigase.kernel.beans.config.ConfigAliases;
 import tigase.kernel.beans.selector.ConfigType;
 import tigase.kernel.beans.selector.ConfigTypeEnum;
 import tigase.xmpp.jid.BareJID;
@@ -33,7 +31,6 @@ import tigase.xmpp.jid.BareJID;
 import java.util.Map;
 
 @Bean(name = "repository", parent = AbstractModule.class, active = true)
-@ConfigAliases({@ConfigAlias(field = "items", alias = "api-keys")})
 @ConfigType({ConfigTypeEnum.DefaultMode, ConfigTypeEnum.SessionManagerMode, ConfigTypeEnum.ConnectionManagersMode,
 			 ConfigTypeEnum.ComponentMode})
 public class ApiKeyRepository

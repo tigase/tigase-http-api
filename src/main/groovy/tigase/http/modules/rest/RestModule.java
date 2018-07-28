@@ -21,6 +21,7 @@ package tigase.http.modules.rest;
 
 import tigase.http.DeploymentInfo;
 import tigase.http.HttpMessageReceiver;
+import tigase.http.PacketWriter;
 import tigase.http.ServletInfo;
 import tigase.http.modules.AbstractModule;
 import tigase.http.stats.HttpStatsCollector;
@@ -32,19 +33,19 @@ import tigase.kernel.beans.selector.ConfigType;
 import tigase.kernel.beans.selector.ConfigTypeEnum;
 import tigase.kernel.core.BeanConfig;
 import tigase.kernel.core.Kernel;
+import tigase.server.script.CommandIfc;
 import tigase.stats.StatisticHolder;
 import tigase.stats.StatisticHolderImpl;
 import tigase.stats.StatisticsList;
+import tigase.xmpp.jid.BareJID;
+import tigase.xmpp.jid.JID;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -61,11 +62,17 @@ public class RestModule
 
 	private static final String SCRIPTS_DIR_KEY = "rest-scripts-dir";
 	private static final ConcurrentHashMap<String, StatisticHolder> stats = new ConcurrentHashMap<String, StatisticHolder>();
-	private final ReloadHandlersCmd reloadHandlersCmd = new ReloadHandlersCmd(this);
+	private final CommandIfc[] commands = new CommandIfc[] {
+			new ReloadHandlersCmd(this), new ApiKeyAddCmd(this),
+			new ApiKeyRemoveCmd(this), new ApiKeyUpdateCmd(this)
+	};
 	private DeploymentInfo httpDeployment = null;
 	private List<RestServlet> restServlets = new ArrayList<RestServlet>();
 	@ConfigField(desc = "Scripts directory", alias = SCRIPTS_DIR_KEY)
 	private String scriptsDir = DEF_SCRIPTS_DIR_VAL;
+
+	@Inject
+	private ApiKeyRepository apiKeyRepository;
 
 	@Inject(nullAllowed = true)
 	private List<HttpStatsCollector> statsCollectors = Collections.emptyList();
@@ -112,6 +119,19 @@ public class RestModule
 		return "REST support - handles HTTP REST access using scripts";
 	}
 
+	public void setApiKeyRepository(ApiKeyRepository apiKeyRepository) {
+		if (getComponentName() != null) {
+			apiKeyRepository.setRepoUser(BareJID.bareJIDInstanceNS(getName(), getComponentName()));
+			apiKeyRepository.setRepo(getUserRepository());
+		}
+		this.apiKeyRepository = apiKeyRepository;
+	}
+	
+	@Override
+	public boolean isRequestAllowed(String key, String domain, String path) {
+		return apiKeyRepository.isAllowed(key, domain, path);
+	}
+	
 	@Override
 	public void start() {
 		if (httpDeployment != null) {
@@ -163,7 +183,7 @@ public class RestModule
 
 		httpServer.deploy(httpDeployment);
 	}
-
+	
 	@Override
 	public void stop() {
 		if (httpDeployment != null) {
@@ -189,6 +209,7 @@ public class RestModule
 		}
 		restServlets = new ArrayList<RestServlet>();
 		super.stop();
+		apiKeyRepository.setAutoloadTimer(0);
 	}
 
 	@Override
@@ -224,13 +245,29 @@ public class RestModule
 	}
 
 	@Override
+	public void init(JID jid, String componentName, PacketWriter writer) {
+		super.init(jid, componentName, writer);
+		setApiKeyRepository(apiKeyRepository);
+	}
+
+	@Override
 	public void initialize() {
 		super.initialize();
-		commandManager.registerCmd(reloadHandlersCmd);
+		Arrays.stream(commands).forEach(commandManager::registerCmd);
+	}
+
+	@Override
+	public void beforeUnregister() {
+		super.beforeUnregister();
+		Arrays.stream(commands).forEach(commandManager::unregisterCmd);
 	}
 
 	protected void registerRestServlet(RestServlet servlet) {
 		restServlets.add(servlet);
+	}
+
+	protected ApiKeyRepository getApiKeyRepository() {
+		return apiKeyRepository;
 	}
 
 	protected List<? extends RestServlet> getRestServlets() {

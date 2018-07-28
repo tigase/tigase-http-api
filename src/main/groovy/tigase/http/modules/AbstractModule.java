@@ -21,19 +21,15 @@ package tigase.http.modules;
 
 import tigase.db.AuthRepository;
 import tigase.db.UserRepository;
-import tigase.http.modules.rest.ApiKeyRepository;
 import tigase.kernel.beans.Initializable;
 import tigase.kernel.beans.Inject;
 import tigase.kernel.beans.UnregisterAware;
 import tigase.kernel.beans.config.ConfigurationChangedAware;
-import tigase.xmpp.jid.BareJID;
 
 public abstract class AbstractModule
 		extends AbstractBareModule
 		implements Module, Initializable, ConfigurationChangedAware, UnregisterAware {
 
-	@Inject
-	private ApiKeyRepository apiKeyRepository;
 	@Inject
 	private AuthRepository authRepository;
 	@Inject
@@ -42,18 +38,10 @@ public abstract class AbstractModule
 	public static <T extends Module> T getModuleByUUID(String uuid) {
 		return (T) AbstractBareModule.getModuleByUUID(uuid);
 	}
-
-	public void setApiKeyRepository(ApiKeyRepository apiKeyRepository) {
-		if (getComponentName() != null) {
-			apiKeyRepository.setRepoUser(BareJID.bareJIDInstanceNS(getName(), getComponentName()));
-			apiKeyRepository.setRepo(userRepository);
-		}
-		this.apiKeyRepository = apiKeyRepository;
-	}
-
+	
 	@Override
 	public boolean isRequestAllowed(String key, String domain, String path) {
-		return apiKeyRepository.isAllowed(key, domain, path);
+		return false;
 	}
 
 	@Override
@@ -64,12 +52,6 @@ public abstract class AbstractModule
 	@Override
 	public AuthRepository getAuthRepository() {
 		return authRepository;
-	}
-
-	@Override
-	public void stop() {
-		super.stop();
-		apiKeyRepository.setAutoloadTimer(0);
 	}
 
 }

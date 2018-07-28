@@ -46,13 +46,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.security.Principal;
-import java.time.*;
-import java.time.chrono.IsoChronology;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
-import java.time.format.ResolverStyle;
 import java.time.temporal.TemporalAccessor;
-import java.time.temporal.TemporalField;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
@@ -279,6 +278,38 @@ public class Servlet
 							}
 						}
 						if (counter.decrementAndGet() == 0) {
+							try {
+								retrieveHttpComponentModulesCommands(principal, (httpCommands) -> {
+									commands.addAll(httpCommands);
+									callback.call(commands);
+								});
+							} catch (TigaseStringprepException ex)  {
+								callback.call(commands);
+							}
+						}
+					});
+				} catch (TigaseStringprepException ex) {
+					Logger.getLogger(Servlet.class.getName()).log(Level.FINE, null, ex);
+				}
+			});
+		});
+	}
+
+	private void retrieveHttpComponentModulesCommands(final Principal principal, final Callback<List<Map>> callback)
+			throws TigaseStringprepException {
+		retrieveComponents(principal, JID.jidInstance("http." + BareJID.bareJIDInstance(principal.getName()).getDomain()),
+						   (List<JID> componentJids) -> {
+			final AtomicInteger counter = new AtomicInteger(componentJids.size());
+			final List<Map> commands = new ArrayList();
+			componentJids.forEach((JID jid) -> {
+				try {
+					retrieveComponentCommands(principal, jid, (List<Map> componentCommands) -> {
+						synchronized (commands) {
+							if (componentCommands != null) {
+								commands.addAll(componentCommands);
+							}
+						}
+						if (counter.decrementAndGet() == 0) {
 							callback.call(commands);
 						}
 					});
@@ -291,13 +322,17 @@ public class Servlet
 
 	private void retrieveComponents(Principal principal, Callback<List<JID>> callback)
 			throws TigaseStringprepException {
+		retrieveComponents(principal, JID.jidInstance(BareJID.bareJIDInstance(principal.getName()).getDomain()), callback);
+	}
+
+	private void retrieveComponents(Principal principal, JID to, Callback<List<JID>> callback)
+			throws TigaseStringprepException {
 		long start = System.currentTimeMillis();
 		Element iqEl = new Element("iq");
 		iqEl.setXMLNS("jabber:client");
 		iqEl.setAttribute("from", principal.getName());
-		BareJID jid = BareJID.bareJIDInstance(principal.getName());
 		iqEl.setAttribute("type", StanzaType.get.name());
-		iqEl.setAttribute("to", jid.getDomain());
+		iqEl.setAttribute("to", to.toString());
 
 		Element queryEl = new Element("query");
 		queryEl.setXMLNS(DISCO_ITEMS_XMLNS);

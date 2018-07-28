@@ -121,9 +121,13 @@ public abstract class AbstractBareModule
 				if (node.equals("http://jabber.org/protocol/commands") && this.isAdmin(from.getBareJID())) {
 					List<Element> result = new LinkedList<Element>();
 					for (CommandIfc comm : commandManager.getCommands()) {
-						result.add(new Element("item", new String[]{"node", "name", "jid"},
-											   new String[]{comm.getCommandId(), comm.getDescription(),
-															jid.toString()}));
+						Element item = new Element("item", new String[]{"node", "name", "jid"},
+												 new String[]{comm.getCommandId(), comm.getDescription(),
+															  jid.toString()});
+						if (comm.getGroup() != null) {
+							item.setAttribute("group", comm.getGroup());
+						}
+						result.add(item);
 					}
 					return result;
 				}
