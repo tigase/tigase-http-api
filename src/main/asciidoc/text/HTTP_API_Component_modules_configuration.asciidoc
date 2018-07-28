@@ -26,48 +26,20 @@ This is the Module that provides support for the REST API.
 Available properties:
 
 - `rest-scripts-dir` - Provides ability to specify path to scripts processing REST requests if you do not wish to use default (scripts/rest).
-- `api-keys` - Comma separated list of strings which would be possible to use as keys to pass `api-key` parameter to request authorization for request execution. If nothing is passed, then no request will be allowed. To allow any request, this property needs to be set using the following:
 
-This setting is used to provide API-keys that will provide access to the REST module. By default all access to REST module is blocked and nobody can access REST interface.
+=== API keys
+In previous version it was possible to configure `api-keys` for REST module using entries within configuration file.
+In the recent version we decided to remove this configuration option. Now, by default Tigase XMPP Server requires API key to be passed to all requests and you need to configure them before you will be able to use REST API.
 
-To allow access for specific clients you should create a list of API keys here and add one of the API keys listed here as the `api-key` HTTP request parameter sent to server. You can also allow anyone to access REST API by setting this to `open_access`, however this may leave your server vulnerable.
+Instead, you should use ad-hocs available on the REST module JID to:
 
-While configuring the API key, it is possible to set specific api keys for specific domains or vhosts.  These API keys will only be valid for the specified vhost and the path that matches the configured value.  For example:
+- Add API key (`api-key-add`)
+- Update API key (`api-key-update`)
+- Remove API key (`api-key-remove`);
 
-.Example of API keys
-[source,properties]
-----
-api-keys = [
-    'test1',
-    'test2:domain=api.example.com;rest.example.com:regex=/rest/*',
-    'open_access:regex=/rest/test/.*'
-]
-----
-does the following:
+TIP: If you have Admin UI enabled, you may log in using admin credentials to this UI and when you select `CONFIGURATION` section on the left sidebar, it will expand and allow you to execute any of those ad-hoc commands mentioned above.
 
-. sets API key `test1` which will be valid for any vhost and for any request.
-. sets API key `test2` which will be valid only for requests to vhost `api.example.com` or `rest.example.com` and with a path matching the regular expression `/rest/*`
-. sets open to everyone access to any domain/vhost with a request path matching the regular expression `/rest/test/.*`
-
-Requests made to the HTTP service must conclude with one of the listed keys: `http://localhost:8080/rest/adhoc/sess-man@domain.com?api-key=test1`
-
-=== Example
-
-Configure API keys for the REST module:
-
-[source,java]
-----
-http {
-    rest {
-        api-keys = [
-            'test1',
-            'test2:domain=api.example.com;rest.example.com:regex=/rest/*',
-            'open_access:regex=/rest/test/.*'
-        ]
-    }
-}
-----
-
+Requests made to the HTTP service must conclude with one of the API keys defined using ad-hoc commands: `http://localhost:8080/rest/adhoc/sess-man@domain.com?api-key=test1`
 
 == DNS Web Service module
 For web based XMPP clients it is not possible to execute DNS SRV requests to find address of XMPP server hosting for particular domain.
