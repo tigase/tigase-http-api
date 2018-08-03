@@ -47,7 +47,7 @@ public class Config {
 	protected BareJID[] admins = new BareJID[]{
 			BareJID.bareJIDInstanceNS("admin@" + DNSResolverFactory.getInstance().getDefaultHost())};
 	protected boolean advancedConfig = false;
-	protected boolean clusterMode = false;
+	private boolean clusterMode = false;
 	protected Properties dbProperties = new Properties();
 	protected SetupHelper.HttpSecurity httpSecurity = new SetupHelper.HttpSecurity();
 	protected Set<String> optionalComponents = new HashSet<>();
@@ -149,6 +149,14 @@ public class Config {
 		this.acsName = acsName;
 	}
 
+	public boolean getClusterMode() {
+		return clusterMode;
+	}
+
+	public void setClusterMode(boolean val) {
+		this.clusterMode = val;
+	}
+	
 	public String getDatabaseUri() {
 		if (dbType == null) {
 			return null;

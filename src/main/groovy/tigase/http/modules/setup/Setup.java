@@ -63,11 +63,11 @@ public class Setup {
 															val != null ? (Boolean.parseBoolean(val) ||
 																	"on".equals(val)) : false)));
 		pages.add(new AdvConfigPage("Advanced configuration options", config, Stream.of(
-				new SingleAnswerQuestion("clusterMode", () -> String.valueOf(config.clusterMode),
-										 val -> config.clusterMode =
-												 val != null ? (Boolean.parseBoolean(val) || "on".equals(val)) : false),
-				new SingleAnswerQuestion("acsComponent", () -> String.valueOf(config.acs), val -> config.acs =
-						val != null ? (Boolean.parseBoolean(val) || "on".equals(val)) : false))));
+				new SingleAnswerQuestion("clusterMode", () -> String.valueOf(config.getClusterMode()),
+										 val -> config.setClusterMode(
+												 val != null ? (Boolean.parseBoolean(val) || "on".equals(val)) : false)),
+				new SingleAnswerQuestion("acsComponent", () -> String.valueOf(config.getACS()), val -> config.setACS(
+						val != null ? (Boolean.parseBoolean(val) || "on".equals(val)) : false)))));
 
 		pages.add(new PluginsConfigPage("Plugins selection", config));
 
@@ -338,6 +338,15 @@ public class Setup {
 
 		public List<Question> getOptionalComponents() {
 			return Collections.unmodifiableList(optionalComponents);
+		}
+
+		@Override
+		protected void setValues(Map<String, String[]> params) {
+			super.setValues(params);
+
+			if (config.getClusterMode() && (config.optionalComponents.contains("muc") || config.optionalComponents.contains("pubsub"))) {
+				config.setACS(true);
+			}
 		}
 	}
 
