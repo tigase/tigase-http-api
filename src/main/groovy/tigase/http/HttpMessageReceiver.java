@@ -295,11 +295,21 @@ public class HttpMessageReceiver extends AbstractMessageReceiver implements Pack
 		
 		// send error result if packet was not handled
 		if (!handled) {
-			try {
-				// we can only process response we are waiting for so return error if packet is not expected
-				addOutPacket(Authorization.FEATURE_NOT_IMPLEMENTED.getResponseMessage(packet, null, false));
-			} catch (PacketErrorTypeException ex) {
-				log.log(Level.FINEST, "packet processing type error", ex);
+			if (packet.isCommand()) {
+				Queue<Packet> results = new ArrayDeque<>();
+				if (super.processScriptCommand(packet, results)) {
+					Packet result = null;
+					while ((result = results.poll()) != null) {
+						addOutPacket(result);
+					}
+				}
+			} else {
+				try {
+					// we can only process response we are waiting for so return error if packet is not expected
+					addOutPacket(Authorization.FEATURE_NOT_IMPLEMENTED.getResponseMessage(packet, null, false));
+				} catch (PacketErrorTypeException ex) {
+					log.log(Level.FINEST, "packet processing type error", ex);
+				}
 			}
 		}		
 	}

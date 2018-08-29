@@ -21,19 +21,20 @@
  */
 package tigase.http.rest;
 
-import tigase.http.AbstractModule;
-import tigase.http.DeploymentInfo;
-import tigase.http.HttpServer;
-import tigase.http.ServletInfo;
+import tigase.http.*;
 import tigase.http.util.StaticFileServlet;
+import tigase.server.BasicComponent;
+import tigase.server.script.CommandIfc;
 import tigase.stats.StatisticHolder;
 import tigase.stats.StatisticHolderImpl;
 import tigase.stats.StatisticsList;
+import tigase.xmpp.JID;
 
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -82,8 +83,25 @@ public class RestModule extends AbstractModule {
 		for (StatisticHolder holder : stats.values()) {
 			holder.everySecond();
 		} 		
-	}	
-	
+	}
+
+	@Override
+	public void init(JID jid, PacketWriter writer) {
+		super.init(jid, writer);
+
+		try {
+			Field f = AbstractModule.class.getDeclaredField("apiKeyRepository");
+			f.setAccessible(true);
+			ApiKeyRepository apiKeyRepository = (ApiKeyRepository) f.get(this);
+			f = BasicComponent.class.getDeclaredField("scriptCommands");
+			f.setAccessible(true);
+			((Map<String, CommandIfc>) f.get(writer)).put("api-key-repo-persist", new ApiKeyRepositoryPersistCmd(apiKeyRepository));
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			System.exit(1);
+		}
+	}
+
 	@Override
 	public String getName() {
 		return NAME;
