@@ -245,7 +245,10 @@ public class Servlet
 		Packet iq = Packet.packetInstance(iqEl);
 		service.sendPacket(iq, null, (Packet result) -> {
 			Element xEl = result.getElement().findChildStaticStr(new String[]{"iq", "command", "x"});
-			List<Element> fields = xEl == null ? new ArrayList<>() : xEl.getChildren();
+			List<Element> fields = xEl == null ? null : xEl.getChildren();
+			if (fields == null) {
+				fields = new ArrayList<>();
+			}
 			final Command.DataType formType = (xEl != null && xEl.getAttributeStaticStr("type") != null)
 											  ? Command.DataType.valueOf(xEl.getAttributeStaticStr("type"))
 											  : Command.DataType.result;

@@ -41,6 +41,8 @@ TIP: If you have Admin UI enabled, you may log in using admin credentials to thi
 
 Requests made to the HTTP service must conclude with one of the API keys defined using ad-hoc commands: `http://localhost:8080/rest/adhoc/sess-man@domain.com?api-key=test1`
 
+NOTE: If you want to allow access to REST API without usage of any keys, it is possible. To do so, you need to add an API key with `API key` field value equal `open_access`.
+
 == DNS Web Service module
 For web based XMPP clients it is not possible to execute DNS SRV requests to find address of XMPP server hosting for particular domain.
 To solve this the DNS Web Service module was created.
