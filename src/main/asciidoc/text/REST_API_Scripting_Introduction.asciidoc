@@ -37,3 +37,28 @@ Extended class should also set closures for one or more of following properties:
 . *x* - Additional arguments passed to callback are groups from regular expression matching the URI. *Groups are not passed as a list, but are added to list of arguments as next arguments.*
 
 If property for corresponding HTTP action is not set, then the component will return a 404 HTTP error.
+
+== Accessing beans
+
+It is possible to gain access to beans managed by Tigase XMPP Server from within groovy script implementing REST handler.
+To achieve that implementation of the handler class within groovy script needs to be annotated with `@Bean` annotation. In this annotation, you need to pass at least one parameter `name`, which should contain desired name of the bean under which this handler will be available within the REST module kernel scope.
+
+With that in place, it is possible to use `@Inject` annotation on any field of the `Handler` implementation class to tell Tigase Kernel to inject instance of a particular class (or instance of class implementing particular interface).
+
+For more details about Tigase Kernel and beans please check `Tigase Kernel` section of the Tigase XMPP Server Development Guide.
+
+.Example
+[source,java]
+----
+@Bean(name = "test-bean", active = true)
+class TestHandler
+		extends tigase.http.rest.Handler {
+
+    @Inject
+    private UserRepository userRepo;
+    
+    // implementation of the handler...
+}
+----
+
+WARNING: Please remember that your bean is created and registered within the scope of the REST module kernel. So other beans needs to be accessible there for you to access them.
