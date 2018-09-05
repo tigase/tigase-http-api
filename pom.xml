@@ -6,7 +6,7 @@
         <dir>target</dir>
         <maven.build.timestamp.format>yyyy-MM-dd/HH:mm:ss</maven.build.timestamp.format>
         <gmavenProviderSelection>2.0</gmavenProviderSelection>
-        <groovyVersion>2.4.12</groovyVersion>
+        <groovyVersion>2.5.2</groovyVersion>
 
         <sign-keystore>/path/to/jks.keystore</sign-keystore>
         <sign-alias>alias</sign-alias>
@@ -545,7 +545,31 @@
         </dependency>
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy-all</artifactId>
+            <artifactId>groovy</artifactId>
+            <version>${groovyVersion}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-json</artifactId>
+            <version>${groovyVersion}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-jsr223</artifactId>
+            <version>${groovyVersion}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-templates</artifactId>
+            <version>${groovyVersion}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-xml</artifactId>
             <version>${groovyVersion}</version>
             <scope>compile</scope>
         </dependency>
