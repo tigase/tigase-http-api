@@ -67,7 +67,7 @@ public class RestModule
 			new ApiKeyRemoveCmd(this), new ApiKeyUpdateCmd(this)
 	};
 	private DeploymentInfo httpDeployment = null;
-	private List<RestServlet> restServlets = new ArrayList<RestServlet>();
+	private List<RestServletIfc> restServlets = new ArrayList<RestServletIfc>();
 	@ConfigField(desc = "Scripts directory", alias = SCRIPTS_DIR_KEY)
 	private String scriptsDir = DEF_SCRIPTS_DIR_VAL;
 
@@ -207,7 +207,7 @@ public class RestModule
 				}
 			}
 		}
-		restServlets = new ArrayList<RestServlet>();
+		restServlets = new ArrayList<RestServletIfc>();
 		super.stop();
 		apiKeyRepository.setAutoloadTimer(0);
 	}
@@ -262,7 +262,7 @@ public class RestModule
 		Arrays.stream(commands).forEach(commandManager::unregisterCmd);
 	}
 
-	protected void registerRestServlet(RestServlet servlet) {
+	protected void registerRestServlet(RestServletIfc servlet) {
 		restServlets.add(servlet);
 	}
 
@@ -270,7 +270,7 @@ public class RestModule
 		return apiKeyRepository;
 	}
 
-	protected List<? extends RestServlet> getRestServlets() {
+	protected List<? extends RestServletIfc> getRestServlets() {
 		return restServlets;
 	}
 

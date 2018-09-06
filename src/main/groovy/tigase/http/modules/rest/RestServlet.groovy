@@ -37,7 +37,8 @@ import java.util.logging.Logger
 
 @WebServlet(asyncSupported = true)
 public class RestServlet
-		extends HttpServlet {
+		extends HttpServlet
+		implements RestServletIfc {
 
 	public static String REST_MODULE_KEY = "rest-module-uuid";
 	public static String SCRIPTS_DIR_KEY = "script-dir";

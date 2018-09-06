@@ -57,8 +57,6 @@ public interface FileUploadRepository<DS extends DataSource>
 	 * @param sender
 	 * @param slotId
 	 *
-	 * @return slot id - if slot exists and file name and size match
-	 *
 	 * @throws TigaseDBException
 	 */
 	void updateSlot(BareJID sender, String slotId) throws TigaseDBException;
