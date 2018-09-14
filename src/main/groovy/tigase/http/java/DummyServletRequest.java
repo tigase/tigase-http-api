@@ -53,6 +53,7 @@ public class DummyServletRequest
 	private final HttpExchange exchange;
 	private final Integer executionTimeout;
 	private final Map<String, String[]> params;
+	private final Cookie[] cookies;
 	private final Service service;
 	private final String servletPath;
 	private final ScheduledExecutorService timer;
@@ -80,6 +81,19 @@ public class DummyServletRequest
 						.log(Level.FINE, "could not read parameters from input stream", ex);
 			}
 		}
+
+		this.cookies = exchange.getRequestHeaders()
+				.entrySet()
+				.stream()
+				.filter(entry -> "Cookie".equalsIgnoreCase(entry.getKey()))
+				.flatMap(entry1 -> entry1.getValue().stream())
+				.flatMap(item -> Arrays.stream(item.split(";")))
+				.map(cookie -> {
+					final String[] tokens = cookie.split("=");
+					return new Cookie(tokens[0].trim(), tokens[1].trim());
+				})
+				.toArray(Cookie[]::new);
+
 		this.contextPath = contextPath;
 		this.servletPath = servletPath;
 		this.service = service;
@@ -317,7 +331,7 @@ public class DummyServletRequest
 
 	@Override
 	public Cookie[] getCookies() {
-		return new Cookie[0];
+		return cookies;
 	}
 
 	@Override
@@ -337,7 +351,7 @@ public class DummyServletRequest
 
 	@Override
 	public Enumeration<String> getHeaderNames() {
-		return null;
+		return Collections.enumeration(exchange.getRequestHeaders().keySet());
 	}
 
 	@Override
