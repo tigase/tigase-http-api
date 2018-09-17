@@ -27,6 +27,7 @@ import tigase.http.rest.Handler
 import tigase.http.rest.Service
 import tigase.xmpp.jid.BareJID
 
+import javax.servlet.AsyncContext
 import javax.servlet.ServletConfig
 import javax.servlet.annotation.WebServlet
 import javax.servlet.http.HttpServlet
@@ -157,9 +158,9 @@ public class RestServlet
 
 				// prepare for execution
 				if (handler.isAsync) {
-					executeAsync(request, response, handler, params);
+					executeAsync(request, response, handler, (List) params);
 				} else {
-					execute(request, response, handler, params, null);
+					execute(request, response, handler, (List) params, null);
 				}
 
 				handled = true;
@@ -185,8 +186,8 @@ public class RestServlet
 	 * @param reqParams
 	 * @return
 	 */
-	def executeAsync(HttpServletRequest request, HttpServletResponse response, def route, def reqParams) {
-		def asyncCtx = request.startAsync(request, response);
+	def executeAsync(HttpServletRequest request, HttpServletResponse response, Handler route, List reqParams) {
+		AsyncContext asyncCtx = request.startAsync(request, response);
 		execute(asyncCtx.getRequest(), asyncCtx.getResponse(), route, reqParams, asyncCtx);
 	}
 
@@ -200,15 +201,17 @@ public class RestServlet
 	 * @param asyncCtx
 	 * @return
 	 */
-	def execute(HttpServletRequest request, HttpServletResponse response, Handler route, def reqParams, def asyncCtx) {
+	def execute(HttpServletRequest request, HttpServletResponse response, Handler route, List reqParams, AsyncContext asyncCtx) {
 		long start = System.currentTimeMillis();
 		def prefix = request.getServletPath();
 		prefix = request.getContextPath() + prefix
 
 		String type = request.getContentType();
-		String requestContent = null;
 		service.getModule().countRequest(request);
 
+
+		def method = request.getMethod().toLowerCase().capitalize()
+		
 		def callback = { result ->
 			long end = System.currentTimeMillis();
 			executedIn(prefix + route.regex.toString(), end - start);
@@ -248,9 +251,19 @@ public class RestServlet
 					request.getUserPrincipal() ? BareJID.bareJIDInstance(request.getUserPrincipal().getName()) : null);
 		}
 
+		boolean requestAdded = false;
+		Class[] paramTypes = ((Closure) route."exec$method").getParameterTypes();
+		if (paramTypes.length > params.size()) {
+			Class expParamType = paramTypes[params.size()];
+			if ((Object.class != expParamType) && expParamType.isAssignableFrom(HttpServletRequest.class)) {
+				params.add(request);
+				requestAdded = true;
+			}
+		}
+		
 		if (type != null && request.getContentLength() > 0) {
 			if (route.decodeContent && (type.contains("/xml") || type.contains("/json"))) {
-				requestContent = request.getReader().getText()
+				String requestContent = request.getReader().getText()
 
 				if (log.isLoggable(Level.FINEST)) {
 					log.finest("received content = " + requestContent + "of type = " + type)
@@ -270,7 +283,7 @@ public class RestServlet
 				}
 
 				params.add(parsed)
-			} else {
+			} else if (!requestAdded) {
 				// pass request if we have content but it is none of JSON or XML
 				// or handler requires not decoded content
 				params.add(request);
@@ -282,8 +295,6 @@ public class RestServlet
 		if (log.isLoggable(Level.FINEST)) {
 			log.finest("got calling with params = " + params.toString())
 		}
-
-		def method = request.getMethod().toLowerCase().capitalize()
 
 		// Call exact closure
 		route."exec$method".call(params);

@@ -22,6 +22,8 @@ If you are extending classes you will need to set following properties:
 
 * *isAsync* - If set to true, it will be possible to wait for results, for example waiting for an response IQ stanza.
 
+* *decodeContent* - If set to false, then content of the request will not be parsed and your script will receive instance of `HttpServletRequest` to handle incoming content.
+
 == Properties containing closures
 
 Extended class should also set closures for one or more of following properties: execGet, execPut, execPost, and execDelete depending on which HTTP action or actions you need to support for the URI. *Each closure has a dynamic arguments list*. Below is list of arguments passed to closure which describes how and when the list of arguments changes:
@@ -32,7 +34,9 @@ Extended class should also set closures for one or more of following properties:
 
 . *user* - Will be passed only if `requiredRole` is not null. *In all other cases this argument will not be in arguments list!*
 
-. *content* - Parsed content of request. This closure will not be in arguments list if Content-Length of request is empty. If Content-Type is XML or JSON returned as Map, otherwise it will be an instance of `HttpServletRequest`.
+. *request* - Will be passed only if declared as instance of `HttpServletRequest` and it will be instance of `HttpServletRequest` of the current HTTP request.
+
+. *content* - Parsed content of request. This closure will not be in arguments list if Content-Length of request is empty. If Content-Type is XML or JSON returned as Map, otherwise (or if `decodeContent` is set to `false`) it will be an instance of `HttpServletRequest`.
 
 . *x* - Additional arguments passed to callback are groups from regular expression matching the URI. *Groups are not passed as a list, but are added to list of arguments as next arguments.*
 
