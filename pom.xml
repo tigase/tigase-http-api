@@ -200,7 +200,7 @@
                         <Implementation-Build>${gitVersion}/${buildNumber} (${maven.build.timestamp})
                         </Implementation-Build>
                         <Tigase-Version>${project.version}-b${gitVersion}</Tigase-Version>
-                        <Tigase-Required-Dependencies>tigase.http=${project.dependencies[3].version}
+                        <Tigase-Required-Dependencies>tigase.http=${project.dependencies[2].version}
                         </Tigase-Required-Dependencies>
                         <Bundle-Activator>tigase.http.Activator</Bundle-Activator>
                         <DynamicImport-Package>'*'</DynamicImport-Package>
@@ -299,6 +299,12 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
+            <groupId>tigase</groupId>
+            <artifactId>tigase-http-api</artifactId>
+            <version>2.0.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy</artifactId>
             <version>${groovyVersion}</version>
@@ -326,12 +332,6 @@
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy-xml</artifactId>
             <version>${groovyVersion}</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>tigase</groupId>
-            <artifactId>tigase-http-api</artifactId>
-            <version>2.0.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
