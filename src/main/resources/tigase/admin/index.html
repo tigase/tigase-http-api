@@ -94,34 +94,50 @@
 										<div class="col-sm-offset-3 col-sm-9">
 											<div class="checkbox">
 												<label>
-													<input type="checkbox" name='${formField.getAttribute("var")}' ${(formField.getChildCData('field/value') == 'true' || formField.getChildCData('field/value') == '1') ? 'checked' : ''}><%= formField.getAttribute('label') ?: formField.getAttribute("var") %></input>
+													<input type="checkbox" name='${formField.getAttribute("var")}' ${(formField.getChildCData('field/value') == 'true' || formField.getChildCData('field/value') == '1') ? 'checked' : ''} ${formField.getChild('required') ? 'required' : ''}><%= formField.getAttribute('label') ?: formField.getAttribute("var") %></input>
 												</label>
 											</div>
 										</div>
+										<% String desc = formField.getChildCData("field/desc");
+										if (desc != null) { %>
+										<small class="text-muted col-sm-offset-3 col-sm-9">${desc}</small>
+										<% } %>
 									</div>
 								<% } else if (type == 'text-private') { %>
 									<div class="form-group">
 										<label class="col-sm-3 control-label" for='${formField.getAttribute("var")}'><%= formField.getAttribute('label') ?: formField.getAttribute("var") %></label>
 										<div class="col-sm-9">
-											<input class="form-control" type='password' size='90' name='${formField.getAttribute("var")}' value="${formField.getChildCData('field/value') ?: ''}" />
+											<input class="form-control" type='password' size='90' name='${formField.getAttribute("var")}' value="${formField.getChildCData('field/value') ?: ''}" ${formField.getChild('required') ? 'required' : ''}/>
 										</div>
+										<% String desc = formField.getChildCData("field/desc");
+										if (desc != null) { %>
+										<small class="text-muted col-sm-offset-3 col-sm-9">${desc}</small>
+										<% } %>
 									</div>
 								<% } else if (type == 'text-multi' || type == 'jid-multi') { %>
 									<div class="form-group">
 										<label class="col-sm-3 control-label" for='${formField.getAttribute("var")}'><%= formField.getAttribute('label') ?: formField.getAttribute("var") %></label>
 										<div class="col-sm-9">
-											<textarea class="form-control" rows='5' name='${formField.getAttribute("var")}' >${formField.getChildren()?.findAll{el -> el.getName() == 'value'}.collect{el -> el.getCData() ?: ''}.join('\n') ?: ''}</textarea>
+											<textarea class="form-control" rows='5' name='${formField.getAttribute("var")}' ${formField.getChild('required') ? 'required' : ''}>${formField.getChildren()?.findAll{el -> el.getName() == 'value'}.collect{el -> el.getCData() ?: ''}.join('\n') ?: ''}</textarea>
 										</div>
+										<% String desc = formField.getChildCData("field/desc");
+										if (desc != null) { %>
+										<small class="text-muted col-sm-offset-3 col-sm-9">${desc}</small>
+										<% } %>
 									</div>
 								<% } else if (type == 'list-single' || type == 'list-multi') { %>
 									<div class="form-group">
 										<label class="col-sm-3 control-label" for='${formField.getAttribute("var")}'><%= formField.getAttribute('label') ?: formField.getAttribute("var") %></label>
 										<div class="col-sm-9">
-											<select class="form-control" name='${formField.getAttribute("var")}' ${ (type == 'list-multi') ? 'multiple' : ''}><% formField.getChildren().findAll { it.getName() == 'option' }.each { %>
-											<option value='${it.getChildCData(it.getName()+'/value') ?: it.getAttribute('label')}' ${formField.getChildren().find{ child -> (child.getName() == 'value') && (child.getCData() == (it.getChildCData(it.getName()+'/value') ?: it.getAttribute('label'))) } ? 'selected' : ''}>${it.getAttribute('label') ?: it.getChildCData(it.getName()+'/value')}</option>
+											<select class="form-control" name='${formField.getAttribute("var")}' ${ (type == 'list-multi') ? 'multiple' : ''} ${formField.getChild('required') ? 'required' : ''}><% formField.getChildren().findAll { it.getName() == 'option' }.each { %>
+											<option value='${it.getChildCData(it.getName()+'/value') ?: ''}' ${formField.getChildren().find{ child -> (child.getName() == 'value') && (child.getCData() == (it.getChildCData(it.getName()+'/value') ?: it.getAttribute('label'))) } ? 'selected' : ''}>${it.getAttribute('label') ?: it.getChildCData(it.getName()+'/value')}</option>
 											<% } %>
 											</select>
 										</div>
+										<% String desc = formField.getChildCData("field/desc");
+										if (desc != null) { %>
+										<small class="text-muted col-sm-offset-3 col-sm-9">${desc}</small>
+										<% } %>
 									</div>
 								<% } else if (type == 'text-single' || type == 'jid-single') { %>
 									<% def subtype = formField.getAttribute('subtype');
@@ -132,13 +148,13 @@
 										<div class="form-group">
 											<label class="col-sm-3 control-label" for='${formField.getAttribute("var")}'><%= formField.getAttribute('label') ?: formField.getAttribute("var") %></label>
 											<div class="col-sm-3">
-												<input class="form-control" type='date' name='${formField.getAttribute("var")}_date' value="${value?.toLocalDate()?.toString() ?: ''}" />
+												<input class="form-control" type='date' name='${formField.getAttribute("var")}_date' value="${value?.toLocalDate()?.toString() ?: ''}" ${formField.getChild('required') ? 'required' : ''}/>
 											</div>
 											<div class="col-sm-2">
-												<input class="form-control" type='time' name='${formField.getAttribute("var")}_time' value="${value?.toLocalTime()?.toString() ?: ''}" />
+												<input class="form-control" type='time' name='${formField.getAttribute("var")}_time' value="${value?.toLocalTime()?.toString() ?: ''}" ${formField.getChild('required') ? 'required' : ''}/>
 											</div>
 											<div class="col-sm-3">
-												<select class="form-control" name='${formField.getAttribute("var")}_tz'>
+												<select class="form-control" name='${formField.getAttribute("var")}_tz' ${formField.getChild('required') ? 'required' : ''}>
 													<% def zoneIds = java.util.TimeZone.getAvailableIDs();
 													zoneIds.each { zoneId ->
                                                         def tz = java.util.TimeZone.getTimeZone(zoneId);
@@ -147,12 +163,16 @@
 													<% } %>
 												</select>
 											</div>
+											<% String desc = formField.getChildCData("field/desc");
+											if (desc != null) { %>
+											<small class="text-muted col-sm-offset-3 col-sm-9">${desc}</small>
+											<% } %>
 										</div>
 									<% } else { %>
 									<div class="form-group">
 										<label class="col-sm-3 control-label" for='${formField.getAttribute("var")}'><%= formField.getAttribute('label') ?: formField.getAttribute("var") %></label>
 										<div class="col-sm-9">
-											<input class="form-control" type='text' size='90' name='${formField.getAttribute("var")}' value="${formField.getChildCData('field/value') ?: ''}" />
+											<input class="form-control" type='text' size='90' name='${formField.getAttribute("var")}' value="${formField.getChildCData('field/value') ?: ''}" ${formField.getChild('required') ? 'required' : ''}/>
 										</div>
 									</div>
 									<% } %>
@@ -160,8 +180,12 @@
 									<div class="form-group">
 										<label class="col-sm-3 control-label" for='${formField.getAttribute("var")}'><%= formField.getAttribute('label') ?: formField.getAttribute("var") %></label>
 										<div class="col-sm-9">
-											<input class="form-control" disabled type='text' size='90' name='${formField.getAttribute("var")}' value="${formField.getChildCData('field/value') ?: ''}" />
+											<input class="form-control" disabled type='text' size='90' name='${formField.getAttribute("var")}' value="${formField.getChildCData('field/value') ?: ''}" ${formField.getChild('required') ? 'required' : ''}/>
 										</div>
+										<% String desc = formField.getChildCData("field/desc");
+										if (desc != null) { %>
+										<small class="text-muted col-sm-offset-3 col-sm-9">${desc}</small>
+										<% } %>
 									</div>
 								<% } %>
 							<% } %>
