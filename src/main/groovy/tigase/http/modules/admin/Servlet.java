@@ -491,6 +491,7 @@ public class Servlet
 					}
 					break;
 				case "hidden":
+				case "fixed":
 					formField.addChildren(orginalChildren);
 					break;
 				case "list-single":
