@@ -24,6 +24,7 @@ import tigase.http.rest.Service
 import tigase.server.Iq
 import tigase.server.Packet
 import tigase.xml.Element
+import tigase.xml.XMLUtils
 import tigase.xmpp.StanzaType
 import tigase.xmpp.jid.BareJID
 
@@ -247,6 +248,21 @@ In result of this operation you will receive ie. following XML:
 				}
 				if (!tables.isEmpty()) {
 					results.reported = tables;
+				}
+				def roster = data.getChild("query", "jabber:iq:roster")?.getChildren().collect { el ->
+					def item = [ jid: el.getAttribute("jid"), subscription: el.getAttribute("subscription") ];
+					def tmp = el.getAttribute("name");
+					if (tmp) {
+						item.name = tmp;
+					}
+					def groups = el.getChildren()?.findAll { it -> it.name == "group"}.collect { it -> XMLUtils.unescape(it.getCData()) };
+					if (groups) {
+						item.groups = groups;
+					}
+					return item;
+				}
+				if (roster) {
+					results.roster = roster;
 				}
 
 				callback([ command: results ])
