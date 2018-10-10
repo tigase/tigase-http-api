@@ -34,9 +34,9 @@
 	</licenses>
 
 	<scm>
-		<connection>scm:git:https://repository.tigase.org/git/tigase-http-api.git</connection>
-		<developerConnection>scm:git:https://repository.tigase.org/git/tigase-http-api.git</developerConnection>
-		<url>https://projects.tigase.org/projects/tigase-http-api/repository</url>
+		<connection>scm:git:https://git.tigase.tech/tigase-http-api.git</connection>
+		<developerConnection>scm:git:https://git.tigase.tech/tigase-http-api.git</developerConnection>
+		<url>https://tigase.tech/projects/tigase-http-api/repository</url>
 	  <tag>HEAD</tag>
   </scm>
 
@@ -62,7 +62,7 @@
 		<plugins>
 			<plugin>
 				<artifactId>maven-release-plugin</artifactId>
-				<version>2.5.1</version>
+				<version>2.5.3</version>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -170,7 +170,7 @@
 								} catch (Exception e) {
 									version = '0'
 								}
-								println "setting revision to: " + version
+								log.info("setting revision to: " + version)
 
 								project.properties.setProperty( 'gitVersion' , version )
 
@@ -263,12 +263,6 @@
 			<version>1.4.0</version>
 			<scope>compile</scope>
 		</dependency>
-<!--		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-server</artifactId>
-			<version>8.1.9.v20130131</version>
-			<scope>compile</scope>
-		</dependency> -->
 		<dependency>
 			<groupId>org.codehaus.groovy</groupId>
 			<artifactId>groovy-all</artifactId>
@@ -287,24 +281,18 @@
 			<version>3.1.0</version>
 			<scope>compile</scope>
 		</dependency>
-<!--		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-servlet</artifactId>
-			<version>8.1.9.v20130131</version>
-			<scope>compile</scope>
-		</dependency> -->
 	</dependencies>
 
 	<repositories>
 		<repository>
 			<id>tigase</id>
 			<name>Tigase repository</name>
-			<url>http://maven-repo.tigase.org/repository/release</url>
+			<url>https://maven-repo.tigase.net/repository/release</url>
 		</repository>
 		<repository>
 			<id>tigase-snapshot</id>
 			<name>Tigase repository</name>
-			<url>http://maven-repo.tigase.org/repository/snapshot</url>
+			<url>https://maven-repo.tigase.net/repository/snapshot</url>
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
@@ -314,12 +302,12 @@
 		<repository>
 			<id>tigase</id>
 			<name>Tigase repository</name>
-			<url>http://maven-repo.tigase.org/repository/release</url>
+			<url>https://maven-repo.tigase.net/repository/release</url>
 		</repository>
 		<snapshotRepository>
 			<id>tigase-snapshot</id>
 			<name>Tigase snapshot repository</name>
-			<url>http://maven-repo.tigase.org/repository/snapshot</url>
+			<url>https://maven-repo.tigase.net/repository/snapshot</url>
 		</snapshotRepository>
 	</distributionManagement>
 
