@@ -319,6 +319,7 @@
                     <include>**/*.asciidoc</include>
                     <include>**/*.css</include>
 					<include>**/*.jpg</include>
+					<include>**/*.png</include>
                 </includes>
             </resource>
         </resources>
@@ -378,7 +379,7 @@
                             </execution>
                             <execution>
                                 <id>output-docbook</id>
-                                <phase>generate-resources</phase>
+                                <phase>none</phase>
                                 <goals>
                                     <goal>process-asciidoc</goal>
                                 </goals>
@@ -434,7 +435,7 @@
                         <executions>
                             <execution>
                                 <id>generate-webhelp</id>
-                                <phase>generate-resources</phase>
+                                <phase>none</phase>
                                 <goals>
                                     <goal>generate-webhelp</goal>
                                 </goals>
@@ -455,7 +456,7 @@
                             </execution>
                             <execution>
                                 <id>generate-pdf</id>
-                                <phase>generate-resources</phase>
+                                <phase>none</phase>
                                 <goals>
                                     <goal>generate-pdf</goal>
                                 </goals>
@@ -474,7 +475,7 @@
                             </execution>
                             <execution>
                                 <id>generate-html</id>
-                                <phase>generate-resources</phase>
+                                <phase>none</phase>
                                 <goals>
                                     <goal>generate-html</goal>
                                 </goals>

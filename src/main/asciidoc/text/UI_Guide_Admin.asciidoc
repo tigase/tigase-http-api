@@ -12,31 +12,18 @@ The Admin User Interface is an HTTP-based interface that sends REST commands to 
 == A Note about REST
 REST stands for REpresentational State Transfer which is a stateless communication method that in our case passes commands using HTTP GET, PUT, POST, and DELETE commands to resources within the Tigase server.
 
+== General overview of the UI
+
+After navigating to the Admin WebUI you will see basic information about navigation. The panel itself consists of two main parts:
+* left navigation menu, which groups all configuration items into categories;
+* central, main configuration page displaying configuration options of the selected items.
+
+image:images/adminUI-main.png[]
+
+Each configuration item has name (upper line) and associated component (lower line) as some features can be executed in the context of different component (for example `Update Item Configuration` can be executed for VirtualHost Manager or ExternalConnection Manager)
 
 == Configuration
-////
-NOTE: This feature is not supported in 8.0.0, should be back in 8.1.0 when #5498 is done
 
-Allows you to list server components and their configurations, as well as manage server components and plugins.
-
-List server/component configuration section covers all the component options including the basic-conf and will allow you to change each setting by changing the values in the field and clicking submit.  All settings are listed by the component name in the dropdown menu either as default, or as defined by --component-name property.
-
-image:images/admin-componentconfig.jpg[]
-
-Manage active server components allows you to do exactly that, but you can also add and disable components from this interface.
-
-image:images/admin-managecomponent.jpg[]
-
-Here you can List, Add, Edit, and Remove components.
-- *List* provides a list of all running components, each with its name, info, and class.
-- *Add* provides an interface to add a class and a name for components. You will not be able to add invalid component names or classes.
-- *Edit* enables you to edit the specific properties of any running component. Even options for which there are no current values will be listed, you can consider this list a comprehensive list of settings and options for the current component.
-- *Remove* provides a way to remove running components.
-
-Managing server plugins allows you to turn on or off plugins from this window VIA check-boxes. Note that the changes are made in real-time.
-
-image:images/admin-manageplugins.jpg[]
-////
 Allows you to configure some of the servers settings, such as message of the day, welcome message or initialize shutdown of the cluster node.
 
 == Example Scripts
