@@ -343,6 +343,8 @@ Example contents shown below needs to be sent to (by default) `http://localhost:
 
 TIP: You may add `/{resource}` to the URL after `/status` part, where `{resource}` is name of the resource for which you want to set presence.
 
+WARNING: You need to add `'user-status-endpoint@http.{clusterNode}'` to the list of trusted jids to allow UserStatusEndpoint module to properly integrate with Tigase XMPP Server.
+
 == Using XML
 
 To set user status you need to set HTTP header `Content-Type` to `application/xml`
