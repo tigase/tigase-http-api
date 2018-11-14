@@ -32,3 +32,6 @@ Changes may be saved to configuration file from this module.
 == Web UI module
 This module contains full web client based on http://www.tigase.net/content/jaxmpp-library:[Tigase JaXMPP] client library allowing user to chat, manage contacts list (roster), browse message archive, etc.
 For more information on this module, consult the link:http://docs.tigase.org/tigase-server/snapshot/Administration_Guide/html/#_use_of_the_http_api[Administration Guide].
+
+== User Status Endpoint module
+This module is designed as an endpoint required for REST API User Status to work properly. It is not accessible using HTTP/REST API, so it can (and in most cases should) be active.

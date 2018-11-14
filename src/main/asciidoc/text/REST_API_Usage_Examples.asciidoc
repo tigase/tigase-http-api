@@ -330,3 +330,102 @@ Data needs to be sent as a HTTP POST request content to `/rest/stream/?api-key=A
     <body>Example message 1</body>
 </message>
 -----
+
+= Setting XMPP user status
+
+By default XMPP user is visible as unavailable when his client is disconnected. However in some cases we may want to present user a active with some particular presence being set.
+To control this presence of unavailable XMPP user we can use this feature.
+
+Example contents shown below needs to be sent to (by default) `http://localhost:8080/rest/user/{user-jid}/status?api-key=API_KEY`, where:
+
+* `API_KEY` is the API key for HTTP API
+* `{user-jid}` is a bare jid of the user for which you want to set presence.
+
+TIP: You may add `/{resource}` to the URL after `/status` part, where `{resource}` is name of the resource for which you want to set presence.
+
+== Using XML
+
+To set user status you need to set HTTP header `Content-Type` to `application/xml`
+
+[source,xml]
+-----
+<command>
+    <available>true</available>
+    <priority>-1</priority>
+    <show>xa</show>
+    <status>On the phone</status>
+</command>
+-----
+
+where:
+
+* `available` - may be:
+** `true` - user is available/connected *_(default)_*
+** `false` - user is unavailable/disconnected
+* `priority` - an integer of presence priority. _(It should be always set as a negative value to make sure that messages are not dropped)_ *_(default: -1)_* 
+* `show` - may be one of `presence/show` element values *_(optional)_*
+** `chat`
+** `away`
+** `xa`
+** `dnd`
+* `status` - message which should be sent as a presence status message *_(optional)_*
+
+As a result server will return following XML:
+
+[source,xml]
+-----
+<status>
+  <user>test@domain.com/tigase-external</user>
+  <available>true</available>
+  <priority>priority</priority>
+  <show>xa</show>
+  <status>On the phone</status>
+  <success>true</success>
+</status>
+-----
+
+This will confirm that user `test@domain.com` with resource `tigase-external` has it presence changed (look for `success` element value).
+
+== Using JSON
+
+To set user status you need to set HTTP header `Content-Type` to `application/json`
+
+[source,xml]
+-----
+{
+  "available": "true",
+  "priority": "-1",
+  "show": "xa",
+  "status": "On the phone"
+}
+-----
+
+where:
+
+* `available` - may be:
+** `true` - user is available/connected *_(default)_*
+** `false` - user is unavailable/disconnected
+* `priority` - an integer of presence priority. _(It should be always set as a negative value to make sure that messages are not dropped)_ *_(default: -1)_*
+* `show` - may be one of `presence/show` element values *_(optional)_*
+** `chat`
+** `away`
+** `xa`
+** `dnd`
+* `status` - message which should be sent as a presence status message *_(optional)_*
+
+As a result, the server will return following JSON:
+[source,json]
+-----
+{
+  "status": {
+    "user": "test@domain.com/tigase-external",
+    "available": "true",
+    "priority": "-1",
+    "show": "xa",
+    "status": "On the phone",
+    "success": true
+  }
+}
+-----
+This will confirm that user `test@domain.com` with resource `tigase-external` has it presence changed (look for `success` element value).
+

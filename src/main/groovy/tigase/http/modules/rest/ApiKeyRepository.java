@@ -22,13 +22,18 @@ package tigase.http.modules.rest;
 import tigase.db.DBInitException;
 import tigase.db.UserRepository;
 import tigase.db.comp.UserRepoRepository;
+import tigase.eventbus.EventBus;
+import tigase.eventbus.HandleEvent;
 import tigase.http.modules.AbstractModule;
 import tigase.kernel.beans.Bean;
+import tigase.kernel.beans.Inject;
 import tigase.kernel.beans.selector.ConfigType;
 import tigase.kernel.beans.selector.ConfigTypeEnum;
 import tigase.xmpp.jid.BareJID;
 
+import java.io.Serializable;
 import java.util.Map;
+import java.util.Objects;
 
 @Bean(name = "repository", parent = AbstractModule.class, active = true)
 @ConfigType({ConfigTypeEnum.DefaultMode, ConfigTypeEnum.SessionManagerMode, ConfigTypeEnum.ConnectionManagersMode,
@@ -41,6 +46,9 @@ public class ApiKeyRepository
 	private boolean openAccess = false;
 
 	private BareJID repoUserJid;
+
+	@Inject
+	private EventBus eventBus;
 
 	@Override
 	public BareJID getRepoUser() {
@@ -116,5 +124,62 @@ public class ApiKeyRepository
 	@Deprecated
 	public void initRepository(String resource_uri, Map<String, String> params) throws DBInitException {
 		// Nothing to do
+	}
+
+	@Override
+	public void initialize() {
+		super.initialize();
+		eventBus.registerAll(this);
+	}
+
+	@Override
+	public void beforeUnregister() {
+		eventBus.unregisterAll(this);
+		super.beforeUnregister();
+	}
+
+	@Override
+	public void addItem(ApiKeyItem item) {
+		super.addItem(item);
+		eventBus.fire(new ItemsChangedEvent(repoUserJid.getLocalpart()));
+	}
+
+	@Override
+	public void removeItem(String key) {
+		super.removeItem(key);
+		eventBus.fire(new ItemsChangedEvent(repoUserJid.getLocalpart()));
+	}
+
+	@HandleEvent
+	public void itemsChanged(ItemsChangedEvent itemsChanged) {
+		if (!itemsChanged.checkModule(repoUserJid.getLocalpart())) {
+			return;
+		}
+
+		super.reload();
+	}
+
+	public static class ItemsChangedEvent implements Serializable {
+
+		private String module;
+		private transient boolean local = false;
+		
+		/**
+		 * Empty constructor to be able to serialize/deserialize event
+		 */
+		public ItemsChangedEvent() {
+		}
+
+		public ItemsChangedEvent(String module) {
+			this.module = module;
+		}
+
+		public boolean checkModule(String module) {
+			return Objects.equals(this.module, module);
+		}
+
+		public boolean isLocal() {
+			return local;
+		}
 	}
 }
