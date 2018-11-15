@@ -56,7 +56,7 @@ public class HttpMessageReceiver extends AbstractMessageReceiver implements Pack
 
 	private Map<String,Module> modules = new ConcurrentHashMap<String,Module>();
 	private static final Class[] ALL_MODULES = { RestModule.class, DnsWebServiceModule.class, 
-		ServerInfoModule.class, SetupModule.class, WebModule.class, AdminModule.class, IndexModule.class };
+		ServerInfoModule.class, SetupModule.class, WebModule.class, AdminModule.class, IndexModule.class, UserStatusEndpointModule.class };
 	
 	private HttpServer httpServer = new HttpServer();
 	
