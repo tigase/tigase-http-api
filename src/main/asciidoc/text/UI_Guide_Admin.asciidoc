@@ -18,7 +18,7 @@ After navigating to the Admin WebUI you will see basic information about navigat
 * left navigation menu, which groups all configuration items into categories;
 * central, main configuration page displaying configuration options of the selected items.
 
-image:images/adminUI-main.png[]
+image:images/adminUI-main.jpg[]
 
 Each configuration item has name (upper line) and associated component (lower line) as some features can be executed in the context of different component (for example `Update Item Configuration` can be executed for VirtualHost Manager or ExternalConnection Manager)
 
