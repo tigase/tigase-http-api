@@ -191,11 +191,9 @@
                         <executions>
                             <execution>
                                 <id>output-html</id>
-                                <phase>generate-resources</phase>
                             </execution>
                             <execution>
                                 <id>output-docbook</id>
-                                <phase>generate-resources</phase>
                             </execution>
                         </executions>
                     </plugin>
@@ -206,15 +204,12 @@
                         <executions>
                             <execution>
                                 <id>generate-webhelp</id>
-                                <phase>generate-resources</phase>
                             </execution>
                             <execution>
                                 <id>generate-pdf</id>
-                                <phase>generate-resources</phase>
                             </execution>
                             <execution>
                                 <id>generate-html</id>
-                                <phase>generate-resources</phase>
                             </execution>
                         </executions>
                     </plugin>
