@@ -15,6 +15,8 @@
         <groovyVersion>2.5.2</groovyVersion>
 
         <bundle-activator>tigase.http.Activator</bundle-activator>
+
+        <license.inlineHeader>${inlineHeader_agpl3}</license.inlineHeader>
     </properties>
 
     <artifactId>tigase-http-api</artifactId>
@@ -24,6 +26,8 @@
     <name>Tigase HTTP API component</name>
     <description>Tigase HTTP API component</description>
 
+    <inceptionYear>2013</inceptionYear>
+    
     <licenses>
         <license>
             <name>GNU Affero General Public License GPLv3</name>
