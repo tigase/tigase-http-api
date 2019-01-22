@@ -36,8 +36,8 @@
     </licenses>
 
     <scm>
-        <connection>scm:git:https://git.tigase.tech/tigase-http-api.git</connection>
-        <developerConnection>scm:git:https://git.tigase.tech/tigase-http-api.git</developerConnection>
+        <connection>scm:git:${scm_repo_base}/tigase-http-api.git</connection>
+        <developerConnection>scm:git:${scm_repo_base}/tigase-http-api.git</developerConnection>
         <url>https://tigase.tech/projects/tigase-http-api/repository</url>
         <tag>HEAD</tag>
     </scm>
