@@ -1,33 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <!--<packet.version>5.2.0</packet.version>-->
-        <dir>target</dir>
-        <maven.build.timestamp.format>yyyy-MM-dd/HH:mm:ss</maven.build.timestamp.format>
-        <gmavenProviderSelection>2.0</gmavenProviderSelection>
-        <groovyVersion>2.5.2</groovyVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-        <sign-keystore>/path/to/jks.keystore</sign-keystore>
-        <sign-alias>alias</sign-alias>
-        <sign-storepass>storepass</sign-storepass>
-        <sign-keypass>keypass</sign-keypass>
-        <sign-skip>true</sign-skip>
-        <verbose-log>false</verbose-log>
-        <tsa>${tsa-uri}</tsa>
+    <parent>
+        <groupId>tigase</groupId>
+        <artifactId>tigase-projects-parent</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+        <relativePath/>
+    </parent>
+
+    <properties>
         <maven.javadoc.skip>true</maven.javadoc.skip>
 
+        <bundle-activator>tigase.http.Activator</bundle-activator>
+
+        <license.inlineHeader>${inlineHeader_agpl3}</license.inlineHeader>
     </properties>
 
-    <modelVersion>4.0.0</modelVersion>
-    <packaging>bundle</packaging>
-
-    <groupId>tigase</groupId>
     <artifactId>tigase-http-api-jetty</artifactId>
     <version>2.0.0-SNAPSHOT</version>
-    <name>Tigase HTTP API - support for Jetty HTTP Server</name>
+    <packaging>bundle</packaging>
+
+    <name>Tigase HTTP API - Jetty</name>
     <description>Tigase HTTP API - support for Jetty HTTP Server</description>
+
+    <inceptionYear>2014</inceptionYear>
 
     <licenses>
         <license>
@@ -37,8 +35,8 @@
     </licenses>
 
     <scm>
-        <connection>scm:git:https://repository.tigase.org/git/tigase-http-api-jetty.git</connection>
-        <developerConnection>scm:git:https://repository.tigase.org/git/tigase-http-api-jetty.git</developerConnection>
+        <connection>scm:git:${scm_repo_base}/tigase-http-api-jetty.git</connection>
+        <developerConnection>scm:git:${scm_repo_base}/tigase-http-api-jetty.git</developerConnection>
         <url>https://projects.tigase.org/projects/tigase-http-api-jetty/repository</url>
         <tag>HEAD</tag>
     </scm>
@@ -48,53 +46,11 @@
         <url>http://www.tigase.org</url>
     </organization>
 
-    <profiles>
-        <profile>
-            <id>dist</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-                <property>
-                    <name>dist</name>
-                </property>
-            </activation>
-            <properties>
-                <maven.javadoc.skip>false</maven.javadoc.skip>
-            </properties>
-        </profile>
-    </profiles>
     <build>
-        <finalName>${project.artifactId}</finalName>
-
         <plugins>
-            <plugin>
-                <artifactId>maven-release-plugin</artifactId>
-                <version>2.5.1</version>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>buildnumber-maven-plugin</artifactId>
-                <version>1.3</version>
-                <configuration>
-                    <timestampFormat>{0,date} {0,time}</timestampFormat>
-                    <doCheck>false</doCheck>
-                    <doUpdate>false</doUpdate>
-                    <getRevisionOnlyOnce>true</getRevisionOnlyOnce>
-                    <shortRevisionLength>8</shortRevisionLength>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>create</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <!-- 2.8.0-01 and later require maven-compiler-plugin 3.0 or higher -->
-                <version>3.2</version>
                 <configuration>
                     <compilerId>groovy-eclipse-compiler</compilerId>
                     <source>1.8</source>
@@ -148,150 +104,10 @@
                     </execution>
                 </executions>
             </plugin>
-
-            <plugin>
-                <groupId>org.codehaus.gmaven</groupId>
-                <artifactId>gmaven-plugin</artifactId>
-                <version>1.5</version>
-                <executions>
-                    <execution>
-                        <id>gitver</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>execute</goal>
-                        </goals>
-                        <configuration>
-                            <providerSelection>2.0</providerSelection>
-                            <properties>
-                                <script>git rev-list HEAD --count</script>
-                            </properties>
-                            <source>
-                                def version
-                                try {
-                                    def command = project.properties.script
-                                    def process = command.execute()
-                                    process.waitFor()
-
-                                    version = process.in.text.trim()
-                                } catch (Exception e) {
-                                    version = '0'
-                                }
-                                println "setting revision to: " + version
-
-                                project.properties.setProperty('gitVersion', version)
-
-                            </source>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <version>2.5.3</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <instructions combine.inherited="append">
-                        <manifestLocation>src/main/resources/META-INF/MANIFEST.MF</manifestLocation>
-                        <Implementation-Title>${project.name}: ${project.description}</Implementation-Title>
-                        <Implementation-Version>${project.version}-b${gitVersion}/${buildNumber}
-                        </Implementation-Version>
-                        <Implementation-Build>${gitVersion}/${buildNumber} (${maven.build.timestamp})
-                        </Implementation-Build>
-                        <Tigase-Version>${project.version}-b${gitVersion}</Tigase-Version>
-                        <Tigase-Required-Dependencies>tigase.http=${project.dependencies[2].version}
-                        </Tigase-Required-Dependencies>
-                        <Bundle-Activator>tigase.http.Activator</Bundle-Activator>
-                        <DynamicImport-Package>'*'</DynamicImport-Package>
-                        <Import-Package>!junit.*,!sun.*,!com.sun.*,*</Import-Package>
-                    </instructions>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jarsigner-plugin</artifactId>
-                <version>1.4</version>
-                <executions>
-                    <execution>
-                        <id>sign</id>
-                        <goals>
-                            <goal>sign</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <archiveDirectory>${project.basedir}</archiveDirectory>
-                    <includes>
-                        <include>target/tigase*.?ar</include>
-                        <include>jars/tigase*.?ar</include>
-                    </includes>
-                    <processMainArtifact>false</processMainArtifact>
-                    <processAttachedArtifacts>false</processAttachedArtifacts>
-                    <tsa>${tsa-uri}</tsa>
-                    <skip>${sign-skip}</skip>
-
-                    <keystore>${sign-keystore}</keystore>
-                    <alias>${sign-alias}</alias>
-                    <storepass>${sign-storepass}</storepass>
-                    <keypass>${sign-keypass}</keypass>
-                    <verbose>${verbose-log}</verbose>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.0.1</version>
-
-                <executions>
-                    <execution>
-                        <id>dist</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                        <configuration>
-                            <source>1.8</source>
-                            <aggregate>true</aggregate>
-                            <quiet>true</quiet>
-
-                            <reportOutputDirectory>${project.reporting.outputDirectory}/docs/javadoc
-                            </reportOutputDirectory>
-                            <destDir>docs/javadoc</destDir>
-
-                            <finalName>${project.artifactId}-${project.version}-b${gitVersion}</finalName>
-                            <jarOutputDirectory>dist</jarOutputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
-
-        <resources>
-            <resource>
-                <directory>src/scripts/groovy/tigase/</directory>
-                <targetPath>scripts</targetPath>
-                <includes>
-                    <include>**/*.groovy</include>
-                </includes>
-            </resource>
-            <resource>
-                <directory>src/main/resources/</directory>
-                <targetPath>etc</targetPath>
-                <includes>
-                    <include>**/*.xml</include>
-                </includes>
-            </resource>
-        </resources>
     </build>
 
     <dependencies>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.osgi.core</artifactId>
-            <version>1.4.0</version>
-            <scope>compile</scope>
-        </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
@@ -345,38 +161,8 @@
     <repositories>
         <repository>
             <id>tigase</id>
-            <name>Tigase repository</name>
-            <url>http://maven-repo.tigase.org/repository/release</url>
-        </repository>
-        <repository>
-            <id>tigase-snapshot</id>
-            <name>Tigase repository</name>
-            <url>http://maven-repo.tigase.org/repository/snapshot</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
+            <url>http://maven-repo.tigase.org/repository/tigase</url>
         </repository>
     </repositories>
-    <distributionManagement>
-        <repository>
-            <id>tigase</id>
-            <name>Tigase repository</name>
-            <url>http://maven-repo.tigase.org/repository/release</url>
-        </repository>
-        <snapshotRepository>
-            <id>tigase-snapshot</id>
-            <name>Tigase snapshot repository</name>
-            <url>http://maven-repo.tigase.org/repository/snapshot</url>
-        </snapshotRepository>
-    </distributionManagement>
-    <reporting>
-        <plugins>
-        </plugins>
-    </reporting>
-
-    <dependencyManagement>
-        <dependencies>
-        </dependencies>
-    </dependencyManagement>
 </project>
 
