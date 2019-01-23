@@ -1,8 +1,6 @@
-/*
- * JettyOSGiHttpServer.java
- *
- * Tigase HTTP API - Jetty support
- * Copyright (C) 2004-2017 "Tigase, Inc." <office@tigase.com>
+/**
+ * Tigase HTTP API - Jetty - Tigase HTTP API - support for Jetty HTTP Server
+ * Copyright (C) 2014 Tigase, Inc. (office@tigase.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
