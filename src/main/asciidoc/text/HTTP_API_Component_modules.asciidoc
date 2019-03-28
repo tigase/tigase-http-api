@@ -33,5 +33,14 @@ Changes may be saved to configuration file from this module.
 This module contains full web client based on http://www.tigase.net/content/jaxmpp-library:[Tigase JaXMPP] client library allowing user to chat, manage contacts list (roster), browse message archive, etc.
 For more information on this module, consult the link:http://docs.tigase.org/tigase-server/snapshot/Administration_Guide/html/#_use_of_the_http_api[Administration Guide].
 
+== DNS Web Service module
+For web based XMPP clients it is not possible to execute DNS SRV requests to find address of XMPP server hosting for particular domain.
+To solve this the DNS Web Service module was created.
+
+It handles incoming HTTP GET request and using `Host` HTTP header executes DNS requests as specified in link:https://xmpp.org/extensions/xep-0156.html[XEP-0156: Discovering Alternative XMPP Connection Methods].
+Results are returned in XML or JSON as specified in the XEP mentioned before.
+
+By default it is deployed at `dns-webservice` and path for XML response is `/dns-webservice/.well-known/host-meta` and for JSON is `/dns-webservice/-known/host-meta.json`.
+
 == User Status Endpoint module
 This module is designed as an endpoint required for REST API User Status to work properly. It is not accessible using HTTP/REST API, so it can (and in most cases should) be active.

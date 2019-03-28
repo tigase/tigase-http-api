@@ -50,7 +50,7 @@ public class DnsWebServiceModule
 				.setContextPath(contextPath)
 				.setDeploymentName("DnsWebService")
 				.setDeploymentDescription(getDescription())
-				.addServlets(httpServer.servlet("JsonServlet", JsonServlet.class).addMapping("/*"));
+				.addServlets(httpServer.servlet("HostMeta", DnsHostMetaServlet.class).addMapping("/.well-known/*"), httpServer.servlet("JsonServlet", JsonServlet.class).addMapping("/*"));
 		if (vhosts != null) {
 			deployment.setVHosts(vhosts);
 		}
