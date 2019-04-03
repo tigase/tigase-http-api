@@ -101,7 +101,7 @@ public class FileServlet
 					resp.sendError(404);
 				} else {
 					resp.setHeader("Content-Length", String.valueOf(slot.filesize));
-					resp.setHeader("Content-Disposition", "attachment; filename=\"" + slot.filename + "\"");
+					resp.setHeader("Content-Disposition", "inline; filename=\"" + slot.filename + "\"");
 					if (slot.contentType != null) {
 						resp.setHeader("Content-Type", slot.contentType);
 					}
