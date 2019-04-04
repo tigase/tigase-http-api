@@ -58,9 +58,11 @@ public class DummyServletRequest
 	private String characterEncoding = "UTF-8";
 	private Principal principal;
 	private BufferedReader reader;
+	private int requestId;
 
-	public DummyServletRequest(HttpExchange exchange, String contextPath, String servletPath, Service service,
+	public DummyServletRequest(int requestId, HttpExchange exchange, String contextPath, String servletPath, Service service,
 							   ScheduledExecutorService timer, Integer executionTimeout) {
+		this.requestId = requestId;
 		this.exchange = exchange;
 		this.params = new HashMap<>();
 		String query = exchange.getRequestURI().getRawQuery();
@@ -553,6 +555,11 @@ public class DummyServletRequest
 			return 0;
 		}
 		return Long.parseLong(contentLength);
+	}
+
+	@Override
+	public String toString() {
+		return "" + requestId + " for " + getRequestURI();
 	}
 
 	private void decodeParamsFromString(String query, Map<String, String[]> params) {

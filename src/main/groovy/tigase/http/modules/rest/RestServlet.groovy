@@ -115,20 +115,20 @@ public class RestServlet
 		String localUri = URLDecoder.decode(request.getRequestURI(), "UTF-8").replace(prefix, "");
 
 		if (log.isLoggable(Level.FINEST)) {
-			log.finest("checking routings = " + routings + " for prefix = " + prefix + " and uri = " + localUri)
+			log.finest(request.toString() + ", checking routings = " + routings + " for prefix = " + prefix + " and uri = " + localUri)
 		}
 
 		boolean handled = false;
 		routings.each { Handler handler ->
 			if (log.isLoggable(Level.FINEST)) {
-				log.finest("checking localUri = " + localUri + ", prefix = " + prefix + ", regex = " + handler.regex);
+				log.finest(request.toString() + ", checking localUri = " + localUri + ", prefix = " + prefix + ", regex = " + handler.regex);
 			}
 
 			// check if regex matches
 			def matcher = (localUri =~ handler.regex)
 			if (matcher.matches()) {
 				if (log.isLoggable(Level.FINEST)) {
-					log.finest("found handler")
+					log.finest(request.toString() + ", found handler: " + handler.getClass().getCanonicalName());
 				}
 
 				def params = matcher[0];
@@ -207,12 +207,21 @@ public class RestServlet
 		String type = request.getContentType();
 		service.getModule().countRequest(request);
 
+		if (log.isLoggable(Level.FINEST)) {
+			log.log(Level.FINEST,
+					request.toString() + ", starting execution of handler: " + route.getClass().getCanonicalName() +
+							" for method " + request.getMethod());
+		}
 
 		def method = request.getMethod().toLowerCase().capitalize()
 		
 		def callback = { result ->
 			long end = System.currentTimeMillis();
 			executedIn(prefix + route.regex.toString(), end - start);
+
+			if (log.isLoggable(Level.FINEST)) {
+				log.log(Level.FINEST, request.toString() + ", got results for request: " + result);
+			}
 			if (result == null) {
 				// no response - nothing to send so there was nothing
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -237,6 +246,9 @@ public class RestServlet
 				}
 			}
 
+			if (log.isLoggable(Level.FINEST)) {
+				log.log(Level.FINEST, request.toString() + ", execution of request in servlet completed");
+			}
 			if (asyncCtx) {
 				asyncCtx.complete();
 			}
@@ -264,7 +276,7 @@ public class RestServlet
 				String requestContent = request.getReader().getText()
 
 				if (log.isLoggable(Level.FINEST)) {
-					log.finest("received content = " + requestContent + "of type = " + type)
+					log.finest(request.toString() + ", received content = " + requestContent + "of type = " + type)
 				}
 
 				def parsed = null;
@@ -277,7 +289,7 @@ public class RestServlet
 				}
 
 				if (log.isLoggable(Level.FINEST)) {
-					log.finest("parsed received content = " + parsed)
+					log.finest(request.toString() + ", parsed received content = " + parsed)
 				}
 
 				params.add(parsed)
@@ -291,7 +303,8 @@ public class RestServlet
 		params.addAll(reqParams)
 
 		if (log.isLoggable(Level.FINEST)) {
-			log.finest("got calling with params = " + params.toString())
+			log.finest(request.toString() + ", calling handlers " + route.getClass().getCanonicalName() + " method " +
+							   request.getMethod() + " with params = " + params.toString())
 		}
 
 		// Call exact closure

@@ -33,6 +33,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * @author andrzej
@@ -89,7 +90,14 @@ public class RequestHandler
 		boolean exception = false;
 		try {
 			String path = he.getRequestURI().getPath();
-			log.log(Level.FINEST, "received request for path = " + path);
+			if (log.isLoggable(Level.FINEST)) {
+				log.log(Level.FINEST, "received request " + reqId + " method " + he.getRequestMethod() + " for " +
+						he.getRequestURI().toString() + ", headers:" + he.getRequestHeaders()
+						.entrySet()
+						.stream()
+						.map(e -> "'" + e.getKey() + "': '" + e.getValue() + "'")
+						.collect(Collectors.joining(",")));
+			}
 			List<String> keys = new ArrayList<String>(servlets.keySet());
 			Collections.sort(keys, COMPARATOR);
 			boolean handled = false;
@@ -101,17 +109,26 @@ public class RequestHandler
 						if (servletPath.isEmpty()) {
 							servletPath = "/";
 						}
-						req = new DummyServletRequest(he, contextPath, servletPath, service, timer.getScheduledExecutorService(),
+						req = new DummyServletRequest(reqId, he, contextPath, servletPath, service, timer.getScheduledExecutorService(),
 													  timer.requestTimeoutSupplier.get());
 						resp = new DummyServletResponse(he);
 						if (key.endsWith(path) && !key.equals("/")) {
 							String query = req.getQueryString();
 							if (query == null || query.isEmpty()) {
+								if (log.isLoggable(Level.FINEST)) {
+									log.log(Level.FINEST, "for request " + reqId + " sent redirect to " + req.getRequestURI() + "/");
+								}
 								resp.sendRedirect(req.getRequestURI() + "/");
 							} else {
+								if (log.isLoggable(Level.FINEST)) {
+									log.log(Level.FINEST, "for request " + reqId + " sent redirect to " + req.getRequestURI() + "/?" + query);
+								}
 								resp.sendRedirect(req.getRequestURI() + "/?" + query);
 							}
 							return;
+						}
+						if (log.isLoggable(Level.FINEST)) {
+							log.log(Level.FINEST, "request " + reqId + " will be processed by " + servlet.getClass() + " for " + key);
 						}
 						servlet.service(req, resp);
 						handled = true;
@@ -121,6 +138,10 @@ public class RequestHandler
 			}
 
 			if (!handled) {
+				if (log.isLoggable(Level.FINEST)) {
+					log.log(Level.FINEST,
+							"not found handler for request " + reqId + " for " + he.getRequestURI().toString());
+				}
 				he.sendResponseHeaders(404, -1);
 			}
 		} catch (IOException ex) {
@@ -132,7 +153,10 @@ public class RequestHandler
 			throw new IOException(ex);
 		} catch (Throwable ex) {
 			exception = true;
-			log.log(Level.FINEST, "Exception during processing HTTP request" + " for id = " + reqId, ex);
+			if (log.isLoggable(Level.FINEST)) {
+				log.log(Level.FINEST, "Exception during processing HTTP request" + reqId + " for " + he.getRequestURI().toString(),
+						ex);
+			}
 			try {
 				he.sendResponseHeaders(500, -1);
 			} catch (IOException ex1) {
@@ -151,8 +175,14 @@ public class RequestHandler
 					((AsyncContextImpl) async).cancel();
 				}
 				he.close();
+				if (log.isLoggable(Level.FINEST)) {
+					log.log(Level.FINEST, "request " + reqId + " processing finished!");
+				}
 			}
 		} else {
+			if (log.isLoggable(Level.FINEST)) {
+				log.log(Level.FINEST, "request " + reqId + " processing finished!");
+			}
 			he.close();
 		}
 		timer.requestProcessingFinished();
