@@ -37,8 +37,8 @@ public class DiscoveryModule
 	private Logic logic;
 
 	@Override
-	protected Packet prepareDiscoInfoReponse(Packet packet, JID jid, String node, JID senderJID) {
-		Packet result = super.prepareDiscoInfoReponse(packet, jid, node, senderJID);
+	protected Packet prepareDiscoInfoResponse(Packet packet, JID jid, String node, JID senderJID) {
+		Packet result = super.prepareDiscoInfoResponse(packet, jid, node, senderJID);
 
 		Element fileUploadForm = getForm();
 
