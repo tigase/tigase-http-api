@@ -56,8 +56,24 @@ By default it is deployed at `dns-webservice`
 domain:: Domain name to look for XMPP SRV client records.
 callback:: Due to security reasons web based client may not be able to access some DNS Web Service due to cross-domain AJAX requests. Passing optional `callback` parameter sets name of callback for JSONP requests and results proper response in JSONP format.
 
-=== Discover way to connect to XMPP server hosting `sure.im` domain.
-Sending HTTP GET request to `http://our-xmpp-server:8080/dns-webservice/?domain=sure.im&version=2` you will receive following response:
+=== Discover way to connect to XMPP server
+
+==== Using `host-meta`
+
+You should access endpoint available at `/dns-webservice/.well-known/host-meta`.
+
+To make it follow specification you should configure a redirection from the root path of your http server to above path. For example, using nginx:
+
+```
+location  /.well-known/ {
+    proxy_pass http://localhost:8080/dns-webservice/.well-known/;
+    proxy_set_header Host $host;
+}
+```
+
+==== Query particular domain.
+
+If we want to know connectivity options for `sure.im` we should send HTTP GET request to `http://our-xmpp-server:8080/dns-webservice/?domain=sure.im&version=2`. We will receive following response:
 
 [source,java]
 ----
