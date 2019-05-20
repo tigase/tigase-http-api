@@ -57,7 +57,7 @@ In result of this operation you will receive ie. following XML:
 \${util.formatData([command:[jid:'sess-man@domain.com',node:'http://jabber.org/protocol/admin#get-active-users',fields:[[var:'Users: 2',label:'text-multi',value:['user1@domain.com','user2@domain.com']]]]])}
 """ ] ];
 		regex = /\/(?:([^@\/]+)@){0,1}([^@\/]+)/
-		requiredRole = "admin"
+		requiredRole = "user"
 		isAsync = true
 
 		/**
