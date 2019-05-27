@@ -156,7 +156,7 @@ public class JettyStandaloneHttpServer
 		} else {
 			String domain = config.getDomain();
 			SSLContext context = sslContextContainer.getSSLContext("TLS", domain, false);
-			SslContextFactory contextFactory = new SslContextFactory() {
+			SslContextFactory contextFactory = new SslContextFactory.Server() {
 				@Override
 				public void customize(SSLEngine sslEngine) {
 					super.customize(sslEngine);
