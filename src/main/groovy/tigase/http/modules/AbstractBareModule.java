@@ -187,7 +187,7 @@ public abstract class AbstractBareModule
 	@Override
 	public void initialize() {
 		super.initialize();
-		serviceEntity = new ServiceEntity(getName(), null, getDescription(), true);
+		serviceEntity = new ServiceEntity(getName(), null, getDescription(), null,true);
 		serviceEntity.setFeatures(getFeatures());
 	}
 
