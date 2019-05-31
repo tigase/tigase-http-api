@@ -99,6 +99,7 @@ public class SetupServlet
 				page.setValues(request.getParameterMap());
 			}
 			Page page = setup.getPageById(i);
+			i = setup.pageId(page);
 			t = templates.get(page.getTemplate());
 			page.beforeDisplay();
 			templateParams.put("page", page);

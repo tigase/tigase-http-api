@@ -1,0 +1,27 @@
+${ util.include('header', [title:'Setup: ' + page.title]) }
+<% def fieldFn = { q, label, valueControl -> %>
+<div class="form-group">
+	<label class="col-sm-4 control-label" for='${q.getName()}'><%= label %></label>
+	<div class="col-sm-8">
+		<% valueControl(q); %>
+	</div>
+</div>
+<% } %>
+<div class="panel panel-default">
+	<div class="panel-heading panel-xs">
+		<h4>Please select/deselect connectors which should be enabled:</h4>
+	</div>
+	<div class="panel-body">
+<form class="form-horizontal" method='POST' action="?step=${ page.nextPage() }">
+<% page.getQuestionsWithLabels().each { %>
+	<% fieldFn(it, it.getLabel(), { q1 -> %>
+	<input class="form-control" name='${q1.getName()}' type='checkbox' ${ (q1.isSelected(q1.getId())) ? "checked" : "" } />
+	<% }); %>
+<% } %>
+	</div>
+</div>
+
+<button class="btn btn-default" type="submit">Next</button>
+
+</form>
+${ util.include('footer') } 

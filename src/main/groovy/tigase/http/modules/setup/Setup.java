@@ -38,6 +38,10 @@ public class Setup {
 
 		addPage(new BasicConfigPage(config));
 
+		addPage(new ConnectorsPage(config));
+
+		addPage(new FeaturesPage(config));
+
 		addPage(new AdvConfigPage(config));
 
 		addPage(new PluginsConfigPage(config));
@@ -58,21 +62,35 @@ public class Setup {
 	}
 
 	public Page getPageById(int page) {
-		return pages.get(page -1);
+		for (int i=0; i<page-1; i++) {
+			Page p = getPages().get(i);
+			if (!p.isValid()) {
+				return p;
+			}
+		}
+		return getPages().get(page -1);
 	}
 
 	public int pageId(Page page) {
 		if (page == null) {
 			return 1;
 		}
-		return this.pages.indexOf(page) + 1;
+		return this.getPages().indexOf(page) + 1;
 	}
 
 	public int nextPageId(Page page) {
 		if (page == null) {
 			return 1;
 		}
-		return this.pages.indexOf(page) + 2;
+		return this.getPages().indexOf(page) + 2;
+	}
+
+	public List<Page> getPages() {
+		return pages.stream()
+				.filter(page -> config.advancedConfig
+								? (!(page instanceof SimpleConfigPage))
+								: (!(page instanceof AdvancedConfigPage)))
+				.collect(Collectors.toList());
 	}
 
 	public List<String> getTemplates() {
