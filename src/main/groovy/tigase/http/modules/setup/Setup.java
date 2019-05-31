@@ -17,24 +17,12 @@
  */
 package tigase.http.modules.setup;
 
-import tigase.db.util.SchemaLoader;
-import tigase.db.util.SchemaManager;
-import tigase.kernel.beans.selector.ConfigTypeEnum;
-import tigase.server.BasicComponent;
-import tigase.server.xmppsession.SessionManager;
-import tigase.util.setup.BeanDefinition;
-import tigase.util.setup.SetupHelper;
-import tigase.util.ui.console.CommandlineParameter;
-import tigase.xmpp.XMPPImplIfc;
-import tigase.xmpp.jid.BareJID;
+import tigase.http.modules.setup.pages.*;
 
-import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Created by andrzej on 30.03.2017.
@@ -45,484 +33,50 @@ public class Setup {
 	private final List<Page> pages = new ArrayList<>();
 
 	public Setup() {
-		pages.add(new Page("About software"));
-		pages.add(new Page("Advanced Clustering Strategy information",
-						   new SingleAnswerQuestion("acsName", config::getAcsName, config::setAcsName)));
+		addPage(new AboutSoftwarePage());
+		addPage(new ACSInfoPage(config));
 
-		pages.add(new Page("Basic Tigase server configuration",
-						   new SingleAnswerQuestion("configType", () -> config.getConfigType().id(),
-													type -> config.setConfigType(ConfigTypeEnum.valueForId(type))),
-						   new VirtualDomainQuestion("virtualDomain", config), new AdminsQuestion("admins", config),
-						   new SingleAnswerQuestion("adminPwd", () -> config.adminPwd, pwd -> config.adminPwd = pwd),
-						   new SingleAnswerQuestion("dbType", () -> config.getDbType(), type -> config.setDbType(type)),
-						   new SingleAnswerQuestion("advancedConfig", () -> String.valueOf(config.advancedConfig),
-													val -> config.advancedConfig =
-															val != null ? (Boolean.parseBoolean(val) ||
-																	"on".equals(val)) : false)));
-		pages.add(new AdvConfigPage("Advanced configuration options", config, Stream.of(
-				new SingleAnswerQuestion("clusterMode", () -> String.valueOf(config.getClusterMode()),
-										 val -> config.setClusterMode(
-												 val != null ? (Boolean.parseBoolean(val) || "on".equals(val)) : false)),
-				new SingleAnswerQuestion("acsComponent", () -> String.valueOf(config.getACS()), val -> config.setACS(
-						val != null ? (Boolean.parseBoolean(val) || "on".equals(val)) : false)))));
+		addPage(new BasicConfigPage(config));
 
-		pages.add(new PluginsConfigPage("Plugins selection", config));
+		addPage(new AdvConfigPage(config));
 
-		pages.add(new DBSetupPage("Database configuration"));
+		addPage(new PluginsConfigPage(config));
 
-		pages.add(new DBCheckPage("Database connectivity check"));
+		addPage(new DBSetupPage(config));
 
-		pages.add(new Page("Setup security", new SingleAnswerQuestion("setupUser", () -> config.httpSecurity.setupUser,
-																	  user -> config.httpSecurity.setupUser = user),
-						   new SingleAnswerQuestion("setupPassword", () -> config.httpSecurity.setupPassword,
-													pass -> config.httpSecurity.setupPassword = pass)));
+		addPage(new DBCheckPage(config));
 
-		pages.add(new Page("Saving configuration", new SingleAnswerQuestion("saveConfig", () -> "true", val -> {
-			if (val != null ? (Boolean.parseBoolean(val) || "on".equals(val)) : false) {
-				try {
-					config.saveConfig();
-				} catch (IOException ex) {
-					throw new RuntimeException(ex);
-				}
-			}
-		})));
-		pages.add(new Page("Finished"));
+		addPage(new SetupSecurityPage(config));
+
+		addPage(new SaveConfigPage(config));
+		addPage(new Page("Finished", "finished.html"));
 	}
 
-	public Page getPage(int page) {
-		return pages.get(page - 1);
+	private void addPage(Page page) {
+		page.init(this);
+		pages.add(page);
 	}
 
-	private static class ComponentQuestion
-			extends SingleAnswerQuestion {
-
-		private static final Comparator<ComponentQuestion> byBeanName = (e1, e2) -> e1.getBeanName()
-				.compareTo(e2.getBeanName());
-
-		private final BeanDefinition def;
-
-		ComponentQuestion(BeanDefinition def, Config config) {
-			super(def.getName(), () -> config.optionalComponents.contains(def.getName()) ? def.getName() : null,
-				  (val) -> {
-					  if (val != null ? (Boolean.parseBoolean(val) || "on".equals(val)) : false) {
-						  config.optionalComponents.add(def.getName());
-					  } else {
-						  config.optionalComponents.remove(def.getName());
-					  }
-				  });
-			this.def = def;
-		}
-
-		public String getLabel() {
-			String desc = def.getName();
-			try {
-				desc = ((BasicComponent) def.getClazz().newInstance()).getDiscoDescription();
-			} catch (Exception ex) {
-			}
-			return desc;
-		}
-
-		public String getBeanName() {
-			return def.getName();
-		}
-
+	public Page getPageById(int page) {
+		return pages.get(page -1);
 	}
 
-	public static class MultiAnswerQuestion
-			extends Question {
-
-		private final Supplier<String[]> getter;
-		private final Consumer<String[]> setter;
-
-		public MultiAnswerQuestion(String id, Supplier<String[]> getter, Consumer<String[]> setter) {
-			super(id);
-			this.getter = getter;
-			this.setter = setter;
+	public int pageId(Page page) {
+		if (page == null) {
+			return 1;
 		}
-
-		public String[] getValues() {
-			return getter.get();
-		}
-
-		public void setValues(String[] value) {
-			setter.accept(value);
-		}
-
+		return this.pages.indexOf(page) + 1;
 	}
 
-	private static class PluginQuestion
-			extends SingleAnswerQuestion {
-
-		private static final Comparator<PluginQuestion> byBeanName = (e1, e2) -> e1.getBeanName()
-				.compareTo(e2.getBeanName());
-		private final Config config;
-		private final BeanDefinition def;
-
-		PluginQuestion(BeanDefinition def, Config config) {
-			super(def.getName(), () -> config.plugins.contains(def.getName()) ? def.getName() : null, (val) -> {
-				if (val != null ? (Boolean.parseBoolean(val) || "on".equals(val)) : false) {
-					config.plugins.add(def.getName());
-				} else {
-					config.plugins.remove(def.getName());
-				}
-			});
-			this.def = def;
-			this.config = config;
+	public int nextPageId(Page page) {
+		if (page == null) {
+			return 1;
 		}
-
-		public String getLabel() {
-			return null;
-		}
-
-		public String getBeanName() {
-			return def.getName();
-		}
-
-		public boolean mayBeChanged() {
-			if (!mayBeEnabled()) {
-				return false;
-			}
-			if (def.getClazz().getCanonicalName().equals("tigase.archive.unified.processors.UnifiedArchivePlugin") &&
-					config.optionalComponents.contains("unified-archive")) {
-				return false;
-			}
-			return true;
-		}
-
-		public boolean mayBeEnabled() {
-			if (def.getClazz().getCanonicalName().startsWith("tigase.archive.unified")) {
-				return config.optionalComponents.contains("unified-archive");
-			}
-			if (def.getClazz().getCanonicalName().startsWith("tigase.archive.")) {
-				return config.optionalComponents.contains("message-archive") ||
-						config.optionalComponents.contains("unified-archive");
-			}
-			if (def.getClazz().getCanonicalName().startsWith("tigase.pubsub.")) {
-				return config.optionalComponents.contains("pubsub");
-			}
-			return true;
-		}
-
-		public String getCause() {
-			if (def.getClazz().getCanonicalName().startsWith("tigase.archive.unified")) {
-				return "Processor requires Tigase Unified Archive Component";
-			}
-			if (def.getClazz().getCanonicalName().startsWith("tigase.archive.")) {
-				return "Processor requires Tigase Message Archiving Component or Tigase Unified Component";
-			}
-			if (def.getClazz().getCanonicalName().startsWith("tigase.pubsub.")) {
-				return "Processor requires Tigase PubSub Component";
-			}
-			return null;
-		}
-
-		@Override
-		public boolean isSelected(String value) {
-			if (def.getClazz().getCanonicalName().equals("tigase.archive.unified.processors.UnifiedArchivePlugin")) {
-				return config.optionalComponents.contains("unified-archive");
-			}
-			return super.isSelected(value);
-		}
+		return this.pages.indexOf(page) + 2;
 	}
 
-	public abstract static class Question {
-
-		private final String id;
-		private Page page;
-		private boolean secret = false;
-
-		public Question(String id) {
-			this.id = id;
-		}
-
-		public String getId() {
-			return id;
-		}
-
-		public String getName() {
-			return page.getId() + "_" + getId();
-		}
-
-		public boolean isSecret() {
-			return secret;
-		}
-
-		protected void setSecret(boolean secret) {
-			this.secret = secret;
-		}
-
-		protected void setPage(Page page) {
-			this.page = page;
-		}
-
-		protected abstract void setValues(String[] values);
+	public List<String> getTemplates() {
+		return pages.stream().map(Page::getTemplate).filter(Objects::nonNull).collect(Collectors.toList());
 	}
-
-	public static class SingleAnswerQuestion
-			extends Question {
-
-		private final Supplier<String> getter;
-		private final String label;
-		private final Consumer<String> setter;
-
-		public SingleAnswerQuestion(String id, Supplier<String> getter, Consumer<String> setter) {
-			this(id, null, getter, setter);
-		}
-
-		public SingleAnswerQuestion(String id, String label, Supplier<String> getter, Consumer<String> setter) {
-			super(id);
-			this.label = label;
-			this.getter = getter;
-			this.setter = setter;
-		}
-
-		public String getLabel() {
-			return label;
-		}
-
-		public String getValue() {
-			return getter.get();
-		}
-
-		public void setValue(String value) {
-			setter.accept(value);
-		}
-
-		public boolean isSelected(String value) {
-			return value != null && value.equals(getValue());
-		}
-
-		@Override
-		protected void setValues(String[] values) {
-			setValue((values == null || values.length == 0) ? null : (values[0].trim().isEmpty() ? null : values[0]));
-		}
-	}
-
-	private class AdminsQuestion
-			extends SingleAnswerQuestion {
-
-		AdminsQuestion(String id, Config config) {
-			super(id, () -> Arrays.stream(config.admins).map(jid -> jid.toString()).collect(Collectors.joining(",")),
-				  admins -> {
-					  if (admins != null && !admins.trim().isEmpty()) {
-						  config.admins = Stream.of(admins.split(","))
-								  .map(str -> str.trim())
-								  .map(str -> BareJID.bareJIDInstanceNS(str))
-								  .toArray(BareJID[]::new);
-					  } else {
-						  config.admins = new BareJID[0];
-					  }
-				  });
-		}
-	}
-
-	private class AdvConfigPage
-			extends Page {
-
-		private List<ComponentQuestion> optionalComponents = new ArrayList<>();
-
-		public AdvConfigPage(String title, Config config, Stream<Question> questions) {
-			super(title, questions);
-
-			optionalComponents = SetupHelper.getAvailableComponents()
-					.stream()
-					.filter(def -> !def.isCoreComponent())
-					.map(def -> new ComponentQuestion(def, config))
-					.sorted(ComponentQuestion.byBeanName)
-					.collect(Collectors.toList());
-			optionalComponents.forEach(this::addQuestion);
-		}
-
-		public List<Question> getOptionalComponents() {
-			return Collections.unmodifiableList(optionalComponents);
-		}
-
-		@Override
-		protected void setValues(Map<String, String[]> params) {
-			super.setValues(params);
-
-			if (config.getClusterMode() && (config.optionalComponents.contains("muc") || config.optionalComponents.contains("pubsub"))) {
-				config.setACS(true);
-			}
-		}
-	}
-
-	private class DBCheckPage
-			extends Page {
-
-		public DBCheckPage(String title, Stream<Question> questions) {
-			super(title, questions);
-		}
-
-		public DBCheckPage(String title, Question... questions) {
-			super(title, questions);
-		}
-
-		public synchronized Map<SchemaManager.DataSourceInfo, List<SchemaManager.ResultEntry>> loadSchema() {
-			try {
-				Map<String, Object> configStr = config.getConfigurationInMap();
-
-				SchemaManager schemaManager = new SchemaManager();
-				schemaManager.setConfig(configStr);
-				schemaManager.setDbRootCredentials(config.dbProperties.getProperty("rootUser"),
-												   config.dbProperties.getProperty("rootPass"));
-				if (config.admins != null) {
-					schemaManager.setAdmins(Arrays.asList(config.admins), config.adminPwd);
-				}
-
-				return schemaManager.loadSchemas();
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		}
-
-	}
-
-	private class DBSetupPage
-			extends Page {
-
-		private List<Question> questions = new ArrayList<>();
-
-		public DBSetupPage(String title) {
-			super(title);
-		}
-
-		@Override
-		public void beforeDisplay() {
-			List<CommandlineParameter> options = SchemaLoader.newInstance(config.getDbType()).getSetupOptions();
-			Stream<Question> questions = options.stream().map(o -> {
-				SingleAnswerQuestion question = null;
-				if (Boolean.class.equals(o.getType())) {
-					question = new SingleAnswerQuestion(o.getFullName().get(), o.getDescription().get(), () -> {
-						String val = config.dbProperties.getProperty(o.getFullName().get());
-						if (val == null) {
-							val = o.getDefaultValue().orElse(null);
-						}
-						return val;
-					}, val -> {
-						boolean bval = val != null ? (Boolean.parseBoolean(val) || "on".equals(val)) : false;
-						config.dbProperties.setProperty(o.getFullName().get(), String.valueOf(bval));
-					});
-				} else {
-					question = new SingleAnswerQuestion(o.getFullName().get(), o.getDescription().get(), () -> {
-						String val = config.dbProperties.getProperty(o.getFullName().get());
-						if (val == null) {
-							val = o.getDefaultValue().orElse(null);
-						}
-						return val;
-					}, val -> {
-						if (val == null || val.trim().isEmpty()) {
-							config.dbProperties.remove(o.getFullName().get());
-						} else {
-							config.dbProperties.setProperty(o.getFullName().get(), val);
-						}
-					});
-					question.setSecret(o.isSecret());
-				}
-				return question;
-			});
-			this.questions.clear();
-			setQuestions(questions);
-		}
-
-		public List<Question> getQuestions() {
-			return questions;
-		}
-
-		@Override
-		protected void addQuestion(Question question) {
-			super.addQuestion(question);
-			questions.add(question);
-		}
-	}
-
-	public class Page {
-
-		private final Map<String, Question> questions = new ConcurrentHashMap<>();
-		private final String title;
-
-		public Page(String title, Stream<Question> questions) {
-			this.title = title;
-			setQuestions(questions);
-		}
-
-		public Page(String title, Question... questions) {
-//			this.title = title;
-//			this.questions.putAll(
-//					Arrays.stream(questions).collect(Collectors.toMap(Question::getId, Function.identity())));
-//			this.questions.values().forEach(Question::setPage);
-//			Arrays.stream(questions).forEach(this::addQuestion);
-			this(title, Arrays.stream(questions));
-		}
-
-		public String getId() {
-			return "" + Setup.this.pages.indexOf(this);
-		}
-
-		public String getTitle() {
-			return title;
-		}
-
-		public Question getQuestion(String id) {
-			return questions.get(id);
-		}
-
-		public void beforeDisplay() {
-
-		}
-
-		public Integer nextPage() {
-			int i = Setup.this.pages.indexOf(this);
-			return i + 1 + 1;
-		}
-
-		protected void addQuestion(Question question) {
-			question.setPage(this);
-			this.questions.put(question.getId(), question);
-		}
-
-		protected void setQuestions(Stream<Question> questions) {
-			this.questions.clear();
-			questions.forEach(this::addQuestion);
-		}
-
-		protected void setValues(Map<String, String[]> params) {
-			questions.values().forEach(question -> {
-				String[] value = params.get(question.getName());
-				question.setValues(value);
-			});
-		}
-	}
-
-	private class PluginsConfigPage
-			extends Page {
-
-		private List<PluginQuestion> plugins;
-
-		PluginsConfigPage(String title, Config config) {
-			super(title, Stream.empty());
-
-			plugins = SetupHelper.getAvailableProcessors(SessionManager.class, XMPPImplIfc.class)
-					.stream()
-					.map(def -> new PluginQuestion(def, config))
-					.sorted(PluginQuestion.byBeanName)
-					.collect(Collectors.toList());
-			plugins.forEach(this::addQuestion);
-		}
-
-		public List<Question> getPlugins() {
-			return Collections.unmodifiableList(plugins);
-		}
-	}
-
-	private class VirtualDomainQuestion
-			extends SingleAnswerQuestion {
-
-		VirtualDomainQuestion(String id, Config config) {
-			super(id, () -> Optional.ofNullable(config.defaultVirtualDomain).orElse(""), vhost -> {
-				config.defaultVirtualDomain = vhost;
-			});
-		}
-	}
-
+	
 }

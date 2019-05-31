@@ -23,6 +23,7 @@ import groovy.text.TemplateEngine
 import groovy.transform.CompileStatic
 import tigase.db.AuthRepositoryMDImpl
 import tigase.http.modules.AbstractBareModule
+import tigase.http.modules.setup.pages.Page
 import tigase.http.util.CSSHelper
 
 import javax.servlet.ServletConfig
@@ -93,12 +94,12 @@ public class SetupServlet
 				i = Integer.parseInt(step);
 			}
 
-			t = templates.get("step" + i);
 			if (i > 1 && "POST".equals(request.getMethod())) {
-				Setup.Page page = setup.getPage(i - 1);
+				Page page = setup.getPageById(i - 1);
 				page.setValues(request.getParameterMap());
 			}
-			Setup.Page page = setup.getPage(i);
+			Page page = setup.getPageById(i);
+			t = templates.get(page.getTemplate());
 			page.beforeDisplay();
 			templateParams.put("page", page);
 			templateParams.put("currentStep", i);
@@ -137,27 +138,22 @@ public class SetupServlet
 	}
 
 	private void loadTemplates() {
-		int i = 1;
-		boolean loaded = true;
-		while (loaded) {
+		templates.clear();
+		
+		List<String> templatesFilenames = setup.getTemplates();
+		for (String templateFilename: templatesFilenames) {
 			try {
-				String templateSrc = load("step", i, "html");
+				String templateSrc = load(templateFilename);
 				Template template = templateEngine.createTemplate(templateSrc);
-				templates.put("step" + i, template);
-				log.log(Level.FINEST, "loaded html template for step " + i);
+				templates.put(templateFilename, template);
+				log.log(Level.FINEST, "loaded html template from " + templateFilename);
 			} catch (Exception ex) {
-				if (ex instanceof IOException && "Resource not found".equals(ex.getMessage())) {
-					log.log(Level.FINEST, "loaded " + (i-1) + " resource files.")
-				} else {
-					log.log(Level.FINEST, "resource file for index = " + i + " was not found and could not be loaded", ex);
-				}
-				loaded = false;
+				log.log(Level.FINEST, "resource file " + templateFilename + " was not found and could not be loaded", ex);
 			}
-			i++;
 		}
 		[ "header", "footer", "index", "edit" ].each { String file ->
 			try {
-				String templateSrc = load(file, null, "html");
+				String templateSrc = load(file + ".html");
 				Template template = templateEngine.createTemplate(templateSrc);
 				templates.put(file, template);
 			} catch (Exception ex) {
@@ -166,8 +162,8 @@ public class SetupServlet
 		}
 	}
 
-	private String load(String prefix, Integer i, String suffix) throws IOException {
-		String path = "tigase/setup/" + prefix + (i == null ? "" : ("-" + i)) + "." + suffix;
+	private String load(String filename) throws IOException {
+		String path = "tigase/setup/" + filename;
 		File f = new File(path);
 		InputStream is = null;
 		if (f.exists()) {

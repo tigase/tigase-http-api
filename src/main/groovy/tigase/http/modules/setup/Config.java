@@ -40,16 +40,16 @@ import java.util.stream.Collectors;
 public class Config {
 
 	protected boolean acs = true;
-	protected String adminPwd = "tigase";
-	protected BareJID[] admins = new BareJID[]{
+	public String adminPwd = "tigase";
+	public BareJID[] admins = new BareJID[]{
 			BareJID.bareJIDInstanceNS("admin@" + DNSResolverFactory.getInstance().getDefaultHost())};
-	protected boolean advancedConfig = false;
+	public boolean advancedConfig = false;
 	private boolean clusterMode = false;
-	protected Properties dbProperties = new Properties();
-	protected SetupHelper.HttpSecurity httpSecurity = new SetupHelper.HttpSecurity();
-	protected Set<String> optionalComponents = new HashSet<>();
-	protected Set<String> plugins = new HashSet<>();
-	protected String defaultVirtualDomain = DNSResolverFactory.getInstance().getDefaultHost();
+	public Properties dbProperties = new Properties();
+	public SetupHelper.HttpSecurity httpSecurity = new SetupHelper.HttpSecurity();
+	public Set<String> optionalComponents = new HashSet<>();
+	public Set<String> plugins = new HashSet<>();
+	public String defaultVirtualDomain = DNSResolverFactory.getInstance().getDefaultHost();
 	private String acsName = "";
 	private ConfigTypeEnum configType = ConfigTypeEnum.DefaultMode;
 	private String dbType = null;
