@@ -38,11 +38,11 @@ class UserStatusHandler
 						POST  : [ info       : 'Set user status',
 								  description: """Part of url {user_jid} is parameter which is jid of user which status you want to set and {resource} is optional resource of the jid.\n\
 Additional data needs to be passed as content of HTTP request:
-\${util.formatData([available: 'true', priority: '-1', show: 'xa', status: 'On the phone'])}
+\${util.formatData([available: 'true', priority: '-1', show: 'xa', status: 'On the phone', activity: [category: 'talking', type: 'on_the_phone', text: 'Optional description']])}
 Data will be returned in form of JSON or XML depending on selected format by Accept HTTP header
 
 Example response:
-\${util.formatData([available: 'true', priority: '-1', show: 'xa', status: 'On the phone'])}				
+\${util.formatData([available: 'true', priority: '-1', show: 'xa', status: 'On the phone', activity: [category: 'talking', type: 'on_the_phone', text: 'Optional description']])}				
 """ ] ];
 		regex = /\/([^@\/]+)@([^@\/]+)\/status(\/[^@\/]+)?/
 		authRequired = { api_key -> return api_key == null && requiredRole != null }
@@ -58,6 +58,7 @@ Example response:
 			String priority = content.priority ?: "-1";
 			String show = content.show;
 			String status = content.status;
+			Map<String, String> activity = content.activity;
 
 			String hash = Algorithms.sha256(userJid);
 
@@ -80,12 +81,31 @@ Example response:
 			if (status != null && !status.isEmpty()) {
 				presence.addChild(new Element("status", XMLUtils.escape(status)));
 			}
+			if (activity != null) {
+				String category = activity.get("category");
+				if (category != null) {
+					Element activityEl = new Element("activity").withAttribute("xmlns", "http://jabber.org/protocol/activity");
+					Element categoryEl = new Element(category);
+					activityEl.addChild(categoryEl);
+
+					String type = activity.get("type");
+					if (type != null) {
+						categoryEl.addChild(new Element(type));
+					}
+
+					String text = activity.get("text");
+					if (text != null && !text.isEmpty()) {
+						activityEl.addChild(new Element("text",XMLUtils.escape(text)));
+					}
+					presence.addChild(activityEl);
+				}
+			}
 
 			packet.getElement().getChild("command").addChild(presence);
 
 			service.sendPacket(packet, 5 * 1000, { result ->
 				boolean ok = result != null && result.getType() == StanzaType.result;
-				callback([ status: [ user: userJid, available: available, priority: priority, show: show, status: status, success: ok] ]);
+				callback([ status: [ user: userJid, available: available, priority: priority, show: show, status: status, success: ok, activity: activity] ]);
 			});
 		}
 	}
