@@ -53,6 +53,9 @@ Example response:
 			if (resource == null || resource.isEmpty()) {
 				resource = "tigase-external";
 			}
+			if (content.command) {
+				content = content.command;
+			}
 			String userJid = "${localPart}@${domain}/${resource}";
 			String available = content.available ?: "true";
 			String priority = content.priority ?: "-1";
@@ -84,7 +87,8 @@ Example response:
 			if (activity != null) {
 				String category = activity.get("category");
 				if (category != null) {
-					Element activityEl = new Element("activity").withAttribute("xmlns", "http://jabber.org/protocol/activity");
+					Element activityEl = new Element("activity");
+					activityEl.setXMLNS("http://jabber.org/protocol/activity");
 					Element categoryEl = new Element(category);
 					activityEl.addChild(categoryEl);
 
