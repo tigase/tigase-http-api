@@ -86,14 +86,14 @@ Example response:
 			}
 			if (activity != null) {
 				String category = activity.get("category");
-				if (category != null) {
+				if (category != null && !category.isEmpty()) {
 					Element activityEl = new Element("activity");
 					activityEl.setXMLNS("http://jabber.org/protocol/activity");
 					Element categoryEl = new Element(category);
 					activityEl.addChild(categoryEl);
 
 					String type = activity.get("type");
-					if (type != null) {
+					if (type != null && !type.isEmpty()) {
 						categoryEl.addChild(new Element(type));
 					}
 
