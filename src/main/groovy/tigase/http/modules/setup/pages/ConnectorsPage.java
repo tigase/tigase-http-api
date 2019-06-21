@@ -33,7 +33,7 @@ public class ConnectorsPage
 	private List<SingleAnswerQuestion> questionsWithLabels = new ArrayList<>();
 
 	public ConnectorsPage(Config config) {
-		super("Connectors", "connectors.html", Stream.empty());
+		super("Connectivity", "connectors.html", Stream.empty());
 		this.config = config;
 		addConnectorsQuestions();
 	}
@@ -51,15 +51,15 @@ public class ConnectorsPage
 	}
 
 	private void addConnectorsQuestions() {
-		SingleAnswerQuestion question = new ConnectorsQuestion("c2s", "Client connections", config);
+		SingleAnswerQuestion question = new ConnectorsQuestion("c2s", "Desktop / Mobile", config);
 		addQuestion(question);
-		question = new ConnectorsQuestion("bosh", "BOSH connections", config);
+		question = new ConnectorsQuestion("bosh", "Web (HTTP)", config);
 		addQuestion(question);
-		question = new ConnectorsQuestion("ws2s", "WebSocket connections", config);
+		question = new ConnectorsQuestion("ws2s", "Web (WebSocket)", config);
 		addQuestion(question);
-		question = new ConnectorsQuestion("s2s", "Server-to-Server connections", config);
+		question = new ConnectorsQuestion("s2s", "Federation", config);
 		addQuestion(question);
-		question = new SingleAnswerQuestion("ext", "External components connections", ()-> (config.optionalComponents.contains("ext") && config.optionalComponents.contains("ext-man")) ? "ext" : null, (val) -> {
+		question = new SingleAnswerQuestion("ext", "External", ()-> (config.optionalComponents.contains("ext") && config.optionalComponents.contains("ext-man")) ? "ext" : null, (val) -> {
 			if (val != null ? (Boolean.parseBoolean(val) || "on".equals(val)) : false) {
 				config.optionalComponents.add("ext");
 				config.optionalComponents.add("ext-man");
@@ -69,7 +69,7 @@ public class ConnectorsPage
 			}
 		});
 		addQuestion(question);
-		question = new SingleAnswerQuestion("http", "HTTP API/REST API/Admin UI", () -> config.optionalComponents.contains("http") ? "http" :null, (val) -> {
+		question = new SingleAnswerQuestion("http", "REST API/Admin UI", () -> config.optionalComponents.contains("http") ? "http" :null, (val) -> {
 			if (val != null ? (Boolean.parseBoolean(val) || "on".equals(val)) : false) {
 				config.optionalComponents.add("http");
 			} else {

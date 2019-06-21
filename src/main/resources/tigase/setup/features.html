@@ -38,7 +38,7 @@ ${ util.include('header', [title:'Setup: ' + page.title]) }
 
 		<% def q2 = page.getQuestion('acsComponent') %>
 		<% fieldFn(q2, "Tigase Advanced Clustering Strategy (ACS) Component", { q -> %>
-		<input name='${q.getName()}' id='acsComponent' type="checkbox" ${ q1.isSelected("true") ? "" : "disabled"} ${ q.isSelected("true") ? 'checked' : '' } /><span id="acs-warn" style="color: red; display: none;"><br/>Warning: Tigase ACS is required for PubSub and MUC components to work and cannot be disabled!</span>
+		<input class="form-control" name='${q.getName()}' id='acsComponent' type="checkbox" ${ q1.isSelected("true") ? "" : "disabled"} ${ q.isSelected("true") ? 'checked' : '' } /><span id="acs-warn" style="color: red; display: none;"><br/>Warning: Tigase ACS is required for PubSub and MUC components to work and cannot be disabled!</span>
 		<% }); %>
 	</div>
 </div>
