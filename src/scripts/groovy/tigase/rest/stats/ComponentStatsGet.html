@@ -21,8 +21,8 @@ ${ util.include('header', [title: result?.stats?.component + ' statistics',
     imports: [
 	[ type: 'css', content:'.chart-bar-legend { display: block; } .chart-bar-legend > li { width: 100; display: block; padding: 2px; }' ]
     ]]) }
-<script src="${request.getContextPath()}/static/Chart.min.js" ></script>
-<script src="${request.getContextPath()}/static/chart_legend_templates.js" ></script>
+<script src="${request.getContextPath() ?: ''}/static/Chart.min.js" ></script>
+<script src="${request.getContextPath() ?: ''}/static/chart_legend_templates.js" ></script>
 
 <% def userConnections = null;
    def tmp = result.stats.data.findAll { it.var.contains(' user connections') };
