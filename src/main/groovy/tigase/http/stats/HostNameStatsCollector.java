@@ -48,7 +48,6 @@ public class HostNameStatsCollector
 	public void count(HttpServletRequest request) {
 		String host = request.getHeader("Host");
 		host = host.contains(":") ? host.substring(0, host.indexOf(':')) : host;
-		System.out.println("Host: " + host);
 		counters.computeIfAbsent(host, k -> new AtomicLong()).getAndIncrement();
 	}
 
