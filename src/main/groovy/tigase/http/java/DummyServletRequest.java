@@ -122,16 +122,20 @@ public class DummyServletRequest
 
 	@Override
 	public int getContentLength() {
-		String contentLength = exchange.getRequestHeaders().getFirst("Content-Length");
-		if (contentLength == null || contentLength.isEmpty()) {
-			return 0;
+		synchronized (exchange) {
+			String contentLength = exchange.getRequestHeaders().getFirst("Content-Length");
+			if (contentLength == null || contentLength.isEmpty()) {
+				return 0;
+			}
+			return Integer.parseInt(contentLength);
 		}
-		return Integer.parseInt(contentLength);
 	}
 
 	@Override
 	public String getContentType() {
-		return exchange.getRequestHeaders().getFirst("Content-Type");
+		synchronized (exchange) {
+			return exchange.getRequestHeaders().getFirst("Content-Type");
+		}
 	}
 
 	@Override
@@ -142,9 +146,11 @@ public class DummyServletRequest
 
 			@Override
 			public int read() throws IOException {
-				int read = exchange.getRequestBody().read();
-				finished = read == -1;
-				return read;
+				synchronized (exchange) {
+					int read = exchange.getRequestBody().read();
+					finished = read == -1;
+					return read;
+				}
 			}
 
 			@Override
@@ -154,10 +160,12 @@ public class DummyServletRequest
 
 			@Override
 			public boolean isReady() {
-				try {
-					return exchange.getRequestBody().available() > 0;
-				} catch (IOException ex) {
-					return false;
+				synchronized (exchange) {
+					try {
+						return exchange.getRequestBody().available() > 0;
+					} catch (IOException ex) {
+						return false;
+					}
 				}
 			}
 
@@ -195,27 +203,35 @@ public class DummyServletRequest
 
 	@Override
 	public String getProtocol() {
-		return exchange.getProtocol();
+		synchronized (exchange) {
+			return exchange.getProtocol();
+		}
 	}
 
 	@Override
 	public String getScheme() {
-		return exchange.getProtocol();
+		synchronized (exchange) {
+			return exchange.getProtocol();
+		}
 	}
 
 	@Override
 	public String getServerName() {
-		return exchange.getRequestHeaders().getFirst("Host");
+		synchronized (exchange) {
+			return exchange.getRequestHeaders().getFirst("Host");
+		}
 	}
 
 	@Override
 	public int getServerPort() {
-		return exchange.getLocalAddress().getPort();
+		synchronized (exchange) {
+			return exchange.getLocalAddress().getPort();
+		}
 	}
 
 	@Override
 	public BufferedReader getReader() throws IOException {
-		synchronized (this) {
+		synchronized (exchange) {
 			if (reader == null) {
 				reader = new BufferedReader(new InputStreamReader(exchange.getRequestBody(), characterEncoding));
 			}
@@ -225,12 +241,16 @@ public class DummyServletRequest
 
 	@Override
 	public String getRemoteAddr() {
-		return exchange.getRemoteAddress().toString();
+		synchronized (exchange) {
+			return exchange.getRemoteAddress().toString();
+		}
 	}
 
 	@Override
 	public String getRemoteHost() {
-		return exchange.getRemoteAddress().getHostName();
+		synchronized (exchange) {
+			return exchange.getRemoteAddress().getHostName();
+		}
 	}
 
 	@Override
@@ -253,7 +273,9 @@ public class DummyServletRequest
 
 	@Override
 	public boolean isSecure() {
-		return exchange.getHttpContext().getServer() instanceof HttpsServer;
+		synchronized (exchange) {
+			return exchange.getHttpContext().getServer() instanceof HttpsServer;
+		}
 	}
 
 	@Override
@@ -268,22 +290,30 @@ public class DummyServletRequest
 
 	@Override
 	public int getRemotePort() {
-		return exchange.getRemoteAddress().getPort();
+		synchronized (exchange) {
+			return exchange.getRemoteAddress().getPort();
+		}
 	}
 
 	@Override
 	public String getLocalName() {
-		return exchange.getRequestURI().getHost();
+		synchronized (exchange) {
+			return exchange.getRequestURI().getHost();
+		}
 	}
 
 	@Override
 	public String getLocalAddr() {
-		return exchange.getLocalAddress().toString();
+		synchronized (exchange) {
+			return exchange.getLocalAddress().toString();
+		}
 	}
 
 	@Override
 	public int getLocalPort() {
-		return exchange.getLocalAddress().getPort();
+		synchronized (exchange) {
+			return exchange.getLocalAddress().getPort();
+		}
 	}
 
 	@Override
@@ -340,7 +370,9 @@ public class DummyServletRequest
 
 	@Override
 	public String getHeader(String string) {
-		return exchange.getRequestHeaders().getFirst(string);
+		synchronized (exchange) {
+			return exchange.getRequestHeaders().getFirst(string);
+		}
 	}
 
 	@Override
@@ -350,7 +382,9 @@ public class DummyServletRequest
 
 	@Override
 	public Enumeration<String> getHeaderNames() {
-		return Collections.enumeration(exchange.getRequestHeaders().keySet());
+		synchronized (exchange) {
+			return Collections.enumeration(exchange.getRequestHeaders().keySet());
+		}
 	}
 
 	@Override
@@ -384,7 +418,9 @@ public class DummyServletRequest
 
 	@Override
 	public String getQueryString() {
-		return exchange.getRequestURI().getQuery();
+		synchronized (exchange) {
+			return exchange.getRequestURI().getQuery();
+		}
 	}
 
 	@Override
@@ -443,28 +479,32 @@ public class DummyServletRequest
 
 	@Override
 	public String getRequestURI() {
-		String uri = exchange.getRequestURI().toString();
-		int idx = uri.indexOf("?");
-		if (idx > -1) {
-			uri = uri.substring(0, idx);
+		synchronized (exchange) {
+			String uri = exchange.getRequestURI().toString();
+			int idx = uri.indexOf("?");
+			if (idx > -1) {
+				uri = uri.substring(0, idx);
+			}
+			return uri;
 		}
-		return uri;
 	}
 
 	@Override
 	public StringBuffer getRequestURL() {
 		StringBuffer buf = new StringBuffer();
 		try {
-			if (exchange.getRequestURI().isAbsolute()) {
-				buf.append(exchange.getRequestURI().toURL().toExternalForm());
-			} else {
-				if (isSecure()) {
-					buf.append("https");
+			synchronized (exchange) {
+				if (exchange.getRequestURI().isAbsolute()) {
+					buf.append(exchange.getRequestURI().toURL().toExternalForm());
 				} else {
-					buf.append("http");
+					if (isSecure()) {
+						buf.append("https");
+					} else {
+						buf.append("http");
+					}
+					buf.append("://").append(getServerName());
+					buf.append(exchange.getRequestURI().getPath());
 				}
-				buf.append("://").append(getServerName());
-				buf.append(exchange.getRequestURI().getPath());
 			}
 		} catch (MalformedURLException ex) {
 			Logger.getLogger(DummyServletRequest.class.getName()).log(Level.FINE, "could not read request URL", ex);
@@ -511,9 +551,11 @@ public class DummyServletRequest
 	public boolean authenticate(HttpServletResponse hsr) throws IOException, ServletException {
 		hsr.setHeader("WWW-Authenticate", "Basic realm=\"TigasePlain\"");
 		hsr.sendError(401, "Not authorized");
-		if (!"HEAD".equals(exchange.getRequestMethod())) {
-			exchange.getResponseBody().flush();
-			exchange.getResponseBody().close();
+		synchronized (exchange) {
+			if (!"HEAD".equals(exchange.getRequestMethod())) {
+				exchange.getResponseBody().flush();
+				exchange.getResponseBody().close();
+			}
 		}
 		return false;
 	}
@@ -550,11 +592,13 @@ public class DummyServletRequest
 
 	@Override
 	public long getContentLengthLong() {
-		String contentLength = exchange.getRequestHeaders().getFirst("Content-Length");
-		if (contentLength == null || contentLength.isEmpty()) {
-			return 0;
+		synchronized (exchange) {
+			String contentLength = exchange.getRequestHeaders().getFirst("Content-Length");
+			if (contentLength == null || contentLength.isEmpty()) {
+				return 0;
+			}
+			return Long.parseLong(contentLength);
 		}
-		return Long.parseLong(contentLength);
 	}
 
 	@Override

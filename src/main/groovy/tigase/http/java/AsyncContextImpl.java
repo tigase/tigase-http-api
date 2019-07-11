@@ -78,12 +78,14 @@ public class AsyncContextImpl
 	@Override
 	public void complete() {
 		cancel();
-		try {
-			resp.flushBuffer();
-		} catch (IOException ex) {
-			log.log(Level.FINEST, "Failure during completion of async task", ex);
+		synchronized (exchange) {
+			try {
+				resp.flushBuffer();
+			} catch (IOException ex) {
+				log.log(Level.FINEST, "Failure during completion of async task", ex);
+			}
+			exchange.close();
 		}
-		exchange.close();
 	}
 
 	@Override
@@ -121,11 +123,17 @@ public class AsyncContextImpl
 
 	private void timeout() {
 		try {
-			exchange.sendResponseHeaders(504, -1);
-		} catch (IOException ex) {
-			log.log(Level.FINEST, " failed to send 504 error", ex);
+			synchronized (exchange) {
+				try {
+					exchange.sendResponseHeaders(504, -1);
+				} catch (IOException ex) {
+					log.log(Level.FINEST, " failed to send 504 error", ex);
+				}
+				exchange.close();
+			}
+		} catch (Throwable ex) {
+			log.log(Level.FINEST, " failed to send 504 error, throwable thrown:", ex);
 		}
-		exchange.close();
 	}
 
 	public void cancel() {

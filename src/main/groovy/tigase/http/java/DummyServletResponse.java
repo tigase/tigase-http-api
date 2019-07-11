@@ -61,7 +61,9 @@ public class DummyServletResponse
 
 	@Override
 	public void setContentType(String string) {
-		exchange.getResponseHeaders().set("Content-Type", string);
+		synchronized (exchange) {
+			exchange.getResponseHeaders().set("Content-Type", string);
+		}
 	}
 
 	@Override
@@ -69,10 +71,12 @@ public class DummyServletResponse
 		return new ServletOutputStream() {
 			@Override
 			public void write(int b) throws IOException {
-				if (exchange.getResponseCode() == -1) {
-					sendResponseHeaders(200, 0);
+				synchronized (exchange) {
+					if (exchange.getResponseCode() == -1) {
+						sendResponseHeaders(200, 0);
+					}
+					exchange.getResponseBody().write(b);
 				}
-				exchange.getResponseBody().write(b);
 			}
 
 			@Override
@@ -89,17 +93,21 @@ public class DummyServletResponse
 	@Override
 	public PrintWriter getWriter() throws IOException {
 		if (writer == null) {
-			if (exchange.getResponseCode() == -1) {
-				sendResponseHeaders(200, 0);
+			synchronized (exchange) {
+				if (exchange.getResponseCode() == -1) {
+					sendResponseHeaders(200, 0);
+				}
+				writer = new PrintWriter(exchange.getResponseBody());
 			}
-			writer = new PrintWriter(exchange.getResponseBody());
 		}
 		return writer;
 	}
 
 	@Override
 	public void setContentLength(int i) {
-		exchange.getResponseHeaders().set("Content-Length", String.valueOf(i));
+		synchronized (exchange) {
+			exchange.getResponseHeaders().set("Content-Length", String.valueOf(i));
+		}
 	}
 
 	@Override
@@ -113,10 +121,12 @@ public class DummyServletResponse
 
 	@Override
 	public void flushBuffer() throws IOException {
-		if (writer != null) {
-			writer.flush();
+		synchronized (exchange) {
+			if (writer != null) {
+				writer.flush();
+			}
+			exchange.getResponseBody().flush();
 		}
-		exchange.getResponseBody().flush();
 	}
 
 	@Override
@@ -196,13 +206,15 @@ public class DummyServletResponse
 
 	@Override
 	public void sendError(int i, String string) throws IOException {
-		if (string != null && !"HEAD".equals(exchange.getRequestMethod())) {
-			sendResponseHeaders(i, string.getBytes().length);
-			PrintWriter writer = getWriter();
-			writer.write(string);
-			writer.flush();
-		} else {
-			sendResponseHeaders(i, 0);
+		synchronized (exchange) {
+			if (string != null && !"HEAD".equals(exchange.getRequestMethod())) {
+				sendResponseHeaders(i, string.getBytes().length);
+				PrintWriter writer = getWriter();
+				writer.write(string);
+				writer.flush();
+			} else {
+				sendResponseHeaders(i, 0);
+			}
 		}
 	}
 
@@ -227,12 +239,16 @@ public class DummyServletResponse
 
 	@Override
 	public void setHeader(String string, String string1) {
-		exchange.getResponseHeaders().set(string, string1);
+		synchronized (exchange) {
+			exchange.getResponseHeaders().set(string, string1);
+		}
 	}
 
 	@Override
 	public void addHeader(String string, String string1) {
-		exchange.getResponseHeaders().add(string, string1);
+		synchronized (exchange) {
+			exchange.getResponseHeaders().add(string, string1);
+		}
 	}
 
 	@Override
@@ -268,7 +284,9 @@ public class DummyServletResponse
 
 	@Override
 	public String getHeader(String string) {
-		return exchange.getResponseHeaders().getFirst(string);
+		synchronized (exchange) {
+			return exchange.getResponseHeaders().getFirst(string);
+		}
 	}
 
 	@Override
@@ -287,10 +305,12 @@ public class DummyServletResponse
 	}
 
 	private void sendResponseHeaders(int rCode, int contentLength) throws IOException {
-		if ("HEAD".equals(exchange.getRequestMethod())) {
-			exchange.sendResponseHeaders(rCode, -1);
-		} else {
-			exchange.sendResponseHeaders(rCode, contentLength);
+		synchronized (exchange) {
+			if ("HEAD".equals(exchange.getRequestMethod())) {
+				exchange.sendResponseHeaders(rCode, -1);
+			} else {
+				exchange.sendResponseHeaders(rCode, contentLength);
+			}
 		}
 	}
 }

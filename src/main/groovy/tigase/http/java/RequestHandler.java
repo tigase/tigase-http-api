@@ -142,7 +142,9 @@ public class RequestHandler
 					log.log(Level.FINEST,
 							"not found handler for request " + reqId + " for " + he.getRequestURI().toString());
 				}
-				he.sendResponseHeaders(404, -1);
+				synchronized (he) {
+					he.sendResponseHeaders(404, -1);
+				}
 			}
 		} catch (IOException ex) {
 			timer.requestProcessingFinished();
@@ -158,7 +160,9 @@ public class RequestHandler
 						ex);
 			}
 			try {
-				he.sendResponseHeaders(500, -1);
+				synchronized (he) {
+					he.sendResponseHeaders(500, -1);
+				}
 			} catch (IOException ex1) {
 				// ignoring IOException - here we want to properly finish processing this request
 			}
@@ -174,7 +178,9 @@ public class RequestHandler
 				if (async instanceof AsyncContextImpl) {
 					((AsyncContextImpl) async).cancel();
 				}
-				he.close();
+				synchronized (he) {
+					he.close();
+				}
 				if (log.isLoggable(Level.FINEST)) {
 					log.log(Level.FINEST, "request " + reqId + " processing finished!");
 				}
@@ -183,7 +189,9 @@ public class RequestHandler
 			if (log.isLoggable(Level.FINEST)) {
 				log.log(Level.FINEST, "request " + reqId + " processing finished!");
 			}
-			he.close();
+			synchronized (he) {
+				he.close();
+			}
 		}
 		timer.requestProcessingFinished();
 	}
