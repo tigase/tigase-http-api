@@ -86,6 +86,22 @@ httpServer (class: tigase.http.jetty.JettyStandaloneHttpServer) {
 }
 ----
 
+[[jettyHttp2]]
+===== HTTP/2 and Jetty HTTP Server
+If Jetty HTTP server is used in standalone mode, JDK which Tigase is using is newer then JDK 8 and HTTP server is configured to serve data over encrypted (`ssl` or `tls`) connections then HTTP/2 will be enabled by default.
+
+However it is possible to disable HTTP/2 by setting `use-http2` property of encrypted port to `false`, ie. for port 8443:
+[source,properties]
+----
+httpServer (class: tigase.http.jetty.JettyStandaloneHttpServer) {
+    ...
+    '8443' () {
+        socket = ssl
+        'use-http2' = false
+    }
+}
+----
+
 ==== OSGi
 This can only be used when Tigase is running inside OSGi container.
 If this is used Tigase HTTP API will try to retrieve Jetty HTTP server from OSGi container and use it.
