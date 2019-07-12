@@ -17,8 +17,10 @@
  */
 package tigase.http.jetty;
 
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.alpn.server.ALPNServerConnectionFactory;
+import org.eclipse.jetty.http2.HTTP2Cipher;
+import org.eclipse.jetty.http2.server.HTTP2ServerConnectionFactory;
+import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
@@ -28,12 +30,14 @@ import tigase.kernel.beans.Bean;
 import tigase.kernel.beans.Initializable;
 import tigase.kernel.beans.Inject;
 import tigase.kernel.beans.UnregisterAware;
+import tigase.kernel.beans.config.ConfigField;
 import tigase.net.SocketType;
 
 import javax.net.ssl.*;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -171,26 +175,25 @@ public class JettyStandaloneHttpServer
 				}
 			};
 			contextFactory.setSslContext(context);
-//					if (http2Enabled) {
-//						contextFactory.setCipherComparator(HTTP2Cipher.COMPARATOR);
-//						contextFactory.setUseCipherSuitesOrder(true);
-//
-//						HttpConfiguration httpConfig = new HttpConfiguration();
-//						httpConfig.setSecureScheme("https");
-//						httpConfig.setSecurePort(port);
-//						httpConfig.setSendXPoweredBy(true);
-//						httpConfig.setSendServerVersion(true);
-//
-//						HttpConnectionFactory http1 = new HttpConnectionFactory(httpConfig);
-//						HTTP2ServerConnectionFactory http2 = new HTTP2ServerConnectionFactory(httpConfig);
-//
-//						NegotiatingServerConnectionFactory.checkProtocolNegotiationAvailable();
-//						ALPNServerConnectionFactory alpn = new ALPNServerConnectionFactory();
-//						alpn.setDefaultProtocol(http1.getProtocol())
-//						connector = new ServerConnector(server, contextFactory, alpn, http1, http2);
-//					} else {
-			connector = new ServerConnector(server, contextFactory);
-//					}
+			if (config.useHttp2) {
+						contextFactory.setCipherComparator(HTTP2Cipher.COMPARATOR);
+						contextFactory.setUseCipherSuitesOrder(true);
+
+						HttpConfiguration httpConfig = new HttpConfiguration();
+						httpConfig.setSecureScheme("https");
+						httpConfig.setSecurePort(config.getPort());
+						httpConfig.setSendXPoweredBy(true);
+						httpConfig.setSendServerVersion(true);
+
+						HttpConnectionFactory http1 = new HttpConnectionFactory(httpConfig);
+						HTTP2ServerConnectionFactory http2 = new HTTP2ServerConnectionFactory(httpConfig);
+
+						ALPNServerConnectionFactory alpn = new ALPNServerConnectionFactory();
+						alpn.setDefaultProtocol(http1.getProtocol());
+						connector = new ServerConnector(server, contextFactory, alpn, http2, http1);
+			} else {
+				connector = new ServerConnector(server, contextFactory);
+			}
 		}
 		connector.setPort(config.getPort());
 		return connector;
@@ -199,9 +202,19 @@ public class JettyStandaloneHttpServer
 	public static class PortConfigBean
 			extends AbstractHttpServer.PortConfigBean {
 
+		private static final boolean isHttp2Available() {
+			return Optional.ofNullable(System.getProperty("java.version"))
+					.map(version -> version.split("\\.")[0])
+					.map(Integer::parseInt)
+					.map(version -> version >= 9)
+					.orElse(false);
+		}
+
 		private ServerConnector connector = null;
 		@Inject
 		private JettyStandaloneHttpServer serverManager;
+		@ConfigField(desc = "Enable HTTP2 if supported", alias = "use-http2")
+		private Boolean useHttp2 = isHttp2Available();
 
 		@Override
 		public void beforeUnregister() {
@@ -223,6 +236,9 @@ public class JettyStandaloneHttpServer
 
 		@Override
 		public void beanConfigurationChanged(Collection<String> changedFields) {
+			if (getSocket() == SocketType.plain || !isHttp2Available()) {
+				useHttp2 = false;
+			}
 			beforeUnregister();
 			initialize();
 		}
