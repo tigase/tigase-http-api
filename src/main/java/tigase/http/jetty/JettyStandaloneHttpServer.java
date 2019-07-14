@@ -139,9 +139,9 @@ public class JettyStandaloneHttpServer
 	protected void unregisterConnector(ServerConnector connector, boolean secure) {
 		server.removeConnector(connector);
 		if (secure) {
-			httpsPorts.remove(connector.getPort());
+			httpsPorts.remove((Integer) connector.getPort());
 		} else {
-			httpPorts.remove(connector.getPort());
+			httpPorts.remove((Integer) connector.getPort());
 		}
 	}
 
