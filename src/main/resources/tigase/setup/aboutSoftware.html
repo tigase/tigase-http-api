@@ -7,7 +7,7 @@ ${ util.include('header', [title:'Setup: ' + page.title, currentStep:'test']) }
 </div>
 <form class="form-horizontal" method='POST' action="?step=${ page.nextPage() }">
 
-    <button class="btn btn-default" type="submit">Next</button>
+    <button class="btn btn-default" type="submit" name="next">Next</button>
 
 </form>
 ${ util.include('footer') }

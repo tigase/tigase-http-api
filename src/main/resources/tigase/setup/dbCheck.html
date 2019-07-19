@@ -39,7 +39,7 @@ ${ util.include('header', [title:'Setup: ' + page.title]) }
 <!--</table>-->
 <form method='POST' action="?step=${ page.nextPage() }">
 
-	<button class="btn btn-default" type="submit">Next</button>
+	<button class="btn btn-default" type="submit" name="next">Next</button>
 
 </form>
 ${ util.include('footer') } 
