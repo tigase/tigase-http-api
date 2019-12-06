@@ -1,4 +1,4 @@
-/**
+/*
  * Tigase HTTP API - Jetty - Tigase HTTP API - support for Jetty HTTP Server
  * Copyright (C) 2014 Tigase, Inc. (office@tigase.com)
  *
