@@ -31,10 +31,14 @@ import tigase.xmpp.jid.BareJID
 
 import javax.servlet.http.HttpServletRequest
 import java.security.MessageDigest
+import java.util.logging.Level
+import java.util.logging.Logger
 
 @Bean(name = "password-reset-form", active = true)
 class ResetPasswordFormHandler
 		extends tigase.http.rest.Handler {
+
+	def log = Logger.getLogger("tigase.rest")
 
 	private Random random = new Random();
 
@@ -109,7 +113,10 @@ class ResetPasswordFormHandler
 
 			if (errors.isEmpty()) {
 				try {
-					sendToken(jid, request.getRequestURL().toString());
+					def requestURL = request.getRequestURL().toString()
+					def forwarded = getForwardedFor(request);
+					def resetUrl = forwarded ? replaceRequestDomain(requestURL, forwarded) : requestURL
+					sendToken(jid, resetUrl);
 				} catch (Exception ex) {
 					errors.add("Internal error occurred. Please try again later.");
 				}
@@ -157,5 +164,28 @@ class ResetPasswordFormHandler
 		return Algorithms.bytesToHex(
 				MessageDigest.getInstance("SHA1").digest((captcha + " = " + result.trim()).getBytes("UTF-8"))).
 				equals(id);
+	}
+
+	private String getForwardedFor(HttpServletRequest request) {
+		def forwardedHostname = null
+		try {
+			def forwarded = request.getHeader("X-Forwarded-For");
+			if (forwarded) {
+				def address = request.getRemoteAddr()
+				def clearAddress = address.replaceAll("/", "");
+				if (clearAddress == "127.0.0.1") {
+					forwardedHostname = forwarded.split(",")[0]
+				}
+			}
+		} catch (Exception e) {
+			log.log(Level.WARNING, "Error obtaining forward address", e)
+		}
+		return forwardedHostname;
+	}
+
+	private String replaceRequestDomain(String url, String domain) {
+		final int start = url.indexOf("//")+2;
+		final int stop = url.indexOf("/", start);
+		System.out.println(url.substring(0,start) + domain + url.substring(stop));
 	}
 }
