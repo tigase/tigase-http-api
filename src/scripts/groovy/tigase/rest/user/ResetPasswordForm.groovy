@@ -108,6 +108,7 @@ class ResetPasswordFormHandler
 				errors.add("Provided email address does not match email address used during registration. " +
 								   "Please try different one or contact XMPP server administrator.")
 			} catch (TigaseDBException ex) {
+				log.log(Level.WARNING, "Database issue when processing request: " + request, ex)
 				errors.add("Internal error occurred. Please try again later.")
 			}
 
@@ -118,6 +119,7 @@ class ResetPasswordFormHandler
 					def resetUrl = forwarded ? replaceRequestDomain(requestURL, forwarded) : requestURL
 					sendToken(jid, resetUrl);
 				} catch (Exception ex) {
+					log.log(Level.WARNING, "Issue when processing request: ${request}", ex)
 					errors.add("Internal error occurred. Please try again later.");
 				}
 			}
@@ -186,6 +188,6 @@ class ResetPasswordFormHandler
 	private String replaceRequestDomain(String url, String domain) {
 		final int start = url.indexOf("//")+2;
 		final int stop = url.indexOf("/", start);
-		System.out.println(url.substring(0,start) + domain + url.substring(stop));
+		return url.substring(0,start) + domain + url.substring(stop);
 	}
 }
