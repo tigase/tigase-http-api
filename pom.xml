@@ -5,7 +5,7 @@
     <parent>
         <groupId>tigase</groupId>
         <artifactId>tigase-projects-parent</artifactId>
-        <version>1.0.1</version>
+        <version>1.0.3-SNAPSHOT</version>
         <relativePath />
     </parent>
 
@@ -35,9 +35,9 @@
     </licenses>
 
     <scm>
-        <connection>scm:git:${scm_repo_base}/tigase-http-api.git</connection>
-        <developerConnection>scm:git:${scm_repo_base}/tigase-http-api.git</developerConnection>
-        <url>https://tigase.tech/projects/tigase-http-api/repository</url>
+        <connection>scm:git:${scm_repo_base}tigase/tigase-http-api.git</connection>
+        <developerConnection>scm:git:${scm_repo_base}tigase/tigase-http-api.git</developerConnection>
+        <url>https://github.com/tigase/tigase-http-api</url>
         <tag>HEAD</tag>
     </scm>
 
