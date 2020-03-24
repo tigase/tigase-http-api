@@ -19,7 +19,7 @@
     </properties>
 
     <artifactId>tigase-http-api</artifactId>
-    <version>1.2.3-SNAPSHOT</version>
+    <version>1.2.3</version>
     <packaging>bundle</packaging>
 
     <name>Tigase HTTP API component</name>
@@ -38,7 +38,7 @@
         <connection>scm:git:${scm_repo_base}tigase/tigase-http-api.git</connection>
         <developerConnection>scm:git:${scm_repo_base}tigase/tigase-http-api.git</developerConnection>
         <url>https://github.com/tigase/tigase-http-api</url>
-        <tag>HEAD</tag>
+        <tag>tigase-http-api-1.2.3</tag>
     </scm>
 
     <profiles>
