@@ -176,6 +176,28 @@
         </profile>
 
         <profile>
+            <id>build-under-jdk-ge-9</id>
+            <activation>
+                <jdk>[1.9,)</jdk>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <configuration>
+                            <source>9</source>
+                            <target>9</target>
+                            <release combine.self="override"></release>
+                            <compilerArgs>
+                                <arg>--add-exports</arg><arg>java.base/sun.security.x509=ALL-UNNAMED</arg>
+                            </compilerArgs>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
             <id>dist</id>
             <activation>
                 <activeByDefault>false</activeByDefault>

@@ -1,7 +1,3 @@
-:author: Tigase Team <team@tigase.net>
-:toc:
-:numbered:
-
 include::text/HTTP_API_Component.asciidoc[]
 
 
