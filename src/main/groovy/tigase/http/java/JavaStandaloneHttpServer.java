@@ -183,9 +183,15 @@ public class JavaStandaloneHttpServer
 		public void execute(final Runnable command) {
 			executor.execute(() -> {
 				RequestHandler.setRequestId();
-
+				if (log.isLoggable(Level.FINEST)) {
+					log.log(Level.FINEST, "executing for:" + RequestHandler.getRequestId() + " - " + command.toString());
+				}
 				timer.connectionAccepted();
 				command.run();
+				if (log.isLoggable(Level.FINEST)) {
+					log.log(Level.FINEST, "execution completed for:" + RequestHandler.getRequestId() + " - " + command.toString());
+				}
+				timer.requestProcessingFinished();
 			});
 		}
 
@@ -243,6 +249,9 @@ public class JavaStandaloneHttpServer
 			public void connectionAccepted() {
 				final Thread currentThread = Thread.currentThread();
 				final int reqId = RequestHandler.getRequestId();
+				if (log.isLoggable(Level.FINEST)) {
+					log.log(Level.FINEST, "request accept timer started: " + reqId);
+				}
 				threadTimeouts.set(executor.schedule(() -> {
 					log.log(Level.WARNING, "request accept time exceeded!" + " for id = " + reqId);
 					currentThread.interrupt();
@@ -252,11 +261,18 @@ public class JavaStandaloneHttpServer
 			public void requestProcessingStarted() {
 				ScheduledFuture timeout = threadTimeouts.get();
 				if (timeout != null) {
+					final int reqId = RequestHandler.getRequestId();
+					if (log.isLoggable(Level.FINEST)) {
+						log.log(Level.FINEST, "request accept timer ended: " + reqId);
+					}
 					timeout.cancel(false);
 				}
 
 				final Thread currentThread = Thread.currentThread();
 				final int reqId = RequestHandler.getRequestId();
+				if (log.isLoggable(Level.FINEST)) {
+					log.log(Level.FINEST, "request processing timer started: " + reqId);
+				}
 				threadTimeouts.set(executor.schedule(() -> {
 					log.log(Level.WARNING, "request processing time exceeded!" + " for id = " + reqId);
 					currentThread.interrupt();
@@ -266,6 +282,9 @@ public class JavaStandaloneHttpServer
 			public void requestProcessingFinished() {
 				ScheduledFuture timeout = threadTimeouts.get();
 				if (timeout != null) {
+					if (log.isLoggable(Level.FINEST)) {
+						log.log(Level.FINEST, "request accept/processing timer ended: " + RequestHandler.getRequestId());
+					}
 					timeout.cancel(false);
 				}
 			}
