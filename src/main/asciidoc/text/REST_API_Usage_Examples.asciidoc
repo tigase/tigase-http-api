@@ -154,7 +154,7 @@ Below is an example result for request presented above:
 -----
 {
   "command": {
-    "jid": "vhost-man@atlantiscity",
+    "jid": "vhost-man@domain.com",
     "node": "comp-repo-item-add",
     "fields": [
       {
@@ -419,10 +419,12 @@ Adding domain is done using `comp-repo-item-add` command sent with all required 
 
 To execute the command using XML content you need to set HTTP header `Content-Type` to `application/xml` and the filled out form (below is trimmed example, see <<RetrievingCommandForm>> for details how to get complete form):
 
+NOTE: It's essential to include `command-marker` in the request, otherwise the form will be returned without adding the VHost.
+
 [source,xml]
 -----
 <command>
-    <jid>vhost-man@atlantiscity</jid>
+    <jid>vhost-man@domain.com</jid>
     <node>comp-repo-item-add</node>
     <fields>
         <item>
@@ -431,18 +433,11 @@ To execute the command using XML content you need to set HTTP header `Content-Ty
         </item>
         <item>
             <var>Enabled</var>
-            <type>boolean</type>
             <value>true</value>
         </item>
         <item>
-            <var>Anonymous enabled</var>
-            <type>boolean</type>
-            <value>true</value>
-        </item>
-        <item>
-            <var>In-band registration</var>
-            <type>boolean</type>
-            <value>true</value>
+            <var>command-marker</var>
+            <value>command-marker</value>
         </item>
         …
     </fields>
@@ -454,7 +449,7 @@ If the domain was added correctly you will receive response with `Operation succ
 [source,xml]
 -----
 <command>
-    <jid>vhost-man@atlantiscity</jid>
+    <jid>vhost-man@domain.com</jid>
     <node>comp-repo-item-add</node>
     <fields>
         <item>
@@ -470,11 +465,13 @@ If the domain was added correctly you will receive response with `Operation succ
 
 To execute the command using XML content you need to set HTTP header `Content-Type` to `application/json` and the filled out form (below is trimmed example, see <<RetrievingCommandForm>> for details how to get complete form):
 
+NOTE: It's essential to include `command-marker` in the request, otherwise the form will be returned without adding the VHost.
+
 [source,json]
 -----
 {
   "command": {
-    "jid": "vhost-man@atlantiscity",
+    "jid": "vhost-man@domain.com",
     "node": "comp-repo-item-add",
     "fields": [
       {
@@ -483,18 +480,11 @@ To execute the command using XML content you need to set HTTP header `Content-Ty
       },
       {
         "var": "Enabled",
-        "type": "boolean",
         "value": "true"
       },
       {
-        "var": "Anonymous enabled",
-        "type": "boolean",
-        "value": "true"
-      },
-      {
-        "var": "In-band registration",
-        "type": "boolean",
-        "value": "true"
+        "var": "command-marker",
+        "value": "command-marker"
       }
       …
     ]
@@ -508,7 +498,7 @@ If the domain was added correctly you will receive response with `Operation succ
 -----
 {
   "command": {
-    "jid": "vhost-man@atlantiscity",
+    "jid": "vhost-man@domain.com",
     "node": "comp-repo-item-add",
     "fields": [
       {
