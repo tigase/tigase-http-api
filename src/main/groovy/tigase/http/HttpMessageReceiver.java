@@ -27,6 +27,7 @@ import tigase.kernel.beans.selector.ConfigType;
 import tigase.kernel.beans.selector.ConfigTypeEnum;
 import tigase.kernel.core.Kernel;
 import tigase.server.AbstractMessageReceiver;
+import tigase.server.Iq;
 import tigase.server.Packet;
 import tigase.server.Permissions;
 import tigase.stats.StatisticsList;
@@ -48,6 +49,8 @@ public class HttpMessageReceiver
 		implements PacketWriter, RegistrarBean {
 
 	private static final Logger log = Logger.getLogger(HttpMessageReceiver.class.getCanonicalName());
+	private static final EnumSet<StanzaType> resultTypes = EnumSet.of(StanzaType.error, StanzaType.result);
+
 	@Inject
 	private List<Module> activeModules = new ArrayList<>();
 	@Inject
@@ -178,7 +181,7 @@ public class HttpMessageReceiver
 	public void processPacket(Packet packet) {
 		boolean handled = false;
 
-		if (packet.getType() == StanzaType.result || packet.getType() == StanzaType.error) {
+		if (resultTypes.contains(packet.getType())) {
 			handled = processResultPacket(packet);
 		}
 
@@ -191,11 +194,15 @@ public class HttpMessageReceiver
 
 		// send error result if packet was not handled
 		if (!handled) {
-			try {
-				// we can only process response we are waiting for so return error if packet is not expected
-				addOutPacket(Authorization.FEATURE_NOT_IMPLEMENTED.getResponseMessage(packet, null, false));
-			} catch (PacketErrorTypeException ex) {
-				log.log(Level.FINEST, "packet processing type error", ex);
+			// do not send errors if we received <iq/> with type of "result" or "error" as timeout could be reached
+			// and there is no point in responding with errors for those requests
+			if (packet.getElemName() != Iq.ELEM_NAME || !resultTypes.contains(packet.getType())) {
+				try {
+					// we can only process response we are waiting for so return error if packet is not expected
+					addOutPacket(Authorization.FEATURE_NOT_IMPLEMENTED.getResponseMessage(packet, null, false));
+				} catch (PacketErrorTypeException ex) {
+					log.log(Level.FINEST, "packet processing type error", ex);
+				}
 			}
 		}
 	}
