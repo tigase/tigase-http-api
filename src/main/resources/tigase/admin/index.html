@@ -130,7 +130,7 @@
 										<label class="col-sm-3 control-label" for='${formField.getAttribute("var")}'><%= formField.getAttribute('label') ?: formField.getAttribute("var") %></label>
 										<div class="col-sm-9">
 											<select class="form-control" name='${formField.getAttribute("var")}' ${ (type == 'list-multi') ? 'multiple' : ''} ${formField.getChild('required') ? 'required' : ''}><% formField.getChildren().findAll { it.getName() == 'option' }.each { %>
-											<option value='${it.getChildCData(it.getName()+'/value') ?: ''}' ${formField.getChildren().find{ child -> (child.getName() == 'value') && ((child.getCData() == (it.getChildCData(it.getName()+'/value')) || (child.getCData() == it.getAttribute('label'))))) } ? 'selected' : ''}>${it.getAttribute('label') ?: it.getChildCData(it.getName()+'/value')}</option>
+											<option value='${it.getChildCData(it.getName()+'/value') ?: ''}' ${formField.getChildren().find{ child -> (child.getName() == 'value') && (child.getCData() == (it.getChildCData(it.getName()+'/value') ?: it.getAttribute('label'))) } ? 'selected' : ''}>${it.getAttribute('label') ?: it.getChildCData(it.getName()+'/value')}</option>
 											<% } %>
 											</select>
 										</div>
