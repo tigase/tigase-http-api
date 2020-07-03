@@ -18,7 +18,7 @@
 <div id="wrapper">
 	<nav class="navbar navbar-default navbar-static-top" role = "navigation" style="margin-bottom: 0;">
 		<div class="navbar-header">
-			<a class="navbar-brand" href="/" id="logo">
+			<a class="navbar-brand" href="/admin/" id="logo">
 				<p>Tigase XMPP Server - Admin console<% def currentCommand = model.commands.find { command -> command.node == request.getParameter('_node') && command.jid == request.getParameter('_jid') };
 					if (currentCommand) { %>: ${currentCommand.name}<% } %></p>
 			</a>
@@ -29,9 +29,9 @@
 					<% model.commands.findAll { !it.group }.each { it.group = "Other" };
 					def groups = model.commands.collect { it.group }.unique().sort().each { group -> %>
 					<li>
-						<a ${(group == request.getParameter('_group')) ? 'class="active"' : ''} href="?_group=${java.net.URLEncoder.encode(group ?: '')}"><i class="fa fa-fw"></i>${group}</a><% if (request.getParameter("_group") == group) { %>
+						<a class="sidebar-group-header ${(group == request.getParameter('_group')) ? 'active' : ''}" href="?_group=${java.net.URLEncoder.encode(group ?: '')}"><i class="fa fa-fw"></i>${group}</a><% if (request.getParameter("_group") == group) { %>
 						<ul><% model.commands.findAll { it.group == group }.sort { it.name }.each { command -> %>
-							<li ${ (command.node == request.getParameter('_node') && command.jid == request.getParameter('_jid')) ? 'class="active"' : ''}><a href="?_group=${java.net.URLEncoder.encode(group ?: '')}&_jid=${java.net.URLEncoder.encode(command.jid)}&_node=${java.net.URLEncoder.encode(command.node)}">${command.name}</a><br/><small>${command.jid}</small></li>
+							<li ${ (command.node == request.getParameter('_node') && command.jid == request.getParameter('_jid')) ? 'class="active"' : ''}><a class="command-name" href="?_group=${java.net.URLEncoder.encode(group ?: '')}&_jid=${java.net.URLEncoder.encode(command.jid)}&_node=${java.net.URLEncoder.encode(command.node)}">${command.name}</a><br/><span class="command-jid">${command.jid}</span></li>
 						<% } %></ul><% } %>
 					</li>
 					<% } %>
@@ -202,7 +202,7 @@
 			</div>
 			<div class="panel panel-default">
 				<div class="panel-heading">
-					<h2 class="panel-title">First steps</h2>
+					<h1 class="panel-title">First steps</h1>
 				</div>
 				<div class="panel-body lead">
 					<ul>
@@ -210,6 +210,18 @@
 						<li>After expanding them you can see a list of items from the group.</li>
 						<li>Each item has name (upper line) and associated component (lower line).</li>
 						<li>For more details please refer to the documentation included in the distribution archive or <a href="https://docs.tigase.net/">online</a> </li>
+					</ul>
+				</div>
+			</div>
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h1 class="panel-title">Most common actions</h1>
+				</div>
+				<div class="panel-body lead">
+					<ul>
+						<% model.defaultCommands.each { command -> %>
+							<li><a href="?_group=${java.net.URLEncoder.encode(command.group ?: '')}&_jid=${java.net.URLEncoder.encode(command.jid)}&_node=${java.net.URLEncoder.encode(command.node)}">${command.name}</a></li>
+						<% } %>
 					</ul>
 				</div>
 			</div>

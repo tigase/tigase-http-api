@@ -51,6 +51,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.TemporalAccessor;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -133,8 +134,9 @@ public class Servlet
 		final AsyncContext asyncCtx = request.startAsync(request, response);
 
 		final Map model = new HashMap();
-		retrieveComponentsCommands(request.getUserPrincipal(), (List<Map> commands) -> {
+		retrieveComponentsCommands(request.getUserPrincipal(), (List<Map<String,String>> commands) -> {
 			model.put("commands", commands);
+			model.put("defaultCommands", getDefaultCommands(commands));
 
 			try {
 				String node = request.getParameter("_node");
@@ -142,48 +144,6 @@ public class Servlet
 				if (node != null && jidStr != null) {
 					JID jid = JID.jidInstance(jidStr);
 					processRequestStep(request, asyncCtx, model, jid, node, null);
-//					executeAdhocForm(request.getUserPrincipal(), jid, node, null, (Command.DataType formType, List<Element> formFields) -> {
-//						if (formType == Command.DataType.result || request.getContentLength() == 0) {
-//							model.put("formFields", formFields);
-//							try {
-//								generateResult(asyncCtx, model);
-//							} catch (Exception ex) {
-//								log.log(Level.SEVERE, "exception processing HTTP request", ex);
-//							}
-//						} else {
-//							setFieldValuesFromRequest(formFields, request);
-//
-//							try {
-//								executeAdhocForm(request.getUserPrincipal(), jid, node, formFields, (Command.DataType formType1, List<Element> formFields1) -> {
-//									if (formType1 == Command.DataType.form && requestHasValuesForFields(formFields1, request)) {
-//										setFieldValuesFromRequest(formFields1, request);
-//										try {
-//											executeAdhocForm(request.getUserPrincipal(), jid, node, formFields1, (Command.DataType formType2, List<Element> formFields2) -> {
-//
-//												model.put("formFields", formFields2);
-//												try {
-//													generateResult(asyncCtx, model);
-//												} catch (Exception ex) {
-//													log.log(Level.SEVERE, "exception processing HTTP request", ex);
-//												}
-//											});
-//										} catch (TigaseStringprepException ex) {
-//											log.log(Level.SEVERE, "exception processing HTTP request", ex);
-//										}
-//									} else {
-//										model.put("formFields", formFields1);
-//										try {
-//											generateResult(asyncCtx, model);
-//										} catch (Exception ex) {
-//											log.log(Level.SEVERE, "exception processing HTTP request", ex);
-//										}
-//									}
-//								});
-//							} catch (TigaseStringprepException ex) {
-//								log.log(Level.SEVERE, "exception processing HTTP request", ex);
-//							}
-//						}
-//					});
 				} else {
 					generateResult(asyncCtx, model);
 				}
@@ -221,6 +181,37 @@ public class Servlet
 		asyncCtx.complete();
 	}
 
+	static List<Map<String,String>> getDefaultCommands(List<Map<String,String>> commands) {
+		final List<Map<String, String>> result = new CopyOnWriteArrayList<>();
+		getCommand(commands, "sess-man", "http://jabber.org/protocol/admin#add-user").ifPresent(result::add);
+		getCommand(commands, "sess-man", "modify-user").ifPresent(result::add);
+		getCommand(commands, "sess-man", "http://jabber.org/protocol/admin#delete-user").ifPresent(result::add);
+		getCommand(commands, "sess-man", "http://jabber.org/protocol/admin#get-online-users-list").ifPresent(result::add);
+		getCommand(commands, "vhost-man", "comp-repo-item-add").ifPresent(e -> {
+			e.put("name", "Add domain");
+			result.add(e);
+		});
+		getCommand(commands, "vhost-man", "comp-repo-item-update").ifPresent(e -> {
+			e.put("name", "Configure domain");
+			result.add(e);
+		});
+		getCommand(commands, "vhost-man", "comp-repo-item-remove").ifPresent(e -> {
+			e.put("name", "Remove domain");
+			result.add(e);
+		});
+		getCommand(commands, "Rest", "api-key-add").ifPresent(e -> {
+			e.put("name", "Add REST-API key");
+			result.add(e);
+		});
+
+		return result;
+	}
+	static Optional<Map<String,String>> getCommand(List<Map<String,String>> commands, String component, String command) {
+		return commands.stream()
+				.filter(map -> map.get("node").equals(command) && map.get("jid").startsWith(component))
+				.findAny();
+	}
+
 	private void executeAdhocForm(final Principal principal, JID componentJid, String node, List<Element> formFields,
 								  final CallbackExecuteForm<List<Element>> callback) throws TigaseStringprepException {
 		Element iqEl = new Element("iq");
@@ -236,7 +227,7 @@ public class Servlet
 
 		if (formFields != null) {
 			Element x = new Element("x", new String[]{"xmlns", "type"}, new String[]{"jabber:x:data", "submit"});
-			formFields.forEach((Element formField) -> x.addChild(formField));
+			formFields.forEach(x::addChild);
 			commandEl.addChild(x);
 		}
 
@@ -265,14 +256,14 @@ public class Servlet
 		});
 	}
 
-	private void retrieveComponentsCommands(final Principal principal, final Callback<List<Map>> callback)
+	private void retrieveComponentsCommands(final Principal principal, final Callback<List<Map<String,String>>> callback)
 			throws TigaseStringprepException {
 		retrieveComponents(principal, (List<JID> componentJids) -> {
 			final AtomicInteger counter = new AtomicInteger(componentJids.size());
-			final List<Map> commands = new ArrayList();
+			final List<Map<String,String>> commands = new ArrayList<>();
 			componentJids.forEach((JID jid) -> {
 				try {
-					retrieveComponentCommands(principal, jid, (List<Map> componentCommands) -> {
+					retrieveComponentCommands(principal, jid, (List<Map<String,String>> componentCommands) -> {
 						synchronized (commands) {
 							if (componentCommands != null) {
 								commands.addAll(componentCommands);
@@ -296,15 +287,15 @@ public class Servlet
 		});
 	}
 
-	private void retrieveHttpComponentModulesCommands(final Principal principal, final Callback<List<Map>> callback)
+	private void retrieveHttpComponentModulesCommands(final Principal principal, final Callback<List<Map<String,String>>> callback)
 			throws TigaseStringprepException {
 		retrieveComponents(principal, JID.jidInstance("http." + BareJID.bareJIDInstance(principal.getName()).getDomain()),
 						   (List<JID> componentJids) -> {
 			final AtomicInteger counter = new AtomicInteger(componentJids.size());
-			final List<Map> commands = new ArrayList();
+			final List<Map<String,String>> commands = new ArrayList<>();
 			componentJids.forEach((JID jid) -> {
 				try {
-					retrieveComponentCommands(principal, jid, (List<Map> componentCommands) -> {
+					retrieveComponentCommands(principal, jid, (List<Map<String,String>> componentCommands) -> {
 						synchronized (commands) {
 							if (componentCommands != null) {
 								commands.addAll(componentCommands);
@@ -358,7 +349,7 @@ public class Servlet
 		});
 	}
 
-	private void retrieveComponentCommands(Principal principal, JID componentJid, Callback<List<Map>> callback)
+	private void retrieveComponentCommands(Principal principal, JID componentJid, Callback<List<Map<String,String>>> callback)
 			throws TigaseStringprepException {
 		long start = System.currentTimeMillis();
 		Element iqEl = new Element("iq");
@@ -385,9 +376,9 @@ public class Servlet
 				return;
 			}
 
-			List<Map> commands = result.getElement()
+			List<Map<String,String>> commands = result.getElement()
 					.getChild("query", DISCO_ITEMS_XMLNS)
-					.mapChildren((Element item) -> item.getAttributes());
+					.mapChildren(Element::getAttributes);
 			callback.call(commands);
 		});
 	}

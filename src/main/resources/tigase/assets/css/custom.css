@@ -267,12 +267,24 @@ padding-bottom: 5px;
 	background-color: #1a282d;
 
 	font-weight: 400;
-	text-transform: uppercase;
 	/*color: #90ABB4;*/
 	color: #fff !important;
 	font-family: "oswaldregular",Arial,Helvetica,sans-serif;
-	font-size: 13px;
+	font-size: 1.2em;
 
+}
+.sidebar .sidebar-group-header {
+	text-transform: uppercase;
+	font-size: 1.15em;
+}
+.sidebar .command-name {
+	font-size: 1.1em;
+	text-transform: capitalize;
+	filter: brightness(115%);
+}
+.sidebar .command-jid {
+	font-size: 0.9em;
+	opacity: 0.15;
 }
 
 .sidebar .sidebar-nav.navbar-collapse {
@@ -292,6 +304,13 @@ padding-bottom: 5px;
 .sidebar ul li a.active {
 	background-color: #09C;
 	color: #fff;
+}
+.sidebar ul li ul li.active {
+	font-weight: bold;
+}
+
+.sidebar ul li ul li.active a {
+	color: white;
 }
 .nav > li > a:focus {
 	background-color: transparent;
