@@ -511,6 +511,114 @@ If the domain was added correctly you will receive response with `Operation succ
 }
 -----
 
+=== Configuring VHost
+
+Modifying domain configuration is done using `comp-repo-item-update` command sent with all required and desired fields (if something is missing form-to-fill-out will be returned). For the instructions how to retrieve the form/available fields please see <<RetrievingCommandForm>>.
+
+==== Using XML
+
+To execute the command using XML content you need to set HTTP header `Content-Type` to `application/xml` and the filled out form (below is trimmed example, see <<RetrievingCommandForm>> for details how to get complete form):
+
+NOTE: It's essential to include `command-marker` in the request (otherwise the form will be returned without adding the VHost) and `item-list` with value set to the name of the VHost that's being configured.
+
+[source,xml]
+-----
+<command>
+    <jid>vhost-man@domain.com</jid>
+    <node>comp-repo-item-update</node>
+    <fields>
+        <item>
+            <var>Domain name</var>
+            <value>my-vhost.com</value>
+        </item>
+        <item>
+            <var>Enabled</var>
+            <value>true</value>
+        </item>
+        …
+        <item>
+            <var>command-marker</var>
+            <value>command-marker</value>
+        </item>
+        <item>
+            <var>item-list</var>
+            <value>my-vhost.com</value>
+        </item>
+    </fields>
+</command>
+-----
+
+If the domain was added correctly you will receive response with `Operation successful.` Note field:
+
+[source,xml]
+-----
+<command>
+    <jid>vhost-man@domain.com</jid>
+    <node>comp-repo-item-update</node>
+    <fields>
+        <item>
+            <var>Note</var>
+            <type>fixed</type>
+            <value>Operation successful.</value>
+        </item>
+    </fields>
+</command>
+-----
+
+==== Using JSON
+
+To execute the command using XML content you need to set HTTP header `Content-Type` to `application/json` and the filled out form (below is trimmed example, see <<RetrievingCommandForm>> for details how to get complete form):
+
+NOTE: It's essential to include `command-marker` in the request (otherwise the form will be returned without adding the VHost) and `item-list` with value set to the name of the VHost that's being configured.
+
+[source,json]
+-----
+{
+  "command": {
+    "jid": "vhost-man@domain.com",
+    "node": "comp-repo-item-update",
+    "fields": [
+      {
+        "var": "Domain name",
+        "value": "my-domain.com"
+      },
+      {
+        "var": "Enabled",
+        "value": "true"
+      },
+      …
+      {
+        "var": "command-marker",
+        "value": "command-marker"
+      },
+      {
+        "var": "item-list",
+        "value": "my-domain.com"
+      }
+    ]
+  }
+}
+-----
+
+If the domain was added correctly you will receive response with `Operation successful.` Note field:
+
+[source,json]
+-----
+{
+  "command": {
+    "jid": "vhost-man@domain.com",
+    "node": "comp-repo-item-update",
+    "fields": [
+      {
+        "var": "Note",
+        "type": "fixed",
+        "value": "Operation successful."
+      }
+    ]
+  }
+}
+-----
+
 To confirm that user `test@domain.com` with resource `resource` was connect and it was disconnected.
 
 If user was not connected server will return the following response:
