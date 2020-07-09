@@ -64,7 +64,7 @@ public class StaticFileServlet
 			resp.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE);
 			return;
 		}
-		if ((pathStr == null || pathStr.equals("/")) && index != null) {
+		if ((pathStr == null || pathStr.isEmpty() || pathStr.equals("/")) && index != null) {
 			pathStr = index;
 		}
 

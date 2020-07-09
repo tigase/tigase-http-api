@@ -31,7 +31,7 @@ import java.io.File;
 /**
  * @author andrzej
  */
-@Bean(name = "server", parent = HttpMessageReceiver.class, active = false)
+@Bean(name = "server", parent = HttpMessageReceiver.class, active = true)
 @ConfigType({ConfigTypeEnum.DefaultMode, ConfigTypeEnum.SessionManagerMode, ConfigTypeEnum.ConnectionManagersMode,
 			 ConfigTypeEnum.ComponentMode})
 public class ServerInfoModule
