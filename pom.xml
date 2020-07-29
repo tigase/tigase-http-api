@@ -16,6 +16,9 @@
         <bundle-activator>tigase.http.Activator</bundle-activator>
 
         <license.inlineHeader>${inlineHeader_agpl3}</license.inlineHeader>
+        
+        <guide_name>Tigase_HTTP-API</guide_name>
+        <documentation_phases.all_converters>generate-resources</documentation_phases.all_converters>
     </properties>
 
     <artifactId>tigase-http-api</artifactId>
@@ -192,52 +195,6 @@
                                 <arg>--add-exports</arg><arg>java.base/sun.security.x509=ALL-UNNAMED</arg>
                             </compilerArgs>
                         </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <profile>
-            <id>dist</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-                <property>
-                    <name>dist</name>
-                </property>
-            </activation>
-            <properties>
-                <maven.javadoc.skip>false</maven.javadoc.skip>
-                <guide_name>Tigase_HTTP-API</guide_name>
-            </properties>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.asciidoctor</groupId>
-                        <artifactId>asciidoctor-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>output-html</id>
-                            </execution>
-                            <execution>
-                                <id>output-docbook</id>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                    <plugin>
-                        <groupId>com.agilejava.docbkx</groupId>
-                        <artifactId>docbkx-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>generate-webhelp</id>
-                            </execution>
-                            <execution>
-                                <id>generate-pdf</id>
-                            </execution>
-                            <execution>
-                                <id>generate-html</id>
-                            </execution>
-                        </executions>
                     </plugin>
                 </plugins>
             </build>
