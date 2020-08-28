@@ -35,27 +35,12 @@ public interface FileUploadRepository<DS extends DataSource>
 
 	/**
 	 * Create slot in database for file upload.
-	 *
-	 * @param sender
-	 * @param slotId
-	 * @param filename
-	 * @param filesize
-	 * @param contentType
-	 *
-	 * @return slotId - may be changed by repository implementation
-	 *
-	 * @throws TigaseDBException
 	 */
 	Slot allocateSlot(JID sender, String slotId, String filename, long filesize, String contentType)
 			throws TigaseDBException;
 
 	/**
 	 * Looks for slot for particular sender with exact slot id, file name and file size
-	 *
-	 * @param sender
-	 * @param slotId
-	 *
-	 * @throws TigaseDBException
 	 */
 	void updateSlot(BareJID sender, String slotId) throws TigaseDBException;
 
