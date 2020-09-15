@@ -89,6 +89,8 @@ public class FeaturesPage extends Page implements SimpleConfigPage {
 		question = new ComponentAndProcessorsFeatureQuestion("pubsub", "Publish-Subscribe", new String[]{"pep"}, config,
 															 null);
 		addQuestion(question);
+		question = new ComponentFeatureQuestion("mix", "Mediated Information eXchange", config );
+		addQuestion(question);
 		question = new ComponentAndProcessorsFeatureQuestion("message-archive", "Message Archive",
 															 new String[]{"message-archive-xep-0136",
 																		  "urn:xmpp:mam:1"}, config,
