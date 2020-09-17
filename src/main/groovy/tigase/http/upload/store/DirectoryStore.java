@@ -20,6 +20,7 @@ package tigase.http.upload.store;
 import tigase.http.upload.FileUploadComponent;
 import tigase.kernel.beans.Bean;
 import tigase.kernel.beans.config.ConfigField;
+import tigase.kernel.beans.config.ConfigurationChangedAware;
 import tigase.xmpp.jid.BareJID;
 
 import java.io.IOException;
@@ -29,6 +30,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
@@ -38,7 +40,7 @@ import java.util.stream.Stream;
  */
 @Bean(name = "store", parent = FileUploadComponent.class, active = true, exportable = true)
 public class DirectoryStore
-		implements Store {
+		implements Store, ConfigurationChangedAware {
 
 	private static final Logger log = Logger.getLogger(DirectoryStore.class.getCanonicalName());
 	@ConfigField(desc = "Group user slots in directories", alias = "group-by-user")
@@ -115,6 +117,18 @@ public class DirectoryStore
 		Path slot = prepareSlotPath(uploader, slotId);
 
 		removeWithContent(slot);
+	}
+
+	@Override
+	public void beanConfigurationChanged(Collection<String> collection) {
+		if (!Files.exists(root)) {
+			log.log(Level.FINE, "Directory " + root.toAbsolutePath() + " to store files for HTTP File Upload does not exit, trying to create it...");
+			try {
+				Files.createDirectories(root);
+			} catch (IOException ex) {
+				log.log(Level.WARNING, "Could not create directory " + root.toAbsolutePath().toString() + "  to store files uploaded with HTTP File Upload. HTTP File Upload may not work!", ex);
+			}
+		}
 	}
 
 	protected Path prepareSlotPath(BareJID uploader, String slotId) {
