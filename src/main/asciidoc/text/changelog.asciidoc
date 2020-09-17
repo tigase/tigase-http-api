@@ -1,0 +1,5 @@
+[[httpApiChanges]]
+= HTTP-API changelog
+:author: Wojciech Kapcia
+
+* https://projects.tigase.net/issue/http-95[#http-95]: Enable HTTP File Upload by default
