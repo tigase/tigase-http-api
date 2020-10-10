@@ -26,6 +26,7 @@ ${ util.include('header', [title:'Setup: ' + page.title]) }
 		document.getElementById("acs-warn").style.display = (document.getElementById("clusterMode").checked && acsRequired) ? "inline" : "none";
 	};
 </script>
+<form class="form-horizontal" method='POST' action="?step=${ page.nextPage() }">
 <div class="panel panel-default">
 	<div class="panel-heading panel-xs">
 		<h4>Cluster configuration</h4>
@@ -47,7 +48,6 @@ ${ util.include('header', [title:'Setup: ' + page.title]) }
 		<h4>Please select/deselect features which should be enabled:</h4>
 	</div>
 	<div class="panel-body">
-<form class="form-horizontal" method='POST' action="?step=${ page.nextPage() }">
 <% page.getFeatureQuestions().each { %>
 	<% fieldFn(it, it.getLabel(), { q -> %>
 	<input class="form-control" name='${q.getName()}' id='${q.getId()}' type='checkbox' ${ (q.isSelected(q.getId())) ? "checked" : "" } onclick='checkACS();' />
