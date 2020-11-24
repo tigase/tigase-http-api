@@ -143,3 +143,5 @@ upload() {
     }
 }
 ----
+
+include::HTTP_File_Upload_Component-S3.asciidoc[leveloffset=+1]
