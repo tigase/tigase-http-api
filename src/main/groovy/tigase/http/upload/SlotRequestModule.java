@@ -79,6 +79,10 @@ public class SlotRequestModule
 			throw new ComponentException(Authorization.BAD_REQUEST, "Invalid file size");
 		}
 
+		if (size > logic.getMaxFileSize()) {
+			throw new FileTooLargeException(logic.getMaxFileSize());
+		}
+
 		String slotId = logic.requestSlot(packet.getStanzaFrom(), filename, size, contentType);
 
 		String uploadURI = logic.getUploadURI(packet.getStanzaFrom(), slotId, filename);
