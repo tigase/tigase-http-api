@@ -35,11 +35,12 @@ public class BasicConfigPage extends Page {
 									   type -> config.setConfigType(ConfigTypeEnum.valueForId(type))),
 			  new VirtualDomainQuestion("virtualDomain", config), new AdminsQuestion("admins", config),
 			  new SingleAnswerQuestion("adminPwd", () -> config.adminPwd, pwd -> config.adminPwd = pwd),
-			  new SingleAnswerQuestion("dbType", true, () -> config.getDbType(), type -> config.setDbType(type)),
-			  new SingleAnswerQuestion("advancedConfig", () -> String.valueOf(config.advancedConfig),
-									   val -> config.advancedConfig =
-											   val != null ? (Boolean.parseBoolean(val) ||
-													   "on".equals(val)) : false));
+			  new SingleAnswerQuestion("dbType", true, () -> config.getDbType(), type -> config.setDbType(type))
+//			  new SingleAnswerQuestion("advancedConfig", () -> String.valueOf(config.advancedConfig),
+//									   val -> config.advancedConfig =
+//											   val != null ? (Boolean.parseBoolean(val) ||
+//													   "on".equals(val)) : false)
+													   );
 	}
 
 	private static class VirtualDomainQuestion

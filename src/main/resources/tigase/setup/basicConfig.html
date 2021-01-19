@@ -62,11 +62,6 @@ ${ util.include('header', [title:'Setup: ' + page.title]) }
     </select><span id='dbTypeWarning' style='color: red; font-size:0.8em;'></span>
     <% }); %>
 
-    <% q = page.getQuestion('advancedConfig') %>
-    <% fieldFn(q, "Advanced configuration options", { q1 -> %>
-    <input class="form-control" name='${q.getName()}' type='checkbox' ${ q.isSelected("true") ? "checked" : "" } />
-    <% }); %>
-
 </div>
 </div>
 <button class="btn btn-default" type="submit" name="next">Next</button>

@@ -104,6 +104,10 @@ public class FeaturesPage extends Page implements SimpleConfigPage {
 		addQuestion(question);
 		question = new ProcessorFeatureQuestion("urn:xmpp:csi:0", "Client State Indication", config);
 		addQuestion(question);
+		question = new ProcessorFeatureQuestion("motd", "Message of a Day", config);
+		addQuestion(question);
+		question = new ProcessorFeatureQuestion("jabber:iq:last-marker", "Last Activity", config);
+		addQuestion(question);
 		question = new ProcessorFeatureQuestion("spam-filter", "SPAM Filter", config);
 		addQuestion(question);
 	}
