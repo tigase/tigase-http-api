@@ -33,11 +33,13 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.URLDecoder;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
+import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -87,7 +89,8 @@ public class FileServlet
 			}
 
 			String slotId = m.group("slotId");
-			String filename = m.group("filename");
+			// make sure that file name is not escaped any more
+			String filename = URLDecoder.decode(m.group("filename"), StandardCharsets.UTF_8);
 
 			FileUploadRepository.Slot slot = context.repo.getSlot(uploader, slotId);
 			if (slot == null) {
@@ -194,7 +197,8 @@ public class FileServlet
 			}
 
 			String slotId = m.group("slotId");
-			String filename = m.group("filename");
+			// make sure that file name is not escaped any more
+			String filename = URLDecoder.decode(m.group("filename"), StandardCharsets.UTF_8);
 
 			String contentType = req.getContentType();
 			long fileSize = req.getContentLengthLong();

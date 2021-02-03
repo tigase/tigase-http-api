@@ -19,6 +19,8 @@ package tigase.http.upload.logic;
 
 import tigase.xmpp.jid.JID;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -75,7 +77,7 @@ public class UriFormat {
 				.replace("{domain}", requester.getDomain())
 				.replace("{userJid}", requester.getBareJID().toString())
 				.replace("{slotId}", slotId)
-				.replace("{filename}", filename);
+				.replace("{filename}", URLEncoder.encode(filename, StandardCharsets.UTF_8));
 	}
 
 	public Matcher parsePath(String path) {
