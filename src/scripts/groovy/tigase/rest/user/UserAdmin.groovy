@@ -17,12 +17,16 @@
  */
 package tigase.rest.user
 
+import tigase.db.UserNotFoundException
 import tigase.http.rest.Service
 import tigase.server.Iq
 import tigase.server.Packet
 import tigase.xml.Element
 import tigase.xmpp.StanzaType
 import tigase.xmpp.jid.BareJID
+
+import java.util.logging.Level
+import java.util.logging.Logger
 
 /**
  * Class implements ability to manage users for service administrator
@@ -32,6 +36,8 @@ import tigase.xmpp.jid.BareJID
  * <user><jid>user@domain</jid><password>Paa$$w0rd</password></jid></user>*/
 class UserAdminHandler
 		extends tigase.http.rest.Handler {
+
+	def log = Logger.getLogger("tigase.rest")
 
 	def TIMEOUT = 30 * 1000;
 	def COMMAND_XMLNS = "http://jabber.org/protocol/commands";
@@ -103,52 +109,21 @@ Example response:
 		execDelete = { Service service, callback, user, localPart, domain ->
 			def jid = BareJID.bareJIDInstance(localPart, domain);
 			def uid = service.getUserRepository().getUserUID(jid);
-
-			Element iq = new Element("iq");
-			iq.setAttribute("to", "sess-man@" + domain);
-			if (user != null && user != "null") {
-				iq.setAttribute("from", user.toString());
-			}
-			iq.setAttribute("type", "set");
-			iq.setAttribute("id", UUID.randomUUID().toString())
-
-			Element command = new Element("command");
-			command.setXMLNS(COMMAND_XMLNS);
-			command.setAttribute("node", "http://jabber.org/protocol/admin#delete-user");
-			iq.addChild(command);
-
-			Element x = new Element("x");
-			x.setXMLNS("jabber:x:data");
-			x.setAttribute("type", "submit");
-			command.addChild(x);
-
-			Element fieldEl = new Element("field");
-			fieldEl.setAttribute("var", "notify-cluster");
-			fieldEl.addChild(new Element("value", "true"));
-			x.addChild(fieldEl);
-			fieldEl = new Element("field");
-			fieldEl.setAttribute("var", "accountjids");
-			fieldEl.addChild(new Element("value", jid.toString()));
-			x.addChild(fieldEl);
-
-			service.sendPacket(new Iq(iq), TIMEOUT, { Packet result ->
-				if (result == null || result.getType() == StanzaType.error) {
-					callback(null);
-					return;
+			def exists = service.getUserRepository().userExists(jid)
+			log.log(Level.FINEST, "Call to remove user: ${jid}, uid: ${uid}, exists: ${exists}")
+			if (!exists) {
+				callback(null);
+			} else {
+				service.getAuthRepository().removeUser(jid);
+				try {
+					service.getUserRepository().removeUser(jid)
+				} catch (UserNotFoundException ex) {
+					// We ignore this error here. If auth_repo and user_repo are in fact the same
+					// database, then user has been already removed with the auth_repo.removeUser(...)
+					// then the second call to user_repo may throw the exception which is fine.
 				}
-
-				command = result.getElement().getChild("command", COMMAND_XMLNS);
-				def noteEl = command.getChildren().
-						find { it.getName() == "x" }.
-						getChildren().
-						find { it.getAttribute("var") == "Notes" };
-				if (noteEl == null) {
-					callback(null);
-					return;
-				}
-
 				callback([ user: [ jid: jid.toString(), domain: domain, uid: uid ] ]);
-			});
+			}
 		}
 		execPost = { Service service, callback, user, content, localPart, domain ->
 			def jid = BareJID.bareJIDInstance(localPart, domain);
