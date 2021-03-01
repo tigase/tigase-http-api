@@ -1,11 +1,11 @@
 ${ util.include('header', [title:'Setup: ' + page.title]) }
 <% def fieldFn = { q, label, valueControl -> %>
-<div class="form-group">
 	<label class="col-sm-4 control-label" for='${q.getName()}'><%= label %></label>
 	<div class="col-sm-8">
-		<% valueControl(q); %>
+		<div class="col-sm-1">
+			<% valueControl(q); %>
+		</div>
 	</div>
-</div>
 <% } %>
 <script>
 	var checkACS = function() {
@@ -25,6 +25,12 @@ ${ util.include('header', [title:'Setup: ' + page.title]) }
 		}
 		document.getElementById("acs-warn").style.display = (document.getElementById("clusterMode").checked && acsRequired) ? "inline" : "none";
 	};
+	var checkNotes = function(id) {
+		var noteEl = document.getElementById(id + "-note");
+		if (noteEl != null) {
+			noteEl.style.display = document.getElementById(id).checked ? "inline" : "none";
+		}
+	};
 </script>
 <form class="form-horizontal" method='POST' action="?step=${ page.nextPage() }">
 <div class="panel panel-default">
@@ -33,14 +39,25 @@ ${ util.include('header', [title:'Setup: ' + page.title]) }
 	</div>
 	<div class="panel-body">
 		<% def q1 = page.getQuestion('clusterMode') %>
+		<div class="form-group">
 		<% fieldFn(q1, "Do you want your server to run in the cluster mode?", { q -> %>
 		<input class="form-control" name='${q.getName()}' id="clusterMode" type='checkbox' ${ q.isSelected("true") ? 'checked' : '' } onclick='checkACS();'/>
 		<% }); %>
+		</div>
 
 		<% def q2 = page.getQuestion('acsComponent') %>
+		<div class="form-group">
 		<% fieldFn(q2, "Tigase Advanced Clustering Strategy (ACS) Component", { q -> %>
-		<input class="form-control" name='${q.getName()}' id='acsComponent' type="checkbox" ${ q1.isSelected("true") ? "" : "disabled"} ${ q.isSelected("true") ? 'checked' : '' } /><span id="acs-warn" style="color: red; display: none;"><br/>Warning: Tigase ACS is required for PubSub, MUC and MIX components to work and cannot be disabled!</span>
+		<input class="form-control" name='${q.getName()}' id='acsComponent' type="checkbox" ${ q1.isSelected("true") ? "" : "disabled"} ${ q.isSelected("true") ? 'checked' : '' } />
 		<% }); %>
+			<div id="acs-warn" style="display: none;" class="col-sm-12">
+				<div class="col-sm-2"></div>
+				<div class="col-sm-6 alert alert-danger">
+					Warning: Tigase ACS is required for PubSub, MUC and MIX components to work and cannot be disabled!
+				</div>
+				<div class="col-sm-4"></div>
+			</div>
+		</div>
 	</div>
 </div>
 <div class="panel panel-default">
@@ -49,10 +66,21 @@ ${ util.include('header', [title:'Setup: ' + page.title]) }
 	</div>
 	<div class="panel-body">
 <% page.getFeatureQuestions().each { %>
+	<div class="form-group">
 	<% fieldFn(it, it.getLabel(), { q -> %>
-	<input class="form-control" name='${q.getName()}' id='${q.getId()}' type='checkbox' ${ (q.isSelected(q.getId())) ? "checked" : "" } onclick='checkACS();' />
+	<input class="form-control" name='${q.getName()}' id='${q.getId()}' type='checkbox' ${ (q.isSelected(q.getId())) ? "checked" : "" } onclick='checkNotes("${q.getId()}");' />
 	<% }); %>
-<% } %>
+	<% if (it.getId() == "upload") { %>
+		<div id="upload-note" style="display: none;" class="col-sm-12">
+			<div class="col-sm-2"></div>
+			<div class="col-sm-6 alert alert-warning">
+				If your server is not accessible from the internet using its hostname it may require manual configuration, see <a target="_blank" href="https://docs.tigase.net/tigase-http-api/master-snapshot/Tigase_HTTP-API_Guide/html/#_logic">serverName</a> property documentation.
+			</div>
+			<div class="col-sm-4"></div>
+		</div>
+	<% } %>
+	</div>
+	<% } %>
 	</div>
 </div>
 
@@ -61,5 +89,6 @@ ${ util.include('header', [title:'Setup: ' + page.title]) }
 </form>
 <script>
 	checkACS();
+	checkNotes("upload");
 </script>
 ${ util.include('footer') } 
