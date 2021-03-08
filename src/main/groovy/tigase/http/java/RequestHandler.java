@@ -112,21 +112,22 @@ public class RequestHandler
 						req = new DummyServletRequest(reqId, he, contextPath, servletPath, service, timer.getScheduledExecutorService(),
 													  timer.requestTimeoutSupplier.get());
 						resp = new DummyServletResponse(he);
-						if (key.endsWith(path) && !key.equals("/")) {
-							String query = req.getQueryString();
-							if (query == null || query.isEmpty()) {
-								if (log.isLoggable(Level.FINEST)) {
-									log.log(Level.FINEST, "for request " + reqId + " sent redirect to " + req.getRequestURI() + "/");
-								}
-								resp.sendRedirect(req.getRequestURI() + "/");
-							} else {
-								if (log.isLoggable(Level.FINEST)) {
-									log.log(Level.FINEST, "for request " + reqId + " sent redirect to " + req.getRequestURI() + "/?" + query);
-								}
-								resp.sendRedirect(req.getRequestURI() + "/?" + query);
-							}
-							return;
-						}
+						//
+//						if (key.endsWith(path) && !key.equals("/")) {
+//							String query = req.getQueryString();
+//							if (query == null || query.isEmpty()) {
+//								if (log.isLoggable(Level.FINEST)) {
+//									log.log(Level.FINEST, "for request " + reqId + " sent redirect to " + req.getRequestURI() + "/");
+//								}
+//								resp.sendRedirect(req.getRequestURI() + "/");
+//							} else {
+//								if (log.isLoggable(Level.FINEST)) {
+//									log.log(Level.FINEST, "for request " + reqId + " sent redirect to " + req.getRequestURI() + "/?" + query);
+//								}
+//								resp.sendRedirect(req.getRequestURI() + "/?" + query);
+//							}
+//							return;
+//						}
 						if (log.isLoggable(Level.FINEST)) {
 							log.log(Level.FINEST, "request " + reqId + " will be processed by " + servlet.getClass() + " for " + key);
 						}

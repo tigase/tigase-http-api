@@ -54,12 +54,14 @@ public class DnsHostMetaServlet extends HttpServlet {
 	 */
 	protected void processRequest(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		String path = request.getPathInfo();
-		if (!path.startsWith("/host-meta")) {
-			response.sendError(404, "Not found");
-			return;
-		}
-		Format format = path.startsWith("/host-meta.json") ? Format.json : Format.xml;
+
+		Format format = Optional.ofNullable(getInitParameter("format"))
+				.map(Format::valueOf)
+				.or(() -> Optional.ofNullable(request.getPathInfo())
+						.map(path -> path.startsWith("/host-meta.json"))
+						.map(v -> v ? Format.json : Format.xml))
+				.orElse(Format.xml);
+		
 		String domain = Optional.ofNullable(request.getHeader("domain"))
 				.orElse(Optional.of(request.getServerName()).map(str -> str.split(":")).map(arr -> arr[0]).get());
 		PrintWriter out = null;
