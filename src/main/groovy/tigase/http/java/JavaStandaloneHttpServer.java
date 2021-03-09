@@ -17,10 +17,7 @@
  */
 package tigase.http.java;
 
-import com.sun.net.httpserver.HttpServer;
-import com.sun.net.httpserver.HttpsConfigurator;
-import com.sun.net.httpserver.HttpsParameters;
-import com.sun.net.httpserver.HttpsServer;
+import com.sun.net.httpserver.*;
 import tigase.http.AbstractHttpServer;
 import tigase.http.DeploymentInfo;
 import tigase.kernel.beans.Bean;
@@ -330,7 +327,11 @@ public class JavaStandaloneHttpServer
 					httpServer = serverManager.createServer(this);
 					httpServer.setExecutor(executor);
 					httpServer.start();
-					serverManager.registerServer(httpServer);
+					if (getRedirectUri() != null) {
+						httpServer.createContext("/", new RedirectHandler(getRedirectUri()));
+					} else {
+						serverManager.registerServer(httpServer);
+					}
 				} catch (IOException ex) {
 					throw new RuntimeException("Could not initialize HTTP server for port " + getPort());
 				}
@@ -347,5 +348,33 @@ public class JavaStandaloneHttpServer
 			return JavaStandaloneHttpServer.PortConfigBean.class;
 		}
 
+	}
+
+	private static class RedirectHandler implements HttpHandler {
+
+		private final String redirectUri;
+
+		public RedirectHandler(String redirectUri) {
+			this.redirectUri = redirectUri;
+		}
+
+		@Override
+		public void handle(HttpExchange exchange) throws IOException {
+			String uri = redirectUri.replace("{host}",
+											 Optional.ofNullable(exchange.getRequestHeaders().getFirst("Host"))
+													 .map(host -> {
+														 int idx = host.indexOf(":");
+														 if (idx >= 0) {
+															 return host.substring(0, idx);
+														 } else {
+															 return host;
+														 }
+													 })
+													 .orElse("localhost")) +
+					Optional.ofNullable(exchange.getRequestURI().getRawPath()).orElse("/") +
+					Optional.ofNullable(exchange.getRequestURI().getRawQuery()).map(query -> "?" + query).orElse("");
+			exchange.getResponseHeaders().set("Location", uri);
+			exchange.sendResponseHeaders(301, -1);
+		}
 	}
 }

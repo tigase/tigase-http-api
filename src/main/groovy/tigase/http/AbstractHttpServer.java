@@ -81,6 +81,8 @@ public abstract class AbstractHttpServer
 		private Integer name;
 		@ConfigField(desc = "Socket type")
 		private SocketType socket = SocketType.plain;
+		@ConfigField(desc = "Redirect URI")
+		private String redirectUri;
 
 		public int getPort() {
 			return name;
@@ -92,6 +94,10 @@ public abstract class AbstractHttpServer
 
 		public String getDomain() {
 			return domain;
+		}
+
+		public String getRedirectUri() {
+			return redirectUri;
 		}
 	}
 
