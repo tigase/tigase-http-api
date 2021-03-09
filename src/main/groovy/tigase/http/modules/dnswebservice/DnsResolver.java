@@ -165,9 +165,9 @@ public class DnsResolver {
 
 	private static DnsEntry[] resolveBosh(DirContext ctx, String domain, DnsEntry[] c2sEntries) {
 		try {
-			log.log(Level.FINE, "checking bosh for = _xmppconnect." + domain);
 			Attributes attrs = ctx.getAttributes("_xmppconnect." + domain, new String[]{"TXT"});
 			Attribute attr = attrs.get("TXT");
+			log.log(Level.FINE, "checking bosh TXT for = _xmppconnect." + domain + ", result: " + attr);
 
 			if (attr != null && attr.size() > 0) {
 				List<DnsEntry> entries = new ArrayList<DnsEntry>();
@@ -181,12 +181,13 @@ public class DnsResolver {
 					String uri = data.replace("_xmpp-client-xbosh=", "");
 					entries.add(new DnsEntry(uri, 0));
 				}
+				log.log(Level.FINEST, "Adding BOSH DNS entries" + entries + " for domain: " + domain);
 				if (!entries.isEmpty()) {
 					return entries.toArray(new DnsEntry[entries.size()]);
 				}
 			}
 		} catch (NamingException ex) {
-			// no TXT record for domain
+			log.log(Level.FINEST, "no TXT record for domain: " + domain);
 		}
 		if (c2sEntries != null) {
 			List<DnsEntry> entries = new ArrayList<DnsEntry>();
@@ -198,28 +199,7 @@ public class DnsResolver {
 					}
 				}
 			}
-			if (entries.isEmpty()) {
-				Set<String> hostnames = new HashSet<String>();
-				for (DnsEntry c2sEntry : c2sEntries) {
-					try {
-						InetAddress[] addrs = InetAddress.getAllByName(c2sEntry.getHost());
-						for (InetAddress addr : addrs) {
-							try {
-								InetAddress tmp = InetAddress.getByAddress(addr.getAddress());
-								hostnames.add(tmp.getHostName());
-							} catch (UnknownHostException ex) {
-							}
-						}
-					} catch (UnknownHostException ex) {
-						// igoring
-					}
-				}
-
-				for (String hostname : hostnames) {
-					entries.add(new DnsEntry("http://" + hostname + ":5280/bosh", 0));
-				}
-			}
-
+			log.log(Level.FINEST, "Adding BOSH DNS entries" + entries + " for domain: " + domain);
 			if (!entries.isEmpty()) {
 				return entries.toArray(new DnsEntry[entries.size()]);
 			}
@@ -231,6 +211,7 @@ public class DnsResolver {
 		try {
 			Attributes attrs = ctx.getAttributes("_xmpp-client._tcp." + domain, new String[]{"SRV"});
 			Attribute attr = attrs.get("SRV");
+			log.log(Level.FINE, "checking c2s SRV for = _xmpp-client._tcp." + domain + ", result: " + attr);
 
 			if (attr != null && attr.size() > 0) {
 				List<DnsEntry> entries = new ArrayList<DnsEntry>();
@@ -246,7 +227,7 @@ public class DnsResolver {
 				return entries.toArray(new DnsEntry[entries.size()]);
 			}
 		} catch (NamingException ex) {
-			// no SRV record for domain - we need to go by A record for domain
+			log.log(Level.FINEST, "no SRV record for domain - we need to go by A record for domain: " + domain);
 		}
 
 		try {
@@ -259,7 +240,7 @@ public class DnsResolver {
 			}
 			return new DnsEntry[]{new DnsEntry(domain, 5222, ips, 0)};
 		} catch (UnknownHostException ex) {
-			// even no A record for domain - we need to ignore this domain
+			log.log(Level.FINEST, "even no A record for domain - we need to ignore this domain: " + domain);
 		}
 
 		return null;
@@ -269,6 +250,7 @@ public class DnsResolver {
 		try {
 			Attributes attrs = ctx.getAttributes("_xmppconnect." + domain, new String[]{"TXT"});
 			Attribute attr = attrs.get("TXT");
+			log.log(Level.FINE, "checking websocket TXT for = _xmppconnect." + domain + ", result: " + attr);
 
 			if (attr != null && attr.size() > 0) {
 				List<DnsEntry> entries = new ArrayList<DnsEntry>();
@@ -282,12 +264,13 @@ public class DnsResolver {
 					String uri = data.replace("_xmpp-client-websocket=", "");
 					entries.add(new DnsEntry(uri, 0));
 				}
+				log.log(Level.FINEST, "Adding WebSocket DNS entries" + entries + " for domain: " + domain);
 				if (!entries.isEmpty()) {
 					return entries.toArray(new DnsEntry[entries.size()]);
 				}
 			}
 		} catch (NamingException ex) {
-			// no TXT record for domain
+			log.log(Level.FINEST, "no TXT record for domain: " + domain);
 		}
 		if (c2sEntries != null) {
 			List<DnsEntry> entries = new ArrayList<DnsEntry>();
@@ -299,6 +282,7 @@ public class DnsResolver {
 					}
 				}
 			}
+			log.log(Level.FINEST, "Adding WebSocket DNS entries" + entries + " for domain: " + domain);
 			if (!entries.isEmpty()) {
 				return entries.toArray(new DnsEntry[entries.size()]);
 			}

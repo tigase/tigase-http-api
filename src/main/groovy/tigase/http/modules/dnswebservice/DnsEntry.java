@@ -17,6 +17,8 @@
  */
 package tigase.http.modules.dnswebservice;
 
+import java.util.Arrays;
+
 public class DnsEntry {
 
 	private String host;
@@ -61,4 +63,14 @@ public class DnsEntry {
 		return url;
 	}
 
+	@Override
+	public String toString() {
+		final StringBuffer sb = new StringBuffer();
+		sb.append(host).append('\'');
+		sb.append(", port=").append(port);
+		sb.append(", URL='").append(getURL()).append('\'');
+		sb.append(", IPs=").append(getIPs() == null ? "null" : Arrays.asList(getIPs()).toString());
+		sb.append('}');
+		return sb.toString();
+	}
 }
