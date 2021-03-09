@@ -20,9 +20,13 @@ package tigase.http.jetty;
 import org.eclipse.jetty.alpn.server.ALPNServerConnectionFactory;
 import org.eclipse.jetty.http2.HTTP2Cipher;
 import org.eclipse.jetty.http2.server.HTTP2ServerConnectionFactory;
-import org.eclipse.jetty.server.*;
+import org.eclipse.jetty.server.HttpConfiguration;
+import org.eclipse.jetty.server.HttpConnectionFactory;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import tigase.http.AbstractHttpServer;
 import tigase.http.DeploymentInfo;
@@ -34,10 +38,11 @@ import tigase.kernel.beans.config.ConfigField;
 import tigase.net.SocketType;
 
 import javax.net.ssl.*;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -146,6 +151,10 @@ public class JettyStandaloneHttpServer
 	}
 
 	protected ServerConnector createConnector(PortConfigBean config) {
+		return createConnector(server, config);
+	}
+
+	protected ServerConnector createConnector(Server server, PortConfigBean config) {
 		ServerConnector connector;
 //				boolean http2Enabled = (Boolean) config.getOrDefault(HTTP2_ENABLED_KEY, true);
 		if (config.getSocket() == SocketType.plain) {
@@ -215,6 +224,7 @@ public class JettyStandaloneHttpServer
 		private JettyStandaloneHttpServer serverManager;
 		@ConfigField(desc = "Enable HTTP2 if supported", alias = "use-http2")
 		private Boolean useHttp2 = isHttp2Available();
+		private RedirectServer redirectServer;
 
 		@Override
 		public void beforeUnregister() {
@@ -222,15 +232,35 @@ public class JettyStandaloneHttpServer
 				return;
 			}
 
-			serverManager.unregisterConnector(connector, getSocket() != SocketType.plain);
+			if (redirectServer != null) {
+				try {
+					redirectServer.stop();
+				} catch (Exception ex) {
+					log.log(Level.SEVERE, "Exception stopping internal HTTP server", ex);
+				}
+				redirectServer = null;
+			} else {
+				serverManager.unregisterConnector(connector, getSocket() != SocketType.plain);
+			}
 			connector = null;
 		}
 
 		@Override
 		public void initialize() {
 			if (serverManager != null) {
-				connector = serverManager.createConnector(this);
-				serverManager.registerConnector(connector, getSocket() != SocketType.plain);
+				if (getRedirectUri() != null) {
+					redirectServer = new RedirectServer(getRedirectUri());
+					connector = serverManager.createConnector(redirectServer,this);
+					redirectServer.addConnector(connector);
+					try {
+						redirectServer.start();
+					} catch (Exception ex) {
+						log.log(Level.SEVERE, "Exception starting internal HTTP server", ex);
+					}
+				} else {
+					connector = serverManager.createConnector(this);
+					serverManager.registerConnector(connector, getSocket() != SocketType.plain);
+				}
 			}
 		}
 
@@ -251,6 +281,39 @@ public class JettyStandaloneHttpServer
 		@Override
 		public Class<?> getDefaultBeanClass() {
 			return PortConfigBean.class;
+		}
+	}
+
+	private static class RedirectServer extends Server {
+
+		final ServletContextHandler context;
+
+		RedirectServer(String redirectUri) {
+			super();
+			context = new ServletContextHandler(ServletContextHandler.NO_SESSIONS);
+			context.setContextPath("/");
+			ServletHolder holder = new ServletHolder(RedirectServlet.class);
+			holder.setInitParameters(Map.of("uri", redirectUri));
+			context.addServlet(holder, "/*");
+			this.setHandler(context);
+		}
+	}
+
+	public static class RedirectServlet extends HttpServlet {
+
+		@Override
+		public void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
+			String uri = getInitParameter("uri").replace("{host}",
+														 Optional.ofNullable(request.getHeader("Host")).map(host -> {
+															 int idx = host.indexOf(":");
+															 if (idx >= 0) {
+																 return host.substring(0, idx);
+															 } else {
+																 return host;
+															 }
+														 }).orElse("localhost")) + request.getRequestURI() +
+					Optional.ofNullable(request.getQueryString()).map(query -> "?" + query).orElse("");
+			response.sendRedirect(uri);
 		}
 	}
 
