@@ -43,6 +43,8 @@ Requests made to the HTTP service must conclude with one of the API keys defined
 
 NOTE: If you want to allow access to REST API without usage of any keys, it is possible. To do so, you need to add an API key with `API key` field value equal `open_access`.
 
+NOTE: You can also completely disable api-keys by adding `'open-access' = true` to the TDSL configuration file, either in `http` bean or any of the modules of that bean, e.g. `rest`, `admin, etc
+
 == DNS Web Service module
 For web based XMPP clients it is not possible to execute DNS SRV requests to find address of XMPP server hosting for particular domain.
 To solve this the DNS Web Service module was created.
