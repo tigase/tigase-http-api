@@ -288,12 +288,12 @@ public class JettyStandaloneHttpServer
 
 		final ServletContextHandler context;
 
-		RedirectServer(String redirectUri) {
+		RedirectServer(String redirectEndpoint) {
 			super();
 			context = new ServletContextHandler(ServletContextHandler.NO_SESSIONS);
 			context.setContextPath("/");
 			ServletHolder holder = new ServletHolder(RedirectServlet.class);
-			holder.setInitParameters(Map.of("uri", redirectUri));
+			holder.setInitParameters(Map.of("redirectEndpoint", redirectEndpoint));
 			context.addServlet(holder, "/*");
 			this.setHandler(context);
 		}
@@ -303,17 +303,20 @@ public class JettyStandaloneHttpServer
 
 		@Override
 		public void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
-			String uri = getInitParameter("uri").replace("{host}",
-														 Optional.ofNullable(request.getHeader("Host")).map(host -> {
-															 int idx = host.indexOf(":");
-															 if (idx >= 0) {
-																 return host.substring(0, idx);
-															 } else {
-																 return host;
-															 }
-														 }).orElse("localhost")) + request.getRequestURI() +
-					Optional.ofNullable(request.getQueryString()).map(query -> "?" + query).orElse("");
+			final String originalRequestHost = Optional.ofNullable(request.getHeader("Host"))
+					.map(this::parseHostname)
+					.orElse("localhost");
+			final String requestQuery = Optional.ofNullable(request.getQueryString())
+					.map(query -> "?" + query)
+					.orElse("");
+			String uri = getInitParameter("redirectEndpoint").replace("{host}", originalRequestHost) +
+					request.getRequestURI() + requestQuery;
 			response.sendRedirect(uri);
+		}
+
+		private String parseHostname(String host) {
+			int idx = host.indexOf(":");
+			return idx >= 0 ? host.substring(0, idx) : host;
 		}
 	}
 
