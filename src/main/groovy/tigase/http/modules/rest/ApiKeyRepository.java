@@ -25,6 +25,7 @@ import tigase.eventbus.HandleEvent;
 import tigase.http.modules.AbstractModule;
 import tigase.kernel.beans.Bean;
 import tigase.kernel.beans.Inject;
+import tigase.kernel.beans.config.ConfigField;
 import tigase.kernel.beans.selector.ConfigType;
 import tigase.kernel.beans.selector.ConfigTypeEnum;
 import tigase.xmpp.jid.BareJID;
@@ -41,6 +42,7 @@ public class ApiKeyRepository
 
 	public static final String API_KEYS_KEY = "api-keys";
 	private static final String GEN_API_KEYS = "--api-keys";
+	@ConfigField(desc = "Configure REST API to be open and avoid requirement for api-key", alias = "open-access")
 	private boolean openAccess = false;
 
 	private BareJID repoUserJid;
