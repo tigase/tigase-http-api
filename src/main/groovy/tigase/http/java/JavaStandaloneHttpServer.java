@@ -352,29 +352,30 @@ public class JavaStandaloneHttpServer
 
 	private static class RedirectHandler implements HttpHandler {
 
-		private final String redirectUri;
+		private final String redirectEndpoint;
 
-		public RedirectHandler(String redirectUri) {
-			this.redirectUri = redirectUri;
+		public RedirectHandler(String redirectEndpoint) {
+			this.redirectEndpoint = redirectEndpoint;
 		}
 
 		@Override
 		public void handle(HttpExchange exchange) throws IOException {
-			String uri = redirectUri.replace("{host}",
-											 Optional.ofNullable(exchange.getRequestHeaders().getFirst("Host"))
-													 .map(host -> {
-														 int idx = host.indexOf(":");
-														 if (idx >= 0) {
-															 return host.substring(0, idx);
-														 } else {
-															 return host;
-														 }
-													 })
-													 .orElse("localhost")) +
-					Optional.ofNullable(exchange.getRequestURI().getRawPath()).orElse("/") +
-					Optional.ofNullable(exchange.getRequestURI().getRawQuery()).map(query -> "?" + query).orElse("");
+			final String originalRequestHost = Optional.ofNullable(exchange.getRequestHeaders().getFirst("Host"))
+					.map(this::parseHostname)
+					.orElse("localhost");
+			final String requestEndpoint = redirectEndpoint.replace("{host}", originalRequestHost);
+			final String requestPath = Optional.ofNullable(exchange.getRequestURI().getRawPath()).orElse("/");
+			final String requestQuery = Optional.ofNullable(exchange.getRequestURI().getRawQuery())
+					.map(query -> "?" + query)
+					.orElse("");
+			String uri = requestEndpoint + requestPath + requestQuery;
 			exchange.getResponseHeaders().set("Location", uri);
 			exchange.sendResponseHeaders(301, -1);
+		}
+
+		private String parseHostname(String host) {
+			int idx = host.indexOf(":");
+			return idx >= 0 ? host.substring(0, idx) : host;
 		}
 	}
 }
