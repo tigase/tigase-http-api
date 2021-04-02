@@ -61,6 +61,33 @@ public class DummyFileUploadRepository
 	}
 
 	@Override
+	public long getUsedSpaceForDomain(String domain) throws TigaseDBException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public long getUsedSpaceForUser(BareJID user) throws TigaseDBException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public List<FileUploadRepository.Slot> querySlots(BareJID user, String afterId, int limit)
+			throws TigaseDBException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public List<FileUploadRepository.Slot> querySlots(String domain, String afterId, int limit)
+			throws TigaseDBException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void removeSlot(BareJID user, String slotId) throws TigaseDBException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public void setDataSource(DataSource dataSource) {
 		// nothing to do
 	}

@@ -51,6 +51,12 @@ public class JDBCFileUploadRepository
 	private static final String DEF_LIST_EXPIRED_SLOTS = "{ call Tig_HFU_ListExpiredSlots(?,?,?) }";
 	private static final String DEF_REMOVE_EXPIRED_SLOTS = "{ call Tig_HFU_RemoveExpiredSlots(?,?,?) }";
 
+	private static final String DEF_COUNT_SPACE_USED_USER = "{ call Tig_HFU_UsedSpaceCountForUser(?) }";
+	private static final String DEF_COUNT_SPACE_USED_DOMAIN = "{ call Tig_HFU_UsedSpaceCountForDomain(?) }";
+	private static final String DEF_LIST_USER_SLOTS = "{ call Tig_HFU_UserSlotsQuery(?,?,?) }";
+	private static final String DEF_LIST_DOMAIN_SLOTS = "{ call Tig_HFU_DomainSlotsQuery(?,?,?) }";
+	private static final String DEF_REMOVE_SLOT = "{ call Tig_HFU_RemoveSlot(?) }";
+
 	@ConfigField(desc = "Query to allocate slot", alias = "allocate-slot-query")
 	private String ALLOCATE_SLOT_QUERY = DEF_ALLOCATE_SLOT;
 
@@ -65,35 +71,19 @@ public class JDBCFileUploadRepository
 	private String REMOVE_EXPIRED_SLOTS_QUERY = DEF_REMOVE_EXPIRED_SLOTS;
 	@ConfigField(desc = "Query to update slot on file upload", alias = "update-slot-query")
 	private String UPDATE_SLOT_QUERY = DEF_UPDATE_SLOT;
-	private DataRepository repo;
 
-//	@Override
-//	public long[] getTransferUsed(BareJID userJid, Date from, Date to) throws TigaseDBException {
-//		long[] result = { 0, 0 };
-//		try {
-//			PreparedStatement stmt = repo.getPreparedStatement(userJid, GET_TRANSFER_USED_QUERY);
-//			ResultSet rs = null;
-//			synchronized (stmt) {
-//				try {
-//					stmt.setString(1, userJid.toString());
-//					stmt.setString(2, userJid.getDomain());
-//					stmt.setTimestamp(3, from != null ? new Timestamp(from.getTime()) : null);
-//					stmt.setTimestamp(4, to != null ? new Timestamp(to.getTime()) : null);
-//
-//					rs = stmt.executeQuery();
-//					if (rs.next()) {
-//						result[0] = rs.getLong(1);
-//						result[1] = rs.getLong(2);
-//					}
-//				} finally {
-//					repo.release(null, rs);
-//				}
-//			}
-//		} catch (SQLException ex) {
-//			throw new TigaseDBException("Could not calculated used transfer", ex);
-//		}
-//		return result;
-//	}
+	@ConfigField(desc = "Query to count space used by user", alias = "count-space-used-user-query")
+	private String COUNT_SPACE_USED_USER_QUERY = DEF_COUNT_SPACE_USED_USER;
+	@ConfigField(desc = "Query to count space used by domain", alias = "count-space-used-domain-query")
+	private String COUNT_SPACE_USED_DOMAIN_QUERY = DEF_COUNT_SPACE_USED_DOMAIN;
+	@ConfigField(desc = "Query to list slots owned by user", alias = "list-user-slots-query")
+	private String LIST_USER_SLOTS_QUERY = DEF_LIST_USER_SLOTS;
+	@ConfigField(desc = "Query to list slots owner by domain", alias = "list-domain-slots-query")
+	private String LIST_DOMAIN_SLOTS_QUERY = DEF_LIST_DOMAIN_SLOTS;
+	@ConfigField(desc = "Query remove slot", alias = "remove-slot-query")
+	private String REMOVE_SLOT_QUERY = DEF_REMOVE_SLOT;
+
+	private DataRepository repo;
 
 	@Override
 	public Slot allocateSlot(JID sender, String slotId, String filename, long filesize, String contentType)
@@ -229,6 +219,116 @@ public class JDBCFileUploadRepository
 	}
 
 	@Override
+	public long getUsedSpaceForDomain(String domain) throws TigaseDBException {
+		try {
+			PreparedStatement stmt = repo.getPreparedStatement(BareJID.bareJIDInstanceNS(domain), COUNT_SPACE_USED_DOMAIN_QUERY);
+
+			synchronized (stmt) {
+				stmt.setString(1, domain);
+				try (ResultSet rs = stmt.executeQuery()) {
+					if (rs.next()) {
+						return rs.getLong(1);
+					}
+					return -1;
+				}
+			}
+		} catch (SQLException ex) {
+			throw new TigaseDBException("Could not count used space for domain", ex);
+		}
+	}
+
+	@Override
+	public long getUsedSpaceForUser(BareJID user) throws TigaseDBException {
+		try {
+			PreparedStatement stmt = repo.getPreparedStatement(user, COUNT_SPACE_USED_USER_QUERY);
+
+			synchronized (stmt) {
+				stmt.setString(1, user.toString());
+				try (ResultSet rs = stmt.executeQuery()) {
+					if (rs.next()) {
+						return rs.getLong(1);
+					}
+					return -1;
+				}
+			}
+		} catch (SQLException ex) {
+			throw new TigaseDBException("Could not count used space for user", ex);
+		}
+	}
+
+	@Override
+	public List<Slot> querySlots(String domain, String afterId, int limit) throws TigaseDBException {
+		try {
+			PreparedStatement stmt = repo.getPreparedStatement(BareJID.bareJIDInstanceNS(domain), LIST_DOMAIN_SLOTS_QUERY);
+
+			synchronized (stmt) {
+				stmt.setString(1, domain);
+				stmt.setString(2, afterId);
+				stmt.setInt(3, limit);
+				List<Slot> slots = new ArrayList<>();
+				try (ResultSet rs = stmt.executeQuery()) {
+					while (rs.next()) {
+						String slotId = rs.getString(1);
+						String filename = rs.getString(2);
+						long size = rs.getLong(3);
+						String contentType = rs.getString(4);
+						Date ts = rs.getTimestamp(5);
+						BareJID jid = BareJID.bareJIDInstanceNS(rs.getString(6));
+
+						slots.add(new Slot(jid, slotId, filename, size, contentType, ts));
+					}
+				}
+				return slots;
+			}
+		} catch (SQLException ex) {
+			throw new TigaseDBException("Could not count used space for user", ex);
+		}
+	}
+
+	@Override
+	public List<Slot> querySlots(BareJID user, String afterId, int limit) throws TigaseDBException {
+		try {
+			PreparedStatement stmt = repo.getPreparedStatement(user, LIST_USER_SLOTS_QUERY);
+
+			synchronized (stmt) {
+				stmt.setString(1, user.toString());
+				stmt.setString(2, afterId);
+				stmt.setInt(3, limit);
+				List<Slot> slots = new ArrayList<>();
+				try (ResultSet rs = stmt.executeQuery()) {
+					while (rs.next()) {
+						String slotId = rs.getString(1);
+						String filename = rs.getString(2);
+						long size = rs.getLong(3);
+						String contentType = rs.getString(4);
+						Date ts = rs.getTimestamp(5);
+						BareJID jid = BareJID.bareJIDInstanceNS(rs.getString(6));
+
+						slots.add(new Slot(jid, slotId, filename, size, contentType, ts));
+					}
+				}
+				return slots;
+			}
+		} catch (SQLException ex) {
+			throw new TigaseDBException("Could not count used space for user", ex);
+		}
+	}
+
+	@Override
+	public void removeSlot(BareJID user, String slotId) throws TigaseDBException {
+		try {
+			PreparedStatement stmt = repo.getPreparedStatement(user, REMOVE_SLOT_QUERY);
+
+			synchronized (stmt) {
+				stmt.setString(1, slotId);
+				stmt.executeUpdate();
+			}
+		} catch (SQLException ex) {
+			throw new TigaseDBException("Could not remove slot", ex);
+		}
+	}
+	
+	@Override
 	public void setDataSource(DataRepository dataSource) {
 		try {
 			dataSource.initPreparedStatement(ALLOCATE_SLOT_QUERY, ALLOCATE_SLOT_QUERY);
@@ -236,6 +336,11 @@ public class JDBCFileUploadRepository
 			dataSource.initPreparedStatement(GET_SLOT_QUERY, GET_SLOT_QUERY);
 			dataSource.initPreparedStatement(LIST_EXPIRED_SLOTS_QUERY, LIST_EXPIRED_SLOTS_QUERY);
 			dataSource.initPreparedStatement(REMOVE_EXPIRED_SLOTS_QUERY, REMOVE_EXPIRED_SLOTS_QUERY);
+			dataSource.initPreparedStatement(COUNT_SPACE_USED_DOMAIN_QUERY, COUNT_SPACE_USED_DOMAIN_QUERY);
+			dataSource.initPreparedStatement(COUNT_SPACE_USED_USER_QUERY,COUNT_SPACE_USED_USER_QUERY);
+			dataSource.initPreparedStatement(LIST_USER_SLOTS_QUERY, LIST_USER_SLOTS_QUERY);
+			dataSource.initPreparedStatement(LIST_DOMAIN_SLOTS_QUERY, LIST_DOMAIN_SLOTS_QUERY);
+			dataSource.initPreparedStatement(REMOVE_SLOT_QUERY, REMOVE_SLOT_QUERY);
 			repo = dataSource;
 		} catch (SQLException ex) {
 			throw new RuntimeException("Could not initialize repository", ex);

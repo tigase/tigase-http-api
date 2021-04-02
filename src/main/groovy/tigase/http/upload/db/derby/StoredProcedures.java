@@ -153,4 +153,108 @@ public class StoredProcedures {
 		}
 	}
 
+	public static void usedSpaceCountForUser(String jid, ResultSet[] data) throws SQLException {
+		Connection conn = DriverManager.getConnection("jdbc:default:connection");
+
+		conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+
+		try {
+			PreparedStatement stmt = conn.prepareStatement("select sum(filesize) from tig_hfu_slots where uploader = ?");
+			stmt.setString(1, jid);
+
+			data[0] = stmt.executeQuery();
+		} finally {
+			conn.close();
+		}
+	}
+
+	public static void usedSpaceCountForDomain(String domain, ResultSet[] data) throws SQLException {
+		Connection conn = DriverManager.getConnection("jdbc:default:connection");
+
+		conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+
+		try {
+			PreparedStatement stmt = conn.prepareStatement("select sum(filesize) from tig_hfu_slots where domain = ?");
+			stmt.setString(1, domain);
+
+			data[0] = stmt.executeQuery();
+		} finally {
+			conn.close();
+		}
+	}
+
+	public static void userSlotsQuery(String jid, String afterId, Integer maxLimit, ResultSet[] data) throws SQLException {
+		Connection conn = DriverManager.getConnection("jdbc:default:connection");
+
+		conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+
+		try {
+			if (afterId == null) {
+				PreparedStatement stmt = conn.prepareStatement(
+						"select slot_id, filename, filesize, content_type, ts, uploader" + " from tig_hfu_slots" +
+								" where" + " uploader = ?" + " order by ts asc" + " fetch first ? rows only");
+				stmt.setString(1, jid);
+				stmt.setInt(2, maxLimit);
+
+				data[0] = stmt.executeQuery();
+			} else {
+				PreparedStatement stmt = conn.prepareStatement(
+						"select slot_id, filename, filesize, content_type, ts, uploader" + " from tig_hfu_slots" +
+								" where" + " uploader = ?" + " and ts > (" + " select ts" + " from tig_hfu_slots" +
+								" where slot_id = ?" + " )" + " order by ts asc" + " fetch first ? rows only");
+				stmt.setString(1, jid);
+				stmt.setString(2, afterId);
+				stmt.setInt(3, maxLimit);
+
+				data[0] = stmt.executeQuery();
+			}
+		} finally {
+			conn.close();
+		}
+	}
+
+	public static void domainSlotsQuery(String domain, String afterId, Integer maxLimit, ResultSet[] data) throws SQLException {
+		Connection conn = DriverManager.getConnection("jdbc:default:connection");
+
+		conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+
+		try {
+			if (afterId == null) {
+				PreparedStatement stmt = conn.prepareStatement(
+						"select slot_id, filename, filesize, content_type, ts, uploader" + " from tig_hfu_slots" +
+								" where" + " domain = ?" + " order by ts asc" + " fetch first ? rows only");
+				stmt.setString(1, domain);
+				stmt.setInt(2, maxLimit);
+
+				data[0] = stmt.executeQuery();
+			} else {
+				PreparedStatement stmt = conn.prepareStatement(
+						"select slot_id, filename, filesize, content_type, ts, uploader" + " from tig_hfu_slots" +
+								" where" + " domain = ?" + " and ts > (" + " select ts" + " from tig_hfu_slots" +
+								" where slot_id = ?" + " )" + " order by ts asc" + " fetch first ? rows only");
+				stmt.setString(1, domain);
+				stmt.setString(2, afterId);
+				stmt.setInt(3, maxLimit);
+
+				data[0] = stmt.executeQuery();
+			}
+		} finally {
+			conn.close();
+		}
+	}
+
+	public static void removeSlot(String slotId) throws SQLException {
+		Connection conn = DriverManager.getConnection("jdbc:default:connection");
+
+		conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+
+		try {
+			PreparedStatement stmt = conn.prepareStatement("delete from tig_hfu_slots where slot_id = ?");
+			stmt.setString(1, slotId);
+
+			stmt.execute();
+		} finally {
+			conn.close();
+		}
+	}
 }

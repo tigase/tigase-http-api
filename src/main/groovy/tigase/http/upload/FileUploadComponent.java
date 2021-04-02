@@ -18,6 +18,7 @@
 package tigase.http.upload;
 
 import tigase.component.AbstractKernelBasedComponent;
+import tigase.component.modules.impl.AdHocCommandModule;
 import tigase.kernel.beans.Bean;
 import tigase.kernel.beans.Inject;
 import tigase.kernel.beans.selector.ConfigType;
@@ -68,6 +69,7 @@ public class FileUploadComponent
 
 	@Override
 	protected void registerModules(Kernel kernel) {
+		kernel.registerBean(AdHocCommandModule.class).exec();
 	}
 
 }

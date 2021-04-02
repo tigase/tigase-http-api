@@ -59,6 +59,47 @@ public interface FileUploadRepository<DS extends DataSource>
 	 */
 	void removeExpiredSlots(BareJID domain, LocalDateTime before, int limit) throws TigaseDBException;
 
+	/**
+	 * Calculates space used by files upload by all users from domain
+	 * @param domain
+	 * @return
+	 * @throws TigaseDBException
+	 */
+	long getUsedSpaceForDomain(String domain) throws TigaseDBException;
+
+	/**
+	 * Calculates space used by files upload by the user
+	 * @param jid
+	 * @return
+	 * @throws TigaseDBException
+	 */
+	long getUsedSpaceForUser(BareJID user) throws TigaseDBException;
+
+	/**
+	 * Retrieves list of slots after slot with provided id. If id is null, first slots will be returned.
+	 * @param user
+	 * @param afterId
+	 * @return
+	 * @throws TigaseDBException
+	 */
+	List<Slot> querySlots(BareJID user, String afterId, int limit) throws TigaseDBException;
+
+	/**
+	 * Retrieves list of slots after slot with provided id. If id is null, first slots will be returned.
+	 * @param user
+	 * @param afterId
+	 * @return
+	 * @throws TigaseDBException
+	 */
+	List<Slot> querySlots(String domain, String afterId, int limit) throws TigaseDBException;
+
+	/**
+	 * Removes slot with id
+	 * @param slotId
+	 * @throws TigaseDBException
+	 */
+	void removeSlot(BareJID user, String slotId) throws TigaseDBException;
+
 	class Slot {
 
 		public final String contentType;

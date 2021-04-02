@@ -16,4 +16,102 @@
 -- If not, see http://www.gnu.org/licenses/.
 --
 
--- 
+--
+
+-- QUERY START:
+drop procedure if exists Tig_HFU_UsedSpaceCountForUser;
+-- QUERY END:
+
+-- QUERY START:
+drop procedure if exists Tig_HFU_UsedSpaceCountForDomain;
+-- QUERY END:
+
+-- QUERY START:
+drop procedure if exists Tig_HFU_UserSlotsQuery;
+-- QUERY END:
+
+-- QUERY START:
+drop procedure if exists Tig_HFU_DomainSlotsQuery;
+-- QUERY END:
+
+-- QUERY START:
+drop procedure if exists Tig_HFU_RemoveSlot;
+-- QUERY END:
+
+delimiter //
+
+-- looks like usage of _filename is restriced on MySQL
+-- QUERY START:
+create procedure  Tig_HFU_UsedSpaceCountForUser(_jid varchar(2049) CHARSET utf8)
+begin
+    select sum(filesize) from tig_hfu_slots where uploader = _jid;
+end //
+-- QUERY END:
+
+-- QUERY START:
+create procedure  Tig_HFU_UsedSpaceCountForDomain(_domain varchar(1024) CHARSET utf8)
+begin
+    select sum(filesize) from tig_hfu_slots where domain = _domain;
+end //
+-- QUERY END:
+
+-- QUERY START:
+create procedure  Tig_HFU_UserSlotsQuery(_jid varchar(2049) CHARSET utf8, _afterId varchar(60), _limit int)
+begin
+    if _afterId is null then
+        select slot_id, filename, filesize, content_type, ts, uploader
+        from tig_hfu_slots
+        where
+            uploader = _jid
+        order by ts asc
+        limit _limit;
+    else
+        select slot_id, filename, filesize, content_type, ts, uploader
+        from tig_hfu_slots
+        where
+            uploader = _jid
+            and ts > (
+                select ts
+                from tig_hfu_slots
+                where slot_id = _afterId
+            )
+        order by ts asc
+        limit _limit;
+    end if;
+end //
+-- QUERY END:
+
+-- QUERY START:
+create procedure  Tig_HFU_DomainSlotsQuery(_domain varchar(1024) CHARSET utf8, _afterId varchar(60), _limit int)
+begin
+    if _afterId is null then
+        select slot_id, filename, filesize, content_type, ts, uploader
+        from tig_hfu_slots
+        where
+                domain = _domain
+        order by ts asc
+        limit _limit;
+    else
+        select slot_id, filename, filesize, content_type, ts, uploader
+        from tig_hfu_slots
+        where
+                domain = _domain
+          and ts > (
+            select ts
+            from tig_hfu_slots
+            where slot_id = _afterId
+        )
+        order by ts asc
+        limit _limit;
+    end if;
+end //
+-- QUERY END:
+
+-- QUERY START:
+create procedure  Tig_HFU_RemoveSlot(_slotId varchar(60) CHARSET utf8)
+begin
+    delete from tig_hfu_slots where slot_id = _slotId;
+end //
+-- QUERY END:
+
+delimiter ;

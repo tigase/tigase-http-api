@@ -75,6 +75,31 @@ public class FileUploadRepositoryPool<R extends FileUploadRepository<DataSource>
 	}
 
 	@Override
+	public long getUsedSpaceForDomain(String domain) throws TigaseDBException {
+		return getRepository(domain).getUsedSpaceForDomain(domain);
+	}
+
+	@Override
+	public long getUsedSpaceForUser(BareJID user) throws TigaseDBException {
+		return getRepository(user.getDomain()).getUsedSpaceForUser(user);
+	}
+
+	@Override
+	public List<Slot> querySlots(BareJID user, String afterId, int limit) throws TigaseDBException {
+		return getRepository(user.getDomain()).querySlots(user, afterId, limit);
+	}
+
+	@Override
+	public List<Slot> querySlots(String domain, String afterId, int limit) throws TigaseDBException {
+		return getRepository(domain).querySlots(domain, afterId, limit);
+	}
+
+	@Override
+	public void removeSlot(BareJID user, String slotId) throws TigaseDBException {
+		getRepository(user.getDomain()).removeSlot(user, slotId);
+	}
+
+	@Override
 	public void setDataSource(DataSource dataSource) {
 		// nothing to do
 	}
