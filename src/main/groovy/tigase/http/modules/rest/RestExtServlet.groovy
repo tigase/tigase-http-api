@@ -25,6 +25,7 @@ import tigase.http.util.CSSHelper
 
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
+import java.nio.file.Paths
 import java.util.logging.Level
 import java.util.logging.Logger
 
@@ -65,10 +66,10 @@ class RestExtServlet
 						if (handler."exec${methodStr}" == null) {
 							return
 						};
-						File templateFile = new File(name + methodStr + ".html", scriptsDir);
+						File templateFile = Paths.get(scriptsDir.toString(), name + methodStr + ".html").toFile();
 						if (!templateFile.exists()) {
 							// in case we need one template file for every action
-							templateFile = new File(name + ".html", scriptsDir);
+							templateFile = Paths.get(scriptsDir.toString(), name + ".html").toFile();
 							if (!templateFile.exists()) {
 								return
 							};
@@ -86,9 +87,9 @@ class RestExtServlet
 		}
 
 		[ "header", "footer", "index" ].each { src ->
-			File f = new File(src + ".html", scriptsDir);
+			File f = Paths.get(scriptsDir.toString(), src + ".html").toFile();
 			if (!f.exists()) {
-				f = new File(src + '.html', scriptsDir.getParentFile());
+				f = Paths.get(scriptsDir.getParentFile().toString(), src + '.html').toFile();
 			}
 			if (!f.exists()) {
 				return
