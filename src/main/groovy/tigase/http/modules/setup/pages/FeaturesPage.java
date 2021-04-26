@@ -92,8 +92,7 @@ public class FeaturesPage extends Page implements SimpleConfigPage {
 		question = new ComponentFeatureQuestion("mix", "Mediated Information eXchange", config );
 		addQuestion(question);
 		question = new ComponentAndProcessorsFeatureQuestion("message-archive", "Message Archive",
-															 new String[]{"message-archive-xep-0136",
-																		  "urn:xmpp:mam:1"}, config,
+															 new String[]{"urn:xmpp:mam:1", "urn:xmpp:mam:2"}, config,
 															 () -> config.optionalComponents.remove("unified-archive"));
 		addQuestion(question);
 		question = new ProcessorFeatureQuestion("urn:xmpp:push:0", "PUSH Notifications", config);
