@@ -73,14 +73,22 @@ httpServer {
 
 It's beneficial to use HTTPS as much as possible, however often it requires adding redirection from `http` to `https`. While it's possible to have it done using external solutions (additional http servers like nginx or apache or some sort of load balancer with such feature) it's convenient to have it build-in.
 
-Feature implemented in Tigase XMPP Server allows specifying `redirectEndpoint` which consists of destination hostname and optionally port and path. Specifying any query parameters IS NOT supported. `redirectEndpoint` has support for `{host}` variable which can be used to keep original server name in the redirection from the original request, ie. `redirectEndpoint = 'https://{host}:8089'` to redirect request to the same server but on port 8089 (original path URI and query string will be automatically appended to the redirection URL).
+Feature implemented in Tigase XMPP Server allows specifying `redirectUri` which consists of destination hostname and optionally port and path. Specifying any query parameters IS NOT supported. `redirectUri` has support for `{host}` variable which can be used to keep original server name in the redirection from the original request, ie. `redirectUri = 'https://{host}:8089'` to redirect request to the same server but on port 8089 (original path URI and query string will be automatically appended to the redirection URL).
+
+It's also possible, that Tigase XMPP server handles on it's plain socket port regular `http` request as well as `https` handled by load balancer/proxy that terminates HTTPS traffic and forwards the request using `http` protocol. In that case unconditional request would result in infinite redirection. Fortunately it's possible to specify condition under which redirection should happen using `redirectCondition` option. It has to be set for the redirection to wrok. Currently following values are supported (they should be self-explanatory):
+
+* `never`,
+* `http`,
+* `https`,
+* `always`
 
 [source,groovy]
 ----
 httpServer {
     connections {
         8080 () {
-            redirectEndpoint = 'https://{host}:443'
+            redirectCondition = 'http'
+            redirectUri = 'https://{host}:443'
         }
     }
 }
