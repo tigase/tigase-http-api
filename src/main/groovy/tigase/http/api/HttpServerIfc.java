@@ -19,7 +19,9 @@ package tigase.http.api;
 
 import tigase.http.DeploymentInfo;
 import tigase.http.ServletInfo;
+import tigase.kernel.beans.Initializable;
 import tigase.kernel.beans.RegistrarBean;
+import tigase.kernel.beans.UnregisterAware;
 
 import javax.servlet.http.HttpServlet;
 import java.util.List;
@@ -28,7 +30,7 @@ import java.util.List;
  * @author andrzej
  */
 public interface HttpServerIfc
-		extends RegistrarBean {
+		extends RegistrarBean, Initializable, UnregisterAware {
 
 	@Deprecated
 	public static final String HTTP_PORT_KEY = "port";
@@ -60,4 +62,5 @@ public interface HttpServerIfc
 
 	List<Integer> getHTTPSPorts();
 
+	String getName();
 }

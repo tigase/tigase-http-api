@@ -29,10 +29,8 @@ import tigase.kernel.beans.config.ConfigurationChangedAware;
 import tigase.kernel.core.Kernel;
 import tigase.net.SocketType;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -41,9 +39,20 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public abstract class AbstractHttpServer
 		implements HttpServerIfc {
 
+	private static final ConcurrentHashMap<String, AbstractHttpServer> SERVERS = new ConcurrentHashMap<>();
+
+	public static Optional<PortConfigBean> getPortConfig(String name, int port) {
+		return Optional.ofNullable(SERVERS.get(name))
+				.flatMap(server -> Arrays.stream(server.portsConfigBean.portsBeans)
+						.filter(config -> port == config.name)
+						.findFirst());
+	}
+	
 	protected List<Integer> httpPorts = new CopyOnWriteArrayList<>();
 	protected List<Integer> httpsPorts = new CopyOnWriteArrayList<>();
 	protected Kernel kernel;
+	@ConfigField(desc = "Name of the bean")
+	private String name;
 	@Inject
 	protected PortsConfigBean portsConfigBean;
 	@Inject(bean = "sslContextContainer")
@@ -60,6 +69,11 @@ public abstract class AbstractHttpServer
 	}
 
 	@Override
+	public String getName() {
+		return name;
+	}
+
+	@Override
 	public void register(Kernel kernel) {
 		this.kernel = kernel;
 
@@ -70,6 +84,16 @@ public abstract class AbstractHttpServer
 	@Override
 	public void unregister(Kernel kernel) {
 		this.kernel = null;
+	}
+
+	@Override
+	public void initialize() {
+		SERVERS.put(name, this);
+	}
+
+	@Override
+	public void beforeUnregister() {
+		SERVERS.remove(name);
 	}
 
 	public abstract static class PortConfigBean
@@ -83,6 +107,8 @@ public abstract class AbstractHttpServer
 		private SocketType socket = SocketType.plain;
 		@ConfigField(desc = "Redirect URI")
 		private String redirectUri;
+		@ConfigField(desc = "Redirection condition")
+		private RedirectionCondition redirectCondition = RedirectionCondition.never;
 
 		public int getPort() {
 			return name;
@@ -98,6 +124,17 @@ public abstract class AbstractHttpServer
 
 		public String getRedirectUri() {
 			return redirectUri;
+		}
+
+		public RedirectionCondition getRedirectCondition() {
+			return redirectCondition;
+		}
+
+		public enum RedirectionCondition {
+			never,
+			http,
+			https,
+			always
 		}
 	}
 

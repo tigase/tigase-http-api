@@ -35,6 +35,7 @@ import javax.net.ssl.SNIMatcher;
 import javax.net.ssl.SNIServerName;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLParameters;
+import javax.servlet.ServletException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.*;
@@ -115,7 +116,14 @@ public class JavaStandaloneHttpServer
 	}
 
 	protected void deploy(HttpServer server, DeploymentInfo info) {
-		server.createContext(info.getContextPath(), new RequestHandler(info, executor.timer));
+		try {
+			server.createContext(info.getContextPath(), new RequestHandler(this, info, executor.timer));
+		} catch (ServletException ex) {
+			String message = "Could not deploy " + info.getContextPath() + " at " + getName() + " at port " +
+					server.getAddress().getPort();
+			log.log(Level.WARNING, message);
+			throw new RuntimeException(ex);
+		}
 	}
 
 	protected void undeploy(HttpServer server) {
@@ -327,11 +335,7 @@ public class JavaStandaloneHttpServer
 					httpServer = serverManager.createServer(this);
 					httpServer.setExecutor(executor);
 					httpServer.start();
-					if (getRedirectUri() != null) {
-						httpServer.createContext("/", new RedirectHandler(getRedirectUri()));
-					} else {
-						serverManager.registerServer(httpServer);
-					}
+					serverManager.registerServer(httpServer);
 				} catch (IOException ex) {
 					throw new RuntimeException("Could not initialize HTTP server for port " + getPort());
 				}
