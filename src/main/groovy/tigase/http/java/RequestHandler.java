@@ -22,10 +22,14 @@ import com.sun.net.httpserver.HttpHandler;
 import tigase.http.DeploymentInfo;
 import tigase.http.ServletInfo;
 import tigase.http.api.Service;
+import tigase.http.java.filters.DummyFilterChain;
+import tigase.http.java.filters.DummyFilterConfig;
+import tigase.http.java.filters.ProtocolRedirectFilter;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import java.io.IOException;
 import java.util.*;
@@ -57,9 +61,11 @@ public class RequestHandler
 		}
 	};
 	private final String contextPath;
+	private final JavaStandaloneHttpServer server;
 	private final Service service;
 	private final Map<String, HttpServlet> servlets = new ConcurrentHashMap<String, HttpServlet>();
 	private final JavaStandaloneHttpServer.ExecutorWithTimeout.Timer timer;
+	private final ProtocolRedirectFilter protocolRedirectFilter;
 
 	public static void setRequestId() {
 		requestId.set(counter.incrementAndGet());
@@ -69,7 +75,12 @@ public class RequestHandler
 		return requestId.get();
 	}
 
-	public RequestHandler(DeploymentInfo info, JavaStandaloneHttpServer.ExecutorWithTimeout.Timer timer) {
+	public RequestHandler(JavaStandaloneHttpServer server, DeploymentInfo info, JavaStandaloneHttpServer.ExecutorWithTimeout.Timer timer)
+			throws ServletException {
+		this.server = server;
+		protocolRedirectFilter = new ProtocolRedirectFilter();
+		DummyFilterConfig filterConfig = new DummyFilterConfig(protocolRedirectFilter.getClass(), server);
+		protocolRedirectFilter.init(filterConfig);
 		this.timer = timer;
 		contextPath = info.getContextPath();
 		service = info.getService();
@@ -131,7 +142,11 @@ public class RequestHandler
 						if (log.isLoggable(Level.FINEST)) {
 							log.log(Level.FINEST, "request " + reqId + " will be processed by " + servlet.getClass() + " for " + key);
 						}
-						servlet.service(req, resp);
+
+						DummyFilterChain filterChain = new DummyFilterChain(servlet);
+						filterChain.addFilter(protocolRedirectFilter);
+						filterChain.doFilter(req, resp);
+
 						handled = true;
 					}
 					break;
