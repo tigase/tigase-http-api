@@ -23,6 +23,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import tigase.http.DeploymentInfo;
 import tigase.http.api.HttpServerIfc;
+import tigase.kernel.beans.config.ConfigField;
 import tigase.kernel.core.Kernel;
 
 import java.util.Collections;
@@ -55,6 +56,9 @@ public class JettyOSGiHttpServer
 		context = Activator.getContext();
 	}
 
+	@ConfigField(desc = "Name of the bean")
+	private String name;
+
 	@Override
 	public List<Integer> getHTTPPorts() {
 		return null;
@@ -63,6 +67,11 @@ public class JettyOSGiHttpServer
 	@Override
 	public List<Integer> getHTTPSPorts() {
 		return null;
+	}
+
+	@Override
+	public String getName() {
+		return name;
 	}
 
 	@Override
@@ -82,7 +91,7 @@ public class JettyOSGiHttpServer
 
 	@Override
 	public void deploy(DeploymentInfo deployment) {
-		ServletContextHandler context = createServletContextHandler(deployment);
+		ServletContextHandler context = createServletContextHandler(deployment, this);
 		deploy(context);
 		deployment.put(CONTEXT_KEY, context);
 		deploymentInfos.add(deployment);
@@ -95,6 +104,15 @@ public class JettyOSGiHttpServer
 			undeploy(context);
 		}
 		deploymentInfos.remove(deployment);
+	}
+
+	@Override
+	public void initialize() {
+	}
+
+	@Override
+	public void beforeUnregister() {
+
 	}
 
 	protected void deploy(ServletContextHandler ctx) {

@@ -21,8 +21,15 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import tigase.http.DeploymentInfo;
 import tigase.http.ServletInfo;
+import tigase.http.api.HttpServerIfc;
 import tigase.http.api.Service;
+import tigase.http.java.filters.ProtocolRedirectFilter;
 
+import javax.servlet.DispatcherType;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -35,7 +42,7 @@ public class JettyHttpServerHelper {
 
 	private static final Logger log = Logger.getLogger(JettyHttpServerHelper.class.getCanonicalName());
 
-	public static ServletContextHandler createServletContextHandler(DeploymentInfo deployment) {
+	public static ServletContextHandler createServletContextHandler(DeploymentInfo deployment, HttpServerIfc server) {
 
 		ServletContextHandler context = new ServletContextHandler(ServletContextHandler.NO_SESSIONS);
 		try {
@@ -66,6 +73,10 @@ public class JettyHttpServerHelper {
 				context.addServlet(holder, mapping);
 			}
 		}
+
+		Map<String, String> filterParams = new HashMap<>();
+		filterParams.put("serverBeanName", server.getName());
+		context.addFilter(ProtocolRedirectFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST)).setInitParameters(Collections.unmodifiableMap(filterParams));
 
 		return context;
 	}

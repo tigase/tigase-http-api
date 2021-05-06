@@ -26,7 +26,6 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import tigase.http.AbstractHttpServer;
 import tigase.http.DeploymentInfo;
@@ -38,11 +37,10 @@ import tigase.kernel.beans.config.ConfigField;
 import tigase.net.SocketType;
 
 import javax.net.ssl.*;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -73,7 +71,7 @@ public class JettyStandaloneHttpServer
 
 	@Override
 	public void deploy(DeploymentInfo deployment) {
-		ServletContextHandler context = createServletContextHandler(deployment);
+		ServletContextHandler context = createServletContextHandler(deployment, this);
 		deploy(context);
 		deployment.put(CONTEXT_KEY, context);
 		deploymentInfos.add(deployment);
@@ -95,6 +93,7 @@ public class JettyStandaloneHttpServer
 		} catch (Exception ex) {
 			log.log(Level.SEVERE, "Exception stopping internal HTTP server", ex);
 		}
+		super.beforeUnregister();
 	}
 
 	@Override
@@ -105,6 +104,7 @@ public class JettyStandaloneHttpServer
 		} catch (Exception ex) {
 			log.log(Level.SEVERE, "Exception starting internal HTTP server", ex);
 		}
+		super.initialize();;
 	}
 
 	protected void deploy(ServletContextHandler ctx) {
@@ -224,7 +224,6 @@ public class JettyStandaloneHttpServer
 		private JettyStandaloneHttpServer serverManager;
 		@ConfigField(desc = "Enable HTTP2 if supported", alias = "use-http2")
 		private Boolean useHttp2 = isHttp2Available();
-		private RedirectServer redirectServer;
 
 		@Override
 		public void beforeUnregister() {
@@ -232,35 +231,15 @@ public class JettyStandaloneHttpServer
 				return;
 			}
 
-			if (redirectServer != null) {
-				try {
-					redirectServer.stop();
-				} catch (Exception ex) {
-					log.log(Level.SEVERE, "Exception stopping internal HTTP server", ex);
-				}
-				redirectServer = null;
-			} else {
-				serverManager.unregisterConnector(connector, getSocket() != SocketType.plain);
-			}
+			serverManager.unregisterConnector(connector, getSocket() != SocketType.plain);
 			connector = null;
 		}
 
 		@Override
 		public void initialize() {
 			if (serverManager != null) {
-				if (getRedirectUri() != null) {
-					redirectServer = new RedirectServer(getRedirectUri());
-					connector = serverManager.createConnector(redirectServer,this);
-					redirectServer.addConnector(connector);
-					try {
-						redirectServer.start();
-					} catch (Exception ex) {
-						log.log(Level.SEVERE, "Exception starting internal HTTP server", ex);
-					}
-				} else {
-					connector = serverManager.createConnector(this);
-					serverManager.registerConnector(connector, getSocket() != SocketType.plain);
-				}
+				connector = serverManager.createConnector(this);
+				serverManager.registerConnector(connector, getSocket() != SocketType.plain);
 			}
 		}
 
@@ -281,42 +260,6 @@ public class JettyStandaloneHttpServer
 		@Override
 		public Class<?> getDefaultBeanClass() {
 			return PortConfigBean.class;
-		}
-	}
-
-	private static class RedirectServer extends Server {
-
-		final ServletContextHandler context;
-
-		RedirectServer(String redirectEndpoint) {
-			super();
-			context = new ServletContextHandler(ServletContextHandler.NO_SESSIONS);
-			context.setContextPath("/");
-			ServletHolder holder = new ServletHolder(RedirectServlet.class);
-			holder.setInitParameters(Map.of("redirectEndpoint", redirectEndpoint));
-			context.addServlet(holder, "/*");
-			this.setHandler(context);
-		}
-	}
-
-	public static class RedirectServlet extends HttpServlet {
-
-		@Override
-		public void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
-			final String originalRequestHost = Optional.ofNullable(request.getHeader("Host"))
-					.map(this::parseHostname)
-					.orElse("localhost");
-			final String requestQuery = Optional.ofNullable(request.getQueryString())
-					.map(query -> "?" + query)
-					.orElse("");
-			String uri = getInitParameter("redirectEndpoint").replace("{host}", originalRequestHost) +
-					request.getRequestURI() + requestQuery;
-			response.sendRedirect(uri);
-		}
-
-		private String parseHostname(String host) {
-			int idx = host.indexOf(":");
-			return idx >= 0 ? host.substring(0, idx) : host;
 		}
 	}
 
