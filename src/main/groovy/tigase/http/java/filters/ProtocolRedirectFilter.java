@@ -50,14 +50,15 @@ public class ProtocolRedirectFilter
 			Optional<AbstractHttpServer.PortConfigBean> portConfigBean = AbstractHttpServer.getPortConfig(
 					serverBeanName, request.getServerPort());
 
-			if (log.isLoggable(
-					Level.FINEST)) {
+			if (log.isLoggable(Level.FINEST)) {
+				/* @formatter:off */
 				log.log(Level.FINEST,
-						"X-Forwarded-Proto: " + request.getHeader("X-Forwarded-Proto") + ", current protocol: " +
-								portConfigBean.map(AbstractHttpServer.PortConfigBean::getSocket) + ", redirect URL: " +
-								portConfigBean.map(AbstractHttpServer.PortConfigBean::getRedirectUri) +
-								", condition: " +
-								portConfigBean.map(AbstractHttpServer.PortConfigBean::getRedirectCondition));
+						"X-Forwarded-Proto: " + request.getHeader("X-Forwarded-Proto")
+								+ ", request protocol: " + request.getProtocol()
+								+ ", socket protocol: " + portConfigBean.map(AbstractHttpServer.PortConfigBean::getSocket)
+								+ ", redirect URL: " + portConfigBean.map(AbstractHttpServer.PortConfigBean::getRedirectUri) +
+								", condition: " + portConfigBean.map(AbstractHttpServer.PortConfigBean::getRedirectCondition));
+				/* @formatter:on */
 			}
 
 			if (portConfigBean.isPresent() && shouldRedirect(request, portConfigBean.get())) {
