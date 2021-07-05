@@ -21,7 +21,6 @@ import tigase.db.DataSource;
 import tigase.db.TigaseDBException;
 import tigase.kernel.beans.Bean;
 import tigase.xmpp.jid.BareJID;
-import tigase.xmpp.jid.JID;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -36,9 +35,9 @@ public class DummyFileUploadRepository
 		implements FileUploadRepository {
 
 	@Override
-	public Slot allocateSlot(JID sender, String slotId, String filename, long filesize, String contentType)
-			throws TigaseDBException {
-		return new Slot(sender.getBareJID(), slotId, filename, filesize, contentType, new Date());
+	public FileUploadRepository.Slot allocateSlot(BareJID sender, String slotId, String filename, long filesize,
+												  String contentType) throws TigaseDBException {
+		return new Slot(sender, slotId, filename, filesize, contentType, new Date());
 	}
 
 	@Override

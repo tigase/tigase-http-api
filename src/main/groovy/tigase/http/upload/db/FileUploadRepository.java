@@ -17,6 +17,7 @@
  */
 package tigase.http.upload.db;
 
+import tigase.annotations.TigaseDeprecated;
 import tigase.db.DataSource;
 import tigase.db.DataSourceAware;
 import tigase.db.TigaseDBException;
@@ -36,9 +37,19 @@ public interface FileUploadRepository<DS extends DataSource>
 	/**
 	 * Create slot in database for file upload.
 	 */
-	Slot allocateSlot(JID sender, String slotId, String filename, long filesize, String contentType)
+	Slot allocateSlot(BareJID sender, String slotId, String filename, long filesize, String contentType)
 			throws TigaseDBException;
 
+	/**
+	 * Create slot in database for file upload.
+	 */
+	@TigaseDeprecated(since = "2.2.0", removeIn = "3.0.0", note = "Use method allocateSlot() with sender as a BareJID")
+	@Deprecated
+	default Slot allocateSlot(JID sender, String slotId, String filename, long filesize, String contentType)
+			throws TigaseDBException {
+		return allocateSlot(sender.getBareJID(), slotId, filename, filesize, contentType);
+	}
+	
 	/**
 	 * Looks for slot for particular sender with exact slot id, file name and file size
 	 */
