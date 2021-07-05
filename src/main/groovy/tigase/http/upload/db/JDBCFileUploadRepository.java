@@ -24,7 +24,6 @@ import tigase.db.util.RepositoryVersionAware;
 import tigase.http.db.Schema;
 import tigase.kernel.beans.config.ConfigField;
 import tigase.xmpp.jid.BareJID;
-import tigase.xmpp.jid.JID;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -86,18 +85,17 @@ public class JDBCFileUploadRepository
 	private DataRepository repo;
 
 	@Override
-	public Slot allocateSlot(JID sender, String slotId, String filename, long filesize, String contentType)
+	public Slot allocateSlot(BareJID sender, String slotId, String filename, long filesize, String contentType)
 			throws TigaseDBException {
-		BareJID bareJid = sender.getBareJID();
 		try {
-			PreparedStatement stmt = repo.getPreparedStatement(bareJid, ALLOCATE_SLOT_QUERY);
+			PreparedStatement stmt = repo.getPreparedStatement(sender, ALLOCATE_SLOT_QUERY);
 			ResultSet rs = null;
 			synchronized (stmt) {
 				try {
 					stmt.setString(1, slotId);
-					stmt.setString(2, bareJid.toString());
-					stmt.setString(3, bareJid.getDomain());
-					stmt.setString(4, sender.getResource());
+					stmt.setString(2, sender.toString());
+					stmt.setString(3, sender.getDomain());
+					stmt.setString(4, "");
 					stmt.setString(5, filename);
 					stmt.setLong(6, filesize);
 					stmt.setString(7, contentType);
@@ -105,7 +103,7 @@ public class JDBCFileUploadRepository
 					rs = stmt.executeQuery();
 					if (rs.next()) {
 						String id = rs.getString(1);
-						return new Slot(bareJid, slotId, filename, filesize, contentType, new Date());
+						return new Slot(sender, slotId, filename, filesize, contentType, new Date());
 					}
 				} finally {
 					repo.release(null, rs);

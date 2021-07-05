@@ -39,6 +39,12 @@ public class FileUploadRepositoryPool<R extends FileUploadRepository<DataSource>
 		implements FileUploadRepository {
 
 	@Override
+	public Slot allocateSlot(BareJID sender, String slotId, String filename, long filesize, String contentType)
+			throws TigaseDBException {
+		return getRepository(sender.getDomain()).allocateSlot(sender, slotId, filename, filesize, contentType);
+	}
+
+	@Override
 	public Slot allocateSlot(JID sender, String slotId, String filename, long filesize, String contentType)
 			throws TigaseDBException {
 		return getRepository(sender.getDomain()).allocateSlot(sender, slotId, filename, filesize, contentType);
