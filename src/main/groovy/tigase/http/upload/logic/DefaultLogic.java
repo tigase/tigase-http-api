@@ -65,7 +65,7 @@ public class DefaultLogic
 	@ConfigField(desc = "Allow file upload for local clients", alias = "local-only")
 	private boolean localOnly = true;
 	@ConfigField(desc = "Maximal file size allowed for transfer", alias = "max-file-size")
-	private long maxFileSize = 5 * 1024 * 1024;
+	private long maxFileSize = 20 * 1024 * 1024;
 	@ConfigField(desc = "Port")
 	private Integer port = null;
 	@ConfigField(desc = "Protocol")
