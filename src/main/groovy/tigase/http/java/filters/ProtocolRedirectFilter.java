@@ -48,7 +48,7 @@ public class ProtocolRedirectFilter
 			final HttpServletResponse response = (HttpServletResponse) servletResponse;
 
 			Optional<AbstractHttpServer.PortConfigBean> portConfigBean = AbstractHttpServer.getPortConfig(
-					serverBeanName, request.getServerPort());
+					serverBeanName, request.getLocalPort());
 
 			if (log.isLoggable(Level.FINEST)) {
 				/* @formatter:off */
