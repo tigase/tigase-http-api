@@ -114,6 +114,9 @@ public class SetupModule
 		ServletInfo servletInfo = httpServer.servlet("SetupServlet", SetupServlet.class).addInitParam("module", uuid);
 		servletInfo.addMapping("/*");
 		httpDeployment.addServlets(servletInfo);
+		servletInfo = httpServer.servlet("AGPLLicenseServlet", AGPLLicenseServlet.class);
+		servletInfo.addMapping("/license/agpl.html");
+		httpDeployment.addServlets(servletInfo);
 		httpServer.deploy(httpDeployment);
 	}
 

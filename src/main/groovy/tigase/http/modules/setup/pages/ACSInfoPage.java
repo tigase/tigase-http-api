@@ -30,4 +30,13 @@ public class ACSInfoPage extends Page {
 		this.config = config;
 	}
 
+	public boolean containsACS() {
+		try {
+			Class.forName("tigase.licence.LicenceChecker");
+			return true;
+		} catch (ClassNotFoundException e) {
+			return false;
+		}
+	}
+
 }
