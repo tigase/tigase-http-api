@@ -18,12 +18,14 @@ ${ util.include('header', [title:'Setup: ' + page.title]) }
         <% valueControl(q); %>
     </div>
 <% } %>
-
 <% def q = page.getQuestion('acsName') %>
+<% if (page.containsACS()) { %>
 <% fieldFn(q, "To confirm please enter your name or company name below", { q1 -> %>
 <input class="form-control" type='text' size='40' name='${q.getName()}' required value='<%= q.getValue() %>' />
 <% }); %>
-
+<% } else { %>
+<input type="hidden" name='${q.getName()}' value="displayed"/>
+<% } %>
     </div>
 </div>
 <button class="btn btn-default" type="submit" name="next">Next</button>

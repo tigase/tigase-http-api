@@ -25,7 +25,7 @@ public class ACSInfoPage extends Page {
 	private final Config config;
 
 	public ACSInfoPage(Config config) {
-		super("Advanced Clustering Strategy information", "acsInfo.html",
+		super("License", "acsInfo.html",
 				new SingleAnswerQuestion("acsName", true, config::getAcsName, config::setAcsName));
 		this.config = config;
 	}
