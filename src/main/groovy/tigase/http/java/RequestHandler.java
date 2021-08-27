@@ -32,8 +32,10 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -66,6 +68,7 @@ public class RequestHandler
 	private final Map<String, HttpServlet> servlets = new ConcurrentHashMap<String, HttpServlet>();
 	private final JavaStandaloneHttpServer.ExecutorWithTimeout.Timer timer;
 	private final ProtocolRedirectFilter protocolRedirectFilter;
+	private final Optional<Set<String>> vhosts;
 
 	public static void setRequestId() {
 		requestId.set(counter.incrementAndGet());
@@ -78,6 +81,7 @@ public class RequestHandler
 	public RequestHandler(JavaStandaloneHttpServer server, DeploymentInfo info, JavaStandaloneHttpServer.ExecutorWithTimeout.Timer timer)
 			throws ServletException {
 		this.server = server;
+		this.vhosts = Optional.ofNullable(info.getVHosts()).map(Arrays::asList).map(CopyOnWriteArraySet::new);
 		protocolRedirectFilter = new ProtocolRedirectFilter();
 		DummyFilterConfig filterConfig = new DummyFilterConfig(protocolRedirectFilter.getClass(), server);
 		protocolRedirectFilter.init(filterConfig);
@@ -100,6 +104,21 @@ public class RequestHandler
 		
 		boolean exception = false;
 		try {
+			if (vhosts.isPresent()) {
+				if (!vhosts.get()
+						.contains(Optional.ofNullable(he.getRequestHeaders().getFirst("Host"))
+										  .map(host -> host.split(":")[0])
+										  .orElse(null))) {
+					synchronized (he) {
+						String error = "Not found";
+						he.sendResponseHeaders(404, error.length());
+						he.getResponseBody().write(error.getBytes(StandardCharsets.UTF_8));
+						he.close();
+					}
+					timer.requestProcessingFinished();
+					return;
+				}
+			}
 			String path = he.getRequestURI().getPath();
 			if (log.isLoggable(Level.FINEST)) {
 				log.log(Level.FINEST, "received request " + reqId + " method " + he.getRequestMethod() + " for " +
