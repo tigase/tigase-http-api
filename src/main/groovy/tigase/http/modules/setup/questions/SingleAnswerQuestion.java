@@ -25,7 +25,6 @@ public class SingleAnswerQuestion extends Question {
 	private final Supplier<String> getter;
 	private final String label;
 	private final Consumer<String> setter;
-	private final boolean required;
 
 	public SingleAnswerQuestion(String id, Supplier<String> getter, Consumer<String> setter) {
 		this(id, false, getter, setter);
@@ -41,10 +40,10 @@ public class SingleAnswerQuestion extends Question {
 	
 	public SingleAnswerQuestion(String id, String label, boolean required, Supplier<String> getter, Consumer<String> setter) {
 		super(id);
-		this.required = required;
 		this.label = label;
 		this.getter = getter;
 		this.setter = setter;
+		setRequired(required);
 	}
 
 	public String getLabel() {
@@ -65,7 +64,7 @@ public class SingleAnswerQuestion extends Question {
 
 	@Override
 	public boolean isValid() {
-		return !required || (getValue() != null && !getValue().isEmpty());
+		return !isRequired() || (getValue() != null && !getValue().isEmpty());
 	}
 
 	@Override

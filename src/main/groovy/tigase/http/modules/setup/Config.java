@@ -20,6 +20,7 @@ package tigase.http.modules.setup;
 import tigase.conf.ConfigBuilder;
 import tigase.conf.ConfigHolder;
 import tigase.conf.ConfigWriter;
+import tigase.db.util.DBSchemaLoader;
 import tigase.db.util.SchemaLoader;
 import tigase.kernel.beans.config.AbstractBeanConfigurator;
 import tigase.kernel.beans.selector.ConfigType;
@@ -169,6 +170,7 @@ public class Config {
 	}
 
 	public Properties getSchemaLoaderProperties() {
+		dbProperties.setProperty(DBSchemaLoader.PARAMETERS_ENUM.ROOT_ASK.getName(), "false");
 		return dbProperties;
 	}
 

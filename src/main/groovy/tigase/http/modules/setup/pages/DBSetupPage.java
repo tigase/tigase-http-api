@@ -17,6 +17,7 @@
  */
 package tigase.http.modules.setup.pages;
 
+import tigase.db.util.DBSchemaLoader;
 import tigase.db.util.SchemaLoader;
 import tigase.http.modules.setup.Config;
 import tigase.http.modules.setup.questions.Question;
@@ -40,7 +41,9 @@ public class DBSetupPage extends Page {
 	@Override
 	public void beforeDisplay() {
 		List<CommandlineParameter> options = SchemaLoader.newInstance(config.getDbType()).getSetupOptions();
-		Stream<Question> questions = options.stream().map(o -> {
+		Stream<Question> questions = options.stream()
+				.filter(param -> !DBSchemaLoader.PARAMETERS_ENUM.ROOT_ASK.getName().equals(param.getFullName().orElse(null)))
+				.map(o -> {
 			SingleAnswerQuestion question = null;
 			if (Boolean.class.equals(o.getType())) {
 				question = new SingleAnswerQuestion(o.getFullName().get(), o.getDescription().get(), () -> {

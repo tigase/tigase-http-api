@@ -24,6 +24,7 @@ public abstract class Question {
 	private final String id;
 	private Page page;
 	private boolean secret = false;
+	private boolean required = true;
 
 	public Question(String id) {
 		this.id = id;
@@ -52,4 +53,12 @@ public abstract class Question {
 	public abstract void setValues(String[] values);
 
 	public abstract boolean isValid();
+
+	public void setRequired(boolean required) {
+		this.required = required;
+	}
+
+	public boolean isRequired() {
+		return required;
+	}
 }
