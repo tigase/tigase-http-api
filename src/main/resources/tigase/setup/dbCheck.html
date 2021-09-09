@@ -26,7 +26,7 @@ ${ util.include('header', [title:'Setup: ' + page.title]) }
 			<span style="float: left;"><h4 style="display: inline;">${entry.name}</h4></span><span style="float: right;"><h4 style="display: inline;">${stateName(entry.result)}</h4></span>
 			<div style="clear: both;"></div>
 		</div>
-		<% if (entry.result.name() != 'ok') { %>
+		<% if (entry.result.name() != 'ok' && entry.message) { %>
 		<div class="panel-body">
 			<pre>${entry.message?.replace('\n', '<br/>')}</pre>
 		</div>
