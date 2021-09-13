@@ -49,19 +49,19 @@
         <url>http://www.tigase.org</url>
     </organization>
 
-    <pluginRepositories>
-        <pluginRepository>
-            <id>bintray</id>
-            <name>Groovy Bintray</name>
-            <url>https://dl.bintray.com/groovy/maven</url>
-            <releases>
-                <updatePolicy>never</updatePolicy>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </pluginRepository>
-    </pluginRepositories>
+<!--    <pluginRepositories>-->
+<!--        <pluginRepository>-->
+<!--            <id>bintray</id>-->
+<!--            <name>Groovy Bintray</name>-->
+<!--            <url>https://dl.bintray.com/groovy/maven</url>-->
+<!--            <releases>-->
+<!--                <updatePolicy>never</updatePolicy>-->
+<!--            </releases>-->
+<!--            <snapshots>-->
+<!--                <enabled>false</enabled>-->
+<!--            </snapshots>-->
+<!--        </pluginRepository>-->
+<!--    </pluginRepositories>-->
 
     <build>
         <plugins>
@@ -77,13 +77,13 @@
                     <dependency>
                         <groupId>org.codehaus.groovy</groupId>
                         <artifactId>groovy-eclipse-compiler</artifactId>
-                        <version>3.0.0-01</version>
+                        <version>3.3.0-01</version>
                         <!--<extensions>true</extensions>-->
                     </dependency>
                     <dependency>
                         <groupId>org.codehaus.groovy</groupId>
                         <artifactId>groovy-eclipse-batch</artifactId>
-                        <version>2.5.2-01</version>
+                        <version>2.5.9-01</version>
                     </dependency>
                 </dependencies>
             </plugin>
@@ -172,7 +172,17 @@
                             </execution>
                         </executions>
                     </plugin>
-
+                    <plugin>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <configuration>
+                            <source>9</source>
+                            <target>9</target>
+                            <release combine.self="override" />
+                            <compilerArgs>
+                                <arg>--add-exports</arg><arg>java.base/sun.security.x509=ALL-UNNAMED</arg>
+                            </compilerArgs>
+                        </configuration>
+                    </plugin>
                 </plugins>
             </build>
         </profile>
@@ -263,7 +273,7 @@
     <repositories>
         <repository>
             <id>tigase</id>
-            <url>http://maven-repo.tigase.org/repository/tigase</url>
+            <url>https://maven-repo.tigase.org/repository/tigase</url>
         </repository>
     </repositories>
 </project>
