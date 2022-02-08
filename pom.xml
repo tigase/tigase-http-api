@@ -42,7 +42,7 @@
 
     <organization>
         <name>Tigase</name>
-        <url>http://www.tigase.org</url>
+        <url>https://tigase.net</url>
     </organization>
 
     <build>
@@ -140,7 +140,7 @@
     <repositories>
         <repository>
             <id>tigase</id>
-            <url>http://maven-repo.tigase.org/repository/tigase</url>
+            <url>https://maven-repo.tigase.org/repository/tigase</url>
         </repository>
     </repositories>
 </project>
