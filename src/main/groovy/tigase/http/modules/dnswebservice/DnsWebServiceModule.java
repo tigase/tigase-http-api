@@ -17,29 +17,26 @@
  */
 package tigase.http.modules.dnswebservice;
 
+import tigase.annotations.TigaseDeprecated;
 import tigase.http.DeploymentInfo;
 import tigase.http.HttpMessageReceiver;
-import tigase.http.ServletInfo;
 import tigase.http.modules.AbstractModule;
-import tigase.http.modules.wellknown.WellKnownServletsProvider;
 import tigase.kernel.beans.Bean;
 import tigase.kernel.beans.selector.ConfigType;
 import tigase.kernel.beans.selector.ConfigTypeEnum;
 
-import java.util.List;
-
-@Bean(name = "dns-webservice", parent = HttpMessageReceiver.class, active = true, exportable = true)
+@Bean(name = "dns-webservice", parent = HttpMessageReceiver.class, active = false, exportable = true)
 @ConfigType({ConfigTypeEnum.DefaultMode, ConfigTypeEnum.SessionManagerMode, ConfigTypeEnum.ConnectionManagersMode,
 			 ConfigTypeEnum.ComponentMode})
+@Deprecated
+@TigaseDeprecated(since = "8.2.0")
 public class DnsWebServiceModule
-		extends AbstractModule implements WellKnownServletsProvider {
+		extends AbstractModule {
 
-	private final List<ServletInfo> wellKnownServletInfos;
 	private DeploymentInfo deployment = null;
 
 	public  DnsWebServiceModule() {
 		super();
-		wellKnownServletInfos = List.of(new ServletInfo("HostMeta", DnsHostMetaServlet.class).addMapping("/host-meta").addInitParam("format", "xml"),new ServletInfo("HostMeta", DnsHostMetaServlet.class).addMapping("/host-meta.json").addInitParam("format", "json"));
 	}
 
 	@Override
@@ -76,9 +73,5 @@ public class DnsWebServiceModule
 		}
 		super.stop();
 	}
-
-	@Override
-	public List<ServletInfo> getServletInfos() {
-		return wellKnownServletInfos;
-	}
+	
 }
