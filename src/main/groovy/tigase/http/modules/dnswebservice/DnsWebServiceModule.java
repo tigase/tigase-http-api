@@ -29,7 +29,7 @@ import tigase.kernel.beans.selector.ConfigTypeEnum;
 @ConfigType({ConfigTypeEnum.DefaultMode, ConfigTypeEnum.SessionManagerMode, ConfigTypeEnum.ConnectionManagersMode,
 			 ConfigTypeEnum.ComponentMode})
 @Deprecated
-@TigaseDeprecated(since = "8.2.0")
+@TigaseDeprecated(since = "2.2.0")
 public class DnsWebServiceModule
 		extends AbstractModule {
 
