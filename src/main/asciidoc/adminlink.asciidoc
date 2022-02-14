@@ -1,5 +1,6 @@
 include::text/HTTP_API_Component.asciidoc[]
 
+include::text/tigase-http-api-release-notes.asciidoc[leveloffset=+1]
 
 include::text/HTTP_API_Component_modules.asciidoc[leveloffset=+1]
 include::text/HTTP_API_Component_modules_common_configuration.asciidoc[leveloffset=+1]

@@ -1,0 +1,6 @@
+= Tigase HTTP-API Release Notes
+:author: Wojciech Kapcia
+
+Welcome to Tigase HTTP-API 2.2.0! This is a feature release for with a number of fixes and updates.
+
+include::tigase-http-api-current.asciidoc[leveloffset=+1]

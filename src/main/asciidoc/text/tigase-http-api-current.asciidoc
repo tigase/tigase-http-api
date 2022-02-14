@@ -1,0 +1,39 @@
+= Tigase HTTP-API 2.2.0 Release Notes
+:author: Wojciech Kapcia
+:date: 2022-02-08
+
+== Major Changes
+
+* Enable HTTP File Upload by default with additional, optional, AWS S3 compatible backend
+* Improvements to Web Setup to make installation even more straightforward
+* Allow exposing `.well-known` in the root context to facilitate [XEP-0156: Discovering Alternative XMPP Connection Methods](https://xmpp.org/extensions/xep-0156.html)
+* Add option to redirect requests from http to https
+
+== All Changes
+
+* https://projects.tigase.net/issue/http-65[#http-65]: More detailed logs
+* https://projects.tigase.net/issue/http-86[#http-86]: Add s3 backend for http-upload
+* https://projects.tigase.net/issue/http-91[#http-91]: Items in setup on Features screen are misaligned
+* https://projects.tigase.net/issue/http-93[#http-93]: Update web-installer documentation
+* https://projects.tigase.net/issue/http-95[#http-95]: Enable HTTP File Upload by default
+* https://projects.tigase.net/issue/http-96[#http-96]: Enabling cluster mode / ACS doesn't add it to resulting configuration file
+* https://projects.tigase.net/issue/http-98[#http-98]: Setup tests are failing since Septempter
+* https://projects.tigase.net/issue/http-99[#http-99]: Enforce max-file-size limit
+* https://projects.tigase.net/issue/http-100[#http-100]: Prevent enabling all Message* plugins
+* https://projects.tigase.net/issue/http-101[#http-101]: Prevent enabling all Mobile* plugins
+* https://projects.tigase.net/issue/http-102[#http-102]: Last activity plugins handling should be improved
+* https://projects.tigase.net/issue/http-103[#http-103]: Enabling http-upload should give an info about requirement to set domain/store
+* https://projects.tigase.net/issue/http-105[#http-105]: Handle forbidden characters in filenames
+* https://projects.tigase.net/issue/http-106[#http-106]: Can't remove user for non-existent VHost
+* https://projects.tigase.net/issue/http-107[#http-107]: Allow exposing `.well-known` in the root context
+* https://projects.tigase.net/issue/http-108[#http-108]: Add option to redirect requests from http to https
+* https://projects.tigase.net/issue/http-109[#http-109]: openAccess option is missing after migrating the component to TK
+* https://projects.tigase.net/issue/http-110[#http-110]: Add support for querying and managing uploaded files
+* https://projects.tigase.net/issue/http-111[#http-111]: DefaultLogic.removeExpired removal of slot failed
+* https://projects.tigase.net/issue/http-113[#http-113]: Add condition to redirect only if the X-Forwarded-Proto has certain value
+* https://projects.tigase.net/issue/http-114[#http-114]: TigaseDBException: Could not allocate slot
+* https://projects.tigase.net/issue/http-116[#http-116]: Limiting list of VHosts doesn't work for JDK based http-server
+* https://projects.tigase.net/issue/http-117[#http-117]: Http redirection doesn't work in docker
+* https://projects.tigase.net/issue/http-119[#http-119]: Can't change VHost configuration via Admin WebUI
+* https://projects.tigase.net/issue/http-120[#http-120]: Improve S3 support for HTTP File Upload to accept custom URL and credentials for S3 storage configuration
+* https://projects.tigase.net/issue/http-121[#http-121]: Deprecate DnsWebService and rewrite /.well-known/host-meta generator
