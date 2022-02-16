@@ -1,4 +1,4 @@
-[[adminUI]]
+[[adminUIguide]]
 = Admin UI Guide
 :author: Daniel Wisnewski
 :version: v2.0 August 2017. Reformatted for v8.0.0.

@@ -6,7 +6,7 @@
 
 * Enable HTTP File Upload by default with additional, optional, AWS S3 compatible backend
 * Improvements to Web Setup to make installation even more straightforward
-* Allow exposing `.well-known` in the root context to facilitate [XEP-0156: Discovering Alternative XMPP Connection Methods](https://xmpp.org/extensions/xep-0156.html)
+* Allow exposing `.well-known` in the root context to facilitate https://xmpp.org/extensions/xep-0156.html[XEP-0156: Discovering Alternative XMPP Connection Methods]
 * Add option to redirect requests from http to https
 
 == All Changes
