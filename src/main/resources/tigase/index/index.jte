@@ -1,12 +1,15 @@
+@import tigase.http.DeploymentInfo
+@import java.util.List
+@param List<DeploymentInfo> deployments
 <!DOCTYPE html>
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 	<meta charset="UTF-8"/>
 	<title>Tigase XMPP Server</title>
-	${ util["inlineCss"].apply('bootstrap.min.css') }
-	${ util["inlineCss"].apply('custom.css') }
-	${ util["inlineCss"].apply('http-api-custom.css') }
+	<link rel="stylesheet" type="text/css" href="assets/css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="assets/css/custom.css">
+	<link rel="stylesheet" type="text/css" href="assets/css/http-api-custom.css">
 </head>
 <body>
 <noscript>
@@ -32,7 +35,7 @@
 				</div>
 			</div>
 
-			<% deployments.each { info -> %>
+			@for(DeploymentInfo info : deployments)
 			<div class="col-sm-6 col-md-6 col-lg-6">
 				<a href="${info.getContextPath()}/">
 			<div class="panel panel-primary">
@@ -46,7 +49,7 @@
 			</div>
 				</a>
 			</div>
-				<% } %>
+			@endfor
 			</div>
 		</div>
 	</div>
