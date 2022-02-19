@@ -17,13 +17,15 @@
  */
 package tigase.http.modules;
 
-import groovy.lang.Writable;
-import groovy.text.GStringTemplateEngine;
-import groovy.text.Template;
+import gg.jte.CodeResolver;
+import gg.jte.ContentType;
+import gg.jte.TemplateEngine;
+import gg.jte.output.WriterOutput;
+import gg.jte.resolve.ResourceCodeResolver;
 import tigase.http.DeploymentInfo;
 import tigase.http.HttpMessageReceiver;
 import tigase.http.ServletInfo;
-import tigase.http.util.CSSHelper;
+import tigase.http.util.AssetsServlet;
 import tigase.kernel.beans.Bean;
 import tigase.kernel.beans.selector.ConfigType;
 import tigase.kernel.beans.selector.ConfigTypeEnum;
@@ -33,10 +35,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 
 /**
  * Created by andrzej on 28.05.2016.
@@ -56,6 +58,8 @@ public class IndexModule
 	public static IndexModule getInstance(String uuid) {
 		return modules.get(uuid);
 	}
+
+	private TemplateEngine templateEngine;
 
 	public IndexModule() {
 		contextPath = "/";
@@ -77,6 +81,8 @@ public class IndexModule
 			stop();
 		}
 
+		CodeResolver codeResolver = new ResourceCodeResolver("tigase/index");
+		templateEngine = TemplateEngine.create(codeResolver, ContentType.Html);
 		super.start();
 		modules.put(uuid, this);
 		httpDeployment = httpServer.deployment()
@@ -88,7 +94,11 @@ public class IndexModule
 			httpDeployment.setVHosts(vhosts);
 		}
 
-		ServletInfo servletInfo = httpServer.servlet("IndexServlet", IndexServlet.class);
+		ServletInfo servletInfo = httpServer.servlet("AssetsServlet", AssetsServlet.class);
+		servletInfo.addMapping("/assets/*");
+		httpDeployment.addServlets(servletInfo);
+
+		servletInfo = httpServer.servlet("IndexServlet", IndexServlet.class);
 		servletInfo.addInitParam("module", uuid);
 		servletInfo.addMapping("/");
 		httpDeployment.addServlets(servletInfo);
@@ -98,6 +108,7 @@ public class IndexModule
 
 	@Override
 	public void stop() {
+		templateEngine = null;
 		if (httpDeployment != null) {
 			httpServer.undeploy(httpDeployment);
 			httpDeployment = null;
@@ -114,7 +125,7 @@ public class IndexModule
 			extends HttpServlet {
 
 		private IndexModule module;
-		private Template template = null;
+		private TemplateEngine engine = null;
 
 		public IndexServlet() {
 
@@ -134,21 +145,11 @@ public class IndexModule
 				throw new ServletException("Not found module for IndexServlet");
 			}
 
-			try {
-				loadTemplate();
-			} catch (IOException | ClassNotFoundException ex) {
-				throw new ServletException("Could not load template", ex);
-			}
+			engine = module.templateEngine;
 		}
 
 		@Override
 		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-//			try {
-//				loadTemplate();
-//			} catch (IOException | ClassNotFoundException ex) {
-//				throw new ServletException("Could not load template", ex);
-//			}
-
 			PrintWriter out = resp.getWriter();
 			List<DeploymentInfo> deploymentInfoList = new ArrayList<>(module.listDeployments());
 			deploymentInfoList.removeIf(info -> {
@@ -158,51 +159,13 @@ public class IndexModule
 				}
 				return false;
 			});
-			deploymentInfoList.sort((o1, o2) -> {
-				return o1.getContextPath().compareTo(o2.getContextPath());
-			});
+			deploymentInfoList.sort(Comparator.comparing(DeploymentInfo::getContextPath));
 
 			Map model = new HashMap();
 			model.put("deployments", deploymentInfoList);
-			Map<String, Object> util = new HashMap<>();
-			Function<String, String> tmp = (path) -> {
-				String content = null;
-				try {
-					content = CSSHelper.getCssFileContent(path);
-				} catch (Exception ex) {
-				}
-				if (content == null) {
-					return "";
-				}
-				return "<style>" + content + "</style>";
-			};
-			util.put("inlineCss", tmp);
-			model.put("util", util);
-			Writable w = template.make(model);
-			w.writeTo(out);
 
-//			out.append("Found ").append(""+deploymentInfoList.size()).append(" endpoints");
-//			for (DeploymentInfo info : deploymentInfoList) {
-//				if (info.getVHosts() != null && info.getVHosts().length > 0) {
-//					List<String> vhosts = Arrays.asList(info.getVHosts());
-//					if (!vhosts.contains(req.getServerName())) {
-//						break;
-//					}
-//				}
-//				out.append("\n").append(info.getDeploymentName()).append(" - ").append(info.getContextPath());
-//			}
+			engine.render("index.jte", model, new WriterOutput(out));
 		}
-
-		private void loadTemplate() throws IOException, ClassNotFoundException {
-			String path = "tigase/index/index.html";
-			File indexFile = new File(path);
-			GStringTemplateEngine templateEngine = new GStringTemplateEngine();
-			if (indexFile.exists()) {
-				template = templateEngine.createTemplate(indexFile);
-			} else {
-				InputStream is = getClass().getResourceAsStream("/" + path);
-				template = templateEngine.createTemplate(new InputStreamReader(is));
-			}
-		}
+		
 	}
 }

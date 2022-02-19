@@ -125,6 +125,7 @@
                     <include>**/*.css</include>
                     <include>**/*.js</include>
                     <include>**/*.html</include>
+                    <include>**/*.jte</include>
                 </includes>
             </resource>
             <resource>
@@ -211,6 +212,11 @@
             <artifactId>groovy-xml</artifactId>
             <version>${groovyVersion}</version>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>gg.jte</groupId>
+            <artifactId>jte</artifactId>
+            <version>1.12.1</version>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>

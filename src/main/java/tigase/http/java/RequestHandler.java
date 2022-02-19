@@ -240,6 +240,9 @@ public class RequestHandler
 				if (mapping.endsWith("/")) {
 					mapping = mapping.substring(0, mapping.length() - 1);
 				}
+				if ("/".equals(contextPath) && mapping.startsWith("/")) {
+					mapping = mapping.substring(1);
+				}
 //				if ("/".equals(contextPath)) {
 //					servlets.put(mapping.replace("/*", ""), servlet);
 //				} else {
