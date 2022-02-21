@@ -17,16 +17,15 @@
  */
 package tigase.http.modules.admin;
 
-import groovy.lang.Writable;
-import groovy.text.GStringTemplateEngine;
-import groovy.text.Template;
-import org.codehaus.groovy.control.CompilationFailedException;
+import gg.jte.ContentType;
+import gg.jte.TemplateEngine;
+import gg.jte.output.WriterOutput;
+import gg.jte.resolve.ResourceCodeResolver;
 import tigase.http.ServiceImpl;
 import tigase.http.api.Service;
-import tigase.http.util.CSSHelper;
+import tigase.http.modules.admin.form.Form;
 import tigase.server.Command;
 import tigase.server.Packet;
-import tigase.util.stringprep.TigaseStringprepException;
 import tigase.xml.Element;
 import tigase.xml.XMLUtils;
 import tigase.xmpp.StanzaType;
@@ -41,8 +40,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -53,10 +50,10 @@ import java.time.temporal.TemporalAccessor;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author andrzej
@@ -71,7 +68,7 @@ public class Servlet
 	private static final String ADHOC_COMMANDS_XMLNS = "http://jabber.org/protocol/commands";
 	private File scriptsDir = null;
 	private Service service = null;
-	private Template template = null;
+	private TemplateEngine engine = null;
 
 	@Override
 	public void init() throws ServletException {
@@ -80,150 +77,174 @@ public class Servlet
 		String moduleName = cfg.getInitParameter(MODULE_ID_KEY);
 		service = new ServiceImpl(moduleName);
 		scriptsDir = new File(cfg.getInitParameter(SCRIPTS_DIR_KEY));
-		try {
-			loadTemplate();
-		} catch (IOException|ClassNotFoundException e) {
-			throw new ServletException(e);
-		}
+		engine = TemplateEngine.create(new ResourceCodeResolver("tigase/admin"), ContentType.Html);
 	}
 
 	@Override
 	public void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		try {
-			processRequest(request, response);
+			if (request.getUserPrincipal() == null && !request.authenticate(response)) {
+				// user not authenticated but authentication is required for this servlet
+				return;
+			}
+
+			final AsyncContext asyncCtx = request.startAsync(request, response);
+
+			CompletableFuture<List<CommandItem>> future = retrieveComponentsCommands(request.getUserPrincipal());
+
+			future.thenCompose(commands -> {
+				final Map model = new HashMap();
+				model.put("commands", commands.stream().collect(Collectors.groupingBy(CommandItem::getGroup)));
+				model.put("commandGroups", commands.stream().map(CommandItem::getGroup).distinct().sorted().collect(Collectors.toList()));
+				model.put("defaultCommands", getDefaultCommands(commands));
+
+				model.put("currentGroup", Optional.ofNullable(request.getParameter("_group")).orElse(""));
+				CompletableFuture<Map<String,Object>> futureResult = new CompletableFuture<>();
+				Optional<CommandItem> command = getCommand(commands, request.getParameter("_jid"), request.getParameter("_node"));
+
+				if (command.isPresent()) {
+					model.put("currentCommand", command.get());
+					processRequestStep(request, command.get()).thenAccept(result -> {
+						model.put("form", new Form(result.getFields()));
+//						model.put("formTitle", result.getFields().stream().filter(el -> el.getName() == "title").findFirst().orElse(null));
+//						model.put("formInstructions", result.getFields().stream().filter(el -> el.getName() == "instructions").findFirst().orElse(null));
+//						model.put("formFields", result.getFields());
+						futureResult.complete(model);
+					}).exceptionally(ex -> {
+						futureResult.completeExceptionally(ex);
+						return null;
+					});
+				} else {
+					futureResult.complete(model);
+				}
+				return futureResult;
+			}).thenCompose(context -> {
+				try {
+					engine.render("index.jte", context, new WriterOutput(asyncCtx.getResponse().getWriter()));
+					return CompletableFuture.completedFuture(null);
+				} catch (IOException ex) {
+					// nothing we can do, ignoring..
+					return CompletableFuture.failedFuture(ex);
+				}
+			}).exceptionally(ex -> {
+				log.log(Level.FINE, "exception processing request", ex);
+				try {
+					response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				} catch (Throwable ex1) {
+					// ignoring..
+				}
+				return null;
+			}).whenComplete((r,ex) -> asyncCtx.complete());
 		} catch (Exception ex) {
 			log.log(Level.FINE, "exception processing request", ex);
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
 
-	public void processRequestStep(final HttpServletRequest request, final AsyncContext asyncCtx, final Map model,
-								   final JID jid, final String node, final List<Element> formFields)
-			throws TigaseStringprepException {
-		executeAdhocForm(request.getUserPrincipal(), jid, node, formFields,
-						 (Command.DataType formType1, List<Element> formFields1) -> {
-							 int iteration = model.containsKey("iteration") ? (Integer) model.get("iteration") : 1;
-							 if (formType1 == Command.DataType.form &&
-									 ((requestHasValuesForFields(formFields1, request) && (iteration < 10)) ||
-											 (iteration == 1 && "POST".equals(request.getMethod())))) {
-								 setFieldValuesFromRequest(formFields1, request, iteration);
-								 model.put("iteration", ++iteration);
-								 try {
-									 processRequestStep(request, asyncCtx, model, jid, node, formFields1);
-								 } catch (TigaseStringprepException ex) {
-									 log.log(Level.FINE, "exception processing HTTP request", ex);
-								 }
-							 } else {
-								 model.put("formFields", formFields1);
-								 try {
-									 generateResult(asyncCtx, model);
-								 } catch (Exception ex) {
-									 log.log(Level.FINE, "exception processing HTTP request", ex);
-								 }
-							 }
-						 });
-
+	public CompletableFuture<ExecutionResult> processRequestStep(final HttpServletRequest request,
+																 final CommandItem command) {
+		return processRequestStep(request, command, 1, null);
 	}
 
-	private void processRequest(final HttpServletRequest request, final HttpServletResponse response)
-			throws TigaseStringprepException, IOException, ServletException {
-		if (request.getUserPrincipal() == null && !request.authenticate(response)) {
-			// user not authenticated but authentication is required for this servlet
-			return;
-		}
-
-		final AsyncContext asyncCtx = request.startAsync(request, response);
-
-		final Map model = new HashMap();
-		retrieveComponentsCommands(request.getUserPrincipal(), (List<Map<String,String>> commands) -> {
-			model.put("commands", commands);
-			model.put("defaultCommands", getDefaultCommands(commands));
-
-			try {
-				String node = request.getParameter("_node");
-				String jidStr = request.getParameter("_jid");
-				if (node != null && jidStr != null) {
-					JID jid = JID.jidInstance(jidStr);
-					processRequestStep(request, asyncCtx, model, jid, node, null);
-				} else {
-					generateResult(asyncCtx, model);
-				}
-			} catch (Exception ex) {
-				log.log(Level.FINE, "exception processing HTTP request", ex);
+	public CompletableFuture<ExecutionResult> processRequestStep(final HttpServletRequest request,
+								   final CommandItem command, int iteration, final List<Element> formFields) {
+		return executeAdhocForm(request.getUserPrincipal(), command, formFields).thenCompose(result -> {
+			if (result.isFormType(Command.DataType.form) && ((requestHasValuesForFields(result.getFields(), request) && (iteration < 10)) ||
+					(iteration == 1 && "POST".equals(request.getMethod())))) {
+				setFieldValuesFromRequest(result.getFields(), request, iteration);
+				return processRequestStep(request, command, iteration+1, result.getFields());
+			} else {
+				return CompletableFuture.completedFuture(result);
 			}
 		});
 	}
+	
+//	private void generateResult(final AsyncContext asyncCtx, final Map model)
+//			throws IOException, CompilationFailedException, ClassNotFoundException {
+//		Map context = new HashMap();
+//		context.put("model", model);
+//		context.put("request", asyncCtx.getRequest());
+//		context.put("response", asyncCtx.getResponse());
+//
+//		Map<String, Object> util = new HashMap<>();
+//		Function<String, String> tmp = (path) -> {
+//			String content = null;
+//			try {
+//				content = CSSHelper.getCssFileContent(path);
+//			} catch (Exception ex) {
+//			}
+//			if (content == null) {
+//				return "";
+//			}
+//			return "<style>" + content + "</style>";
+//		};
+//		util.put("inlineCss", tmp);
+//		context.put("util", util);
+//
+//		engine.render("tigase/admin/index.html", context, new WriterOutput(asyncCtx.getResponse().getWriter()));
+//		asyncCtx.complete();
+//	}
 
-	private void generateResult(final AsyncContext asyncCtx, final Map model)
-			throws IOException, CompilationFailedException, ClassNotFoundException {
-		Map context = new HashMap();
-		context.put("model", model);
-		context.put("request", asyncCtx.getRequest());
-		context.put("response", asyncCtx.getResponse());
-
-		Map<String, Object> util = new HashMap<>();
-		Function<String, String> tmp = (path) -> {
-			String content = null;
-			try {
-				content = CSSHelper.getCssFileContent(path);
-			} catch (Exception ex) {
-			}
-			if (content == null) {
-				return "";
-			}
-			return "<style>" + content + "</style>";
-		};
-		util.put("inlineCss", tmp);
-		context.put("util", util);
-
-		//loadTemplate();
-		Writable result = template.make(context);
-		result.writeTo(asyncCtx.getResponse().getWriter());
-		asyncCtx.complete();
-	}
-
-	static List<Map<String,String>> getDefaultCommands(List<Map<String,String>> commands) {
-		final List<Map<String, String>> result = new CopyOnWriteArrayList<>();
+	static List<CommandItem> getDefaultCommands(List<CommandItem> commands) {
+		final List<CommandItem> result = new CopyOnWriteArrayList<>();
 		getCommand(commands, "sess-man", "http://jabber.org/protocol/admin#add-user").ifPresent(result::add);
 		getCommand(commands, "sess-man", "modify-user").ifPresent(result::add);
 		getCommand(commands, "sess-man", "http://jabber.org/protocol/admin#delete-user").ifPresent(result::add);
 		getCommand(commands, "sess-man", "http://jabber.org/protocol/admin#get-online-users-list").ifPresent(result::add);
 		getCommand(commands, "vhost-man", "comp-repo-item-add").ifPresent(e -> {
-			e.put("name", "Add domain");
+			e.setName("Add domain");
 			result.add(e);
 		});
 		getCommand(commands, "vhost-man", "comp-repo-item-update").ifPresent(e -> {
-			e.put("name", "Configure domain");
+			e.setName("Configure domain");
 			result.add(e);
 		});
 		getCommand(commands, "vhost-man", "comp-repo-item-remove").ifPresent(e -> {
-			e.put("name", "Remove domain");
+			e.setName("Remove domain");
 			result.add(e);
 		});
 		getCommand(commands, "Rest", "api-key-add").ifPresent(e -> {
-			e.put("name", "Add REST-API key");
+			e.setName("Add REST-API key");
 			result.add(e);
 		});
 
 		return result;
 	}
-	static Optional<Map<String,String>> getCommand(List<Map<String,String>> commands, String component, String command) {
+	static Optional<CommandItem> getCommand(List<CommandItem> commands, String component, String command) {
 		return commands.stream()
-				.filter(map -> map.get("node").equals(command) && map.get("jid").startsWith(component))
+				.filter(map -> map.getNode().equals(command) && map.getJid().toString().startsWith(component))
 				.findAny();
 	}
 
-	private void executeAdhocForm(final Principal principal, JID componentJid, String node, List<Element> formFields,
-								  final CallbackExecuteForm<List<Element>> callback) throws TigaseStringprepException {
-		Element iqEl = new Element("iq");
-		iqEl.setXMLNS("jabber:client");
-		iqEl.setAttribute("from", principal.getName());
-		iqEl.setAttribute("type", StanzaType.set.name());
-		iqEl.setAttribute("to", componentJid.toString());
+	public class ExecutionResult {
+		private final Command.DataType formType;
+		private final List<Element> fields;
+
+		public ExecutionResult(Command.DataType formType, List<Element> fields) {
+			this.formType = formType;
+			this.fields = fields;
+		}
+
+		public Command.DataType getFormType() {
+			return formType;
+		}
+
+		public boolean isFormType(Command.DataType formType) {
+			return this.formType == formType;
+		}
+
+		public List<Element> getFields() {
+			return fields;
+		}
+	}
+
+	private CompletableFuture<ExecutionResult> executeAdhocForm(final Principal principal, CommandItem command, List<Element> formFields) {
+		Element iqEl = new Element("iq").withAttribute("xmlns", "jabber:client")
+				.withAttribute("type", StanzaType.set.name());
 
 		Element commandEl = new Element("command");
 		commandEl.setXMLNS(ADHOC_COMMANDS_XMLNS);
-		commandEl.setAttribute("node", node);
+		commandEl.setAttribute("node", command.getNode());
 		iqEl.addChild(commandEl);
 
 		if (formFields != null) {
@@ -232,9 +253,9 @@ public class Servlet
 			commandEl.addChild(x);
 		}
 
-		Packet iq = Packet.packetInstance(iqEl);
+		Packet iq = Packet.packetInstance(iqEl, JID.jidInstanceNS(principal.getName()), command.getJid());
 		CompletableFuture<Packet> future = service.sendPacketAndAwait(iq);
-		future.thenAccept(result -> {
+		return future.thenApply(result -> {
 			Element xEl = result.getElement().findChildStaticStr(new String[]{"iq", "command", "x"});
 			List<Element> fields = xEl == null ? null : xEl.getChildren();
 			if (fields == null) {
@@ -254,136 +275,79 @@ public class Servlet
 			if (fields.isEmpty()) {
 				fields.add(new Element("title", "Execution completed"));
 			}
-			callback.call(formType, fields);
+			return new ExecutionResult(formType, fields);
 		});
 	}
 
-	private void retrieveComponentsCommands(final Principal principal, final Callback<List<Map<String,String>>> callback)
-			throws TigaseStringprepException {
-		retrieveComponents(principal, (List<JID> componentJids) -> {
-			final AtomicInteger counter = new AtomicInteger(componentJids.size());
-			final List<Map<String,String>> commands = new ArrayList<>();
-			componentJids.forEach((JID jid) -> {
-				try {
-					retrieveComponentCommands(principal, jid, (List<Map<String,String>> componentCommands) -> {
-						synchronized (commands) {
-							if (componentCommands != null) {
-								commands.addAll(componentCommands);
-							}
-						}
-						if (counter.decrementAndGet() == 0) {
-							try {
-								retrieveHttpComponentModulesCommands(principal, (httpCommands) -> {
-									commands.addAll(httpCommands);
-									callback.call(commands);
-								});
-							} catch (TigaseStringprepException ex)  {
-								callback.call(commands);
-							}
-						}
-					});
-				} catch (TigaseStringprepException ex) {
-					Logger.getLogger(Servlet.class.getName()).log(Level.FINE, null, ex);
-				}
-			});
+	private CompletableFuture<List<CommandItem>> retrieveComponentsCommands(final Principal principal) {
+		CompletableFuture<Stream<JID>> allJids = retrieveComponents(principal, JID.jidInstanceNS(BareJID.bareJIDInstanceNS(principal.getName()).getDomain())).thenCombine(
+				retrieveComponents(principal, JID.jidInstanceNS(service.getModule().getJid().getDomain())),
+				(componentJids, httpModuleJids) -> Stream.concat(componentJids.stream(), httpModuleJids.stream()));
+		return allJids.thenCompose(componentJids -> {
+			CompletableFuture<List<CommandItem>>[] componentFutures = componentJids.map(
+					jid -> retrieveComponentCommands(principal, jid)).toArray(CompletableFuture[]::new);
+			CompletableFuture<List<CommandItem>> commands = CompletableFuture.allOf(componentFutures)
+					.thenApply(x -> Arrays.stream(componentFutures)
+							.map(CompletableFuture::join)
+							.flatMap(Collection::stream)
+							.collect(Collectors.toList()));
+
+			return commands;
 		});
 	}
-
-	private void retrieveHttpComponentModulesCommands(final Principal principal, final Callback<List<Map<String,String>>> callback)
-			throws TigaseStringprepException {
-		retrieveComponents(principal, JID.jidInstance("http." + BareJID.bareJIDInstance(principal.getName()).getDomain()),
-						   (List<JID> componentJids) -> {
-			final AtomicInteger counter = new AtomicInteger(componentJids.size());
-			final List<Map<String,String>> commands = new ArrayList<>();
-			componentJids.forEach((JID jid) -> {
-				try {
-					retrieveComponentCommands(principal, jid, (List<Map<String,String>> componentCommands) -> {
-						synchronized (commands) {
-							if (componentCommands != null) {
-								commands.addAll(componentCommands);
-							}
-						}
-						if (counter.decrementAndGet() == 0) {
-							callback.call(commands);
-						}
-					});
-				} catch (TigaseStringprepException ex) {
-					Logger.getLogger(Servlet.class.getName()).log(Level.FINE, null, ex);
-				}
-			});
-		});
-	}
-
-	private void retrieveComponents(Principal principal, Callback<List<JID>> callback)
-			throws TigaseStringprepException {
-		retrieveComponents(principal, JID.jidInstance(BareJID.bareJIDInstance(principal.getName()).getDomain()), callback);
-	}
-
-	private void retrieveComponents(Principal principal, JID to, Callback<List<JID>> callback)
-			throws TigaseStringprepException {
+	
+	private CompletableFuture<List<JID>> retrieveComponents(Principal principal, JID to) {
 		long start = System.currentTimeMillis();
-		Element iqEl = new Element("iq");
-		iqEl.setXMLNS("jabber:client");
-		iqEl.setAttribute("from", principal.getName());
-		iqEl.setAttribute("type", StanzaType.get.name());
-		iqEl.setAttribute("to", to.toString());
+		Element iqEl = new Element("iq").withAttribute("xmlns", "jabber:client")
+				.withAttribute("type", StanzaType.get.name())
+				.withElement("query", DISCO_ITEMS_XMLNS, (String) null);
 
-		Element queryEl = new Element("query");
-		queryEl.setXMLNS(DISCO_ITEMS_XMLNS);
-		iqEl.addChild(queryEl);
-
-		Packet iq = Packet.packetInstance(iqEl);
+		Packet iq = Packet.packetInstance(iqEl, JID.jidInstanceNS(principal.getName()), to);
 
 		CompletableFuture<Packet> future = service.sendPacketAndAwait(iq, 1L);
-		future.thenAccept(result -> {
+		return future.thenApply(result -> {
 			if (log.isLoggable(Level.FINEST)) {
 				log.log(Level.FINEST, "discovery of components took {0}ms", (System.currentTimeMillis() - start));
 			}
 			if (result == null || result.getType() != StanzaType.result) {
 				log.fine("discovery of components failed");
-				callback.call(null);
-				return;
+				return Collections.emptyList();
 			}
 
-			List<JID> jids = result.getElement()
+			return result.getElement()
 					.getChild("query", DISCO_ITEMS_XMLNS)
 					.mapChildren((Element item) -> JID.jidInstanceNS(item.getAttributeStaticStr("jid")));
-			callback.call(jids);
 		});
 	}
 
-	private void retrieveComponentCommands(Principal principal, JID componentJid, Callback<List<Map<String,String>>> callback)
-			throws TigaseStringprepException {
+	private CompletableFuture<List<CommandItem>> retrieveComponentCommands(Principal principal, JID componentJid) {
 		long start = System.currentTimeMillis();
-		Element iqEl = new Element("iq");
-		iqEl.setXMLNS("jabber:client");
-		iqEl.setAttribute("from", principal.getName());
-		iqEl.setAttribute("type", StanzaType.get.name());
-		iqEl.setAttribute("to", componentJid.toString());
-
-		Element queryEl = new Element("query");
-		queryEl.setXMLNS(DISCO_ITEMS_XMLNS);
-		queryEl.setAttribute("node", ADHOC_COMMANDS_XMLNS);
-		iqEl.addChild(queryEl);
-
-		Packet iq = Packet.packetInstance(iqEl);
+		Element iqEl = new Element("iq").withAttribute("xmlns", "jabber:client")
+				.withAttribute("type", StanzaType.get.name())
+				.withElement("query", DISCO_ITEMS_XMLNS,
+							 queryEl -> queryEl.withAttribute("node", ADHOC_COMMANDS_XMLNS));
+		
+		Packet iq = Packet.packetInstance(iqEl, JID.jidInstanceNS(principal.getName()), componentJid);
 
 		CompletableFuture<Packet> future = service.sendPacketAndAwait(iq, 1L);
-		future.thenAccept(result -> {
+		return future.thenApply(result -> {
 			if (log.isLoggable(Level.FINEST)) {
 				log.log(Level.FINEST, "discovery of commands of component {0} took {1}ms",
 						new Object[]{componentJid, System.currentTimeMillis() - start});
 			}
 			if (result == null || result.getType() != StanzaType.result) {
 				log.log(Level.FINE, "discovery of component {0} adhoc commands failed", componentJid);
-				callback.call(null);
-				return;
+				return Collections.emptyList();
 			}
 
-			List<Map<String,String>> commands = result.getElement()
-					.getChild("query", DISCO_ITEMS_XMLNS)
-					.mapChildren(Element::getAttributes);
-			callback.call(commands);
+			return Optional.ofNullable(result.getElement().getChild("query", DISCO_ITEMS_XMLNS))
+					.stream()
+					.map(Element::getChildren)
+					.filter(Objects::nonNull)
+					.flatMap(Collection::stream)
+					.map(Element::getAttributes)
+					.map(CommandItem::new)
+					.collect(Collectors.toList());
 		});
 	}
 
@@ -530,28 +494,6 @@ public class Servlet
 			}
 		});
 	}
-
-	private void loadTemplate() throws IOException, ClassNotFoundException {
-		String path = "tigase/admin/index.html";
-		File indexFile = new File(path);
-		GStringTemplateEngine templateEngine = new GStringTemplateEngine();
-		if (indexFile.exists()) {
-			template = templateEngine.createTemplate(indexFile);
-		} else {
-			InputStream is = getClass().getResourceAsStream("/" + path);
-			template = templateEngine.createTemplate(new InputStreamReader(is));
-		}
-	}
-
-	private interface Callback<T> {
-
-		public void call(T result);
-
-	}
-
-	private interface CallbackExecuteForm<T> {
-
-		public void call(Command.DataType formType, T result);
-	}
+	
 }
 

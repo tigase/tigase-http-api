@@ -21,6 +21,7 @@ import tigase.http.DeploymentInfo;
 import tigase.http.HttpMessageReceiver;
 import tigase.http.ServletInfo;
 import tigase.http.modules.AbstractModule;
+import tigase.http.util.AssetsServlet;
 import tigase.http.util.StaticFileServlet;
 import tigase.kernel.beans.Bean;
 import tigase.kernel.beans.config.ConfigField;
@@ -90,6 +91,10 @@ public class AdminModule
 		}
 		httpDeployment.addServlets(servletInfo);
 
+		servletInfo = httpServer.servlet("AssetsServlet", AssetsServlet.class);
+		servletInfo.addMapping("/assets/*");
+		httpDeployment.addServlets(servletInfo);
+		
 		servletInfo = httpServer.servlet("StaticServlet", StaticFileServlet.class);
 		servletInfo.addInitParam(StaticFileServlet.DIRECTORY_KEY, new File(scriptsDirFile, "static").getAbsolutePath())
 				.addMapping("/static/*");
