@@ -17,9 +17,9 @@
  */
 package tigase.http;
 
-import groovy.json.JsonBuilder;
 import org.junit.Test;
 import tigase.http.json.JsonParser;
+import tigase.http.json.JsonSerializer;
 
 import java.util.HashMap;
 import java.util.List;
@@ -45,10 +45,10 @@ public class JsonParserTest {
 		input.put("object2", obj2);
 		input.put("list", List.of(1, -1.2, "test", new HashMap<>()));
 
-		String objectString = new JsonBuilder(input).toPrettyString();
+		String objectString = new JsonSerializer().serialize(input);
 		System.out.println("input : " + objectString);
 		Object result = new JsonParser().parse(objectString);
-		String objectString2 = new JsonBuilder(result).toPrettyString();
+		String objectString2 = new JsonSerializer().serialize(result);
 		System.out.println("output: " + objectString2);
 	}
 }
