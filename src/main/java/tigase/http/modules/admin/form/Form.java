@@ -32,7 +32,7 @@ public class Form {
 
 	public Form(List<Element> items) {
 		this.title = items.stream().filter(el ->  el.getName() == "title").findFirst().map(Element::getCData).orElse(null);
-		this.instructions = items.stream().filter(el ->  el.getName() == "title").findFirst().map(Element::getCData).orElse(null);
+		this.instructions = items.stream().filter(el ->  el.getName() == "instructions").findFirst().map(Element::getCData).orElse(null);
 
 		Optional<Reported> reported = Optional.empty();
 		for (Element el : items) {
