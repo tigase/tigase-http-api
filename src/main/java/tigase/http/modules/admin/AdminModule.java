@@ -20,10 +20,12 @@ package tigase.http.modules.admin;
 import tigase.http.DeploymentInfo;
 import tigase.http.HttpMessageReceiver;
 import tigase.http.ServletInfo;
+import tigase.http.AuthProvider;
 import tigase.http.modules.AbstractModule;
 import tigase.http.util.AssetsServlet;
 import tigase.http.util.StaticFileServlet;
 import tigase.kernel.beans.Bean;
+import tigase.kernel.beans.Inject;
 import tigase.kernel.beans.config.ConfigField;
 import tigase.kernel.beans.selector.ConfigType;
 import tigase.kernel.beans.selector.ConfigTypeEnum;
@@ -51,6 +53,8 @@ public class AdminModule
 	private DeploymentInfo httpDeployment = null;
 	@ConfigField(desc = "Scripts directory", alias = SCRIPTS_DIR_KEY)
 	private String scriptsDir = DEF_SCRIPTS_DIR_VAL;
+	@Inject
+	private AuthProvider authProvider;
 
 	@Override
 	public String getDescription() {
@@ -67,7 +71,7 @@ public class AdminModule
 		httpDeployment = httpServer.deployment()
 				.setClassLoader(this.getClass().getClassLoader())
 				.setContextPath(contextPath)
-				.setService(new tigase.http.ServiceImpl(this))
+				.setAuthProvider(authProvider)
 				.setDeploymentName("Admin console")
 				.setDeploymentDescription(getDescription());
 		if (vhosts != null) {

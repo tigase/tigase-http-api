@@ -23,9 +23,7 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.container.AsyncResponse;
 import jakarta.ws.rs.container.Suspended;
 import jakarta.ws.rs.core.Response;
-import tigase.http.ServiceImpl;
 import tigase.http.api.NotFoundException;
-import tigase.http.api.Service;
 import tigase.http.modules.rest.AbstractRestHandler;
 import tigase.http.modules.rest.RestModule;
 import tigase.kernel.beans.Bean;
@@ -58,20 +56,18 @@ public class AvatarGetHandler extends AbstractRestHandler {
 	private static final String[] VCARD4_PHOTO_URI_PATH = { Iq.ELEM_NAME, "vCard", "PHOTO" };
 
 	@Inject
-	private RestModule restModule;
-	private Service<RestModule> service;
+	private RestModule module;
 
 	public AvatarGetHandler() {
 		super(Security.None, Role.None);
 	}
 
-	public RestModule getRestModule() {
-		return restModule;
+	public RestModule getModule() {
+		return module;
 	}
 
-	public void setRestModule(RestModule restModule) {
-		this.restModule = restModule;
-		service = new ServiceImpl<>(restModule);
+	public void setModule(RestModule module) {
+		this.module = module;
 	}
 
 	@GET
@@ -108,7 +104,7 @@ public class AvatarGetHandler extends AbstractRestHandler {
 
 		Iq iq = new Iq(iqEl, null, JID.jidInstance(userJid));
 
-		return service.sendPacketAndAwait(iq, 30l).thenCompose(result -> {
+		return module.sendPacketAndWait(iq, 30).thenCompose(result -> {
 			Optional<Element> infos = Optional.ofNullable(result.getElement().getChildren(PEP_METADATA_PATH))
 					.flatMap(el -> el.stream().filter(it -> "info".equals(it.getName())).findFirst());
 			if (infos.isPresent()) {
@@ -146,7 +142,7 @@ public class AvatarGetHandler extends AbstractRestHandler {
 
 		Iq iq = new Iq(iqEl, null, JID.jidInstance(userJid));
 
-		return service.sendPacketAndAwait(iq, 30l).thenCompose(result -> {
+		return module.sendPacketAndWait(iq, 30).thenCompose(result -> {
 			Optional<byte[]> data = Optional.ofNullable(result.getElement().getChildCData(PEP_DATA_PATH))
 					.map(XMLUtils::unescape)
 					.map(str -> str.replace("\n", "").replace("\r", ""))
@@ -166,7 +162,7 @@ public class AvatarGetHandler extends AbstractRestHandler {
 
 		Iq iq = new Iq(iqEl, null, JID.jidInstance(userJid));
 
-		return service.sendPacketAndAwait(iq, 30l).thenCompose(result -> {
+		return module.sendPacketAndWait(iq, 30).thenCompose(result -> {
 			Optional<String> photoUri = Optional.ofNullable(result.getElement().getCData(VCARD4_PHOTO_URI_PATH))
 					.map(XMLUtils::unescape)
 					.map(str -> str.replace("\n", "").replace("\r", ""));
@@ -196,7 +192,7 @@ public class AvatarGetHandler extends AbstractRestHandler {
 
 		Iq iq = new Iq(iqEl, null, JID.jidInstance(userJid));
 
-		return service.sendPacketAndAwait(iq, 30l).thenCompose(result -> {
+		return module.sendPacketAndWait(iq, 30).thenCompose(result -> {
 			Element photoEl = result.getElement().findChild(VCARD_TEMP_PHOTO_PATH);
 			if (photoEl != null) {
 				Optional<java.net.URI> url = Optional.ofNullable(photoEl.getChild("EXTVAL"))

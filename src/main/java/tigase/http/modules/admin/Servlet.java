@@ -21,8 +21,8 @@ import gg.jte.ContentType;
 import gg.jte.TemplateEngine;
 import gg.jte.output.WriterOutput;
 import gg.jte.resolve.ResourceCodeResolver;
-import tigase.http.ServiceImpl;
-import tigase.http.api.Service;
+import tigase.http.modules.AbstractBareModule;
+import tigase.http.modules.Module;
 import tigase.http.modules.admin.form.Form;
 import tigase.server.Command;
 import tigase.server.Packet;
@@ -67,7 +67,7 @@ public class Servlet
 	private static final String DISCO_ITEMS_XMLNS = "http://jabber.org/protocol/disco#items";
 	private static final String ADHOC_COMMANDS_XMLNS = "http://jabber.org/protocol/commands";
 	private File scriptsDir = null;
-	private Service service = null;
+	private Module module = null;
 	private TemplateEngine engine = null;
 
 	@Override
@@ -75,7 +75,7 @@ public class Servlet
 		super.init();
 		ServletConfig cfg = super.getServletConfig();
 		String moduleName = cfg.getInitParameter(MODULE_ID_KEY);
-		service = new ServiceImpl(moduleName);
+		module = AbstractBareModule.getModuleByUUID(moduleName);
 		scriptsDir = new File(cfg.getInitParameter(SCRIPTS_DIR_KEY));
 		engine = TemplateEngine.create(new ResourceCodeResolver("tigase/admin"), ContentType.Html);
 	}
@@ -254,7 +254,7 @@ public class Servlet
 		}
 
 		Packet iq = Packet.packetInstance(iqEl, JID.jidInstanceNS(principal.getName()), command.getJid());
-		CompletableFuture<Packet> future = service.sendPacketAndAwait(iq);
+		CompletableFuture<Packet> future = module.sendPacketAndWait(iq);
 		return future.thenApply(result -> {
 			Element xEl = result.getElement().findChildStaticStr(new String[]{"iq", "command", "x"});
 			List<Element> fields = xEl == null ? null : xEl.getChildren();
@@ -281,7 +281,7 @@ public class Servlet
 
 	private CompletableFuture<List<CommandItem>> retrieveComponentsCommands(final Principal principal) {
 		CompletableFuture<Stream<JID>> allJids = retrieveComponents(principal, JID.jidInstanceNS(BareJID.bareJIDInstanceNS(principal.getName()).getDomain())).thenCombine(
-				retrieveComponents(principal, JID.jidInstanceNS(service.getModule().getJid().getDomain())),
+				retrieveComponents(principal, JID.jidInstanceNS(module.getJid().getDomain())),
 				(componentJids, httpModuleJids) -> Stream.concat(componentJids.stream(), httpModuleJids.stream()));
 		return allJids.thenCompose(componentJids -> {
 			CompletableFuture<List<CommandItem>>[] componentFutures = componentJids.map(
@@ -304,7 +304,7 @@ public class Servlet
 
 		Packet iq = Packet.packetInstance(iqEl, JID.jidInstanceNS(principal.getName()), to);
 
-		CompletableFuture<Packet> future = service.sendPacketAndAwait(iq, 1L);
+		CompletableFuture<Packet> future = module.sendPacketAndWait(iq, 1);
 		return future.thenApply(result -> {
 			if (log.isLoggable(Level.FINEST)) {
 				log.log(Level.FINEST, "discovery of components took {0}ms", (System.currentTimeMillis() - start));
@@ -329,7 +329,7 @@ public class Servlet
 		
 		Packet iq = Packet.packetInstance(iqEl, JID.jidInstanceNS(principal.getName()), componentJid);
 
-		CompletableFuture<Packet> future = service.sendPacketAndAwait(iq, 1L);
+		CompletableFuture<Packet> future = module.sendPacketAndWait(iq, 1);
 		return future.thenApply(result -> {
 			if (log.isLoggable(Level.FINEST)) {
 				log.log(Level.FINEST, "discovery of commands of component {0} took {1}ms",

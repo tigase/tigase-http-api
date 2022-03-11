@@ -61,7 +61,7 @@ public class CommandManager {
 			Packet result = iqc.commandResult(Command.DataType.result);
 
 			Command.addTextField(result, "Note", "Command canceled.");
-			module.addOutPacket(result);
+			module.sendPacket(result);
 
 			return true;
 		}
@@ -77,7 +77,7 @@ public class CommandManager {
 			Queue<Packet> results = new ArrayDeque<Packet>();
 			com.runCommand(iqc, bindings, results);
 			for (Packet res : results) {
-				module.addOutPacket(res);
+				module.sendPacket(res);
 			}
 			return true;
 		}

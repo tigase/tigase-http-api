@@ -17,8 +17,6 @@
  */
 package tigase.http;
 
-import tigase.http.api.Service;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -37,7 +35,7 @@ public class DeploymentInfo {
 	private String contextPath = null;
 	private String description = null;
 	private String name;
-	private Service service;
+	private AuthProvider authProvider;
 	private String[] vhosts = null;
 
 	public DeploymentInfo() {
@@ -105,13 +103,13 @@ public class DeploymentInfo {
 		return (T) data.get(key);
 	}
 
-	public Service getService() {
-		return service;
+	public DeploymentInfo setAuthProvider(AuthProvider authProvider) {
+		this.authProvider = authProvider;
+		return this;
 	}
 
-	public DeploymentInfo setService(Service service) {
-		this.service = service;
-		return this;
+	public AuthProvider getAuthProvider() {
+		return authProvider;
 	}
 
 }

@@ -18,6 +18,7 @@
 package tigase.http.api.rest2.marshallers;
 
 import jakarta.xml.bind.MarshalException;
+import tigase.http.jaxrs.marshallers.Marshaller;
 
 import java.io.IOException;
 

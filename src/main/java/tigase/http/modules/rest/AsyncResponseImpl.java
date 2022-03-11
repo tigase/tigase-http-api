@@ -20,6 +20,7 @@ package tigase.http.modules.rest;
 import jakarta.ws.rs.container.AsyncResponse;
 import jakarta.ws.rs.container.TimeoutHandler;
 import tigase.http.api.HttpException;
+import tigase.http.jaxrs.RequestHandler;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletRequest;

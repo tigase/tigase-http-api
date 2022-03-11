@@ -17,8 +17,6 @@
  */
 package tigase.http.modules;
 
-import tigase.db.AuthRepository;
-import tigase.db.UserRepository;
 import tigase.http.HttpMessageReceiver;
 import tigase.kernel.beans.Bean;
 import tigase.kernel.beans.selector.ConfigType;
@@ -38,22 +36,7 @@ public class UserStatusEndpointModule extends AbstractBareModule {
 	public String getDescription() {
 		return "User Status Endpoint";
 	}
-
-	@Override
-	public boolean isRequestAllowed(String key, String domain, String path) {
-		return false;
-	}
-
-	@Override
-	public UserRepository getUserRepository() {
-		return null;
-	}
-
-	@Override
-	public AuthRepository getAuthRepository() {
-		return null;
-	}
-
+	
 	@Override
 	public boolean processPacket(Packet packet) {
 		if (packet.getStanzaTo().getResource() == null) {
@@ -74,7 +57,7 @@ public class UserStatusEndpointModule extends AbstractBareModule {
 
 		// we do not know what to do, so lets just return feature-not-implemented
 		if (packet instanceof Iq && packet.isCommand() && packet.getCommand() == Command.CHECK_USER_CONNECTION) {
-			this.addOutPacket(packet.okResult((String) null, 0));
+			this.sendPacket(packet.okResult((String) null, 0));
 			return true;
 		}
 		return false;

@@ -68,7 +68,7 @@
 				<form method="POST" class="form-horizontal m-3">
 					<div class="card">
 						@if(form.getTitle() != null)
-							<h4 class="card-header p-3">${form.getTitle()}</h4>
+							<h5 class="card-header p-3">${form.getTitle()}</h5>
 						@endif
 						<div class="card-body">
 							@if(form.getInstructions() != null)

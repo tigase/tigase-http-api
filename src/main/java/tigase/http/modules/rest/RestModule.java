@@ -20,9 +20,9 @@ package tigase.http.modules.rest;
 import tigase.http.DeploymentInfo;
 import tigase.http.HttpMessageReceiver;
 import tigase.http.ServletInfo;
-import tigase.http.api.rest2.RestHandler;
+import tigase.http.jaxrs.JaxRsModule;
+import tigase.http.jaxrs.JaxRsServlet;
 import tigase.http.modules.AbstractModule;
-import tigase.http.modules.Module;
 import tigase.kernel.beans.Bean;
 import tigase.kernel.beans.Inject;
 import tigase.kernel.beans.selector.ConfigType;
@@ -37,7 +37,7 @@ import java.util.concurrent.ScheduledExecutorService;
 @ConfigType({ConfigTypeEnum.DefaultMode, ConfigTypeEnum.SessionManagerMode, ConfigTypeEnum.ConnectionManagersMode,
 			 ConfigTypeEnum.ComponentMode})
 public class RestModule extends AbstractModule
-		implements Module {
+		implements JaxRsModule<RestHandler> {
 
 	private ScheduledExecutorService executorService;
 
@@ -96,7 +96,7 @@ public class RestModule extends AbstractModule
 		}
 
 		ServletInfo servletInfo = httpServer.servlet("RestServlet", RestServlet.class);
-		servletInfo.addInitParam(RestServlet.REST_MODULE_KEY, uuid).addMapping("/*");
+		servletInfo.addInitParam(JaxRsServlet.MODULE_KEY, uuid).addMapping("/*");
 		httpDeployment.addServlets(servletInfo);
 
 		httpServer.deploy(httpDeployment);

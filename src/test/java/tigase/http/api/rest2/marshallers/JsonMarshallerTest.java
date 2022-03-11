@@ -19,13 +19,13 @@ package tigase.http.api.rest2.marshallers;
 
 import jakarta.xml.bind.MarshalException;
 import org.junit.jupiter.api.Test;
+import tigase.http.jaxrs.marshallers.JsonMarshaller;
+import tigase.http.jaxrs.marshallers.Marshaller;
 
 import java.io.IOException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class JsonMarshallerTest
 		extends AbstractMarshallerTest {

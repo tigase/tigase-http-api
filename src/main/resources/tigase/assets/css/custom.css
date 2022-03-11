@@ -206,6 +206,25 @@ padding-bottom: 5px;
 	color: #fff;
 }
 
+.dbTypeWarning {
+	margin-top: .25rem;
+	font-size: .875em;
+	display: block;
+	color: orangered;
+}
+
+.sidebar .list-group-item {
+	background-color: transparent;
+	text-transform: uppercase;
+	font-size: 1.1em;
+	color: #09C;
+}
+
+.sidebar .list-group-item.active {
+	background-color: #09C;
+	color: #fff;
+}
+
 .sidebar .accordion-item {
 	background-color: transparent;
 }
@@ -359,6 +378,14 @@ padding-bottom: 5px;
 .navbar-toggle {
 	border: none;
 	outline: solid 1px #444;
+}
+
+form-label {
+	font-weight: bolder;
+}
+
+.col-form-label {
+	font-weight: bolder;
 }
 
 @media(min-width:768px) {

@@ -17,8 +17,6 @@
  */
 package tigase.http.modules;
 
-import tigase.db.AuthRepository;
-import tigase.db.UserRepository;
 import tigase.http.PacketWriter;
 import tigase.server.Packet;
 import tigase.stats.StatisticHolder;
@@ -28,10 +26,9 @@ import tigase.xmpp.jid.JID;
 
 import javax.script.Bindings;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 public interface Module
-		extends StatisticHolder {
+		extends StatisticHolder, PacketSender {
 
 	public static final String VHOSTS_KEY = "vhosts";
 
@@ -48,11 +45,7 @@ public interface Module
 	List<Element> getDiscoItems(String node, JID jid, JID from);
 
 	JID getJid();
-
-	boolean addOutPacket(Packet packet);
-
-	CompletableFuture<Packet> addOutPacket(Packet packet, Integer timeout);
-
+	
 	String[] getFeatures();
 
 	void initBindings(Bindings binds);
@@ -61,16 +54,10 @@ public interface Module
 
 	void init(JID jid, String componentName, PacketWriter writer);
 
-	boolean isRequestAllowed(String key, String domain, String path);
-
 	boolean isAdmin(BareJID user);
 
 	void start();
 
 	void stop();
-
-	UserRepository getUserRepository();
-
-	AuthRepository getAuthRepository();
 
 }

@@ -17,7 +17,10 @@
  */
 package tigase.http.api.rest2.marshallers;
 
-import static org.junit.jupiter.api.Assertions.*;
+import tigase.http.jaxrs.marshallers.JsonMarshaller;
+import tigase.http.jaxrs.marshallers.JsonUnmarshaller;
+import tigase.http.jaxrs.marshallers.Marshaller;
+import tigase.http.jaxrs.marshallers.Unmarshaller;
 
 class JsonUnmarshallerTest
 		extends AbstractUnmarshallerTest {

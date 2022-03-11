@@ -37,17 +37,14 @@ public abstract class AbstractModule
 		return (T) AbstractBareModule.getModuleByUUID(uuid);
 	}
 	
-	@Override
 	public boolean isRequestAllowed(String key, String domain, String path) {
 		return false;
 	}
 
-	@Override
 	public UserRepository getUserRepository() {
 		return userRepository;
 	}
 
-	@Override
 	public AuthRepository getAuthRepository() {
 		return authRepository;
 	}

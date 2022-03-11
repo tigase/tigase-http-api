@@ -1,1 +1,1 @@
-tigase.http.modules.rest.RuntimeDelegateImpl
+tigase.http.jaxrs.RuntimeDelegateImpl
