@@ -52,7 +52,7 @@ public class SetupModule extends AbstractBareModule
 
 	@Override
 	public String getDescription() {
-		return "REST support - handles HTTP REST access using scripts";
+		return "Setup";
 	}
 
 	public void setHandlersAll(List<SetupHandler> handlers) {
@@ -132,7 +132,7 @@ public class SetupModule extends AbstractBareModule
 						return authProvider.checkCredentials(user, password);
 					}
 				})
-				.setDeploymentName("Server")
+				.setDeploymentName("Setup")
 				.setDeploymentDescription(getDescription());
 		if (vhosts != null) {
 			httpDeployment.setVHosts(vhosts);

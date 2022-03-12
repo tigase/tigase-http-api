@@ -134,6 +134,13 @@ public class JsonUnmarshaller extends AbstractUnmarshaller implements Unmarshall
 	protected Object deserialize(Class clazz, Object value) throws UnmarshalException {
 		Function<Object, Object> serializer = DESERIALIZERS.get(clazz);
 		if (serializer == null) {
+			if (Enum.class.isAssignableFrom(clazz)) {
+				try {
+					return Enum.valueOf(clazz, value.toString());
+				} catch (IllegalArgumentException ex) {
+					throw new UnmarshalException("Invalid value " + value + " for enum " + clazz.getName(), ex);
+				}
+			}
 			return null;
 		} else {
 			try {

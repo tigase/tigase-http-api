@@ -19,6 +19,7 @@ package tigase.http.modules.rest;
 
 import tigase.http.DeploymentInfo;
 import tigase.http.HttpMessageReceiver;
+import tigase.http.PacketWriter;
 import tigase.http.ServletInfo;
 import tigase.http.jaxrs.JaxRsModule;
 import tigase.http.jaxrs.JaxRsServlet;
@@ -27,8 +28,12 @@ import tigase.kernel.beans.Bean;
 import tigase.kernel.beans.Inject;
 import tigase.kernel.beans.selector.ConfigType;
 import tigase.kernel.beans.selector.ConfigTypeEnum;
+import tigase.server.script.CommandIfc;
+import tigase.xmpp.jid.BareJID;
+import tigase.xmpp.jid.JID;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -49,6 +54,9 @@ public class RestModule extends AbstractModule
 
 	private DeploymentInfo httpDeployment;
 
+	private final CommandIfc[] commands = new CommandIfc[]{new ApiKeyAddCmd(this), new ApiKeyRemoveCmd(this),
+														   new ApiKeyUpdateCmd(this)};
+
 	@Override
 	public String getDescription() {
 		return "REST support - handles HTTP REST access using scripts";
@@ -64,6 +72,14 @@ public class RestModule extends AbstractModule
 
 	public ApiKeyRepository getApiKeyRepository() {
 		return apiKeyRepository;
+	}
+
+	public void setApiKeyRepository(ApiKeyRepository apiKeyRepository) {
+		if (getComponentName() != null) {
+			apiKeyRepository.setRepoUser(BareJID.bareJIDInstanceNS(getName(), getComponentName()));
+			apiKeyRepository.setRepo(getUserRepository());
+		}
+		this.apiKeyRepository = apiKeyRepository;
 	}
 
 	public ScheduledExecutorService getExecutorService() {
@@ -89,7 +105,7 @@ public class RestModule extends AbstractModule
 		httpDeployment = httpServer.deployment()
 				.setClassLoader(this.getClass().getClassLoader())
 				.setContextPath(contextPath)
-				.setDeploymentName("Server")
+				.setDeploymentName("HTTP/REST API")
 				.setDeploymentDescription(getDescription());
 		if (vhosts != null) {
 			httpDeployment.setVHosts(vhosts);
@@ -112,5 +128,32 @@ public class RestModule extends AbstractModule
 			executorService.shutdown();
 		}
 		super.stop();
+	}
+
+	public boolean isRequestAllowed(String key, String domain, String path) {
+		apiKeyRepository.reload();
+		ApiKeyItem item = apiKeyRepository.getItem(key);
+		if (item == null) {
+			return false;
+		}
+		return item.isAllowed(key, domain,path);
+	}
+
+	@Override
+	public void init(JID jid, String componentName, PacketWriter writer) {
+		super.init(jid, componentName, writer);
+		setApiKeyRepository(apiKeyRepository);
+	}
+
+	@Override
+	public void initialize() {
+		super.initialize();
+		Arrays.stream(commands).forEach(commandManager::registerCmd);
+	}
+
+	@Override
+	public void beforeUnregister() {
+		super.beforeUnregister();
+		Arrays.stream(commands).forEach(commandManager::unregisterCmd);
 	}
 }

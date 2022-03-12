@@ -3,12 +3,14 @@ package tigase.http.jaxrs;
 import jakarta.ws.rs.*;
 import tigase.http.api.HttpException;
 import tigase.http.modules.AbstractBareModule;
+import tigase.xmpp.jid.BareJID;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.ValidationException;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -49,8 +51,7 @@ public abstract class JaxRsServlet<H extends Handler, M extends JaxRsModule<H>> 
 	protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		try {
 			HttpMethod httpMethod = HttpMethod.valueOf(req.getMethod());
-			List<RequestHandler<H>> handlers = Optional.ofNullable((List<RequestHandler<H>>) requestHandlers.get(httpMethod))
-					.orElse(Collections.emptyList());
+			List<RequestHandler<H>> handlers = Optional.ofNullable((List<RequestHandler<H>>) requestHandlers.get(httpMethod)).orElse(Collections.emptyList());
 			String requestUri = req.getRequestURI();
 			if (!req.getContextPath().equals("/")) {
 				if (!req.getContextPath().isEmpty()) {
@@ -66,6 +67,8 @@ public abstract class JaxRsServlet<H extends Handler, M extends JaxRsModule<H>> 
 				}
 			}
 			resp.sendError(404, "Not found");
+		} catch (ValidationException ex) {
+			resp.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, ex.getMessage());
 		} catch (HttpException ex) {
 			resp.sendError(ex.getCode(), ex.getMessage());
 		}
@@ -180,16 +183,17 @@ public abstract class JaxRsServlet<H extends Handler, M extends JaxRsModule<H>> 
 		if (String.class.isAssignableFrom(clazz)) {
 			return "[^\\/]+";
 		}
+		if (BareJID.class.isAssignableFrom(clazz)) {
+			return "[^\\/]+";
+		}
 		try {
-			System.out.println("checking if class " + clazz + " has fromString(String) method");
 			Method m = clazz.getDeclaredMethod("fromString", String.class);
 			if (Modifier.isStatic(m.getModifiers())) {
 				System.out.println("method found");
 				return "[^\\/]+";
 			}
-			System.out.println("method not static");
 		} catch (NoSuchMethodException e) {
-			System.out.println("method not found");
+			throw new RuntimeException(e);
 			// nothing to do..
 		}
 		return null;

@@ -33,6 +33,8 @@ import tigase.xmpp.jid.JID;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.ValidationException;
+import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -96,41 +98,32 @@ public class RequestHandler<H extends Handler> {
 		AsyncResponseImpl asyncResponse = null;
 		try {
 			for (Parameter param : method.getParameters()) {
+				Object value = null;
 				PathParam pathParam = param.getAnnotation(PathParam.class);
+				HeaderParam headerParam = param.getAnnotation(HeaderParam.class);
+				FormParam formParam = param.getAnnotation(FormParam.class);
+
 				if (pathParam != null) {
 					String valueStr = matcher.group(pathParam.value());
 					if (valueStr == null) {
 						valueStr = getParamDefaultValue(param);
 					}
-					Object value = null;
 					if (valueStr != null) {
 						value = convertToValue(param.getType(), valueStr);
 					}
-					values.add(value);
-					continue;
-				}
-
-				HeaderParam headerParam = param.getAnnotation(HeaderParam.class);
-				if (headerParam != null) {
+				} else if (headerParam != null) {
 					String valueStr = request.getHeader(headerParam.value());
 					if (valueStr == null) {
 						valueStr = getParamDefaultValue(param);
 					}
-					Object value = null;
 					if (valueStr != null) {
 						value = convertToValue(param.getType(), valueStr);
 					}
-					values.add(value);
-					continue;
-				}
-
-				FormParam formParam = param.getAnnotation(FormParam.class);
-				if (formParam != null) {
+				} else if (formParam != null) {
 					String[] valuesStr = request.getParameterValues(formParam.value());
 					if (valuesStr == null) {
-						valuesStr = new String[] { getParamDefaultValue(param) };
+						valuesStr = new String[]{getParamDefaultValue(param)};
 					}
-					Object value = null;
 					if (boolean.class.equals(param.getType())) {
 						value = valuesStr != null && valuesStr.length == 1 && "on".equals(valuesStr[0]);
 					} else {
@@ -138,43 +131,37 @@ public class RequestHandler<H extends Handler> {
 							value = convertToValue(param.getParameterizedType(), valuesStr);
 						}
 					}
-					values.add(value);
-					continue;
-				}
-
-				if (param.getAnnotation(Suspended.class) != null) {
+				} else if (param.getAnnotation(Suspended.class) != null) {
 					if (asyncResponse == null) {
 						asyncResponse = new AsyncResponseImpl(this, executorService, request, acceptedType);
 					}
-					values.add(asyncResponse);
-					continue;
-				}
-
-				if (param.getAnnotation(BeanParam.class) != null) {
+					value = asyncResponse;
+				} else if (param.getAnnotation(BeanParam.class) != null) {
 					try {
-						values.add(new WWWFormUrlEncodedUnmarshaller().unmarshal(param.getType(), request));
+						value = new WWWFormUrlEncodedUnmarshaller().unmarshal(param.getType(), request);
 					} catch (UnmarshalException ex) {
 						throw new HttpException(ex, HttpServletResponse.SC_NOT_ACCEPTABLE);
 					}
-					continue;
-				}
-
-				if (SecurityContext.class.isAssignableFrom(param.getType())) {
-					values.add(new SecurityContextImpl(request));
-					continue;
-				}
-
-				if (HttpServletRequest.class.isAssignableFrom(param.getType())) {
-					values.add(request);
-					continue;
-				}
-
-				String contentType = request.getContentType();
-				if (contentType != null) {
-					values.add(decodeContent(param.getType(), request));
+				} else if (SecurityContext.class.isAssignableFrom(param.getType())) {
+					value = new SecurityContextImpl(request);
+				} else if (HttpServletRequest.class.isAssignableFrom(param.getType())) {
+					value = request;
 				} else {
-					values.add(null);
+					// if non on the above..
+					String contentType = request.getContentType();
+					if (contentType != null) {
+						value = decodeContent(param.getType(), request);
+						if (value != null) {
+							validateContent(value);
+						}
+					}
 				}
+
+				boolean notNull = param.getAnnotation(NotNull.class) != null;
+				if (notNull && value == null) {
+					throw new ValidationException("Parameter " + param.getName() + " cannot be NULL!");
+				}
+				values.add(value);
 			}
 
 			try {
@@ -189,6 +176,9 @@ public class RequestHandler<H extends Handler> {
 					}
 				}
 			} catch (InvocationTargetException | IllegalAccessException ex) {
+				if (ex.getCause() instanceof HttpException) {
+					throw (HttpException) ex.getCause();
+				}
 				throw new HttpException(ex, 500);
 			}
 		} catch (Throwable ex) {
@@ -196,6 +186,22 @@ public class RequestHandler<H extends Handler> {
 				asyncResponse.resume(ex);
 			}
 			throw ex;
+		}
+	}
+
+	private void validateContent(Object object) throws HttpException {
+		try {
+			for (Field field : object.getClass().getDeclaredFields()) {
+				field.setAccessible(true);
+				if (field.getAnnotation(NotNull.class) != null) {
+					if (field.get(object) == null) {
+						throw new ValidationException(
+								"Field " + field.getName() + " in object " + object.getClass() + " cannot be null!");
+					}
+				}
+			}
+		} catch (IllegalAccessException ex) {
+			throw new HttpException(ex, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
 
@@ -244,11 +250,19 @@ public class RequestHandler<H extends Handler> {
 	private static Object convertToValue(Class<?> expectedClass, String valueStr) {
 		Function<String, Object> mapper = DESERIALIZERS.get(expectedClass);
 		if (mapper == null) {
-			try {
-				Method method = expectedClass.getDeclaredMethod("fromString", String.class);
-				return method.invoke(null, valueStr);
-			} catch (NoSuchMethodException|InvocationTargetException|IllegalAccessException e) {
-				// nothing to do..
+			if (Enum.class.isAssignableFrom(expectedClass)) {
+				try {
+					return Enum.valueOf((Class) expectedClass, valueStr.toString());
+				} catch (IllegalArgumentException ex) {
+					return null;
+				}
+			} else {
+				try {
+					Method method = expectedClass.getDeclaredMethod("fromString", String.class);
+					return method.invoke(null, valueStr);
+				} catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+					// nothing to do..
+				}
 			}
 			return null;
 		}

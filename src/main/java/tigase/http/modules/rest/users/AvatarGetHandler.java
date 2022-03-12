@@ -35,6 +35,7 @@ import tigase.xml.XMLUtils;
 import tigase.xmpp.jid.BareJID;
 import tigase.xmpp.jid.JID;
 
+import javax.validation.constraints.NotNull;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Map;
@@ -72,7 +73,7 @@ public class AvatarGetHandler extends AbstractRestHandler {
 
 	@GET
 	@Path("/{user}(/{source})?")
-	public void retrieveAvatar(@PathParam("user") String userStr, @PathParam("source") Source source, @Suspended AsyncResponse asyncResponse) {
+	public void retrieveAvatar(@NotNull @PathParam("user") String userStr, @PathParam("source") Source source, @Suspended AsyncResponse asyncResponse) {
 		BareJID user = BareJID.bareJIDInstanceNS(userStr);
 		
 		getAvatar(user, source).thenAccept(asyncResponse::resume).exceptionally(ex -> {

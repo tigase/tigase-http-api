@@ -37,10 +37,6 @@ public abstract class AbstractModule
 		return (T) AbstractBareModule.getModuleByUUID(uuid);
 	}
 	
-	public boolean isRequestAllowed(String key, String domain, String path) {
-		return false;
-	}
-
 	public UserRepository getUserRepository() {
 		return userRepository;
 	}

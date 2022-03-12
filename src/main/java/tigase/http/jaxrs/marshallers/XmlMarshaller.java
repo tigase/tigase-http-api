@@ -182,6 +182,9 @@ public class XmlMarshaller extends AbstractMarshaller implements Marshaller {
 	protected String serialize(Object value) {
 		Function<Object, String> serializer = SERIALIZERS.get(value.getClass());
 		if (serializer == null) {
+			if (value instanceof Enum<?>) {
+				return ((Enum<?>) value).name();
+			}
 			return null;
 		} else {
 			return serializer.apply(value);

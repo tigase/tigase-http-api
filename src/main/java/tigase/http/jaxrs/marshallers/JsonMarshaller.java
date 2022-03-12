@@ -104,6 +104,8 @@ public class JsonMarshaller extends AbstractMarshaller implements Marshaller {
 			writer.write("]");
 		} else if (value instanceof Boolean || value instanceof Long || value instanceof Integer || value instanceof Double || value instanceof Float) {
 			writer.write(value.toString());
+		} else if (value instanceof Enum<?>) {
+			writer.write(JsonSerializer.escapeString(((Enum<?>) value).name()));
 		} else {
 			Function<Object, Object> mapper;
 			while ((mapper = SERIALIZERS.get(value.getClass())) != null) {
