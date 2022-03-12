@@ -202,9 +202,16 @@ public class XmlUnmarshaller extends AbstractUnmarshaller implements Unmarshalle
 		return unmarshal(clazz, name, namespace, elem);
 	}
 
-	protected Object deserialize(Class clazz, String valueStr) {
+	protected Object deserialize(Class clazz, String valueStr) throws UnmarshalException {
 		Function<String, Object> serializer = DESERIALIZERS.get(clazz);
 		if (serializer == null) {
+			if (Enum.class.isAssignableFrom(clazz)) {
+				try {
+					return Enum.valueOf(clazz, valueStr);
+				} catch (IllegalArgumentException ex) {
+					throw new UnmarshalException("Invalid value " + valueStr + " for enum " + clazz.getName(), ex);
+				}
+			}
 			return null;
 		} else {
 			return serializer.apply(valueStr);

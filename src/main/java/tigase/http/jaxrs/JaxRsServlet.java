@@ -25,6 +25,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.ValidationException;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
@@ -83,6 +84,8 @@ public abstract class JaxRsServlet<M extends JaxRsModule>
 				}
 			}
 			resp.sendError(404, "Not found");
+		} catch (ValidationException ex) {
+			resp.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, ex.getMessage());
 		} catch (HttpException ex) {
 			resp.sendError(ex.getCode(), ex.getMessage());
 		}
@@ -93,7 +96,7 @@ public abstract class JaxRsServlet<M extends JaxRsModule>
 			registerHandler(requestHandler);
 		}
 	}
-	
+
 	protected void registerHandler(RequestHandler requestHandler) {
 		requestHandlers.computeIfAbsent(requestHandler.getHttpMethod(), x -> new CopyOnWriteArrayList<>()).add(requestHandler);
 	}

@@ -19,22 +19,31 @@ package tigase.http.modules.rest.users;
 
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.container.AsyncResponse;
 import jakarta.ws.rs.container.Suspended;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
+import tigase.db.TigaseDBException;
+import tigase.db.UserRepository;
 import tigase.http.modules.rest.AbstractRestHandler;
 import tigase.http.modules.rest.RestModule;
 import tigase.kernel.beans.Bean;
+import tigase.kernel.beans.Inject;
 import tigase.xmpp.jid.BareJID;
 
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-@Bean(name = "users", parent = RestModule.class, active = true)
+@Bean(name = "users", parent = RestModule.class, active = false)
 @Path("/users")
 public class UsersHandler extends AbstractRestHandler {
+
+	@Inject
+	private UserRepository userRepository;
 
 	public UsersHandler() {
 		super(Security.ApiKey, Role.None);
@@ -43,12 +52,20 @@ public class UsersHandler extends AbstractRestHandler {
 	@GET
 	@Path("/")
 	@Produces({"application/json","application/xml"})
-	public Users listUsers() {
-		List<BareJID> jids = new ArrayList<>();
-		for (int i=0; i<10; i++) {
-			jids.add(BareJID.bareJIDInstanceNS("user-" + i, "example.com"));
-		}
-		return new Users(jids, jids.size());
+	public Users listUsers() throws TigaseDBException {
+		List<BareJID> users = userRepository.getUsers();
+		return new Users(users, users.size());
+	}
+
+	@GET
+	@Path("/{domain}")
+	@Produces({"application/json","application/xml"})
+	public Users listUsersFromDomain(@NotNull @PathParam("domain") String domain) throws TigaseDBException {
+		List<BareJID> users = userRepository.getUsers()
+				.stream()
+				.filter(jid -> domain.equals(jid.getDomain()))
+				.collect(Collectors.toList());
+		return new Users(users, users.size());
 	}
 
 	@GET

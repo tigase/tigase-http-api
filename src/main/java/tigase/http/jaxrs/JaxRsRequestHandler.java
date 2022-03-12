@@ -32,6 +32,8 @@ import tigase.xmpp.jid.JID;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.ValidationException;
+import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -39,6 +41,8 @@ import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -47,6 +51,7 @@ import java.util.stream.Stream;
 public class JaxRsRequestHandler
 		implements RequestHandler {
 
+	private static final Logger log = Logger.getLogger(JaxRsRequestHandler.class.getCanonicalName());
 	private static final Map<Class, Function<String,Object>> DESERIALIZERS = new HashMap<>();
 	static {
 		DESERIALIZERS.put(Long.class, Long::parseLong);
@@ -190,16 +195,17 @@ public class JaxRsRequestHandler
 		if (String.class.isAssignableFrom(clazz)) {
 			return "[^\\/]+";
 		}
+		if (BareJID.class.isAssignableFrom(clazz)) {
+			return "[^\\/]+";
+		}
 		try {
-			System.out.println("checking if class " + clazz + " has fromString(String) method");
 			Method m = clazz.getDeclaredMethod("fromString", String.class);
 			if (Modifier.isStatic(m.getModifiers())) {
-				System.out.println("method found");
 				return "[^\\/]+";
 			}
-			System.out.println("method not static");
 		} catch (NoSuchMethodException e) {
-			System.out.println("method not found");
+			log.log(Level.FINEST, "Method 'fromString' for conversation to object from String not found", e);
+			throw new RuntimeException(e);
 			// nothing to do..
 		}
 		return null;
@@ -250,61 +256,70 @@ public class JaxRsRequestHandler
 		AsyncResponseImpl asyncResponse = null;
 		try {
 			for (Parameter param : method.getParameters()) {
+				Object value = null;
 				PathParam pathParam = param.getAnnotation(PathParam.class);
+				HeaderParam headerParam = param.getAnnotation(HeaderParam.class);
+				FormParam formParam = param.getAnnotation(FormParam.class);
+				
 				if (pathParam != null) {
 					String valueStr = matcher.group(pathParam.value());
-					Object value = null;
+					if (valueStr == null) {
+						valueStr = getParamDefaultValue(param);
+					}
 					if (valueStr != null) {
 						value = convertToValue(param.getType(), valueStr);
 					}
-					values.add(value);
-					continue;
-				}
-
-				HeaderParam headerParam = param.getAnnotation(HeaderParam.class);
-				if (headerParam != null) {
+				} else if (headerParam != null) {
 					String valueStr = request.getHeader(headerParam.value());
-					Object value = null;
+					if (valueStr == null) {
+						valueStr = getParamDefaultValue(param);
+					}
 					if (valueStr != null) {
 						value = convertToValue(param.getType(), valueStr);
 					}
-					values.add(value);
-					continue;
-				}
-
-				if (param.getAnnotation(Suspended.class) != null) {
+				} else if (formParam != null) {
+					String[] valuesStr = request.getParameterValues(formParam.value());
+					if (valuesStr == null) {
+						valuesStr = new String[]{getParamDefaultValue(param)};
+					}
+					if (boolean.class.equals(param.getType())) {
+						value = valuesStr != null && valuesStr.length == 1 && "on".equals(valuesStr[0]);
+					} else {
+						if (valuesStr != null) {
+							value = convertToValue(param.getParameterizedType(), valuesStr);
+						}
+					}
+				} else if (param.getAnnotation(Suspended.class) != null) {
 					if (asyncResponse == null) {
 						asyncResponse = new AsyncResponseImpl(this, executorService, request, acceptedType);
 					}
-					values.add(asyncResponse);
-					continue;
-				}
-
-				if (param.getAnnotation(BeanParam.class) != null) {
+					value = asyncResponse;
+				} else if (param.getAnnotation(BeanParam.class) != null) {
 					try {
-						values.add(new WWWFormUrlEncodedUnmarshaller().unmarshal(param.getType(), request));
+						value = new WWWFormUrlEncodedUnmarshaller().unmarshal(param.getType(), request);
 					} catch (UnmarshalException ex) {
 						throw new HttpException(ex, HttpServletResponse.SC_NOT_ACCEPTABLE);
 					}
-					continue;
-				}
-
-				if (SecurityContext.class.isAssignableFrom(param.getType())) {
-					values.add(new SecurityContextImpl(request));
-					continue;
-				}
-
-				if (HttpServletRequest.class.isAssignableFrom(param.getType())) {
-					values.add(request);
-					continue;
-				}
-				
-				String contentType = request.getContentType();
-				if (contentType != null) {
-					values.add(decodeContent(param.getType(), request));
+				} else if (SecurityContext.class.isAssignableFrom(param.getType())) {
+					value = new SecurityContextImpl(request);
+				} else if (HttpServletRequest.class.isAssignableFrom(param.getType())) {
+					value = request;
 				} else {
-					values.add(null);
+					// if non on the above..
+					String contentType = request.getContentType();
+					if (contentType != null) {
+						value = decodeContent(param.getType(), request);
+						if (value != null) {
+							validateContent(value);
+						}
+					}
 				}
+
+				boolean notNull = param.getAnnotation(NotNull.class) != null;
+				if (notNull && value == null) {
+					throw new ValidationException("Parameter " + param.getName() + " cannot be NULL!");
+				}
+				values.add(value);
 			}
 
 			try {
@@ -319,6 +334,9 @@ public class JaxRsRequestHandler
 					}
 				}
 			} catch (InvocationTargetException | IllegalAccessException ex) {
+				if (ex.getCause() instanceof HttpException) {
+					throw (HttpException) ex.getCause();
+				}
 				throw new HttpException(ex, 500);
 			}
 		} catch (Throwable ex) {
@@ -326,6 +344,22 @@ public class JaxRsRequestHandler
 				asyncResponse.resume(ex);
 			}
 			throw ex;
+		}
+	}
+
+	private void validateContent(Object object) throws HttpException {
+		try {
+			for (Field field : object.getClass().getDeclaredFields()) {
+				field.setAccessible(true);
+				if (field.getAnnotation(NotNull.class) != null) {
+					if (field.get(object) == null) {
+						throw new ValidationException(
+								"Field " + field.getName() + " in object " + object.getClass() + " cannot be null!");
+					}
+				}
+			}
+		} catch (IllegalAccessException ex) {
+			throw new HttpException(ex, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
 

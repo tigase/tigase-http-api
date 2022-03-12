@@ -37,6 +37,7 @@ import tigase.xml.XMLUtils;
 import tigase.xmpp.jid.BareJID;
 import tigase.xmpp.jid.JID;
 
+import javax.validation.constraints.NotNull;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Map;
@@ -47,7 +48,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-@Bean(name = "avatarGet", parent = RestModule.class, active = true)
+@Bean(name = "avatarGet", parent = RestModule.class, active = false)
 @Path("/avatar")
 public class AvatarGetHandler extends AbstractRestHandler {
 
@@ -76,7 +77,7 @@ public class AvatarGetHandler extends AbstractRestHandler {
 
 	@GET
 	@Path("/{user}(/{source})?")
-	public void retrieveAvatar(@PathParam("user") String userStr, @PathParam("source") Source source, @Suspended AsyncResponse asyncResponse) {
+	public void retrieveAvatar(@NotNull @PathParam("user") String userStr, @PathParam("source") Source source, @Suspended AsyncResponse asyncResponse) {
 		BareJID user = BareJID.bareJIDInstanceNS(userStr);
 		
 		getAvatar(user, source).thenAccept(asyncResponse::resume).exceptionally(ex -> {

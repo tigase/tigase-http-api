@@ -17,10 +17,7 @@
  */
 package tigase.http.modules.rest;
 
-import tigase.http.AuthProvider;
-import tigase.http.DeploymentInfo;
-import tigase.http.HttpMessageReceiver;
-import tigase.http.ServletInfo;
+import tigase.http.*;
 import tigase.http.jaxrs.Handler;
 import tigase.http.jaxrs.JaxRsModule;
 import tigase.http.jaxrs.JaxRsServlet;
@@ -31,11 +28,15 @@ import tigase.kernel.beans.config.ConfigField;
 import tigase.kernel.beans.selector.ConfigType;
 import tigase.kernel.beans.selector.ConfigTypeEnum;
 import tigase.kernel.core.Kernel;
+import tigase.server.script.CommandIfc;
+import tigase.xmpp.jid.BareJID;
+import tigase.xmpp.jid.JID;
 
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -66,6 +67,8 @@ public class RestModule extends AbstractModule
 
 	@ConfigField(desc = "Scripts directory", alias = SCRIPTS_DIR_KEY)
 	private String scriptsDir = DEF_SCRIPTS_DIR_VAL;
+	private final CommandIfc[] commands = new CommandIfc[]{new ApiKeyAddCmd(this), new ApiKeyRemoveCmd(this),
+														   new ApiKeyUpdateCmd(this)};
 
 	@Override
 	public String getDescription() {
@@ -100,6 +103,14 @@ public class RestModule extends AbstractModule
 		return apiKeyRepository;
 	}
 
+	public void setApiKeyRepository(ApiKeyRepository apiKeyRepository) {
+		if (getComponentName() != null) {
+			apiKeyRepository.setRepoUser(BareJID.bareJIDInstanceNS(getName(), getComponentName()));
+			apiKeyRepository.setRepo(getUserRepository());
+		}
+		this.apiKeyRepository = apiKeyRepository;
+	}
+
 	public ScheduledExecutorService getExecutorService() {
 		return executorService;
 	}
@@ -111,7 +122,7 @@ public class RestModule extends AbstractModule
 	public Kernel getKernel() {
 		return getKernel(uuid);
 	}
-	
+
 	@Override
 	public void start() {
 		if (httpDeployment != null) {
@@ -162,5 +173,23 @@ public class RestModule extends AbstractModule
 
 	public boolean isRequestAllowed(String key, String domain, String path) {
 		return apiKeyRepository.isAllowed(key, domain, path);
+	}
+
+	@Override
+	public void init(JID jid, String componentName, PacketWriter writer) {
+		super.init(jid, componentName, writer);
+		setApiKeyRepository(apiKeyRepository);
+	}
+
+	@Override
+	public void initialize() {
+		super.initialize();
+		Arrays.stream(commands).forEach(commandManager::registerCmd);
+	}
+
+	@Override
+	public void beforeUnregister() {
+		super.beforeUnregister();
+		Arrays.stream(commands).forEach(commandManager::unregisterCmd);
 	}
 }

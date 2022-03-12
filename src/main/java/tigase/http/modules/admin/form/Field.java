@@ -50,7 +50,7 @@ public class Field {
 	}
 
 	public String getValue() {
-		return field.getChildCData(new String[]{"field/value"});
+		return field.getChildCData(new String[]{"field", "value"});
 	}
 
 	public LocalDateTime getDateTimeValue() {

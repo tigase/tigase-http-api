@@ -19,6 +19,7 @@ package tigase.http.jaxrs;
 
 import jakarta.ws.rs.container.AsyncResponse;
 import jakarta.ws.rs.container.TimeoutHandler;
+import jakarta.xml.bind.ValidationException;
 import tigase.http.api.HttpException;
 
 import javax.servlet.AsyncContext;
@@ -82,7 +83,9 @@ public class AsyncResponseImpl implements AsyncResponse {
 
 	private void sendError(Throwable ex) {
 		try {
-			if (ex instanceof HttpException) {
+			if (ex instanceof ValidationException) {
+				((HttpServletResponse) context.getResponse()).sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, ex.getMessage());
+			} else if (ex instanceof HttpException) {
 				HttpException he = (HttpException) ex;
 				((HttpServletResponse) context.getResponse()).sendError(he.getCode(), he.getMessage());
 			} else {
