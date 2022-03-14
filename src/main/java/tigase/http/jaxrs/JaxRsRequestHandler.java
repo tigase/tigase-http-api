@@ -412,7 +412,12 @@ public class JaxRsRequestHandler
 				Method method = expectedClass.getDeclaredMethod("fromString", String.class);
 				return method.invoke(null, valueStr);
 			} catch (NoSuchMethodException|InvocationTargetException|IllegalAccessException e) {
-				// nothing to do..
+				try {
+					Method method = expectedClass.getDeclaredMethod("valueOf", String.class);
+					return method.invoke(null, valueStr);
+				} catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException ex) {
+					// nothing to do..
+				}
 			}
 			return null;
 		}
