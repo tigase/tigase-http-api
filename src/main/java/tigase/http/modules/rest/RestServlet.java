@@ -61,6 +61,5 @@ public class RestServlet
 			throw new HttpException("Provided Api-Key is not authorized to access " + request.getRequestURI(), HttpServletResponse.SC_FORBIDDEN);
 		}
 	}
-	
 
 }
