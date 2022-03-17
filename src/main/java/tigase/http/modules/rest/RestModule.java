@@ -24,6 +24,7 @@ import tigase.http.ServletInfo;
 import tigase.http.jaxrs.JaxRsModule;
 import tigase.http.jaxrs.JaxRsServlet;
 import tigase.http.modules.AbstractModule;
+import tigase.http.util.AssetsServlet;
 import tigase.kernel.beans.Bean;
 import tigase.kernel.beans.Inject;
 import tigase.kernel.beans.selector.ConfigType;
@@ -113,6 +114,10 @@ public class RestModule extends AbstractModule
 
 		ServletInfo servletInfo = httpServer.servlet("RestServlet", RestServlet.class);
 		servletInfo.addInitParam(JaxRsServlet.MODULE_KEY, uuid).addMapping("/*");
+		httpDeployment.addServlets(servletInfo);
+
+		servletInfo = httpServer.servlet("AssetsServlet", AssetsServlet.class);
+		servletInfo.addMapping("/assets/*");
 		httpDeployment.addServlets(servletInfo);
 
 		httpServer.deploy(httpDeployment);

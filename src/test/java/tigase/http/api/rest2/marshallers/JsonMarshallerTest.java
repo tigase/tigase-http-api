@@ -47,9 +47,30 @@ class JsonMarshallerTest
 		assertMarshalling(expected, data);
 	}
 
+	@Test
+	public void test2() throws MarshalException, IOException {
+
+		TestObject data = new TestObject("root");
+		data.getItems().add(new TestObject("item 1"));
+		data.getItems().add(new TestObject("item 2"));
+
+		String expected = "{\n  \"title\":\"root\",\n  \"data\":\"" + data.getData() + "\",\n  \"date\":\"" +
+				ZonedDateTime.ofInstant(data.getDate().toInstant(), ZoneId.systemDefault()).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME) + "\",\n  \"items\":[\n    {\n      \"title\":\"item 1\",\n      \"data\":\"" + data.getData() + "\",\n      \"date\":\"" +
+				ZonedDateTime.ofInstant(data.getItems().get(0).getDate().toInstant(), ZoneId.systemDefault()).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME) +
+				"\",\n      \"items\":[]\n    },\n    {\n      \"title\":\"item 2\",\n      \"data\":\"" + data.getData() + "\",\n      \"date\":\"" +
+				ZonedDateTime.ofInstant(data.getItems().get(1).getDate().toInstant(), ZoneId.systemDefault()).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME) + "\",\n      \"items\":[]\n    }\n  ]\n}";
+
+		assertMarshallingPretty(expected, data);
+	}
+
 	@Override
 	Marshaller createMarshaller() {
 		return new JsonMarshaller();
+	}
+
+	@Override
+	Marshaller createMarshallerPretty() {
+		return new JsonMarshaller(2);
 	}
 
 }

@@ -17,6 +17,11 @@
  */
 package tigase.http.modules.rest.users;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.ws.rs.*;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
@@ -52,7 +57,11 @@ public class UserHandler extends AbstractRestHandler {
 	@GET
 	@Path("/{userJid}")
 	@Produces({"application/json", "application/xml"})
-	public User getUser(@NotNull @PathParam("userJid") BareJID userJid) throws HttpException {
+	@Operation(summary = "Get user", description = "Get user details")
+	@ApiResponse(responseCode = "200", description = "User details", content = { @Content(schema = @Schema(implementation = User.class)) })
+	@ApiResponse(responseCode = "404", description = "User not found")
+	public User getUser(@Parameter(description = "Bare JID of the user") @NotNull @PathParam("userJid") BareJID userJid)
+			throws HttpException {
 		if (!userRepository.userExists(userJid)) {
 			throw new NotFoundException("User does not exist!");
 		}
@@ -64,8 +73,11 @@ public class UserHandler extends AbstractRestHandler {
 	@Path("/{userJid}")
 	@Consumes({"application/json", "application/xml"})
 	@Produces({"application/json", "application/xml"})
-	public User createUser(@NotNull @PathParam("userJid") BareJID userJid, @NotNull UserCreate form)
-			throws HttpException, TigaseDBException {
+	@Operation(summary = "Create user", description = "Create new user")
+	@ApiResponse(responseCode = "409", description = "User already exists")
+	public User createUser(
+			@Parameter(description = "Bare JID of the user") @NotNull @PathParam("userJid") BareJID userJid,
+			@NotNull UserCreate form) throws HttpException, TigaseDBException {
 		if (userRepository.userExists(userJid)) {
 			throw new HttpException("User already exists!", HttpServletResponse.SC_CONFLICT);
 		}
@@ -80,7 +92,11 @@ public class UserHandler extends AbstractRestHandler {
 	@Path("/{userJid}")
 	@Consumes({"application/json", "application/xml"})
 	@Produces({"application/json", "application/xml"})
-	public User changeUser(@NotNull @PathParam("userJid") BareJID userJid, @NotNull UserChange form)
+	@Operation(summary = "Modify user", description = "Modify user details")
+	@ApiResponse(responseCode = "404", description = "User not found")
+	public User changeUser(
+			@Parameter(description = "Bare JID of the user") @NotNull @PathParam("userJid") BareJID userJid,
+			@NotNull UserChange form)
 			throws NotFoundException, TigaseDBException {
 		if (!userRepository.userExists(userJid)) {
 			throw new NotFoundException("User does not exist!");
@@ -97,7 +113,11 @@ public class UserHandler extends AbstractRestHandler {
 	@DELETE
 	@Path("/{userJid}")
 	@Produces({"application/json", "application/xml"})
-	public User removeUser(@NotNull @PathParam("userJid") BareJID userJid) throws NotFoundException, TigaseDBException {
+	@Operation(summary = "Remove user", description = "Remove user")
+	@ApiResponse(responseCode = "404", description = "User not found")
+	public User removeUser(
+			@Parameter(description = "Bare JID of the user") @NotNull @PathParam("userJid") BareJID userJid)
+			throws NotFoundException, TigaseDBException {
 		if (!userRepository.userExists(userJid)) {
 			throw new NotFoundException("User does not exist!");
 		}
@@ -130,6 +150,8 @@ public class UserHandler extends AbstractRestHandler {
 		private String domain;
 		@XmlAttribute
 		private Result result;
+
+		public User(){}
 
 		public User(BareJID userJid, String domain, Result result) {
 			this.jid = userJid;

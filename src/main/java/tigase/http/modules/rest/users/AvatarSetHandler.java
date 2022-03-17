@@ -17,6 +17,9 @@
  */
 package tigase.http.modules.rest.users;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
@@ -52,8 +55,12 @@ public class AvatarSetHandler extends AbstractRestHandler {
 
 	@PUT
 	@Path("/{userJid}")
-	public Response setAvatar(@NotNull @PathParam("userJid") BareJID user, @NotNull @HeaderParam("Content-Type") String contentType,
-							  byte[] data) throws TigaseDBException {
+	@Operation(summary = "Set user avatar", description = "Set user avatar")
+	@ApiResponse(responseCode = "200", description = "If set correctly")
+	public Response setAvatar(
+			@Parameter(description = "Bare JID of the user") @NotNull @PathParam("userJid") BareJID user,
+			@Parameter(description = "Content type of content (avatar data)") @NotNull @HeaderParam("Content-Type") String contentType,
+			@Parameter(description = "Binary form of the avatar") byte[] data) throws TigaseDBException {
 		String base64EncodedPhoto = Base64.encode(data);
 		Element vCard = Optional.ofNullable(getVCard(user)).orElseGet(() -> createEmptyVCard());
 		String mimeType = contentType.split(";")[0];

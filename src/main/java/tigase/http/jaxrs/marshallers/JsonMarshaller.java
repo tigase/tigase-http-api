@@ -55,6 +55,16 @@ public class JsonMarshaller extends AbstractMarshaller implements Marshaller {
 
 	private final Map<Class, Function<Object,Object>> SERIALIZERS = new HashMap<>(DEFAULT_SERIALIZERS);
 
+	private final int indent;
+
+	public JsonMarshaller() {
+		this(0);
+	}
+
+	public JsonMarshaller(int indent) {
+		this.indent = indent;
+	}
+
 	@Override
 	public void marshall(Object object, OutputStream outputStream) throws MarshalException, IOException {
 		try (OutputStreamWriter writer = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8)) {
@@ -64,7 +74,16 @@ public class JsonMarshaller extends AbstractMarshaller implements Marshaller {
 
 	@Override
 	public void marshall(Object object, Writer writer) throws IOException, MarshalException {
+		marshall(object, 0, writer);
+	}
+
+	private void marshall(Object object, int level, Writer writer) throws IOException, MarshalException {
+		int l = level;
+//		insertIndent(l, writer);
 		writer.write("{");
+		if (indent > 0) {
+			writer.write("\n");
+		}
 		Class clazz = object.getClass();
 		try {
 			boolean first = true;
@@ -73,14 +92,23 @@ public class JsonMarshaller extends AbstractMarshaller implements Marshaller {
 				if (value != null) {
 					if (!first) {
 						writer.write(",");
+						if (indent > 0) {
+							writer.write("\n");
+						}
 					} else {
 						first = false;
 					}
+					insertIndent(level + 1, writer);
+
 					writer.write(JsonSerializer.escapeString(field.getName()));
 					writer.write(":");
 
-					serializeValue(value, writer);
+					serializeValue(value, l + 1, writer);
 				}
+			}
+			if (!first && indent > 0) {
+				writer.write("\n");
+				insertIndent(l, writer);
 			}
 			writer.write("}");
 		} catch (InvocationTargetException|NoSuchMethodException|IllegalAccessException e) {
@@ -88,7 +116,13 @@ public class JsonMarshaller extends AbstractMarshaller implements Marshaller {
 		}
 	}
 
-	public void serializeValue(Object value, Writer writer) throws IOException, MarshalException {
+	private void insertIndent(int level, Writer writer) throws IOException {
+		for (int i=0; i<level*indent; i++) {
+			writer.write(" ");
+		}
+	}
+
+	public void serializeValue(Object value, int level, Writer writer) throws IOException, MarshalException {
 		if (value instanceof Collection) {
 			writer.write("[");
 			boolean first = true;
@@ -98,8 +132,16 @@ public class JsonMarshaller extends AbstractMarshaller implements Marshaller {
 				} else {
 					first = false;
 				}
+				if (indent > 0) {
+					writer.write("\n");
+				}
+				insertIndent(level + 1, writer);
 				//marshall(item, writer);
-				serializeValue(item, writer);
+				serializeValue(item, level + 1, writer);
+			}
+			if (!first && indent > 0) {
+				writer.write("\n");
+				insertIndent(level, writer);
 			}
 			writer.write("]");
 		} else if (value instanceof Boolean || value instanceof Long || value instanceof Integer || value instanceof Double || value instanceof Float) {
@@ -115,7 +157,7 @@ public class JsonMarshaller extends AbstractMarshaller implements Marshaller {
 			if (value instanceof String) {
 				writer.write(JsonSerializer.escapeString(value.toString()));
 			} else {
-				marshall(value, writer);
+				marshall(value, level, writer);
 			}
 		}
 	}

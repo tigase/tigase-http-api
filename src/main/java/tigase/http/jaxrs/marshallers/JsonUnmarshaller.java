@@ -18,6 +18,7 @@
 package tigase.http.jaxrs.marshallers;
 
 import jakarta.xml.bind.UnmarshalException;
+import tigase.http.jaxrs.utils.JaxRsUtil;
 import tigase.http.json.JsonParser;
 import tigase.xmpp.jid.BareJID;
 import tigase.xmpp.jid.JID;
@@ -89,7 +90,7 @@ public class JsonUnmarshaller extends AbstractUnmarshaller implements Unmarshall
 				if (value != null) {
 					if (Collection.class.isAssignableFrom(field.getType())) {
 						if (value instanceof Collection) {
-							Collection collection = createCollectionInstance((Class<Collection>) field.getType());
+							Collection collection = JaxRsUtil.createCollectionInstance((Class<Collection>) field.getType());
 							for (Object item : (Collection) value) {
 								Object v = deserializeValue((Class) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0],
 															item);
@@ -148,22 +149,6 @@ public class JsonUnmarshaller extends AbstractUnmarshaller implements Unmarshall
 			} catch (ClassCastException ex) {
 				throw new UnmarshalException("Failed to convert " + value.getClass() + " to " + clazz.getName(), ex);
 			}
-		}
-	}
-	
-	protected Collection createCollectionInstance(Class<Collection> collectionClass)
-			throws UnmarshalException, NoSuchMethodException, InvocationTargetException, InstantiationException,
-				   IllegalAccessException {
-		if (Modifier.isAbstract(collectionClass.getModifiers()) || Modifier.isInterface(collectionClass.getModifiers())) {
-			if (List.class.isAssignableFrom(collectionClass)) {
-				return new ArrayList();
-			} else if (Set.class.isAssignableFrom(collectionClass)) {
-				return new HashSet();
-			} else {
-				throw new UnmarshalException("Unsupported collection class " + collectionClass.getName());
-			}
-		} else {
-			return collectionClass.getDeclaredConstructor().newInstance();
 		}
 	}
 	

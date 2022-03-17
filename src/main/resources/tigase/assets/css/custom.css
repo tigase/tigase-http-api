@@ -644,3 +644,139 @@ h1.page-header {
 		color: #09c;
     }
 
+.method-GET, .method-PUT, .method-POST, .method-DELETE {
+	border-width: 1px;
+}
+
+.endpoint .card-header {
+	border-width: 1px;
+	background-color: transparent;
+}
+
+.endpoint .card-header.collapsed {
+	border-width: 0px;
+}
+
+.endpoint .card-header.collapsed .collapse-button {
+	transform: rotate(0deg);
+}
+
+.endpoint .card-header .collapse-button {
+	flex-shrink: 0;
+	width: 1.25rem;
+	height: 1.25rem;
+	margin-left: auto;
+	content: "";
+	background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23212529'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+	background-repeat: no-repeat;
+	background-size: 1.25rem;
+	transition: transform .2s ease-in-out;
+	transform: rotate(-180deg);
+}
+
+.method-GET {
+	background: rgba(97, 175, 254, var(--bs-bg-opacity));
+	border-color: rgb(97, 175, 254);
+}
+
+.method-GET .card-header {
+	border-color: rgb(97, 175, 254);
+}
+
+.method-PUT {
+	background: rgba(252, 161, 48, var(--bs-bg-opacity));
+	border-color: rgb(252, 161, 48);
+}
+
+.method-PUT .card-header {
+	border-color: rgb(252, 161, 48);
+}
+
+.method-POST {
+	background: rgba(73, 204, 144,var(--bs-bg-opacity));
+	border-color: rgb(73, 204, 144);
+}
+
+.method-POST .card-header {
+	border-color: rgb(73, 204, 144);
+}
+
+.method-DELETE {
+	background: rgba(249, 62, 62,var(--bs-bg-opacity));
+	border-color: rgb(249, 62, 6);
+}
+
+.method-DELETE .card-header {
+	border-color: rgb(249, 62, 6);
+}
+
+/*.method-GET .card-header div, .method-PUT .card-header div, .method-POST .card-header div, .method-DELETE .card-header div {*/
+/*	border-width: 1px;*/
+/*	!*padding: 0.15em;*!*/
+/*}*/
+
+.endpoint .card-header .method {
+	width: 5em;
+	/*padding: 0.15em;*/
+	text-align: center;
+}
+
+.endpoint .card-header .path {
+	font-weight: bolder;
+}
+
+.endpoint .card-header .description {
+	font-size: 0.9em;
+}
+
+.endpoint .card-body .table > :not(:first-child) {
+	border-top: 1px solid #C0C0C0;
+}
+
+.endpoint .card-body .table > thead {
+	border-bottom: 1px solid #C0C0C0;
+}
+
+.endpoint .card-body .table th {
+	font-weight: bolder;
+	font-size: smaller;
+}
+
+.endpoint .parameter.name {
+	font-size: 1em;
+	font-weight: bold;
+}
+
+.endpoint .parameter.required {
+	color: red;
+	font-size: 0.65em;
+}
+
+.endpoint .parameter.type {
+	font-size: 0.80em;
+	font-weight: bolder;
+}
+
+.endpoint .parameter.kind {
+	font-size: 0.85em;
+}
+
+.parameter .nav.nav-pills .nav-link {
+	padding: .25rem 0.5rem;
+}
+
+.parameter .possible-values {
+	font-style: italic;
+}
+
+.response .nav.nav-pills .nav-link {
+	padding: .25rem 0.5rem;
+}
+
+.response .possible-values {
+	font-style: italic;
+}
+
+/*.method-DELETE.card-header > div.method {*/
+/*	background-color: #f93e3e;*/
+/*}*/

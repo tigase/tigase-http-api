@@ -15,38 +15,26 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://www.gnu.org/licenses/.
  */
-package tigase.http.jaxrs;
+package tigase.http.modules.rest.docs;
 
-import java.lang.reflect.Method;
+import java.util.List;
 
-public enum HttpMethod {
-	GET,
-	PUT,
-	POST,
-	DELETE;
+public class Payload {
 
-	public static HttpMethod valueOf(Method method) {
-		if (method.getAnnotation(jakarta.ws.rs.GET.class) != null) {
-			return HttpMethod.GET;
-		}
-		if (method.getAnnotation(jakarta.ws.rs.POST.class) != null) {
-			return HttpMethod.POST;
-		}
-		if (method.getAnnotation(jakarta.ws.rs.PUT.class) != null) {
-			return HttpMethod.PUT;
-		}
-		if (method.getAnnotation(jakarta.ws.rs.DELETE.class) != null) {
-			return HttpMethod.DELETE;
-		}
-		return null;
+	private final List<PayloadExample> payloadExamples;
+	private final Model model;
+
+	public Payload(Model model, List<PayloadExample> payloadExamples) {
+		this.payloadExamples = payloadExamples;
+		this.model = model;
 	}
 
-//	public boolean requestContainsBody() {
-//		switch (this) {
-//			case POST, PUT:
-//				return true;
-//			case GET, DELETE:
-//				return
-//		}
-//	}
+	public List<PayloadExample> getPayloadExamples() {
+		return payloadExamples;
+	}
+
+	public Model getModel() {
+		return model;
+	}
+
 }

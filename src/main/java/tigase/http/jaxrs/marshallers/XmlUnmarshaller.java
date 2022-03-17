@@ -21,6 +21,7 @@ import jakarta.xml.bind.UnmarshalException;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
+import tigase.http.jaxrs.utils.JaxRsUtil;
 import tigase.xml.*;
 import tigase.xmpp.jid.BareJID;
 import tigase.xmpp.jid.JID;
@@ -140,7 +141,7 @@ public class XmlUnmarshaller extends AbstractUnmarshaller implements Unmarshalle
 					List<Element> elems = root.findChildren(el -> fieldName.equals(el.getName()));
 					if (elems != null) {
 
-						Collection collection = createCollectionInstance((Class<Collection>) field.getType());
+						Collection collection = JaxRsUtil.createCollectionInstance((Class<Collection>) field.getType());
 						for (Element elem : elems) {
 							Object value = deserializeValue((Class) ((ParameterizedType)field.getGenericType()).getActualTypeArguments()[0], fieldName, elem);
 							if (value != null) {
@@ -163,22 +164,6 @@ public class XmlUnmarshaller extends AbstractUnmarshaller implements Unmarshalle
 			return object;
 		} catch (NoSuchFieldException|InvocationTargetException|InstantiationException|IllegalAccessException|NoSuchMethodException e) {
 			throw new UnmarshalException("Could not unmarshal instance of " + clazz.getName(), e);
-		}
-	}
-
-	protected Collection createCollectionInstance(Class<Collection> collectionClass)
-			throws UnmarshalException, NoSuchMethodException, InvocationTargetException, InstantiationException,
-				   IllegalAccessException {
-		if (Modifier.isAbstract(collectionClass.getModifiers()) || Modifier.isInterface(collectionClass.getModifiers())) {
-			if (List.class.isAssignableFrom(collectionClass)) {
-				return new ArrayList();
-			} else if (Set.class.isAssignableFrom(collectionClass)) {
-				return new HashSet();
-			} else {
-				throw new UnmarshalException("Unsupported collection class " + collectionClass.getName());
-			}
-		} else {
-			return collectionClass.getDeclaredConstructor().newInstance();
 		}
 	}
 

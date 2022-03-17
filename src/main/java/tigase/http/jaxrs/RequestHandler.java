@@ -83,6 +83,10 @@ public class RequestHandler<H extends Handler> {
 		return restHandler;
 	}
 
+	public Method getMethod() {
+		return method;
+	}
+
 	public Matcher test(HttpServletRequest request, String requestUri) {
 		if (supportedContentTypes.contains(request.getContentType()) || supportedContentTypes.isEmpty()) {
 			return pattern.matcher(requestUri);

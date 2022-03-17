@@ -47,8 +47,30 @@ class XmlMarshallerTest
 		assertMarshalling(expected, data);
 	}
 
+	@Test
+	public void test2() throws MarshalException, IOException {
+
+		TestObject data = new TestObject("root");
+		data.getItems().add(new TestObject("item 1"));
+		data.getItems().add(new TestObject("item 2"));
+
+		String expected = "<TestObject data=\"" + data.getData() + "\">\n  <title>root</title>\n  <date>" +
+				ZonedDateTime.ofInstant(data.getDate().toInstant(), ZoneId.systemDefault()).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME) + "</date>\n  <items data=\"" +
+				data.getData() + "\">\n    <title>item 1</title>\n    <date>" +
+				ZonedDateTime.ofInstant(data.getItems().get(0).getDate().toInstant(), ZoneId.systemDefault()).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME) +
+				"</date>\n  </items>\n  <items data=\"" + data.getData() + "\">\n    <title>item 2</title>\n    <date>" +
+				ZonedDateTime.ofInstant(data.getItems().get(1).getDate().toInstant(), ZoneId.systemDefault()).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME) + "</date>\n  </items>\n</TestObject>";
+
+		assertMarshallingPretty(expected, data);
+	}
+
 	@Override
 	Marshaller createMarshaller() {
 		return new XmlMarshaller();
+	}
+
+	@Override
+	Marshaller createMarshallerPretty() {
+		return new XmlMarshaller(2);
 	}
 }

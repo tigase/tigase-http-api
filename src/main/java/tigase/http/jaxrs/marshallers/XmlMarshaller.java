@@ -68,6 +68,16 @@ public class XmlMarshaller extends AbstractMarshaller implements Marshaller {
 		return !DEFAULT.equals(value);
 	}
 
+	private final int indent;
+
+	public XmlMarshaller() {
+		this(0);
+	}
+
+	public XmlMarshaller(int indent) {
+		this.indent = indent;
+	}
+
 	@Override
 	public void marshall(Object object, OutputStream outputStream) throws MarshalException, IOException {
 		try (OutputStreamWriter writer = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8)) {
@@ -87,14 +97,15 @@ public class XmlMarshaller extends AbstractMarshaller implements Marshaller {
 					.orElse(clazz.getSimpleName());
 			Optional<String> namespace = Optional.ofNullable(xmlRootElement).map(XmlRootElement::namespace).filter(XmlMarshaller::isNotDefault);
 
-			marshall(object, name, namespace, writer);
+			marshall(object, name, namespace, 0, writer);
 		} catch (InvocationTargetException|NoSuchMethodException|IllegalAccessException e) {
 			throw new MarshalException("Could not marshal instance of " + clazz.getName(), e);
 		}
 	}
 
-	public void marshall(Object object, String name, Optional<String> namespace, Writer writer)
+	public void marshall(Object object, String name, Optional<String> namespace, int level, Writer writer)
 			throws IOException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+		insertIndent(level, writer);
 		writer.write("<");
 		writer.write(name);
 		Class clazz = object.getClass();
@@ -133,27 +144,46 @@ public class XmlMarshaller extends AbstractMarshaller implements Marshaller {
 			writer.write("/>");
 		} else {
 			writer.write(">");
+			if (indent > 0) {
+				writer.write("\n");
+			}
 			
 			for (Field field : elementFields) {
 				Object value = getFieldValue(object, field);
 				if (value != null) {
 					if (value instanceof Collection) {
 						for (Object item : (Collection) value) {
-							serializeValue(field, item, writer);
+							serializeValue(field, item, level + 1, writer);
+							if (indent > 0) {
+								writer.write("\n");
+							}
 						}
 					} else {
-						serializeValue(field, value, writer);
+						serializeValue(field, value, level + 1, writer);
+						if (indent > 0) {
+							writer.write("\n");
+						}
 					}
+
 				}
 			}
 
+			if (indent > 0) {
+				insertIndent(level, writer);
+			}
 			writer.write("</");
 			writer.write(name);
 			writer.write(">");
 		}
 	}
 
-	protected void serializeValue(Field field, Object value, Writer writer)
+	private void insertIndent(int level, Writer writer) throws IOException {
+		for (int i = 0; i<(level * indent); i++) {
+			writer.write(" ");
+		}
+	}
+
+	protected void serializeValue(Field field, Object value, int level, Writer writer)
 			throws IOException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
 		String fieldName = Optional.ofNullable(field.getAnnotation(XmlElement.class))
 				.map(XmlElement::name)
@@ -167,8 +197,9 @@ public class XmlMarshaller extends AbstractMarshaller implements Marshaller {
 					.filter(XmlMarshaller::isNotDefault)
 					.or(() -> Optional.ofNullable(field.getClass().getAnnotation(XmlRootElement.class))
 							.map(XmlRootElement::namespace)
-							.filter(XmlMarshaller::isNotDefault)), writer);
+							.filter(XmlMarshaller::isNotDefault)), level, writer);
 		} else {
+			insertIndent(level, writer);
 			writer.write("<");
 			writer.write(fieldName);
 			writer.write(">");

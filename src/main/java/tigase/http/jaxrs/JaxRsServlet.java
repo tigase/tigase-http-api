@@ -1,3 +1,20 @@
+/*
+ * Tigase HTTP API component - Tigase HTTP API component
+ * Copyright (C) 2013 Tigase, Inc. (office@tigase.com)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. Look for COPYING file in the top folder.
+ * If not, see http://www.gnu.org/licenses/.
+ */
 package tigase.http.jaxrs;
 
 import jakarta.ws.rs.*;
@@ -28,7 +45,7 @@ public abstract class JaxRsServlet<H extends Handler, M extends JaxRsModule<H>> 
 
 	private ScheduledExecutorService executorService;
 	protected M module;
-	private ConcurrentHashMap<HttpMethod, CopyOnWriteArrayList<RequestHandler<H>>> requestHandlers = new ConcurrentHashMap<>();
+	protected final ConcurrentHashMap<HttpMethod, CopyOnWriteArrayList<RequestHandler<H>>> requestHandlers = new ConcurrentHashMap<>();
 
 	@Override
 	public void init() throws ServletException {
@@ -108,19 +125,7 @@ public abstract class JaxRsServlet<H extends Handler, M extends JaxRsModule<H>> 
 	}
 
 	private HttpMethod getHttpMethod(Method method) {
-		if (method.getAnnotation(GET.class) != null) {
-			return HttpMethod.GET;
-		}
-		if (method.getAnnotation(POST.class) != null) {
-			return HttpMethod.POST;
-		}
-		if (method.getAnnotation(PUT.class) != null) {
-			return HttpMethod.PUT;
-		}
-		if (method.getAnnotation(DELETE.class) != null) {
-			return HttpMethod.DELETE;
-		}
-		return null;
+		return HttpMethod.valueOf(method);
 	}
 
 	private Pattern prepareMatcher(String path, Method method) {

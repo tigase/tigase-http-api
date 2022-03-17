@@ -17,6 +17,9 @@
  */
 package tigase.http.modules.rest.users;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -73,7 +76,12 @@ public class AvatarGetHandler extends AbstractRestHandler {
 
 	@GET
 	@Path("/{user}(/{source})?")
-	public void retrieveAvatar(@NotNull @PathParam("user") String userStr, @PathParam("source") Source source, @Suspended AsyncResponse asyncResponse) {
+	@Operation(summary = "Get user avatar", description = "Get user avatar")
+	@ApiResponse(responseCode = "200", description = "User avatar in binary form")
+	public void retrieveAvatar(
+			@Parameter(description = "Bare JID of the user") @NotNull @PathParam("user") String userStr,
+			@Parameter(description = "Type of avatar to retrieve. If not set, first available will be returned.") @PathParam("source") Source source,
+			@Suspended AsyncResponse asyncResponse) {
 		BareJID user = BareJID.bareJIDInstanceNS(userStr);
 		
 		getAvatar(user, source).thenAccept(asyncResponse::resume).exceptionally(ex -> {

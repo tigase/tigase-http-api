@@ -17,6 +17,11 @@
  */
 package tigase.http.modules.rest.users;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -52,6 +57,8 @@ public class UsersHandler extends AbstractRestHandler {
 	@GET
 	@Path("/")
 	@Produces({"application/json","application/xml"})
+	@Operation(summary = "Get list of user", description = "Get list of user")
+	@ApiResponse(responseCode = "200", description = "List of users", content = {@Content(schema = @Schema(implementation = Users.class)) })
 	public Users listUsers() throws TigaseDBException {
 		List<BareJID> users = userRepository.getUsers();
 		return new Users(users, users.size());
@@ -60,7 +67,9 @@ public class UsersHandler extends AbstractRestHandler {
 	@GET
 	@Path("/{domain}")
 	@Produces({"application/json","application/xml"})
-	public Users listUsersFromDomain(@NotNull @PathParam("domain") String domain) throws TigaseDBException {
+	@Operation(summary = "Get list of user for domain", description = "Get list of user for domain")
+	@ApiResponse(responseCode = "200", description = "List of users", content = {@Content(schema = @Schema(implementation = Users.class)) })
+	public Users listUsersFromDomain(@Parameter(description = "Domain to list users for") @NotNull @PathParam("domain") String domain) throws TigaseDBException {
 		List<BareJID> users = userRepository.getUsers()
 				.stream()
 				.filter(jid -> domain.equals(jid.getDomain()))
@@ -71,6 +80,8 @@ public class UsersHandler extends AbstractRestHandler {
 	@GET
 	@Path("/async")
 	@Produces({"application/json","application/xml"})
+	@Operation(summary = "DEMO: Get list of user for domain (async)", description = "Get list of user for domain")
+	@ApiResponse(responseCode = "200", description = "List of users", content = {@Content(schema = @Schema(implementation = Users.class)) })
 	public void listUsersAsync(@Suspended final AsyncResponse response) {
 		List<BareJID> jids = new ArrayList<>();
 		for (int i = 0; i < 10; i++) {
@@ -92,6 +103,8 @@ public class UsersHandler extends AbstractRestHandler {
 		@XmlElement(name = "user")
 		private List<BareJID> users;
 		private int count;
+
+		public Users() {}
 
 		public Users(List<BareJID> users, int count) {
 			this.users = users;

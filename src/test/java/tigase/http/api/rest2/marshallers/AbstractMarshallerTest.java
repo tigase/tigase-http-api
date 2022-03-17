@@ -27,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 abstract class AbstractMarshallerTest {
 
 	abstract Marshaller createMarshaller();
+	abstract Marshaller createMarshallerPretty();
 
 	protected void assertMarshalling(String expected, Object object) throws MarshalException, IOException {
 		Marshaller marshaller = createMarshaller();
@@ -37,5 +38,16 @@ abstract class AbstractMarshallerTest {
 
 		assertEquals(expected, writer.toString(), "Marshalling returned unexpected result!");
 	}
+
+	protected void assertMarshallingPretty(String expected, Object object) throws MarshalException, IOException {
+		Marshaller marshaller = createMarshallerPretty();
+
+		StringBuilderWriter writer = new StringBuilderWriter();
+
+		marshaller.marshall(object, writer);
+
+		assertEquals(expected, writer.toString(), "Marshalling returned unexpected result!");
+	}
+
 
 }
