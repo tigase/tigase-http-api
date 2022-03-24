@@ -21,6 +21,7 @@ import tigase.component.exceptions.ComponentException;
 import tigase.http.api.HttpServerIfc;
 import tigase.http.modules.Module;
 import tigase.http.stats.HttpStatsCollector;
+import tigase.http.util.XmppException;
 import tigase.kernel.beans.Bean;
 import tigase.kernel.beans.Inject;
 import tigase.kernel.beans.RegistrarBean;
@@ -260,6 +261,13 @@ public class HttpMessageReceiver
 		if (addOutPacket(packet)) {
 			return future.orTimeout(timeout, TimeUnit.SECONDS).whenComplete((a,b) -> {
 				pendingRequest.remove(key);
+			}).thenCompose(result -> {
+				XmppException ex = XmppException.fromStanza(packet);
+				if (ex != null) {
+					return CompletableFuture.failedFuture(ex);
+				} else {
+					return CompletableFuture.completedFuture(result);
+				}
 			});
 		} else {
 			pendingRequest.remove(key);

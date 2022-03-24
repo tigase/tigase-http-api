@@ -22,6 +22,7 @@ import tigase.xmpp.jid.JID;
 
 import javax.validation.constraints.NotNull;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -30,19 +31,32 @@ public class Model {
 	public static Model create(Class clazz) {
 		List<Model.Field> fields = new ArrayList<>();
 		for (java.lang.reflect.Field field : clazz.getDeclaredFields()) {
-			Class type = field.getType();
-			boolean isCollection = Collection.class.isAssignableFrom(type);
-			if (isCollection) {
-				type = (Class) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+			Class type = findActualClass(field.getGenericType());
+			if (type != null) {
+				boolean isCollection = Collection.class.isAssignableFrom(type);
+				Model model = (type.getPackageName().startsWith("java.") || type.equals(clazz) || type.equals(BareJID.class) || type.equals(JID.class) || Enum.class.isAssignableFrom(type))
+							  ? null
+							  : create(type);
+				boolean isRequired = field.getAnnotation(NotNull.class) != null;
+				fields.add(new Model.Field(field.getName(), isRequired, isCollection, type, model));
 			}
-			Model model = (type.getPackageName().startsWith("java.") || type.equals(clazz) ||
-					type.equals(BareJID.class) || type.equals(JID.class) || Enum.class.isAssignableFrom(type))
-						  ? null
-						  : create(type);
-			boolean isRequired = field.getAnnotation(NotNull.class) != null;
-			fields.add(new Model.Field(field.getName(), isRequired, isCollection, type, model));
 		}
 		return new Model(clazz.getSimpleName(),fields);
+	}
+
+	private static Class findActualClass(Type type) {
+		if (type instanceof Class<?>) {
+			return (Class) type;
+		} else if (type instanceof ParameterizedType) {
+			ParameterizedType pt = (ParameterizedType) type;
+			if (Collection.class.isAssignableFrom((Class<?>) pt.getRawType())) {
+				return findActualClass(pt.getActualTypeArguments()[0]);
+			} else {
+				return findActualClass(pt.getRawType());
+			}
+		} else {
+			return null;
+		}
 	}
 
 	private final String id = "id-" + UUID.randomUUID().toString();

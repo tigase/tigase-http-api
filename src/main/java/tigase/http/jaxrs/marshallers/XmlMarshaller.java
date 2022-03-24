@@ -21,6 +21,7 @@ import jakarta.xml.bind.MarshalException;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlValue;
 import tigase.xml.XMLUtils;
 import tigase.xmpp.jid.BareJID;
 import tigase.xmpp.jid.JID;
@@ -104,16 +105,39 @@ public class XmlMarshaller extends AbstractMarshaller implements Marshaller {
 	}
 
 	public void marshall(Object object, String name, Optional<String> namespace, int level, Writer writer)
-			throws IOException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+			throws IOException, NoSuchMethodException, InvocationTargetException, IllegalAccessException,
+				   MarshalException {
 		insertIndent(level, writer);
 		writer.write("<");
 		writer.write(name);
-		Class clazz = object.getClass();
+
 		if (namespace.isPresent()) {
 			writer.write(" xmlns=\"");
 			writer.write(namespace.get());
 			writer.write("\"");
 		}
+
+		if (object == null) {
+			writer.write("/>");
+			return;
+		}
+
+		if (object instanceof Collection<?>) {
+			writer.write(">");
+			if (indent > 0) {
+				writer.write("\n");
+			}
+			for (Object item : (Collection) object) {
+				marshall(item, writer);
+			}
+			insertIndent(level, writer);
+			writer.write("</");
+			writer.write(name);
+			writer.write(">");
+			return;
+		}
+
+		Class clazz = object.getClass();
 		Field[] fields = clazz.getDeclaredFields();
 		List<Field> attributeFields = Arrays.stream(fields)
 				.filter(field -> field.getAnnotation(XmlAttribute.class) != null)
@@ -184,7 +208,8 @@ public class XmlMarshaller extends AbstractMarshaller implements Marshaller {
 	}
 
 	protected void serializeValue(Field field, Object value, int level, Writer writer)
-			throws IOException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+			throws IOException, InvocationTargetException, NoSuchMethodException, IllegalAccessException,
+				   MarshalException {
 		String fieldName = Optional.ofNullable(field.getAnnotation(XmlElement.class))
 				.map(XmlElement::name)
 				.filter(XmlMarshaller::isNotDefault)
@@ -200,25 +225,34 @@ public class XmlMarshaller extends AbstractMarshaller implements Marshaller {
 							.filter(XmlMarshaller::isNotDefault)), level, writer);
 		} else {
 			insertIndent(level, writer);
-			writer.write("<");
-			writer.write(fieldName);
-			writer.write(">");
+			boolean isValue = field.getAnnotation(XmlValue.class) != null;
+			if (!isValue) {
+				writer.write("<");
+				writer.write(fieldName);
+				writer.write(">");
+			}
 			writer.write(XMLUtils.escape(valueStr));
-			writer.write("</");
-			writer.write(fieldName);
-			writer.write(">");
+			if (!isValue) {
+				writer.write("</");
+				writer.write(fieldName);
+				writer.write(">");
+			}
 		}
 	}
 
 	protected String serialize(Object value) {
-		Function<Object, String> serializer = SERIALIZERS.get(value.getClass());
-		if (serializer == null) {
-			if (value instanceof Enum<?>) {
-				return ((Enum<?>) value).name();
+		if (value != null) {
+			Function<Object, String> serializer = SERIALIZERS.get(value.getClass());
+			if (serializer == null) {
+				if (value instanceof Enum<?>) {
+					return ((Enum<?>) value).name();
+				}
+				return null;
+			} else {
+				return serializer.apply(value);
 			}
-			return null;
 		} else {
-			return serializer.apply(value);
+			return null;
 		}
 	}
 	

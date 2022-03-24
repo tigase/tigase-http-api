@@ -21,6 +21,7 @@ import jakarta.xml.bind.UnmarshalException;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlValue;
 import tigase.http.jaxrs.utils.JaxRsUtil;
 import tigase.xml.*;
 import tigase.xmpp.jid.BareJID;
@@ -156,6 +157,14 @@ public class XmlUnmarshaller extends AbstractUnmarshaller implements Unmarshalle
 						Object value = deserializeValue(field.getType(), fieldName, elem);
 						if (value != null) {
 							setFieldValue(object, field, value);
+						}
+					} else if (field.getAnnotation(XmlValue.class) != null) {
+						String valueStr = XMLUtils.unescape(root.getCData());
+						if (valueStr != null) {
+							Object value = deserialize(field.getType(),valueStr);
+							if (value != null) {
+								setFieldValue(object, field, value);
+							}
 						}
 					}
 				}

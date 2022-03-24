@@ -17,10 +17,7 @@
  */
 package tigase.http.modules.rest;
 
-import tigase.http.DeploymentInfo;
-import tigase.http.HttpMessageReceiver;
-import tigase.http.PacketWriter;
-import tigase.http.ServletInfo;
+import tigase.http.*;
 import tigase.http.jaxrs.JaxRsModule;
 import tigase.http.jaxrs.JaxRsServlet;
 import tigase.http.modules.AbstractModule;
@@ -49,6 +46,9 @@ public class RestModule extends AbstractModule
 
 	@Inject
 	private ApiKeyRepository apiKeyRepository;
+
+	@Inject
+	private AuthProvider authProvider;
 
 	@Inject(nullAllowed = true)
 	private List<RestHandler> handlers;
@@ -106,6 +106,7 @@ public class RestModule extends AbstractModule
 		httpDeployment = httpServer.deployment()
 				.setClassLoader(this.getClass().getClassLoader())
 				.setContextPath(contextPath)
+				.setAuthProvider(authProvider)
 				.setDeploymentName("HTTP/REST API")
 				.setDeploymentDescription(getDescription());
 		if (vhosts != null) {

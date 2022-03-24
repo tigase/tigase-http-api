@@ -20,6 +20,7 @@ package tigase.http.modules.rest.docs;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.container.AsyncResponse;
 import jakarta.ws.rs.container.Suspended;
+import jakarta.ws.rs.core.SecurityContext;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -72,6 +73,11 @@ public class Parameter
 			} else if (beanParam != null) {
 				params.addAll(getBeanParameters(param.getType()));
 				continue;
+			} else if (SecurityContext.class.isAssignableFrom(param.getType())) {
+				name = "principal";
+				type = "BareJID";
+				kind = ParameterKind.authorizedUser;
+				description = "Bare JID of the authorized user";
 			} else {
 				Consumes consumes = method.getAnnotation(Consumes.class);
 				if (consumes != null) {
@@ -157,7 +163,8 @@ public class Parameter
 		path,
 		header,
 		formData,
-		body
+		body,
+		authorizedUser
 	}
 
 	private final String description;

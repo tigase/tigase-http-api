@@ -19,9 +19,9 @@ package tigase.http.modules.rest;
 
 import jakarta.ws.rs.container.AsyncResponse;
 import jakarta.ws.rs.container.TimeoutHandler;
-import jakarta.xml.bind.ValidationException;
 import tigase.http.api.HttpException;
 import tigase.http.jaxrs.RequestHandler;
+import tigase.http.jaxrs.utils.JaxRsUtil;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletRequest;
@@ -84,14 +84,8 @@ public class AsyncResponseImpl implements AsyncResponse {
 
 	private void sendError(Throwable ex) {
 		try {
-			if (ex instanceof ValidationException) {
-				((HttpServletResponse) context.getResponse()).sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, ex.getMessage());
-			} else if (ex instanceof HttpException) {
-				HttpException he = (HttpException) ex;
-				((HttpServletResponse) context.getResponse()).sendError(he.getCode(), he.getMessage());
-			} else {
-				((HttpServletResponse) context.getResponse()).sendError(500, "Internal Server Error");
-			}
+			HttpException he = JaxRsUtil.convertExceptionForResponse(ex);
+			((HttpServletResponse) context.getResponse()).sendError(he.getCode(), he.getMessage());
 		} catch (IOException ex1) {
 			log.log(Level.FINEST, "Failed to send error message", ex1);
 		}

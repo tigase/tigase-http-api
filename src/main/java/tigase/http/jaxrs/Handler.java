@@ -17,6 +17,13 @@
  */
 package tigase.http.jaxrs;
 
-public interface Handler {
+import jakarta.ws.rs.container.AsyncResponse;
+import tigase.http.jaxrs.utils.JaxRsUtil;
 
+import java.util.concurrent.CompletableFuture;
+
+public interface Handler {
+	default void sendResult(CompletableFuture future, AsyncResponse asyncResponse) {
+		JaxRsUtil.sendResult(future, asyncResponse);
+	}
 }

@@ -123,7 +123,9 @@ public class JsonMarshaller extends AbstractMarshaller implements Marshaller {
 	}
 
 	public void serializeValue(Object value, int level, Writer writer) throws IOException, MarshalException {
-		if (value instanceof Collection) {
+		if (value == null) {
+			writer.write("null");
+		} else if (value instanceof Collection) {
 			writer.write("[");
 			boolean first = true;
 			for (Object item : (Collection) value) {

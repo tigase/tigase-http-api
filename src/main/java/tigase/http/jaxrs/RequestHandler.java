@@ -26,6 +26,7 @@ import jakarta.xml.bind.MarshalException;
 import jakarta.xml.bind.UnmarshalException;
 import tigase.http.api.HttpException;
 import tigase.http.jaxrs.marshallers.*;
+import tigase.http.jaxrs.utils.JaxRsUtil;
 import tigase.http.modules.rest.AsyncResponseImpl;
 import tigase.http.modules.rest.UnsupportedFormatException;
 import tigase.xmpp.jid.BareJID;
@@ -88,10 +89,7 @@ public class RequestHandler<H extends Handler> {
 	}
 
 	public Matcher test(HttpServletRequest request, String requestUri) {
-		if (supportedContentTypes.contains(request.getContentType()) || supportedContentTypes.isEmpty()) {
-			return pattern.matcher(requestUri);
-		}
-		return null;
+		return pattern.matcher(requestUri);
 	}
 
 	public void execute(HttpServletRequest request, HttpServletResponse response, Matcher matcher, ScheduledExecutorService executorService)
@@ -168,28 +166,21 @@ public class RequestHandler<H extends Handler> {
 				values.add(value);
 			}
 
-			try {
-				Object result = method.invoke(restHandler, values.toArray());
-				if (Void.TYPE.equals(method.getReturnType())) {
-					return;
+			Object result = method.invoke(restHandler, values.toArray());
+			if (Void.TYPE.equals(method.getReturnType())) {
+				return;
+			} else {
+				if (result != null) {
+					sendEncodedContent(result, acceptedType, response);
 				} else {
-					if (result != null) {
-						sendEncodedContent(result, acceptedType, response);
-					} else {
-						response.setStatus(200);
-					}
+					response.setStatus(200);
 				}
-			} catch (InvocationTargetException | IllegalAccessException ex) {
-				if (ex.getCause() instanceof HttpException) {
-					throw (HttpException) ex.getCause();
-				}
-				throw new HttpException(ex, 500);
 			}
 		} catch (Throwable ex) {
 			if (asyncResponse != null) {
 				asyncResponse.resume(ex);
 			}
-			throw ex;
+			throw JaxRsUtil.convertExceptionForResponse(ex);
 		}
 	}
 

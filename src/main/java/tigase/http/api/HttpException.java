@@ -31,6 +31,11 @@ public class HttpException extends Exception {
 		this.code = code;
 	}
 
+	public HttpException(int code, Throwable cause) {
+		super(cause);
+		this.code = code;
+	}
+	
 	public HttpException(Throwable cause, int code) {
 		super(cause);
 		this.code = code;

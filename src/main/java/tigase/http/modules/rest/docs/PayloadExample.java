@@ -31,6 +31,7 @@ import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -104,21 +105,31 @@ public class PayloadExample {
 			Object object = clazz.getDeclaredConstructor().newInstance();
 			for (Field field : clazz.getDeclaredFields()) {
 				field.setAccessible(true);
-				if (Collection.class.isAssignableFrom(field.getType())) {
-					Collection collection = JaxRsUtil.createCollectionInstance((Class<Collection>) field.getType());
-					Class collectionType = (Class) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
-					for (int i=0; i<3; i++) {
-						collection.add(generateExampleValue(collectionType));
-					}
-					field.set(object, collection);
-				} else {
-					Object value = generateExampleValue((Class) field.getType());
-					field.set(object, value);
-				}
+				field.set(object, generateExampleValue(field.getGenericType()));
 			}
 			return object;
 		} catch (InvocationTargetException |InstantiationException|IllegalAccessException|NoSuchMethodException ex) {
 			log.log(Level.WARNING, ex, () -> "could not create instance of class " + clazz.getName());
+			return null;
+		}
+	}
+
+	private static Object generateExampleValue(Type type)
+			throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+		if (type instanceof Class<?>) {
+			return generateExampleValue((Class) type);
+		} else if (type instanceof ParameterizedType) {
+			ParameterizedType pt = (ParameterizedType) type;
+			if (Collection.class.isAssignableFrom((Class<?>) pt.getRawType())) {
+				Collection collection = JaxRsUtil.createCollectionInstance((Class<Collection>) pt.getRawType());
+				for (int i=0; i<3; i++) {
+					collection.add(generateExampleValue(pt.getActualTypeArguments()[0]));
+				}
+				return collection;
+			} else {
+				return getObjectExample((Class<?>) pt.getRawType());
+			}
+		} else {
 			return null;
 		}
 	}
@@ -153,7 +164,7 @@ public class PayloadExample {
 		} else if (Enum.class.isAssignableFrom(clazz)) {
 			return clazz.getEnumConstants()[0];
 		} else {
-			return null;
+			return getObjectExample(clazz);
 		}
 	}
 }

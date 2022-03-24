@@ -17,9 +17,20 @@
  */
 package tigase.http.jaxrs.utils;
 
+import jakarta.ws.rs.container.AsyncResponse;
+import jakarta.xml.bind.ValidationException;
+import tigase.http.api.HttpException;
+import tigase.http.util.XmppException;
+
+import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.TimeoutException;
+
+import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 
 public class JaxRsUtil {
 
@@ -38,5 +49,39 @@ public class JaxRsUtil {
 			return collectionClass.getDeclaredConstructor().newInstance();
 		}
 	}
-	
+
+	public static HttpException convertExceptionForResponse(Throwable ex) {
+		if (ex instanceof CompletionException) {
+			return convertExceptionForResponse(ex.getCause());
+		}
+		else if (ex instanceof HttpException) {
+			return (HttpException) ex;
+		}
+		else if (ex instanceof TimeoutException) {
+			return new HttpException(HttpServletResponse.SC_REQUEST_TIMEOUT, ex.getCause());
+		} else if (ex instanceof XmppException) {
+			int code = ((XmppException) ex).getCode();
+			if (code == 0) {
+				code = SC_INTERNAL_SERVER_ERROR;
+			}
+			String message = Optional.ofNullable(ex.getMessage()).map(msg -> msg + "\n\n").orElse("") +
+					((XmppException) ex).getStanza().toString();
+			return new HttpException(message,  code);
+		}
+		else if (ex instanceof ValidationException) {
+			return new HttpException(ex.getMessage(), HttpServletResponse.SC_NOT_ACCEPTABLE, ex);
+		}
+		else if (ex instanceof InvocationTargetException || ex instanceof IllegalAccessException) {
+			return convertExceptionForResponse(ex.getCause());
+		} else {
+			return new HttpException("Internal Server Error", SC_INTERNAL_SERVER_ERROR, ex);
+		}
+	}
+
+	public static void sendResult(CompletableFuture future, AsyncResponse asyncResponse) {
+		future.thenAccept(asyncResponse::resume).exceptionally(ex -> {
+			asyncResponse.resume(convertExceptionForResponse((Throwable) ex));
+			return null;
+		});
+	}
 }
