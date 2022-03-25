@@ -21,6 +21,7 @@ import jakarta.ws.rs.*;
 import tigase.http.api.HttpException;
 import tigase.http.modules.AbstractBareModule;
 import tigase.xmpp.jid.BareJID;
+import tigase.xmpp.jid.JID;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -190,6 +191,9 @@ public abstract class JaxRsServlet<H extends Handler, M extends JaxRsModule<H>> 
 		}
 		if (BareJID.class.isAssignableFrom(clazz)) {
 			return "[^\\/]+";
+		}
+		if (JID.class.isAssignableFrom(clazz)) {
+			return "([^\\/]+)(\\/[^\\/]+)?";
 		}
 		try {
 			Method m = clazz.getDeclaredMethod("fromString", String.class);

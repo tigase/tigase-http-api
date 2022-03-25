@@ -17,6 +17,7 @@
  */
 package tigase.http.modules.rest.docs;
 
+import tigase.xml.Element;
 import tigase.xmpp.jid.BareJID;
 import tigase.xmpp.jid.JID;
 
@@ -34,7 +35,8 @@ public class Model {
 			Class type = findActualClass(field.getGenericType());
 			if (type != null) {
 				boolean isCollection = Collection.class.isAssignableFrom(type);
-				Model model = (type.getPackageName().startsWith("java.") || type.equals(clazz) || type.equals(BareJID.class) || type.equals(JID.class) || Enum.class.isAssignableFrom(type))
+				Model model = (type.getPackageName().startsWith("java.") || type.equals(clazz) || type.equals(BareJID.class) || type.equals(JID.class) || Enum.class.isAssignableFrom(type) ||
+						Element.class.isAssignableFrom(type))
 							  ? null
 							  : create(type);
 				boolean isRequired = field.getAnnotation(NotNull.class) != null;

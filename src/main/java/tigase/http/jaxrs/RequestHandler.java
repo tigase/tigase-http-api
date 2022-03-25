@@ -22,6 +22,7 @@ import jakarta.ws.rs.container.Suspended;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
+import jakarta.xml.bind.Element;
 import jakarta.xml.bind.MarshalException;
 import jakarta.xml.bind.UnmarshalException;
 import tigase.http.api.HttpException;
@@ -29,6 +30,8 @@ import tigase.http.jaxrs.marshallers.*;
 import tigase.http.jaxrs.utils.JaxRsUtil;
 import tigase.http.modules.rest.AsyncResponseImpl;
 import tigase.http.modules.rest.UnsupportedFormatException;
+import tigase.xml.DomBuilderHandler;
+import tigase.xml.SingletonFactory;
 import tigase.xmpp.jid.BareJID;
 import tigase.xmpp.jid.JID;
 
@@ -36,10 +39,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.ValidationException;
 import javax.validation.constraints.NotNull;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.lang.reflect.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Function;
@@ -270,11 +272,24 @@ public class RequestHandler<H extends Handler> {
 	}
 
 	private Object decodeContent(Class clazz, HttpServletRequest request) throws HttpException, IOException {
-		Unmarshaller unmarshaller = newUnmarshaller(request.getContentType());
-		try (InputStream inputStream = request.getInputStream()) {
-			return unmarshaller.unmarshal(clazz, inputStream);
-		} catch (UnmarshalException e) {
-			throw new HttpException(e, 422);
+		if (MediaType.APPLICATION_XML.equals(request.getContentType()) && tigase.xml.Element.class.equals(clazz)) {
+			DomBuilderHandler handler = new DomBuilderHandler();
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(request.getInputStream(), StandardCharsets.UTF_8))) {
+				String inData = reader.lines().collect(Collectors.joining("\n"));
+				SingletonFactory.getParserInstance().parse(handler, inData);
+				tigase.xml.Element root = handler.getParsedElements().poll();
+				if (root == null) {
+					throw new HttpException("Could not parse XML: " + inData, 422);
+				}
+				return root;
+			}
+		} else {
+			Unmarshaller unmarshaller = newUnmarshaller(request.getContentType());
+			try (InputStream inputStream = request.getInputStream()) {
+				return unmarshaller.unmarshal(clazz, inputStream);
+			} catch (UnmarshalException e) {
+				throw new HttpException(e, 422);
+			}
 		}
 	}
 
@@ -283,7 +298,7 @@ public class RequestHandler<H extends Handler> {
 			if (object instanceof Response) {
 				Response resp = (Response) object;
 
-				for (Map.Entry<String,List<String>> entry : resp.getStringHeaders().entrySet()) {
+				for (Map.Entry<String, List<String>> entry : resp.getStringHeaders().entrySet()) {
 					for (String it : entry.getValue()) {
 						response.addHeader(entry.getKey(), it);
 					}
@@ -300,6 +315,9 @@ public class RequestHandler<H extends Handler> {
 				if (entity != null) {
 					if (entity instanceof byte[]) {
 						response.getOutputStream().write((byte[]) entity);
+					} else if (entity instanceof Element) {
+						response.setContentType(MediaType.APPLICATION_XML);
+						response.getWriter().write(entity.toString());
 					} else if (entity instanceof String) {
 						response.getWriter().write((String) entity);
 					} else {
@@ -310,6 +328,9 @@ public class RequestHandler<H extends Handler> {
 						response.getWriter().write(status.getReasonPhrase());
 					}
 				}
+			} else if (object instanceof tigase.xml.Element) {
+				response.setContentType(MediaType.APPLICATION_XML);
+				response.getWriter().write(object.toString());
 			} else {
 				encodeObject(object, acceptedType.orElse(MediaType.APPLICATION_XML), response);
 			}

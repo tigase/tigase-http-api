@@ -49,6 +49,8 @@ public class XmlUnmarshaller extends AbstractUnmarshaller implements Unmarshalle
 	private static final Map<Class,Function<String,Object>> DEFAULT_DESERIALIZERS = new HashMap<>();
 
 	static {
+		DEFAULT_DESERIALIZERS.put(boolean.class, Boolean::parseBoolean);
+		DEFAULT_DESERIALIZERS.put(Boolean.class, Boolean::parseBoolean);
 		DEFAULT_DESERIALIZERS.put(Long.class, Long::parseLong);
 		DEFAULT_DESERIALIZERS.put(Double.class, Double::parseDouble);
 		DEFAULT_DESERIALIZERS.put(Integer.class, Integer::parseInt);

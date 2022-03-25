@@ -25,8 +25,13 @@ public abstract class AbstractMarshaller implements Marshaller {
 
 	protected Object getFieldValue(Object object, Field field)
 			throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-		Method getter = object.getClass().getDeclaredMethod("get" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1));
+		Method getter = object.getClass().getDeclaredMethod(getGetterName(field));
 		return getter.invoke(object);
+	}
+
+	protected String getGetterName(Field field) {
+		String prefix = (Boolean.class.equals(field.getType()) || boolean.class.equals(field.getType())) ? "is" : "get";
+		return prefix + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1);
 	}
 
 }

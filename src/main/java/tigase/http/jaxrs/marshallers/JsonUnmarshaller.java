@@ -42,6 +42,8 @@ public class JsonUnmarshaller extends AbstractUnmarshaller implements Unmarshall
 	private static final Map<Class, Function<Object,Object>> DEFAULT_DESERIALIZERS = new HashMap<>();
 
 	static {
+		DEFAULT_DESERIALIZERS.put(boolean.class, obj -> (Boolean) obj);
+		DEFAULT_DESERIALIZERS.put(Boolean.class, obj -> ((Boolean) obj));
 		DEFAULT_DESERIALIZERS.put(Long.class, obj -> ((Number) obj).longValue());
 		DEFAULT_DESERIALIZERS.put(Double.class, obj -> ((Number) obj).doubleValue());
 		DEFAULT_DESERIALIZERS.put(Integer.class, obj -> ((Number) obj).intValue());

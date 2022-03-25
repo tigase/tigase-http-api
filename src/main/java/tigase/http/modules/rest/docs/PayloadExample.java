@@ -101,6 +101,9 @@ public class PayloadExample {
 	}
 
 	private static Object getObjectExample(Class<?> clazz) {
+		if (tigase.xml.Element.class.equals(clazz)) {
+			return null;
+		}
 		try {
 			Object object = clazz.getDeclaredConstructor().newInstance();
 			for (Field field : clazz.getDeclaredFields()) {
@@ -141,6 +144,8 @@ public class PayloadExample {
 			return BareJID.bareJIDInstanceNS("user", "example.com");
 		} else if (JID.class.equals(clazz)) {
 			return JID.jidInstanceNS("user", "example.com", "resource-1");
+		} else if (boolean.class.equals(clazz) || Boolean.class.equals(clazz)) {
+			return true;
 		} else if (long.class.equals(clazz) || Long.class.equals(clazz)) {
 			return 0l;
 		} else if (int.class.equals(clazz) || Integer.class.equals(clazz)) {
