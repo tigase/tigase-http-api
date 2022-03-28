@@ -5,7 +5,7 @@
     <parent>
         <groupId>tigase</groupId>
         <artifactId>tigase-projects-parent</artifactId>
-        <version>1.0.4</version>
+        <version>1.0.5-SNAPSHOT</version>
         <relativePath />
     </parent>
 
@@ -49,14 +49,6 @@
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <!-- 2.8.0-01 and later require maven-compiler-plugin 3.0 or higher -->
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                    <encoding>UTF-8</encoding>
-                    <showDeprecation>true</showDeprecation>
-                    <!--<verbose>true</verbose>-->
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -96,13 +88,13 @@
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
-            <version>9.4.18.v20190429</version>
+            <version>9.4.45.v20220203</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty.http2</groupId>
             <artifactId>http2-server</artifactId>
-            <version>9.4.18.v20190429</version>
+             <version>9.4.45.v20220203</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -114,13 +106,13 @@
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-alpn-java-server</artifactId>
-            <version>9.4.18.v20190429</version>
+            <version>9.4.45.v20220203</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-alpn-server</artifactId>
-            <version>9.4.18.v20190429</version>
+            <version>9.4.45.v20220203</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -132,7 +124,7 @@
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-servlet</artifactId>
-            <version>9.4.18.v20190429</version>
+            <version>9.4.45.v20220203</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
