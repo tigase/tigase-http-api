@@ -6,3 +6,5 @@ classes/
 *.iml
 /target/
 /docs/
+src/main/restructured/docs/locale/pl/LC_MESSAGES/*.mo
+src/main/restructured/docs/_build/
