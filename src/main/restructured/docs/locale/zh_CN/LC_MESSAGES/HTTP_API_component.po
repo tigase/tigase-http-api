@@ -1,0 +1,2460 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2004-2022, Tigase, Inc
+# This file is distributed under the same license as the TigaseDoc package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: TigaseDoc \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-04-07 15:26-0700\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.1\n"
+
+#: ../../HTTP_API_component.rst:1
+msgid ""
+"Welcome to the Tigase HTTP API users guide. The HTTP API allows you to "
+"manage, configure, chat, and send commands to Tigase server using a "
+"simple, easy-to-use interface right from your browser! We will guide you "
+"through setup, running, and going through some features of the HTTP API."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:3
+msgid "**Setup & Configuration**"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:5
+msgid "Tigase will by default start with the http servlet active and running."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:10
+msgid "HTTP API component"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:12
+msgid ""
+"Tigase HTTP API component is a generic container used to provide other "
+"HTTP related features as modules. It is configured by default to run "
+"under name of http. Installations of Tigase XMPP Server run this "
+"component enabled by default under the same name even if not configured."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:15
+msgid "Tigase HTTP-API Release Notes"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:17
+msgid ""
+"Welcome to Tigase HTTP-API 2.2.0! This is a feature release for with a "
+"number of fixes and update"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:20
+msgid "Tigase HTTP-API 2.2.0 Release Notes"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:23
+msgid "Major Changes"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:25
+msgid ""
+"Enable HTTP File Upload by default with additional, optional, AWS S3 "
+"compatible backend"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:27
+msgid "Improvements to Web Setup to make installation even more straightforward"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:29
+msgid ""
+"Allow exposing ``.well-known`` in the root context to facilitate "
+"`XEP-0156: Discovering Alternative XMPP Connection Methods "
+"<https://xmpp.org/extensions/xep-0156.html>`__"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:31
+msgid "Add option to redirect requests from http to https"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:34
+msgid "All Changes"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:36
+msgid ""
+"`#http-65 <https://projects.tigase.net/issue/http-65>`__: More detailed "
+"logs"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:38
+msgid ""
+"`#http-86 <https://projects.tigase.net/issue/http-86>`__: Add s3 backend "
+"for http-upload"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:40
+msgid ""
+"`#http-91 <https://projects.tigase.net/issue/http-91>`__: Items in setup "
+"on Features screen are misaligned"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:42
+msgid ""
+"`#http-93 <https://projects.tigase.net/issue/http-93>`__: Update web-"
+"installer documentation"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:44
+msgid ""
+"`#http-95 <https://projects.tigase.net/issue/http-95>`__: Enable HTTP "
+"File Upload by default"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:46
+msgid ""
+"`#http-96 <https://projects.tigase.net/issue/http-96>`__: Enabling "
+"cluster mode / ACS doesn’t add it to resulting configuration file"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:48
+msgid ""
+"`#http-98 <https://projects.tigase.net/issue/http-98>`__: Setup tests are"
+" failing since Septempter"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:50
+msgid ""
+"`#http-99 <https://projects.tigase.net/issue/http-99>`__: Enforce max-"
+"file-size limit"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:52
+msgid ""
+"`#http-100 <https://projects.tigase.net/issue/http-100>`__: Prevent "
+"enabling all Message\\* plugins"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:54
+msgid ""
+"`#http-101 <https://projects.tigase.net/issue/http-101>`__: Prevent "
+"enabling all Mobile\\* plugins"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:56
+msgid ""
+"`#http-102 <https://projects.tigase.net/issue/http-102>`__: Last activity"
+" plugins handling should be improved"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:58
+msgid ""
+"`#http-103 <https://projects.tigase.net/issue/http-103>`__: Enabling "
+"http-upload should give an info about requirement to set domain/store"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:60
+msgid ""
+"`#http-105 <https://projects.tigase.net/issue/http-105>`__: Handle "
+"forbidden characters in filenames"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:62
+msgid ""
+"`#http-106 <https://projects.tigase.net/issue/http-106>`__: Can’t remove "
+"user for non-existent VHost"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:64
+msgid ""
+"`#http-107 <https://projects.tigase.net/issue/http-107>`__: Allow "
+"exposing ``.well-known`` in the root context"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:66
+msgid ""
+"`#http-108 <https://projects.tigase.net/issue/http-108>`__: Add option to"
+" redirect requests from http to https"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:68
+msgid ""
+"`#http-109 <https://projects.tigase.net/issue/http-109>`__: openAccess "
+"option is missing after migrating the component to TK"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:70
+msgid ""
+"`#http-110 <https://projects.tigase.net/issue/http-110>`__: Add support "
+"for querying and managing uploaded files"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:72
+msgid ""
+"`#http-111 <https://projects.tigase.net/issue/http-111>`__: "
+"DefaultLogic.removeExpired removal of slot failed"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:74
+msgid ""
+"`#http-113 <https://projects.tigase.net/issue/http-113>`__: Add condition"
+" to redirect only if the X-Forwarded-Proto has certain value"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:76
+msgid ""
+"`#http-114 <https://projects.tigase.net/issue/http-114>`__: "
+"TigaseDBException: Could not allocate slot"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:78
+msgid ""
+"`#http-116 <https://projects.tigase.net/issue/http-116>`__: Limiting list"
+" of VHosts doesn’t work for JDK based http-server"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:80
+msgid ""
+"`#http-117 <https://projects.tigase.net/issue/http-117>`__: Http "
+"redirection doesn’t work in docker"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:82
+msgid ""
+"`#http-119 <https://projects.tigase.net/issue/http-119>`__: Can’t change "
+"VHost configuration via Admin WebUI"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:84
+msgid ""
+"`#http-120 <https://projects.tigase.net/issue/http-120>`__: Improve S3 "
+"support for HTTP File Upload to accept custom URL and credentials for S3 "
+"storage configuration"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:86
+msgid ""
+"`#http-121 <https://projects.tigase.net/issue/http-121>`__: Deprecate "
+"DnsWebService and rewrite /.well-known/host-meta generator"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:90
+msgid "Available modules"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:93
+msgid "Admin UI module"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:95
+msgid ""
+"This is very simple module for administration of Tigase XMPP Server using"
+" HTTP browser. It allows administrators to execute ad-hoc commands from "
+"HTTP browser allowing to change some configuration options at runtime. It"
+" can be accessed by pointing your browser to "
+"http://server.address:8080/admin/ and logging in with admin credentials."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:98
+msgid "Index module"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:100
+msgid ""
+"This module is deployed at ``/`` by default and provides list of "
+"installed and available modules for the virtual host when requested."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:105
+msgid "REST module"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:107
+msgid ""
+"This module provides REST-like API for accessing Tigase XMPP Server. It "
+"uses Groovy scripts to process HTTP requests and prepare responses."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:110
+msgid "Server status module"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:114
+msgid "This module is still a work in progress!"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:116
+msgid ""
+"This module is designed to present current server status and report "
+"possible issues."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:119
+msgid "Setup module"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:121
+msgid ""
+"Module is created to act as a web based installer and configuration "
+"utility for Tigase XMPP Server. Allows you to modify basic Tigase XMPP "
+"Server settings, ie. related to database access. Changes may be saved to "
+"configuration file from this module."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:124
+msgid "Web UI module"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:126
+msgid ""
+"This module contains full web client based on `Tigase JaXMPP "
+"<http://www.tigase.net/content/jaxmpp-library:>`__ client library "
+"allowing user to chat, manage contacts list (roster), browse message "
+"archive, etc. For more information on this module, consult the "
+"`Administration Guide <http://docs.tigase.org/tigase-"
+"server/snapshot/Administration_Guide/html/#_use_of_the_http_api>`__."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:129 ../../HTTP_API_component.rst:265
+msgid "DNS Web Service module"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:131 ../../HTTP_API_component.rst:267
+msgid ""
+"For web based XMPP clients it is not possible to execute DNS SRV requests"
+" to find address of XMPP server hosting for particular domain. To solve "
+"this the DNS Web Service module was created."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:133
+msgid ""
+"It handles incoming HTTP GET request and using ``Host`` HTTP header "
+"executes DNS requests as specified in `XEP-0156: Discovering Alternative "
+"XMPP Connection Methods <https://xmpp.org/extensions/xep-0156.html>`__. "
+"Results are returned in XML or JSON as specified in the XEP mentioned "
+"before."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:135
+msgid ""
+"By default it is deployed at ``dns-webservice`` and path for XML response"
+" is ``/dns-webservice/.well-known/host-meta`` and for JSON is ``/dns-"
+"webservice/-known/host-meta.json``."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:138
+msgid "User Status Endpoint module"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:140
+msgid ""
+"This module is designed as an endpoint required for REST API User Status "
+"to work properly. It is not accessible using HTTP/REST API, so it can "
+"(and in most cases should) be active."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:143
+msgid "Common module configuration"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:146
+msgid "Enabling/disabling module"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:148
+msgid ""
+"Every module can be activated or disabled by adjusting it’s activity in "
+"following way:"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:158
+msgid ""
+"You need to replace ``%module_id%`` with the id of module which you want "
+"to change activity (in this case, it will disable module)."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:160
+msgid "**Disabling REST module.**"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:169
+msgid "Context path"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:171
+msgid ""
+"This property allows you to change the context path that is used by "
+"module. In other words, it allows you to change the prefix used by "
+"module. By default every module (with exception of the Index module) uses"
+" a context path that is the same as module id. For example, the REST "
+"module ID results in the context path ``/rest``"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:173
+msgid "**Changing context path for REST module to ``/api``.**"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:185
+msgid "List of virtual hosts"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:187
+msgid ""
+"This provides the ability to limit modules to be available only on listed"
+" virtual hosts, and allows to set context path to ``/`` for more than one"
+" module. Property accepts list of strings, which in the case of "
+"config.tdsl file format is list of comma separated domain names and in "
+"DSL it is written as list of strings (see `Complex Example "
+"<#complexExample>`__)."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:189
+msgid ""
+"**Moving the REST module to be available only for requests directed to "
+"``api.example.com``.**"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:200
+msgid "Complex example"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:202
+msgid ""
+"In this example we will disable the Index module and move REST module to "
+"``http://api.example.com/`` and ``http://rest.example.com``."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:215
+msgid "Module specific configuration"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:217
+msgid ""
+"Tigase will try to start a standalone Jetty HTTP server at port 8080 and "
+"start up the default modules, including ``RestModule`` which will add "
+"context for REST API in the /rest path. ``RestModule`` will also load all"
+" groovy scripts located in ``scripts/rest/*`` directories and will bind "
+"them to proper actions for the ``/rest/*`` paths."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:219
+msgid ""
+"**NOTE:** Scripts that handle HTTP requests are available in the "
+"component repository in ``src/scriopts/groovy/tigase/rest/`` directory."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:221
+msgid ""
+"Tigase’s REST Component comes with two modules that can be enabled, "
+"disabled, and configured separately. Common settings for modules for "
+"component properties are used in the following format: ``component_name "
+"(module: value) {}`` the following settings are available for both listed"
+" modules:"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:223
+msgid "``active`` - Boolean values true/false to enable or disable the module."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:225
+msgid ""
+"``context-path`` - Path of HTTP context under which the module should be "
+"available."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:227
+msgid ""
+"``vhosts`` - Comma separated list of virtual hosts for which the module "
+"should be available. If not configured, the module will be available for "
+"all vhosts."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:230
+msgid "Rest Module"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:232
+msgid ""
+"This is the Module that provides support for the REST API. Available "
+"properties:"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:234
+msgid ""
+"``rest-scripts-dir`` - Provides ability to specify path to scripts "
+"processing REST requests if you do not wish to use default "
+"(scripts/rest)."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:237
+msgid "API keys"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:239
+msgid ""
+"In previous version it was possible to configure ``api-keys`` for REST "
+"module using entries within configuration file. In the recent version we "
+"decided to remove this configuration option. Now, by default Tigase XMPP "
+"Server requires API key to be passed to all requests and you need to "
+"configure them before you will be able to use REST API."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:241
+msgid "Instead, you should use ad-hocs available on the REST module JID to:"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:243
+msgid "Add API key (``api-key-add``)"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:245
+msgid "Update API key (``api-key-update``)"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:247
+msgid "Remove API key (``api-key-remove``);"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:251
+msgid ""
+"If you have Admin UI enabled, you may log in using admin credentials to "
+"this UI and when you select ``CONFIGURATION`` section on the left "
+"sidebar, it will expand and allow you to execute any of those ad-hoc "
+"commands mentioned above."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:253
+msgid ""
+"Requests made to the HTTP service must conclude with one of the API keys "
+"defined using ad-hoc commands: ``http://localhost:8080/rest/adhoc/sess-"
+"man@domain.com?api-key=test1``"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:257
+msgid ""
+"If you want to allow access to REST API without usage of any keys, it is "
+"possible. To do so, you need to add an API key with ``API key`` field "
+"value equal ``open_access``."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:261
+msgid ""
+"You can also completely disable api-keys by adding ``'open-access' = "
+"true`` to the TDSL configuration file, either in ``http`` bean or any of "
+"the modules of that bean, e.g. ``rest``, \\`admin, etc"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:269
+msgid ""
+"It handles incoming HTTP GET request and using passed ``domain`` and "
+"``callback`` HTTP parameters executes DNS requests as specified in "
+"`XEP-0156: Discovering Alternative XMPP Connection Methods "
+"<https://xmpp.org/extensions/xep-0156.html>`__. Results are returned in "
+"JSON format for easy processing by web based XMPP client."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:271
+msgid "By default it is deployed at ``dns-webservice``"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:274
+msgid "Parameters"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:277
+msgid "**domain**"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:277
+msgid "Domain name to look for XMPP SRV client records."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:281
+msgid "**callback**"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:280
+msgid ""
+"Due to security reasons web based client may not be able to access some "
+"DNS Web Service due to cross-domain AJAX requests. Passing optional "
+"``callback`` parameter sets name of callback for JSONP requests and "
+"results proper response in JSONP format."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:284
+msgid "Discover way to connect to XMPP server"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:287
+msgid "Using ``host-meta``"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:289
+msgid ""
+"You should access endpoint available at ``/dns-webservice/.well-known"
+"/host-meta``."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:291
+msgid ""
+"To make it follow specification you should configure a redirection from "
+"the root path of your http server to above path. For example, using "
+"nginx:"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:302
+msgid "Query particular domain"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:304
+msgid ""
+"If we want to know connectivity options for ``sure.im`` we should send "
+"HTTP GET request to ``http://our-xmpp-server:8080/dns-"
+"webservice/?domain=sure.im&version=2``. We will receive following "
+"response:"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:330
+msgid ""
+"As you can see in here we have names and IP address of XMPP servers "
+"hosting ``sure.im`` domain as well as list of URI for establishing "
+"connections using BOSH or WebSocket."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:332
+msgid ""
+"This module is activated by default. However, if you are operating in a "
+"test environment where you may not have SRV and A records setup to the "
+"domain you are using, you may want to disable this in your config.tdsl "
+"file with the following line:"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:341
+msgid "Enabling password reset mechanism"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:343
+msgid ""
+"It is possible to provide users with a mechanism for a password change in"
+" case if they forgot their password to the XMPP account. To do that you "
+"need to have ``tigase-extras.jar`` in your classpath (it is part of "
+"``-dist-max`` distribution package), enable ``mailer`` and ``account-"
+"email-password-resetter``."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:345
+msgid "**Example configuration.**"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:360
+msgid "You need to replace example configuration parameters with correct ones."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:362
+msgid ""
+"With this configuration in place and after restart of Tigase XMPP Server "
+"at url http://localhost:8080/rest/user/resetPassword will be available "
+"web form which may be used for password reset."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:366
+msgid ""
+"This mechanism will only work if user provided real email address during "
+"account registration and if user still remembers and has access to email "
+"address used during registration."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:369
+msgid "Admin UI Guide"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:371
+msgid ""
+"The Admin User Interface is an HTTP-based interface that sends REST "
+"commands to the server to update configurations, change settings, and "
+"retrieve statistics."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:374
+msgid "A Note about REST"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:376
+msgid ""
+"REST stands for REpresentational State Transfer which is a stateless "
+"communication method that in our case passes commands using HTTP GET, "
+"PUT, POST, and DELETE commands to resources within the Tigase server."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:379
+msgid "General overview of the UI"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:381
+msgid ""
+"After navigating to the Admin WebUI you will see basic information about "
+"navigation. The panel itself consists of two main parts: \\* left "
+"navigation menu, which groups all configuration items into categories; "
+"\\* central, main configuration page displaying configuration options of "
+"the selected items."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:383
+msgid "|adminUI main|"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:957
+msgid "adminUI main"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:385
+msgid ""
+"Each configuration item has name (upper line) and associated component "
+"(lower line) as some features can be executed in the context of different"
+" component (for example ``Update Item Configuration`` can be executed for"
+" VirtualHost Manager or ExternalConnection Manager)"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:388 ../../HTTP_API_component.rst:1037
+msgid "Configuration"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:390
+msgid ""
+"Allows you to configure some of the servers settings, such as message of "
+"the day, welcome message or initialize shutdown of the cluster node."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:393
+msgid "Example Scripts"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:395
+msgid ""
+"This is a list of script examples that can be run and do menial functions"
+" for each component. They may not have particular value themselves, but "
+"are present to be used as reference when writing custom scripts. Get list"
+" of available commands is one script, that is present for every component"
+" that is active on the server, and as its title implies, will provide a "
+"list of all commands for that component. Lastly, the two scripts from the"
+" `Scripting section <#scriptingSupport>`__ of this guide. Generally, "
+"there is not much needed to see in this section."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:398 ../../HTTP_API_component.rst:1042
+msgid "Notifications"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:400
+msgid ""
+"This section has one simple command: to be able to send a mass message to"
+" all logged in users. There are three types of messages that can be sent "
+"from this section: - **normal** Messages will show as a pop-up in most "
+"clients. - **headline** Certain clients will take headline messages and "
+"insert them into MUC or chats between users, otherwise it will create a "
+"pop-up like normal messages. - **chat** Chat messages will open up a chat"
+" dialog with users."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:403 ../../HTTP_API_component.rst:1047
+msgid "Other"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:405 ../../HTTP_API_component.rst:1049
+msgid ""
+"This section contains a considerable list of options and settings "
+"affecting server functions."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:408 ../../HTTP_API_component.rst:1052
+msgid "Activate log tracker for a user"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:410
+msgid ""
+"This allows you to set a log file to track a specific user. Set the bare "
+"or full JID of the user you want to log, and a name of the files you wish"
+" the log to be written to. The files will be written in the root Tigase "
+"directory unless you give a directory like logs/filename. The log files "
+"will be named with a .0 extension and will be named .1, .2, .3 and so on "
+"as each file reaches 10MB by default. filename.0 will always be the most "
+"recent. Logging will start once the command has been issued, and cease "
+"once the server restarts."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:413 ../../HTTP_API_component.rst:1057
+msgid "Add SSL certificate"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:415
+msgid ""
+"Here you can add SSL certificates from PEM files to specific virtual "
+"hosts. Although Tigase can generate its own self-signed certificates, "
+"this will override any default certificates. The certificates cannot "
+"contain a passphrase, or be encrypted. Be sure that the contents contain "
+"both the certificate and private key data. You also have the option to "
+"save the certificate to disk, making the change permanent."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:418
+msgid "Add listener script"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:420
+msgid ""
+"This section allows you to create a custom function for the eventbus "
+"component. These scripts can have the server conduct certain operations "
+"if set criteria are met. You may write the script in either Groovy or "
+"EMCAscript. Please see the `eventbus section <#eventbus>`__ for more "
+"details."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:423 ../../HTTP_API_component.rst:1062
+msgid "Add Monitor Task"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:425
+msgid ""
+"You can write scripts for Groovy or ECMAScript to add to monitor tasks "
+"here. This only adds the script to available scripts however, you will "
+"need to run it from another prompt. Note that these scripts may only work"
+" with the monitor component."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:428 ../../HTTP_API_component.rst:1067
+msgid "Add Monitor Timer Task"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:430 ../../HTTP_API_component.rst:1069
+msgid ""
+"This section allows you to add monitor scripts in Groovy while using a "
+"delay setting which will delay the start of the script."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:434 ../../HTTP_API_component.rst:1072
+msgid "Add New Item - ext"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:436
+msgid ""
+"Depending on whether you have any external components loaded or not, this"
+" may show. This allows you to add additional external components to the "
+"running instance of Tigase."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:439 ../../HTTP_API_component.rst:1077
+msgid "Add New Item - Vhost"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:441 ../../HTTP_API_component.rst:1079
+msgid ""
+"This allows you to add new virtual hosts to the XMPP server. A breakdown "
+"of the fields is as follows:"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:443 ../../HTTP_API_component.rst:750
+#: ../../HTTP_API_component.rst:1081
+msgid ""
+"Domain name: the full domain name of the new vhost. Tigase will not add "
+"anything to this domain, so if it is ti be a subdomain of example.com, "
+"you will need to enter sub.domain.com."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:445 ../../HTTP_API_component.rst:752
+#: ../../HTTP_API_component.rst:1083
+msgid "Enabled: Whether the domain is turned on or off."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:447 ../../HTTP_API_component.rst:754
+#: ../../HTTP_API_component.rst:1085
+msgid "Anonymous enabled: Allow anonymous logins."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:449 ../../HTTP_API_component.rst:756
+#: ../../HTTP_API_component.rst:1087
+msgid ""
+"In-band registration: Whether or not to allow users to register accounts "
+"upon login."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:451 ../../HTTP_API_component.rst:758
+#: ../../HTTP_API_component.rst:1089
+msgid ""
+"TLS required: Require logins to the vhost to conduct a TLS handshake "
+"before opening streams."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:453 ../../HTTP_API_component.rst:760
+#: ../../HTTP_API_component.rst:1091
+msgid ""
+"S2S secret: a server-generated code to differentiate traffic between "
+"servers, typically there is no need to enter your own, but you may if you"
+" need to get into low level code."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:455 ../../HTTP_API_component.rst:762
+#: ../../HTTP_API_component.rst:1093
+msgid ""
+"Domain filter policy: Sets the filter policy for this domain, see `This "
+"section <#domainBasedPacketFiltering>`__ for a description of the rules."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:457 ../../HTTP_API_component.rst:764
+#: ../../HTTP_API_component.rst:1095
+msgid ""
+"Domain filter domains: a specific setting to restrict or control cross "
+"domain traffic."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:459 ../../HTTP_API_component.rst:766
+#: ../../HTTP_API_component.rst:1097
+msgid "Max users: maximum users allowed to be registered to the server."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:461 ../../HTTP_API_component.rst:768
+#: ../../HTTP_API_component.rst:1099
+msgid ""
+"Allowed C2S, BOSH, Websocket ports: Comma separated list of ports that "
+"this vhost will check for all of these services."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:463 ../../HTTP_API_component.rst:770
+#: ../../HTTP_API_component.rst:1101
+msgid ""
+"Presence forward address: specific address where presence information is "
+"forwarded too. This may be handy if you are looking to use a single "
+"domain for presence processing and handling."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:465 ../../HTTP_API_component.rst:772
+#: ../../HTTP_API_component.rst:1103
+msgid ""
+"Message forward address: Specific address where all messages will be sent"
+" too. This may be useful to you if you have a single server handling AMP "
+"or message storage and want to keep the load there."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:467 ../../HTTP_API_component.rst:774
+#: ../../HTTP_API_component.rst:1105
+msgid ""
+"Other Parameters: Other settings you may wish to pass to the server, "
+"consider this a section for options after a command."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:469 ../../HTTP_API_component.rst:776
+#: ../../HTTP_API_component.rst:1107
+msgid ""
+"Owner: The owner of the vhost who will also be considered an "
+"administrator."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:471 ../../HTTP_API_component.rst:778
+#: ../../HTTP_API_component.rst:1109
+msgid ""
+"Administrators: comma separated list of JIDs who will be considered "
+"admins for the vhost."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:473 ../../HTTP_API_component.rst:780
+#: ../../HTTP_API_component.rst:1111
+msgid ""
+"XEP-0136 Message Archiving Enabled: Whether to turn on or off this "
+"feature."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:475 ../../HTTP_API_component.rst:782
+#: ../../HTTP_API_component.rst:1113
+msgid ""
+"XEP-0136 Required store method: If XEP-0136 is turned on, you may "
+"restrict the portion of message that is saved. This is required for any "
+"archiving, if null, any portion of the message may be stored."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:477 ../../HTTP_API_component.rst:784
+#: ../../HTTP_API_component.rst:1115
+msgid ""
+"Client certificate required: Whether the client should submit a "
+"certificate to login."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:479 ../../HTTP_API_component.rst:1117
+msgid ""
+"Client certificate CA: The Certificate Authority of the client "
+"certificate."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:481 ../../HTTP_API_component.rst:1119
+msgid ""
+"XEP-0136 retention period: integer of number of days message archives "
+"will be set."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:483 ../../HTTP_API_component.rst:790
+#: ../../HTTP_API_component.rst:1121
+msgid ""
+"Trusted JIDs: Comma separated list of JIDs who will be added to the "
+"trusted list, these are JIDS that may conduct commands, edit settings, or"
+" other secure work without needed secure logins."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:485 ../../HTTP_API_component.rst:792
+#: ../../HTTP_API_component.rst:1123
+msgid ""
+"XEP-0136 retention type: Sets the type of data that retention period will"
+" use. May be User defined (custom number type), Unlimited, or Number of "
+"Days."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:487 ../../HTTP_API_component.rst:794
+msgid ""
+"XEP-0136 - store MUC messages: Whether or not to store MUC messages for "
+"archiving. Default is user, which allows users to individually set this "
+"setting, otherwise true/false will override."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:489 ../../HTTP_API_component.rst:796
+#: ../../HTTP_API_component.rst:1127
+msgid ""
+"see-other-host redirection enabled: in servers that have multiple "
+"clusters, this feature will help to automatically repopulate the cluster "
+"list if one goes down, however if this is unchecked, that list will not "
+"change and may attempt to send traffic to a down server."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:491 ../../HTTP_API_component.rst:798
+#: ../../HTTP_API_component.rst:1129
+msgid ""
+"XEP-0136 Default store method: The default section of messages that will "
+"be stored in the archive."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:494 ../../HTTP_API_component.rst:1132
+msgid "Change user inter-domain communication permission"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:496
+msgid ""
+"Here you can restrict users to be able to communicate on specific "
+"domains, this works similar to the domain filtering policy using the same"
+" rule sets. For more details, see `Domain Based Packet Filtering "
+"<#domainBasedPacketFiltering>`__ section for rule details and specifics. "
+"Note that the changes may be made to multiple JIDs at the same time."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:499 ../../HTTP_API_component.rst:1138
+msgid "Connections Time"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:501 ../../HTTP_API_component.rst:1140
+msgid "Lists the longest and average connection time from clients to servers."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:504
+msgid "Create Node"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:506
+msgid ""
+"This section allows you to create a new node for the pubsub component. "
+"Here is a breakdown of the fields:"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:508
+msgid "The node to create: this is the name of the node that will be created."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:510
+msgid "Owner JID: user JID who will be considered the owner of the node."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:512
+msgid ""
+"pubsub#node type: sets the type of node the the new node will be. Options"
+" include:"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:514 ../../HTTP_API_component.rst:1152
+msgid "**leaf** Node that can publish and be published too."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:516 ../../HTTP_API_component.rst:1154
+msgid "**collection** A collection of other nodes."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:518 ../../HTTP_API_component.rst:1156
+msgid ""
+"A friendly name for the node: Allows spaces and other characters to help "
+"differentiate it from other nodes."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:520 ../../HTTP_API_component.rst:1158
+msgid ""
+"Whether to deliver payloads with event notifications: as it says, to "
+"publish events or not."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:522 ../../HTTP_API_component.rst:1160
+msgid "Notify subscribers when the configuration changes: default is false"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:524 ../../HTTP_API_component.rst:1162
+msgid ""
+"Persist items to storage: whether or not to physically store items in the"
+" node."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:526 ../../HTTP_API_component.rst:1164
+msgid ""
+"Max # of items to persist: Limit how many items are kept in the node "
+"archive."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:528 ../../HTTP_API_component.rst:1166
+msgid ""
+"The collection with which the node is affiliated: If the node is to be in"
+" a collection, place that node name here."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:530 ../../HTTP_API_component.rst:1168
+msgid ""
+"Specify the subscriber model: Choose what type of subscriber model will "
+"be used for this node. Options include:"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:532 ../../HTTP_API_component.rst:1170
+msgid ""
+"**authorize** - Requires all subscriptions to be approved by the node "
+"owner before items will be published to the user. Also only subscribers "
+"may retrieve items."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:534 ../../HTTP_API_component.rst:1172
+msgid "**open** - All users may subscribe and retrieve items from the node."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:536 ../../HTTP_API_component.rst:1174
+msgid ""
+"**presence** - Typically used in an instant message environment. Provides"
+" a system under which users who are subscribed to the owner JID’s "
+"presence with a from or both subscription may subscribe from and retrieve"
+" items from the node."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:538 ../../HTTP_API_component.rst:1176
+msgid ""
+"**roster** - This is also used in an instant message environments, Users "
+"who are both subscribed to the owners presence AND is placed in specific "
+"allowed groups by the roster are able to subscribe to the node and "
+"retrieve items from it."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:540 ../../HTTP_API_component.rst:1178
+msgid ""
+"**whitelist** - Only explicitly allowed JIDs are allowed to subscribe and"
+" retrieve items from the node, this list is set by the "
+"owner/administrator."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:542 ../../HTTP_API_component.rst:1180
+msgid ""
+"Specify the Publisher model: Choose what type of publisher model will be "
+"used for this node. Options include:"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:544 ../../HTTP_API_component.rst:1182
+msgid "**open** - Any user may publish to this node."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:546 ../../HTTP_API_component.rst:1184
+msgid "**publishers** - Only users listed as publishers may be able to publish."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:548 ../../HTTP_API_component.rst:1186
+msgid "**subscribers** - Only subscribers may publish to this node."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:550 ../../HTTP_API_component.rst:1188
+msgid ""
+"When to send the last published item: This allows you to decide if and "
+"when the last published item to the node may be sent to newly subscribed "
+"users."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:552 ../../HTTP_API_component.rst:1190
+msgid "**never** - Do not send the last published item."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:554 ../../HTTP_API_component.rst:1192
+msgid ""
+"**on_sub** - Send the last published item when a user subscribes to the "
+"node."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:556 ../../HTTP_API_component.rst:1194
+msgid ""
+"**on_sub_and_presence** - Send the last published item to the user after "
+"a subscription is made, and the user is available."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:558
+msgid ""
+"The domains allowed to access this node: Comma separated list of domains "
+"for which users can access this node. By default is is blank, and there "
+"is no domain restriction."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:560 ../../HTTP_API_component.rst:1198
+msgid ""
+"Whether to deliver items to available users only: Items will only be "
+"published to users with available status if this is selected."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:562 ../../HTTP_API_component.rst:1200
+msgid ""
+"Whether to subscription expired when subscriber going offline: This will "
+"make all subscriptions to the node valid for a single session and will "
+"need to be re-subscribed upon reconnect."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:564 ../../HTTP_API_component.rst:1202
+msgid ""
+"The XSL transformation which can be applied to payloads in order to "
+"generate an appropriate message body element: Since you want a properly "
+"formatted <body> element, you can add an XSL transformation here to "
+"address any payloads or extra elements to be properly formatted here."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:566 ../../HTTP_API_component.rst:1204
+msgid ""
+"The URL of the XSL transformation which can be applied to payloads in "
+"order to generate an appropriate message body element: This would be the "
+"URL of the XSL Transform, e.g. http://www.w3.org/1999/XSL/Transform."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:568 ../../HTTP_API_component.rst:1206
+msgid ""
+"Roster groups allowed to subscribe: a list of groups for whom users will "
+"be able to subscribe. If this is blank, no user restriction will be "
+"imposed."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:570 ../../HTTP_API_component.rst:1208
+msgid ""
+"Notify subscribers when owner changes their subscription or affiliation "
+"state: This will have the node send a message in the case of an owner "
+"changing affiliation or subscription state."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:572 ../../HTTP_API_component.rst:1210
+msgid ""
+"Allows get list of subscribers for each subscriber: Allows subscribers to"
+" produce a list of other subscribers to the node."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:574 ../../HTTP_API_component.rst:1212
+msgid ""
+"Whether to sort collection items by creation date or update time: options"
+" include"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:576 ../../HTTP_API_component.rst:1214
+msgid ""
+"**byCreationDate** - Items will be sorted by the creation date, i.e. when"
+" the item was made."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:578 ../../HTTP_API_component.rst:1216
+msgid ""
+"**byUpdateTime** - Items will be sorted by the last update time, i.e. "
+"when the item was last edited/published/etc.."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:581 ../../HTTP_API_component.rst:1143
+msgid "DNS Query"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:583 ../../HTTP_API_component.rst:1145
+msgid "A basic DNS Query form."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:586 ../../HTTP_API_component.rst:1148
+msgid "Default config - Pubsub"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:588
+msgid ""
+"Here you may set the default configuration for any new pubsub node. These"
+" changes will be made for all future nodes, but will not affect currently"
+" active nodes."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:591 ../../HTTP_API_component.rst:1219
+msgid "Default room config"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:593
+msgid ""
+"This page allows admins to set the default configuration for any new MUC "
+"rooms that may be made on the server."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:596 ../../HTTP_API_component.rst:1225
+msgid "Delete Monitor Task"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:598 ../../HTTP_API_component.rst:1227
+msgid ""
+"This removes a monitor task from the list of available monitor scripts. "
+"This action is not permanent as it will revert to initial settings on "
+"server restart."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:601
+msgid "Delete Node"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:603
+msgid ""
+"Provides a space to remove a node from the server. It must be the full "
+"name of the node, and only one node can be removed at a time."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:606
+msgid "Deleting ALL Nodes"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:608
+msgid ""
+"This page allows the logged in admin to delete all nodes from the "
+"associated vhost. This change is irreversible, be sure to read and check "
+"the box before submitting the command."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:611 ../../HTTP_API_component.rst:1231
+msgid "Fix User’s Roster"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:613
+msgid ""
+"You can fix a users roster from this prompt. Fill out the bare JID of the"
+" user and the names you wish to add or remove from the roster. This will "
+"NOT edit a user’s roster, but rather compare client roster to database "
+"and fix any errors between them."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:616 ../../HTTP_API_component.rst:1236
+msgid "Fix User’s Roster on Tigase Cluster"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:618
+msgid ""
+"This does the same as the Fix User’s Roster, but can apply to users who "
+"may not be logged into the local vhost, but are logged into a clustered "
+"server."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:621 ../../HTTP_API_component.rst:1241
+msgid "Get User Roster"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:623 ../../HTTP_API_component.rst:1243
+msgid ""
+"As the title implies this gets a users' roster and displays it on screen."
+" You can use a bare or full JID to get specific rosters."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:626 ../../HTTP_API_component.rst:1246
+msgid "Get any file"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:628 ../../HTTP_API_component.rst:1248
+msgid ""
+"Enables you to see the contents of any file in the tigase directory. By "
+"default you are in the root directory, if you wish to go into directory "
+"use the following format: logs/tigase.log.0"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:631 ../../HTTP_API_component.rst:1251
+msgid "Get Configuration File"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:633 ../../HTTP_API_component.rst:1253
+msgid ""
+"If you don’t want to type in the location of a configuration file, you "
+"can use this prompt to bring up the contents of either tigase.conf or "
+"config.tdsl."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:636 ../../HTTP_API_component.rst:1257
+msgid "Get config.tdsl File"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:638 ../../HTTP_API_component.rst:1259
+msgid ""
+"Will output the current config.tdsl file, this includes any modifications"
+" made during the current server session."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:641
+msgid "Get list available commands"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:643
+msgid ""
+"This may be listed multiple times for different components, but this will"
+" do as the section suggest and list available commands for that "
+"particular component."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:646
+msgid "Load test"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:648
+msgid ""
+"Here you can run a test with the pubsub component on any node to test "
+"functionality and proper settings for the node."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:651 ../../HTTP_API_component.rst:1263
+msgid "Load Errors"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:653 ../../HTTP_API_component.rst:1265
+msgid ""
+"Will display any errors the server encounters in loading and running. Can"
+" be useful if you need to address any issues."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:656
+msgid "New command script"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:658
+msgid ""
+"This space allows you to create a new command script that will work "
+"within the associated component. Note that under the hyperlinked title, "
+"there is a listing of muc.server.org or pubsub.server.org, use these to "
+"determine where the new command will operate."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:661
+msgid "OAuth Credentials"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:663
+msgid ""
+"This allows the setting of new custom OAuth credentials for the server, "
+"and you can also require the use of OAuth tokens for users when they "
+"login. This is a setting for the specific host you are logged into. If "
+"you are logged into xmpp1.domain.com, it will not affect settings for "
+"xmpp2.domain.com."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:666 ../../HTTP_API_component.rst:1286
+msgid "Pre-Bind BOSH user session"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:668
+msgid ""
+"This allows a JID to be paired with a BOSH session before that user logs "
+"in, can reduce CPU use if you have a user that logs in via BOSH on a "
+"regular basis, or a web client that will regularly connect. You may also "
+"specify HOLD and WAIT integers to affect how BOSH operates with the "
+"associated JID."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:671
+msgid "Publish item to node"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:673
+msgid ""
+"This window allows you to not only test, but publish an item to the "
+"specified node. All fields must be filled in in order to avoid the server"
+" dropping an improperly formatted stanza."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:676
+msgid "Read ALL nodes"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:678
+msgid ""
+"This will load a tree of pubsub nodes in memory, it will not output "
+"anything as it is mainly for developer use."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:681
+msgid "Rebuild database"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:683
+msgid ""
+"This will force Tigase to rebuild databases for the pubsub component, "
+"this may be useful for pubsub subscribers who continue to get pushed "
+"events after they unsubscribe."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:686 ../../HTTP_API_component.rst:1291
+msgid "Reload component repository"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:688
+msgid ""
+"This will reload any vhosts that the server is running. This may be "
+"useful if one is disconnected or broken during runtime."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:691
+msgid "Remove an item"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:693
+msgid ""
+"This will remove a running vhost from the server, you will be presented "
+"with a list to pick from."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:696
+msgid "Remove command script"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:698
+msgid ""
+"Like new command script, take a look at the subheading to determine which"
+" component you want to remove the script from. Once there, select the "
+"command you wish to remove from the server. If remove from disk is "
+"selected, then the change will be permanent. Otherwise, the command will "
+"be removed until the next server restart."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:701
+msgid "Remove listener script"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:703
+msgid ""
+"Select from a list the listener script you wish to remove. This will only"
+" affect custom listener scripts added to the eventbus component."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:706
+msgid "Remove room"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:708
+msgid ""
+"This provides fields to remove a room from the MUC component. you may "
+"suggest an alternative room which will move occupants to the alternative "
+"room once the current one is removed."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:711
+msgid "Retrieve items"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:713
+msgid ""
+"Here you can retrieve items from PubSub nodes, this simulates the get IQ "
+"stanza from the pubsub component. - Service name - The address of the "
+"pubsub component. - Node name - Item node to retrieve items from. - Item "
+"ID - The item ID of the item you wish to retrieve. - Items Since - UTC "
+"timestamp to start search from: YYYY-MM-DDTHH:MM:SSZ"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:716
+msgid "S2S Bad State Connections"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:718
+msgid ""
+"This will list any connections to other servers that are considered bad "
+"or stale. This will populate very rarely as Tigase automatically adjusts "
+"around clustered servers that go down. In the event a connection stays "
+"bad, it is recommended to reset those connections in the next space."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:721
+msgid "S2S Reset Bad State Connections"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:723
+msgid ""
+"This will reset the connections with other servers that are considered "
+"bad and have shown up in the S2S Bad State Connections page."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:726
+msgid "S2S Get CID Connection State"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:728
+msgid "For internal developer use only."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:731
+msgid "Subscribe to a node"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:733
+msgid ""
+"This provides a space for an administrator to manually have a JID "
+"subscribe to a particular node."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:736
+msgid "Unsubscribe from node"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:738
+msgid ""
+"Here you can unsubscribe users from a particular node. Users can be a "
+"comma separated list."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:741
+msgid "Update item configuration"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:743
+msgid ""
+"Typically you will see only one item for vhost-man, but some additional "
+"components (ie. ext) may provided them as well. They each have their own "
+"sections, but provide for a plethora of server options. Changes to the "
+"server are done in real time, and may not be permanent."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:746
+msgid "vhost-man"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:748
+msgid ""
+"You will be presented with a list of domains that Tigase is currently "
+"hosting, you will be able to change settings for one domain at a time "
+"using this function. Once a domain is selected, you will be able to set "
+"or change the following settings:"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:786
+msgid "Client certificate CA: Client Certificate Authority."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:788
+msgid ""
+"XEP-0136 retention period: Integer of number of days message archives "
+"will be set."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:801
+msgid "Update user roster entry"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:803
+msgid ""
+"This section allows admins to edit individual users rosters, although it "
+"provides similar functionality to fix users roster, this is designed for "
+"precision editing of a user roster."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:805
+msgid "Roster owner JID: The BareJID of the user roster you wish to edit."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:807
+msgid "JID to manipulate: The specific BareJID you want to add/remove/change."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:809
+msgid "Comma separated groups: Groups you wish to add the JID too."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:811
+msgid "Operation Type: What function will be performed?"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:813
+msgid "**Add** - Add the JID to manipulate to the owner JID’s roster and groups."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:815
+msgid ""
+"**Remove** - Remove the JID to manipulate from the owner JID’s roster and"
+" groups."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:817
+msgid ""
+"Subscription type: The type of subscription stanza that will be sent to "
+"the server, and subsequently between the two users will be employed."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:819
+msgid ""
+"**None** - Select this if neither the owner or the user to be manipulated"
+" wishes to receive presence information."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:821
+msgid ""
+"**From** - The Roster Owner will not receive presence information from "
+"the JID to manipulate, but the opposite will be true."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:823
+msgid ""
+"**To** - The JID to manipulate will not receive presence information from"
+" the Roster Owner, but the opposite will be true."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:825
+msgid "**Both** - Both JIDs will receive presence information about each other."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:828
+msgid "Update user roster entry extended version"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:830
+msgid ""
+"This section is an expanded version of the previous one, all fields "
+"already specified are the same with these additions:"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:832
+msgid ""
+"Roster owner name: A friendly name or nickname if you wish to "
+"change/create one. **not required**"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:834
+msgid ""
+"Comma separated of owner groups: Groups that the user wants to "
+"join/leave. **not required**"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:836
+msgid "Roster item JID: The specific JID that needs to be edited."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:838
+msgid ""
+"Roster item name: A friendly name or nickname that will be "
+"changed/created. **not required**"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:840
+msgid ""
+"Comma separated list of item groups: A group or list of groups that the "
+"roster item JID will be added to/removed from."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:842
+msgid "Action:"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:844
+msgid ""
+"**Add/update item** - Will add or update the item JID in the roster "
+"owner’s roster."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:846
+msgid "**Remove item** - Will remove the item JID from the roster owner’s roster."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:848
+msgid ""
+"**Add/update both rosters** - Will add or update the item in both roster "
+"owner and roster item’s roster."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:850
+msgid ""
+"**Remove from both rosters** - Will remove the item from both roster "
+"owner and roster item’s roster."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:854 ../../HTTP_API_component.rst:1296
+msgid "Scripts"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:856
+msgid ""
+"This section will enable administrators to custom write or enter their "
+"own scripts for specific components. Each active component will have an "
+"entry for new and remove command scripts and scripts written there will "
+"be for that component."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:859
+msgid "New Command Script"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:861
+msgid ""
+"Description: A friendly name of the script, will be the title of the link"
+" in the menu on the left."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:863
+msgid ""
+"Command ID: Internal command that Tigase will use when referencing this "
+"script."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:865
+msgid ""
+"Group: The group for the script, which may be any of the headings on the "
+"left (Configuration, Example scripts, Notifications, Other etc..) or your"
+" own. If no group exists, a new one will be created."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:867
+msgid ""
+"Language: The language the script is written in. Currently Tigase "
+"supports Groovy and EMCAScript."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:869
+msgid "Script text: the fulltext of the script."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:871
+msgid ""
+"Save to disk: Scripts that are saved to disk will be permanently stored "
+"in the server’s directory /scripts/admin/[Component]/commandID.js "
+"**NOTE** Scripts that are NOT saved to disk will not survive a server "
+"restart."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:874
+msgid "Remove Command Script"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:876
+msgid ""
+"As with New Command Script, there is an entry for each component. This "
+"page will provide a space to remove commands for the selected component. "
+"You will be provided a list of scripts associated with that component. "
+"You also have the open to remove from disk, which will permanently delete"
+" the script from the hard drive the server is on. If this is unchecked, "
+"the script will be unavailable until the next restart."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:879 ../../HTTP_API_component.rst:1303
+msgid "Statistics"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:881
+msgid ""
+"This section is more useful to test statistics scripts and components, as"
+" many of them produce very small amounts of information, however these "
+"may be collected by other components or scripts for a better information "
+"display."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:884 ../../HTTP_API_component.rst:1308
+msgid "Get User Statistics"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:886 ../../HTTP_API_component.rst:1310
+msgid ""
+"Provides a script output of user statistics including how many active "
+"sessions are in use, number of packets used, specific connections and "
+"their packet usage and location. All resources will return individual "
+"stats along with IP addresses."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:889 ../../HTTP_API_component.rst:1313
+msgid "Get Active User List"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:891 ../../HTTP_API_component.rst:1315
+msgid ""
+"Provides a list of active users under the selected domain within the "
+"server. An active user is considered a user currently logged into the "
+"XMPP server."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:894 ../../HTTP_API_component.rst:1319
+msgid "Get list of idle users"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:896
+msgid "Provides a list of users who are idle on the server."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:899 ../../HTTP_API_component.rst:1325
+msgid "Get list of online users"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:901
+msgid "Provides a list of users who are currently online."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:904 ../../HTTP_API_component.rst:1330
+msgid "Get number of active users"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:906
+msgid "Provides a list of active users, users who are not idle or away."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:909 ../../HTTP_API_component.rst:1335
+msgid "Get number of idle users"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:911
+msgid "Provides a number of idle users."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:914 ../../HTTP_API_component.rst:1339
+msgid "Get top active users"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:916
+msgid ""
+"Will produce a list of user-limited users who are considered most active "
+"in packets sent."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:919 ../../HTTP_API_component.rst:1345
+msgid "Users"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:922
+msgid "Add User"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:924 ../../HTTP_API_component.rst:1350
+msgid ""
+"Here you can add new users to any domain handled by vHosts, users are "
+"added to database immediately and are able to login. **NOTE: You cannot "
+"bestow admin status to these users in this section.**"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:927
+msgid "Change User Password"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:929
+msgid ""
+"This enables you to change the password of any user in the database. "
+"Although changes will take effect immediately, users currently logged in "
+"will not know the password has been changed until they try to log in "
+"again."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:932
+msgid "Delete User"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:934
+msgid ""
+"This removes the user or users (comma separated) from the database. The "
+"deleted users will be kicked from the server once submit is clicked."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:937
+msgid "End user session"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:939
+msgid ""
+"Disconnects the current selected user by ending their session with the "
+"server."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:942 ../../HTTP_API_component.rst:1363
+msgid "Get User Info"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:944 ../../HTTP_API_component.rst:1365
+msgid ""
+"This section allows admins to get information about a specific user "
+"including current connections as well as offline and online messages "
+"awaiting delivery."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:948 ../../HTTP_API_component.rst:1368
+msgid "Get registered user list"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:950
+msgid ""
+"This will display all registered users for the selected domain up to the "
+"number specified."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:953 ../../HTTP_API_component.rst:1373
+msgid "Modify User"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:955 ../../HTTP_API_component.rst:1375
+msgid ""
+"Allows you to modify some user details including E-mail and whether it is"
+" an active user."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:960
+msgid "5.6. Tigase Web Client"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:962
+msgid ""
+"Tigase now has a fully featured XMPP client built right into the HTTP "
+"interface. Everything you would expect from an XMPP client can now be "
+"done from the comfort of your browser window with no software install "
+"required!"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:964
+msgid ""
+"The web client is active and available by default on servers v7.2.0 and "
+"later."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:966
+msgid ""
+"To access the client, point a browser to the following address: xmpp"
+".your-server.net:8080/ui/"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:968
+msgid ""
+"It will ask you for a login, any bare JID of users registered with the "
+"server will work. **NOTE: Use your bare JID for login**"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:970
+msgid ""
+"Once you have logged in successfully, you will be presented with the "
+"following screen."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:972
+msgid "|WebUI Home|"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1377
+msgid "WebUI Home"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:974
+msgid ""
+"The commands are broken into categories shown here. All changes made in "
+"these sections are instant and should be seen the same as if you were "
+"using an external XMPP client like Psi."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:976
+msgid ""
+"**NOTE** The BOSH client will automatically translate all requests to the"
+" server name. In some rare cases this may not be resolvable by the "
+"browser and you will be unable to login. Should that happen, you may "
+"disable that feature using the following line in your config.tdsl:"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:984
+msgid ""
+"You may have to specifically designate the bosh URL when using the "
+"advanced tag in the login screen."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:987
+msgid "Chat"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:989
+msgid ""
+"This is the default window, and your main interface for chatting inside "
+"XMPP with this server. **NOTE: you can only communicate to users logged "
+"onto the current server, or connected clusters** Users from your roster "
+"will be on the left panel, the right all active discussions and MUCs, as "
+"well as the currently selected chat will be available."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:991
+msgid "|WebUI Chat|"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1378
+msgid "WebUI Chat"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:993
+msgid ""
+"Users that are logged in and on your roster will be displayed on the left"
+" side. Double-clicking will bring up a new chat window with the user. You"
+" can Right-click on them to bring up a sub menu with the following;"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:995
+msgid "|WebUI Usersubmenu|"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1379
+msgid "WebUI Usersubmenu"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:997
+msgid "**Chat** replicates a double-click and opens a new window for chat."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:999
+msgid ""
+"**Modify** brings up a dialogue that allows you to change the JID of the "
+"contact, a nickname, and group."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1001
+msgid ""
+"**Delete** removes the user from your roster. This will also remove "
+"subscription authorization for the selected user to receive presence "
+"information effectively removing you from their roster. **NOTE: this will"
+" not block user packets from your JID**"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1003
+msgid ""
+"**Info** brings up the User Info (this is the disco#info command for the "
+"selected user)"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1005
+msgid ""
+"The top right section has a few icons with specific functionality, they "
+"are;"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1007
+msgid "|WebUI Chat Add New| adds a new user to your roster."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1380
+msgid "WebUI Chat Add New"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1009
+msgid "|WebUI Chat NewMUC| creates a new Multi-user chatroom."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1381
+msgid "WebUI Chat NewMUC"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1011
+msgid ""
+"|WebUI Chat Profile| allows you to edit your user information such as "
+"picture and nickname."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1382
+msgid "WebUI Chat Profile"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1013
+msgid "|WebUI Chat CloseWindow| closes the active chat window."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1383
+msgid "WebUI Chat CloseWindow"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1015
+msgid ""
+"|WebUI Chat settings| provides a place to change your password or publish"
+" changes to your user info. **NOTE: you are limited to changing the "
+"General fields**"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1384
+msgid "WebUI Chat settings"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1019
+msgid "Discovery"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1021
+msgid ""
+"This is your service discovery panel, which breaks down by component in "
+"the sidebar. Each component name and its associated JID is listed to help"
+" you find what you need. Most components give you an option to Execute "
+"commands with a few exceptions allowing browsing and the ability to join "
+"a MUC."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1023
+msgid ""
+"**Browse** allows you to dig deeper into certain components; for example "
+"list the chatrooms available in the MUC component. At the top of the page"
+" the specific JID of the component are you in will be displayed. This is "
+"a text field, and can be edited to reflect the JID of the component (or "
+"just the server name) to navigate."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1025
+msgid "|WebUI Browse Comp|"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1385
+msgid "WebUI Browse Comp"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1027
+msgid ""
+"**Join to Room** will join you to a MUC room that is selected. "
+"Alternatively, selecting Join to Room while MUC component is selected, "
+"you can join and start a new MUC room."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1029
+msgid ""
+"**Execute Command** Provides a hierarchy of commands and options to view "
+"and edit settings, run commands and scripts, view contents of files, and "
+"see statistics. Since each Component can have a unique structure it is "
+"best to explore each to see what options are available."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1032
+msgid "Management"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1034
+msgid ""
+"This is an advanced window for settings and management for the XMPP "
+"server."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1039
+msgid "Here you can manage some of the server settings."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1044
+msgid ""
+"This section has one simple command: to be able to send a mass message to"
+" all logged in users. You may choose to change the type of message to "
+"headline or Normal which will show as a pop-up in most XMPP clients. Chat"
+" messages will open up a chat dialog with users."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1054
+msgid ""
+"This allows you to set a log file to track a specific user. Set the bare "
+"or full JID of the user you want to log, and a name of the files you wish"
+" the log to be written to. The files will be written in the root Tigase "
+"directory unless you give a directory like logs/filename. The log files "
+"will be named with a .0 extension and will be named .1, .2, .3 and so on "
+"as each file reaches 10MB by default. filename.0 will always be the most "
+"recent. Logging will cease once the server restarts."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1059
+msgid ""
+"Here you can add SSL certificates from PEM files to specific virtual "
+"hosts. Although Tigase can generate its own self-signed certificates, "
+"this will override those default certificates."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1064
+msgid ""
+"You can write scripts for Groovy or ECMAScript to add to monitor tasks "
+"here. This only adds the script to available scripts however, you will "
+"need to run it from another prompt."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1074
+msgid ""
+"Provides a method to add external components to the server. By default "
+"you are considered the owner, and the Tigase load balancer is "
+"automatically filled in."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1125
+msgid ""
+"XEP-0136 - store MUC messages: Whether or not to store MUC messages for "
+"archiving. Default is user, which allows users to individually set this "
+"setting, otherwise tue/false will override."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1134
+msgid ""
+"You can restrict users to only be able to send and receive packets to and"
+" from certain virtual hosts. This may be helpful if you want to lock "
+"users to a specific domain, or prevent them from getting information from"
+" a statistics component."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1150
+msgid ""
+"This section enables you to change the default pubsub node configuration "
+"for all future nodes. **Note: these changes will be reset on server "
+"restart.** - pubsub#node type: sets the type of node the the new node "
+"will be. Options include:"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1196
+msgid ""
+"The domains allowed to access this node: Comma separated list of domains "
+"for which users can access this node. If left blank there is no domain "
+"restriction."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1221
+msgid ""
+"Allows you to set the default configuration for new MUC rooms. This will "
+"not be able to modify current in use and persistent rooms."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1233
+msgid ""
+"You can fix a users roster from this prompt. Fill out the bare JID of the"
+" user and the names you wish to add or remove from the roster. You can "
+"edit a users roster using this tool, and changes are permanent."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1238
+msgid ""
+"This does the same as the Fix User’s Roster, but can apply to users in "
+"clustered servers."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1269
+msgid "New command script - Monitor"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1271
+msgid ""
+"Allows you to write command scripts in Groovy and store them physically "
+"so they can be saved past server restart and run at any time. Scripts "
+"written here will only be able to work on the Monitor component."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1274
+msgid "New command script - MUC"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1276
+msgid ""
+"Allows you to write command scripts in Groovy and store them physically "
+"so they can be saved past server restart and run at any time. Scripts "
+"written here will only be able to work on the MUC component."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1280
+msgid "OAUth credentials"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1282
+msgid ""
+"Uses OAuth to set new credentials and enable or disable a registration "
+"requirement with a signed form."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1288
+msgid ""
+"Allows admins to pre-bind a BOSH session with a full or bare JID (with "
+"the resource automatically populated on connection). You may also specify"
+" HOLD or WAIT parameters."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1293
+msgid ""
+"This will show if you have any external components and will reload them "
+"in case of any stuck threads."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1298
+msgid ""
+"This section provides a list of command scripts for all active "
+"components. Each component has the following options - **New command "
+"script** provides a method to author new command scripts for specific "
+"components written in EMCAScript or Groovy. You do have an option to save"
+" the script to disk which will make the script permanent within the "
+"server. - **Remove command script** allows you to remove the selected "
+"script from the repository. If Remove from disk is not checked, the "
+"script will be unavailable until server restart. If it is, it will be "
+"permanently removed from the server."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1300
+msgid ""
+"Newly made commands will be listed under the Group listing in the left "
+"column."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1305
+msgid ""
+"These statistics might be more useful as script results yield small bits "
+"of data, but you may find them useful when looking for server loads or "
+"finding user issues."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1321
+msgid "This will list all idle users separated by vhost."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1327
+msgid ""
+"This will list users separated by the vhost they are connected to. The "
+"list will include the bare JID as well as any resources for that JID."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1332
+msgid "This displays the number of current active users."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1337
+msgid "This section returns the number of active users per specific vhost."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1341
+msgid ""
+"This will list the top number of active users by packets sent and online "
+"time. This list will only be built with users currently online and from "
+"all vhosts."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1348
+msgid "Add New User"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1353
+msgid "Change user password"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1355
+msgid ""
+"Allows for admins to change the password of a specific user without "
+"needing to know the original password for the selected bare JID. Users "
+"currently logged in will not know password has been changed until they "
+"attempt to re-login."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1358
+msgid "Delete user"
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1360
+msgid ""
+"Provides a text window for admins to input the bare JID of the user they "
+"wish to remove from the server."
+msgstr ""
+
+#: ../../HTTP_API_component.rst:1370
+msgid ""
+"Provides a list of vhosts to search and a maximum number of users to "
+"list. Once run, the script will display a list of registered bare JIDs of"
+" users from the selected vhost."
+msgstr ""
+
