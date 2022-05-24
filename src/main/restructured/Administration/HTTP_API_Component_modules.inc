@@ -12,6 +12,8 @@ Index module
 
 This module is deployed at ``/`` by default and provides list of installed and available modules for the virtual host when requested.
 
+.. _Rest_module:
+
 REST module
 ^^^^^^^^^^^^^^^^^^^
 

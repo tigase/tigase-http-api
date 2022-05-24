@@ -82,8 +82,8 @@ All Changes
 
 -  `#http-121 <https://projects.tigase.net/issue/http-121>`__: Deprecate DnsWebService and rewrite /.well-known/host-meta generator
 
-:include:: HTTP_API_Component_modules.inc
-:include:: HTTP_API_Component_modules_common_configuration.inc 
-:include:: HTTP_API_Component_modules_configuration.inc 
-:include:: UI_Guide_Admin.inc 
-:include:: UI_Guide_Client.inc
+.. include:: HTTP_API_Component_modules.inc
+.. include:: HTTP_API_Component_modules_common_configuration.inc 
+.. include:: HTTP_API_Component_modules_configuration.inc 
+.. include:: UI_Guide_Admin.inc
+.. include:: UI_Guide_Client.inc
