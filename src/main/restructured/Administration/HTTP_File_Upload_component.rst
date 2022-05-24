@@ -199,5 +199,4 @@ Configuration for high availability in a cluster with common storage at ``/mnt/s
        }
    }
 
-
-:include:: HTTP_File_Upload_Component-S3.inc
+.. include:: HTTP_File_Upload_Component-S3.inc

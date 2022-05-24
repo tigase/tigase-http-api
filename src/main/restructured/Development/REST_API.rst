@@ -7,7 +7,7 @@ In these sections we will describe the basic REST endpoints provided by Tigase H
 
 Other endpoints, specific to particular Tigase XMPP Server modules, are described in documentation for the modules providing them. You may also look at ``http://localhost:8080/rest/`` on your local Tigase XMPP Server installation at HTTP API, which will provide you with basic usage examples for REST endpoints available at your installation.
 
-For more informations about configuration of REST module please see section about :ref:`REST module <Rest_module:>`:
+For more informations about configuration of REST module please see section about :ref:`REST module<Rest_module>`:
 
 Scripting introduction
 -----------------------
