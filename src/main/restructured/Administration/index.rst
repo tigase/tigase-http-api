@@ -15,11 +15,6 @@ Tigase will by default start with the http servlet active and running.
    :numbered:
 
    tigase-http-api-release-notes.rst
-   HTTP_API_Component_modules.rst
-   HTTP_API_Component_modules_common_configuration.rst 
-   HTTP_API_Component_modules_configuration.rst 
-   UI_Guide_Admin.rst 
-   UI_Guide_Client.rst
    HTTP_File_Upload_component.rst
    HTTP_Server.rst
 
