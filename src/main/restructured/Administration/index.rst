@@ -1,7 +1,7 @@
 
-===================================
+======================
 Tigase HTTP API
-===================================
+======================
 
 Welcome to the Tigase HTTP API users guide. The HTTP API allows you to manage, configure, chat, and send commands to Tigase server using a simple, easy-to-use interface right from your browser! We will guide you through setup, running, and going through some features of the HTTP API.
 
@@ -11,10 +11,15 @@ Tigase will by default start with the http servlet active and running.
 
 
 .. toctree::
-   :titlesonly:
    :maxdepth: 3
+   :numbered:
 
-   Administration/index.rst
-   Development/index.rst
-   
+   tigase-http-api-release-notes.rst
+   HTTP_API_Component_modules.rst
+   HTTP_API_Component_modules_common_configuration.rst 
+   HTTP_API_Component_modules_configuration.rst 
+   UI_Guide_Admin.rst 
+   UI_Guide_Client.rst
+   HTTP_File_Upload_component.rst
+   HTTP_Server.rst
 
