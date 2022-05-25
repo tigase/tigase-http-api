@@ -35,13 +35,13 @@ This property allows you to change the context path that is used by module. In o
 
    http {
        rest {
-           context^path = '/api'
+           context-path = '/api'
        }
    }
 
 
 List of virtual hosts
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This provides the ability to limit modules to be available only on listed virtual hosts, and allows to set context path to ``/`` for more than one module. Property accepts list of strings, which in the case of config.tdsl file format is list of comma separated domain names and in DSL it is written as list of strings (see :ref:`Complex Example<complexExample>`).
 
@@ -67,7 +67,7 @@ In this example we will disable the Index module and move REST module to ``http:
    http {
        index (active: false) {}
        rest {
-           context^path = '/'
+           context-path = '/'
            vhosts = [ 'api.example.com', 'rest.example.com' ]
        }
    }
