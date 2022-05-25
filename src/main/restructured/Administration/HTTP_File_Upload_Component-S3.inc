@@ -5,7 +5,7 @@ By default HTTP File Upload component shipped with Tigase XMPP Server stores upl
 
 .. Note::
 
-   For this feature to work please make sure that you are using all required dependencies (either by using ``-dist-max`` package or obtaining them from `tigase-extras ``aws`` module <https://github.com/tigase/tigase-extras/tree/master/aws>`__)
+   For this feature to work please make sure that you are using all required dependencies (either by using ``-dist-max`` package or obtaining them from `tigase-extras aws module <https://github.com/tigase/tigase-extras/tree/master/aws>`__)
 
 
 Enabling storage in S3
