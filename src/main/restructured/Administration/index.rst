@@ -12,7 +12,7 @@ Tigase will by default start with the http servlet active and running.
 
 .. toctree::
    :maxdepth: 3
-   :numbered:
+   :numbered: 3
 
    tigase-http-api-release-notes.rst
    HTTP_File_Upload_component.rst

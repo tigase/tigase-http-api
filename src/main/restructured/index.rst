@@ -12,6 +12,7 @@ Tigase will by default start with the http servlet active and running.
 
 .. toctree::
    :maxdepth: 3
+   :numbered: 3
 
    Administration/index.rst
    Development/index.rst

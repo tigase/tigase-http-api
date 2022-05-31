@@ -416,13 +416,13 @@ Modify User
 
 Allows you to modify some user details including E-mail and whether it is an active user.
 
-.. |WebUI Home| image:: ../../asciidoc/images/WebUI-Home.jpg
-.. |WebUI Chat| image:: ../../asciidoc/images/WebUI-Chat.jpg
-.. |WebUI Usersubmenu| image:: ../../asciidoc/images/WebUI-Usersubmenu.jpg
-.. |WebUI Chat Add New| image:: ../../asciidoc/images/WebUI-Chat-Add-New.jpg
-.. |WebUI Chat NewMUC| image:: ../../asciidoc/images/WebUI-Chat-NewMUC.jpg
-.. |WebUI Chat Profile| image:: ../../asciidoc/images/WebUI-Chat-Profile.jpg
-.. |WebUI Chat CloseWindow| image:: ../../asciidoc/images/WebUI-Chat-CloseWindow.jpg
-.. |WebUI Chat settings| image:: ../../asciidoc/images/WebUI-Chat-settings.jpg
-.. |WebUI Browse Comp| image:: ../../asciidoc/images/WebUI-Browse-Comp.jpg
+.. |WebUI Home| image:: /images/WebUI-Home.jpg
+.. |WebUI Chat| image:: /images/WebUI-Chat.jpg
+.. |WebUI Usersubmenu| image:: /images/WebUI-Usersubmenu.jpg
+.. |WebUI Chat Add New| image:: /images/WebUI-Chat-Add-New.jpg
+.. |WebUI Chat NewMUC| image:: /images/WebUI-Chat-NewMUC.jpg
+.. |WebUI Chat Profile| image:: /images/WebUI-Chat-Profile.jpg
+.. |WebUI Chat CloseWindow| image:: /images/WebUI-Chat-CloseWindow.jpg
+.. |WebUI Chat settings| image:: /images/WebUI-Chat-settings.jpg
+.. |WebUI Browse Comp| image:: /images/WebUI-Browse-Comp.jpg
 
