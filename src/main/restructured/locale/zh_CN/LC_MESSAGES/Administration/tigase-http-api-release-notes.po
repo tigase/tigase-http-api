@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: TigaseDoc \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-25 02:43-0700\n"
+"POT-Creation-Date: 2022-05-31 16:51-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,8 +17,8 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.8.0\n"
 
-#: ../../Administration/tigase-http-api-release-notes.rst:4
-#: ../../Administration/tigase-http-api-release-notes.rst:9
+#: ../../Administration/tigase-http-api-release-notes.rst:2
+#: ../../Administration/tigase-http-api-release-notes.rst:7
 msgid ""
 "Tigase HTTP API component is a generic container used to provide other "
 "HTTP related features as modules. It is configured by default to run "
@@ -26,205 +26,205 @@ msgid ""
 "component enabled by default under the same name even if not configured."
 msgstr ""
 
-#: ../../Administration/tigase-http-api-release-notes.rst:7
+#: ../../Administration/tigase-http-api-release-notes.rst:5
 msgid "HTTP API component"
 msgstr ""
 
-#: ../../Administration/tigase-http-api-release-notes.rst:12
+#: ../../Administration/tigase-http-api-release-notes.rst:10
 msgid "Tigase HTTP-API Release Notes"
 msgstr ""
 
-#: ../../Administration/tigase-http-api-release-notes.rst:15
+#: ../../Administration/tigase-http-api-release-notes.rst:13
 msgid "Tigase HTTP-API 2.2.0 Release Notes"
 msgstr ""
 
-#: ../../Administration/tigase-http-api-release-notes.rst:17
+#: ../../Administration/tigase-http-api-release-notes.rst:15
 msgid ""
 "Welcome to Tigase HTTP-API 2.2.0! This is a feature release for with a "
 "number of fixes and update"
 msgstr ""
 
-#: ../../Administration/tigase-http-api-release-notes.rst:20
+#: ../../Administration/tigase-http-api-release-notes.rst:18
 msgid "Major Changes"
 msgstr ""
 
-#: ../../Administration/tigase-http-api-release-notes.rst:22
+#: ../../Administration/tigase-http-api-release-notes.rst:20
 msgid ""
 "Enable HTTP File Upload by default with additional, optional, AWS S3 "
 "compatible backend"
 msgstr ""
 
-#: ../../Administration/tigase-http-api-release-notes.rst:24
+#: ../../Administration/tigase-http-api-release-notes.rst:22
 msgid "Improvements to Web Setup to make installation even more straightforward"
 msgstr ""
 
-#: ../../Administration/tigase-http-api-release-notes.rst:26
+#: ../../Administration/tigase-http-api-release-notes.rst:24
 msgid ""
 "Allow exposing ``.well-known`` in the root context to facilitate "
 "`XEP-0156: Discovering Alternative XMPP Connection Methods "
 "<https://xmpp.org/extensions/xep-0156.html>`__"
 msgstr ""
 
-#: ../../Administration/tigase-http-api-release-notes.rst:28
+#: ../../Administration/tigase-http-api-release-notes.rst:26
 msgid "Add option to redirect requests from http to https"
 msgstr ""
 
-#: ../../Administration/tigase-http-api-release-notes.rst:31
+#: ../../Administration/tigase-http-api-release-notes.rst:29
 msgid "All Changes"
 msgstr ""
 
-#: ../../Administration/tigase-http-api-release-notes.rst:33
+#: ../../Administration/tigase-http-api-release-notes.rst:31
 msgid ""
 "`#http-65 <https://projects.tigase.net/issue/http-65>`__: More detailed "
 "logs"
 msgstr ""
 
-#: ../../Administration/tigase-http-api-release-notes.rst:35
+#: ../../Administration/tigase-http-api-release-notes.rst:33
 msgid ""
 "`#http-86 <https://projects.tigase.net/issue/http-86>`__: Add s3 backend "
 "for http-upload"
 msgstr ""
 
-#: ../../Administration/tigase-http-api-release-notes.rst:37
+#: ../../Administration/tigase-http-api-release-notes.rst:35
 msgid ""
 "`#http-91 <https://projects.tigase.net/issue/http-91>`__: Items in setup "
 "on Features screen are misaligned"
 msgstr ""
 
-#: ../../Administration/tigase-http-api-release-notes.rst:39
+#: ../../Administration/tigase-http-api-release-notes.rst:37
 msgid ""
 "`#http-93 <https://projects.tigase.net/issue/http-93>`__: Update web-"
 "installer documentation"
 msgstr ""
 
-#: ../../Administration/tigase-http-api-release-notes.rst:41
+#: ../../Administration/tigase-http-api-release-notes.rst:39
 msgid ""
 "`#http-95 <https://projects.tigase.net/issue/http-95>`__: Enable HTTP "
 "File Upload by default"
 msgstr ""
 
-#: ../../Administration/tigase-http-api-release-notes.rst:43
+#: ../../Administration/tigase-http-api-release-notes.rst:41
 msgid ""
 "`#http-96 <https://projects.tigase.net/issue/http-96>`__: Enabling "
 "cluster mode / ACS doesn’t add it to resulting configuration file"
 msgstr ""
 
-#: ../../Administration/tigase-http-api-release-notes.rst:45
+#: ../../Administration/tigase-http-api-release-notes.rst:43
 msgid ""
 "`#http-98 <https://projects.tigase.net/issue/http-98>`__: Setup tests are"
 " failing since Septempter"
 msgstr ""
 
-#: ../../Administration/tigase-http-api-release-notes.rst:47
+#: ../../Administration/tigase-http-api-release-notes.rst:45
 msgid ""
 "`#http-99 <https://projects.tigase.net/issue/http-99>`__: Enforce max-"
 "file-size limit"
 msgstr ""
 
-#: ../../Administration/tigase-http-api-release-notes.rst:49
+#: ../../Administration/tigase-http-api-release-notes.rst:47
 msgid ""
 "`#http-100 <https://projects.tigase.net/issue/http-100>`__: Prevent "
 "enabling all Message\\* plugins"
 msgstr ""
 
-#: ../../Administration/tigase-http-api-release-notes.rst:51
+#: ../../Administration/tigase-http-api-release-notes.rst:49
 msgid ""
 "`#http-101 <https://projects.tigase.net/issue/http-101>`__: Prevent "
 "enabling all Mobile\\* plugins"
 msgstr ""
 
-#: ../../Administration/tigase-http-api-release-notes.rst:53
+#: ../../Administration/tigase-http-api-release-notes.rst:51
 msgid ""
 "`#http-102 <https://projects.tigase.net/issue/http-102>`__: Last activity"
 " plugins handling should be improved"
 msgstr ""
 
-#: ../../Administration/tigase-http-api-release-notes.rst:55
+#: ../../Administration/tigase-http-api-release-notes.rst:53
 msgid ""
 "`#http-103 <https://projects.tigase.net/issue/http-103>`__: Enabling "
 "http-upload should give an info about requirement to set domain/store"
 msgstr ""
 
-#: ../../Administration/tigase-http-api-release-notes.rst:57
+#: ../../Administration/tigase-http-api-release-notes.rst:55
 msgid ""
 "`#http-105 <https://projects.tigase.net/issue/http-105>`__: Handle "
 "forbidden characters in filenames"
 msgstr ""
 
-#: ../../Administration/tigase-http-api-release-notes.rst:59
+#: ../../Administration/tigase-http-api-release-notes.rst:57
 msgid ""
 "`#http-106 <https://projects.tigase.net/issue/http-106>`__: Can’t remove "
 "user for non-existent VHost"
 msgstr ""
 
-#: ../../Administration/tigase-http-api-release-notes.rst:61
+#: ../../Administration/tigase-http-api-release-notes.rst:59
 msgid ""
 "`#http-107 <https://projects.tigase.net/issue/http-107>`__: Allow "
 "exposing ``.well-known`` in the root context"
 msgstr ""
 
-#: ../../Administration/tigase-http-api-release-notes.rst:63
+#: ../../Administration/tigase-http-api-release-notes.rst:61
 msgid ""
 "`#http-108 <https://projects.tigase.net/issue/http-108>`__: Add option to"
 " redirect requests from http to https"
 msgstr ""
 
-#: ../../Administration/tigase-http-api-release-notes.rst:65
+#: ../../Administration/tigase-http-api-release-notes.rst:63
 msgid ""
 "`#http-109 <https://projects.tigase.net/issue/http-109>`__: openAccess "
 "option is missing after migrating the component to TK"
 msgstr ""
 
-#: ../../Administration/tigase-http-api-release-notes.rst:67
+#: ../../Administration/tigase-http-api-release-notes.rst:65
 msgid ""
 "`#http-110 <https://projects.tigase.net/issue/http-110>`__: Add support "
 "for querying and managing uploaded files"
 msgstr ""
 
-#: ../../Administration/tigase-http-api-release-notes.rst:69
+#: ../../Administration/tigase-http-api-release-notes.rst:67
 msgid ""
 "`#http-111 <https://projects.tigase.net/issue/http-111>`__: "
 "DefaultLogic.removeExpired removal of slot failed"
 msgstr ""
 
-#: ../../Administration/tigase-http-api-release-notes.rst:71
+#: ../../Administration/tigase-http-api-release-notes.rst:69
 msgid ""
 "`#http-113 <https://projects.tigase.net/issue/http-113>`__: Add condition"
 " to redirect only if the X-Forwarded-Proto has certain value"
 msgstr ""
 
-#: ../../Administration/tigase-http-api-release-notes.rst:73
+#: ../../Administration/tigase-http-api-release-notes.rst:71
 msgid ""
 "`#http-114 <https://projects.tigase.net/issue/http-114>`__: "
 "TigaseDBException: Could not allocate slot"
 msgstr ""
 
-#: ../../Administration/tigase-http-api-release-notes.rst:75
+#: ../../Administration/tigase-http-api-release-notes.rst:73
 msgid ""
 "`#http-116 <https://projects.tigase.net/issue/http-116>`__: Limiting list"
 " of VHosts doesn’t work for JDK based http-server"
 msgstr ""
 
-#: ../../Administration/tigase-http-api-release-notes.rst:77
+#: ../../Administration/tigase-http-api-release-notes.rst:75
 msgid ""
 "`#http-117 <https://projects.tigase.net/issue/http-117>`__: Http "
 "redirection doesn’t work in docker"
 msgstr ""
 
-#: ../../Administration/tigase-http-api-release-notes.rst:79
+#: ../../Administration/tigase-http-api-release-notes.rst:77
 msgid ""
 "`#http-119 <https://projects.tigase.net/issue/http-119>`__: Can’t change "
 "VHost configuration via Admin WebUI"
 msgstr ""
 
-#: ../../Administration/tigase-http-api-release-notes.rst:81
+#: ../../Administration/tigase-http-api-release-notes.rst:79
 msgid ""
 "`#http-120 <https://projects.tigase.net/issue/http-120>`__: Improve S3 "
 "support for HTTP File Upload to accept custom URL and credentials for S3 "
 "storage configuration"
 msgstr ""
 
-#: ../../Administration/tigase-http-api-release-notes.rst:83
+#: ../../Administration/tigase-http-api-release-notes.rst:81
 msgid ""
 "`#http-121 <https://projects.tigase.net/issue/http-121>`__: Deprecate "
 "DnsWebService and rewrite /.well-known/host-meta generator"
@@ -904,9 +904,8 @@ msgstr ""
 
 #: ../../Administration/UI_Guide_Admin.inc:88
 msgid ""
-"Domain filter policy: Sets the filter policy for this domain, see "
-":ref:`This section<domainBasedPacketFiltering>` for a description of the "
-"rules."
+"Domain filter policy: Sets the filter policy for this domain, see `This "
+"section <domainBasedPacketFiltering>`__ for a description of the rules."
 msgstr ""
 
 #: ../../Administration/UI_Guide_Admin.inc:90
@@ -1065,10 +1064,9 @@ msgstr ""
 msgid ""
 "Here you can restrict users to be able to communicate on specific "
 "domains, this works similar to the domain filtering policy using the same"
-" rule sets. For more details, see :ref:`Domain Based Packet "
-"Filtering<domainBasedPacketFiltering>` section for rule details and "
-"specifics. Note that the changes may be made to multiple JIDs at the same"
-" time."
+" rule sets. For more details, see `Domain Based Packet Filtering "
+"<#domainBasedPacketFiltering>`__ section for rule details and specifics. "
+"Note that the changes may be made to multiple JIDs at the same time."
 msgstr ""
 
 #: ../../Administration/UI_Guide_Admin.inc:132
@@ -2567,4 +2565,24 @@ msgid ""
 "list. Once run, the script will display a list of registered bare JIDs of"
 " users from the selected vhost."
 msgstr ""
+
+#~ msgid ""
+#~ "Domain filter policy: Sets the filter"
+#~ " policy for this domain, see "
+#~ ":ref:`This section<domainBasedPacketFiltering>` for "
+#~ "a description of the rules."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Here you can restrict users to be"
+#~ " able to communicate on specific "
+#~ "domains, this works similar to the "
+#~ "domain filtering policy using the same"
+#~ " rule sets. For more details, see "
+#~ ":ref:`Domain Based Packet "
+#~ "Filtering<domainBasedPacketFiltering>` section for "
+#~ "rule details and specifics. Note that"
+#~ " the changes may be made to "
+#~ "multiple JIDs at the same time."
+#~ msgstr ""
 
