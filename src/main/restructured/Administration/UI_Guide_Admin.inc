@@ -587,4 +587,4 @@ Modify User
 
 Allows you to modify some user details including E-mail and whether it is an active user.
 
-.. |adminUI main| image:: ../../asciidoc/images/adminUI-main.jpg
+.. |adminUI main| image:: /images/adminUI-main.jpg
