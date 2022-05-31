@@ -17,7 +17,7 @@ The commands are broken into categories shown here. All changes made in these se
 
 **NOTE** The BOSH client will automatically translate all requests to the server name. In some rare cases this may not be resolvable by the browser and you will be unable to login. Should that happen, you may disable that feature using the following line in your config.tdsl:
 
-.. code:: dsl
+.. code:: text
 
    bosh {
        'send-node-hostname' = false

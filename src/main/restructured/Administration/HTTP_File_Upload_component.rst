@@ -12,7 +12,7 @@ Enabling HTTP File Upload Component
 
 **Configuration.**
 
-.. code:: dsl
+.. code:: text
 
    upload() {}
 
@@ -153,7 +153,7 @@ Configuration with a separate repository for metadata to ``example.com`` pointin
 
 **Complex configuration example.**
 
-.. code:: java
+.. code:: text
 
    upload() {
        logic {
@@ -186,7 +186,7 @@ Configuration for high availability in a cluster with common storage at ``/mnt/s
 
 **Example configuration with HA.**
 
-.. code:: java
+.. code:: text
 
    upload() {
        logic {

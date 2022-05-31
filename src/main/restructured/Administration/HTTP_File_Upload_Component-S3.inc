@@ -13,7 +13,7 @@ Enabling storage in S3
 
 To enable storage in S3, you need to add following lines to your configuration file:
 
-.. code:: dsl
+.. code:: text
 
    upload () {
        store (class: tigase.extras.http.upload.S3Store, active: true, exportable: true) {
@@ -29,7 +29,7 @@ This will enable HTTP File Upload component and configure it to be used with S3 
 
 If you wish to use S3 bucket from another AWS region, you can do that by adding setting ``region`` property in the ``store`` block to the id of the AWS region, ie. set to ``us-west-2`` to use ``US West (Oregon)`` region:
 
-.. code:: dsl
+.. code:: text
 
    upload () {
        store (class: tigase.extras.http.upload.S3Store, active: true, exportable: true) {
@@ -40,7 +40,7 @@ If you wish to use S3 bucket from another AWS region, you can do that by adding 
 
 If you wish to share the same S3 bucket between different installations of Tigase XMPP Server, you should configure ``bucketKeyPrefix`` property of ``store`` with different identifiers for each installation. That will allow you to easily filter data uploaded for each installation and will allow Tigase XMPP Server to provide you with correct storage usage for each installation.
 
-.. code:: dsl
+.. code:: text
 
    upload () {
        store (class: tigase.extras.http.upload.S3Store, active: true, exportable: true) {
