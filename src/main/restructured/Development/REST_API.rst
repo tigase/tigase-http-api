@@ -125,7 +125,7 @@ Using JSON format
 
 To retrieve a list of available adhoc commands in JSON, we need to pass ``Content-Type: application/json`` to HTTP header of request or add ``type`` parameter set to ``application/json``. Example result below:
 
-.. code:: json
+.. code:: text
 
    {
        "items": [
@@ -222,7 +222,7 @@ For example, to get form for adding VHost item make a request using ``POST`` met
 
 Below is an example result for request presented above:
 
-.. code:: json
+.. code:: text
 
    {
      "command": {
@@ -543,7 +543,7 @@ To execute the command using XML content you need to set HTTP header ``Content-T
 
    It’s essential to include ``command-marker`` in the request, otherwise the form will be returned without adding the VHost.
 
-.. code:: json
+.. code:: text
 
    {
      "command": {
@@ -650,7 +650,7 @@ To execute the command using XML content you need to set HTTP header ``Content-T
 
    It’s essential to include ``command-marker`` in the request (otherwise the form will be returned without adding the VHost) and ``item-list`` with value set to the name of the VHost that’s being configured.
 
-.. code:: json
+.. code:: text
 
    {
      "command": {

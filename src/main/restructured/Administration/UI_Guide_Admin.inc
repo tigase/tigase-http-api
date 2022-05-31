@@ -85,7 +85,7 @@ This allows you to add new virtual hosts to the XMPP server. A breakdown of the 
 
 -  S2S secret: a server-generated code to differentiate traffic between servers, typically there is no need to enter your own, but you may if you need to get into low level code.
 
--  Domain filter policy: Sets the filter policy for this domain, see :ref:`This section<domainBasedPacketFiltering>` for a description of the rules.
+-  Domain filter policy: Sets the filter policy for this domain, see `This section <domainBasedPacketFiltering>`__ for a description of the rules.
 
 -  Domain filter domains: a specific setting to restrict or control cross domain traffic.
 
@@ -126,7 +126,7 @@ This allows you to add new virtual hosts to the XMPP server. A breakdown of the 
 Change user inter-domain communication permission
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Here you can restrict users to be able to communicate on specific domains, this works similar to the domain filtering policy using the same rule sets. For more details, see :ref:`Domain Based Packet Filtering<domainBasedPacketFiltering>` section for rule details and specifics. Note that the changes may be made to multiple JIDs at the same time.
+Here you can restrict users to be able to communicate on specific domains, this works similar to the domain filtering policy using the same rule sets. For more details, see `Domain Based Packet Filtering <#domainBasedPacketFiltering>`__ section for rule details and specifics. Note that the changes may be made to multiple JIDs at the same time.
 
 Connections Time
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

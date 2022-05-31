@@ -1,9 +1,7 @@
 
-
-
 Tigase HTTP API component is a generic container used to provide other HTTP related features as modules. It is configured by default to run under name of http. Installations of Tigase XMPP Server run this component enabled by default under the same name even if not configured.
 
-HTTP API component
+HTTP API component 
 ====================
 
 Tigase HTTP API component is a generic container used to provide other HTTP related features as modules. It is configured by default to run under name of http. Installations of Tigase XMPP Server run this component enabled by default under the same name even if not configured.

@@ -89,7 +89,7 @@ Query particular domain
 
 If we want to know connectivity options for ``sure.im`` we should send HTTP GET request to ``http://our-xmpp-server:8080/dns-webservice/?domain=sure.im&version=2``. We will receive following response:
 
-.. code:: java
+.. code:: text
 
    {
      domain: 'sure.im',
@@ -117,7 +117,7 @@ As you can see in here we have names and IP address of XMPP servers hosting ``su
 
 This module is activated by default. However, if you are operating in a test environment where you may not have SRV and A records setup to the domain you are using, you may want to disable this in your config.tdsl file with the following line:
 
-.. code:: dsl
+.. code:: text
 
    rest {
        'dns-webservice' (active: false) {}
@@ -130,7 +130,7 @@ It is possible to provide users with a mechanism for a password change in case i
 
 **Example configuration.**
 
-.. code:: tdsl
+.. code:: text
 
    account-email-password-resetter () {}
    mailer (class: tigase.extras.mailer.Mailer) {

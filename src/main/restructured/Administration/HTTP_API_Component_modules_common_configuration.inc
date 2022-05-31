@@ -6,7 +6,7 @@ Enabling/disabling module
 
 Every module can be activated or disabled by adjusting it’s activity in following way:
 
-.. code:: DSL
+.. code:: text
 
    http {
        %module_id% (active: false) {}
@@ -18,7 +18,7 @@ Every module can be activated or disabled by adjusting it’s activity in follow
 
 **Disabling REST module.**
 
-.. code:: DSL
+.. code:: text
 
    http {
        rest (active: false) {}
@@ -31,7 +31,7 @@ This property allows you to change the context path that is used by module. In o
 
 **Changing context path for REST module to ``/api``.**
 
-.. code:: dsl
+.. code:: text
 
    http {
        rest {
@@ -47,7 +47,7 @@ This provides the ability to limit modules to be available only on listed virtua
 
 **Moving the REST module to be available only for requests directed to ``api.example.com``.**
 
-.. code:: dsl
+.. code:: text
 
    http {
        rest {
@@ -62,7 +62,7 @@ Complex example
 
 In this example we will disable the Index module and move REST module to ``http://api.example.com/`` and ``http://rest.example.com``.
 
-.. code:: dsl
+.. code:: text
 
    http {
        index (active: false) {}
