@@ -58,9 +58,9 @@ public class HandlersLoader {
 
 		scripts.each { file ->
 			try {
-				log.info("loading handler from file = " + file.getCanonicalPath())
+				log.log(Level.CONFIG, "loading handler from file = " + file.getCanonicalPath())
 				newHandlers.add(loadHandler(classLoader, file, kernel))
-				log.info("handler loaded");
+				log.log(Level.CONFIG, "handler loaded");
 			} catch (Throwable ex) {
 				log.log(Level.SEVERE, "Exception loading handler from script = " + file.getAbsolutePath(), ex);
 			}

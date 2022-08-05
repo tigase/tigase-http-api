@@ -79,8 +79,8 @@ public class RestServlet
 
 			handlers = newHandlers;
 
-			if (log.isLoggable(Level.INFO)) {
-				log.info("loaded ${listOfHandlers.size()} handlers")
+			if (log.isLoggable(Level.CONFIG)) {
+				log.log(Level.CONFIG, "loaded ${listOfHandlers.size()} handlers")
 			}
 		}
 	}
