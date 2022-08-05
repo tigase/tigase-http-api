@@ -69,7 +69,7 @@ public class WebModule
 
 			httpServer.deploy(deployment);
 		} else {
-			log.log(Level.INFO, "not found file with Web UI - Web UI will not be available");
+			log.log(Level.CONFIG, "not found file with Web UI - Web UI will not be available");
 		}
 	}
 
