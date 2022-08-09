@@ -1,0 +1,4097 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2004-2022, Tigase, Inc
+# This file is distributed under the same license as the TigaseDoc package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: TigaseDoc \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-08-09 01:07-0700\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.8.0\n"
+
+#: ../../Administration/HTTP_File_Upload_component.rst:2
+msgid "HTTP File Upload component"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:4
+msgid ""
+"Tigase’s HTTP File Upload component is an implementation of `XEP-0363 "
+"HTTP File Upload <http://xmpp.org/extensions/xep-0363.html:>`__ "
+"specification. This allows file transfer between XMPP clients by "
+"uploading a file to HTTP server and sending only link to download file to"
+" recipient."
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:6
+msgid ""
+"This implementation makes use of the HTTP server used by Tigase XMPP "
+"Server and Tigase HTTP API component to provide web server for file "
+"upload and download."
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:8
+msgid ""
+"By default this component is **disabled** and needs to be enabled in "
+"configuration file before it can be used. Another requirement is that the"
+" proper database schema needs to be applied to database which will be "
+"used by component."
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:11
+msgid "Enabling HTTP File Upload Component"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:13
+msgid "**Configuration.**"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:20
+msgid "Metadata repository"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:22
+msgid ""
+"Running the component requires a repository where it can store "
+"information about allocated slots. For this, a metadata repository is "
+"used. It is possible to specify a specific implementation of "
+"``FileUploadRepository`` for every domain."
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:24
+msgid ""
+"By default, metadata for all domains will be stored in the ``default`` "
+"repository. Implementation of which will be selected based on kind of "
+"data source defined as ``default``."
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:27
+msgid "DummyFileUploadRepository"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:29
+msgid ""
+"This is very simple repository which does not store any data. Due to "
+"that, it can be very fast! However, it is not able to remove old uploads "
+"and apply any upload limits."
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:32
+msgid "JDBCFileUploadRepository"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:33
+msgid ""
+"This repository implementation stores data in database used to store "
+"procedures and functions. By default, data should be stored in the "
+"``tig_hfu_slots`` table but it can be changed by modification of stored "
+"procedures or reconfiguration of the repository implementation to use "
+"different stored procedures and functions than provided."
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:36
+msgid "Storage"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:38
+msgid ""
+"Component contains a pluggable storage mechanism, which means that it is "
+"relatively easy to implement custom storage provisions. By default "
+"``DirectoryStore`` based storage is used."
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:40
+msgid "Currently following storage providers are available out of the box."
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:43
+msgid "DirectoryStore"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:45
+msgid ""
+"This storage mechanism places files in subdirectories with names that "
+"correspond to the id of `allocated slot "
+"<http://xmpp.org/extensions/xep-0363.html#intro:>`__. If required, it is "
+"possible to group all slot directories allocated by single user in a "
+"directory containing this user name."
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:47
+msgid ""
+"By default there is no redundancy if this store is used in clustered "
+"environment. Every file will be stored on a single cluster node."
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:49
+#: ../../Administration/HTTP_File_Upload_component.rst:63
+#: ../../Administration/HTTP_File_Upload_component.rst:132
+msgid "Available properties:"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:52
+msgid "**path**"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:52
+msgid ""
+"Contains path to directory in which subdirectory with files will be "
+"created on the local machine. **(default: ``data/upload``)**"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:56
+msgid "**group-by-user**"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:55
+msgid ""
+"Configures if slots directories should be grouped in user directories. "
+"**(default: false)**"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:59
+msgid "Logic"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:61
+msgid ""
+"Logic is responsible for generation of URI and applying limits. It groups"
+" all configuration settings related to allocation of slots, etc."
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:66
+msgid "**local-only**"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:66
+msgid ""
+"Allow only users with accounts on the local XMPP server to use this "
+"component for slot allocation. **(default: true)**"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:69
+msgid "**max-file-size**"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:69
+msgid ""
+"Set maximum size of a single allocated slot (maximum file size) in bytes."
+" **(default: 5000)**"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:72
+#: ../../Administration/HTTP_File_Upload_component.rst:104
+msgid "**port**"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:72
+msgid ""
+"Specifies the port which should be used in generating the upload and "
+"download URI. If it is not set, then secured (HTTPS) server port will be "
+"used if available, and plain HTTP in other case. **(default: not set)**"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:79
+msgid "**protocol**"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:75
+msgid ""
+"Protocol which should be used. **This is only used in conjunction with "
+"``port``**. Possible values are:"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:77
+msgid "http"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:79
+msgid "https"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:82
+#: ../../Administration/HTTP_File_Upload_component.rst:101
+msgid "**serverName**"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:82
+msgid ""
+"Server name to use as domain part in generated URI. **(default: server "
+"hostname)**"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:85
+msgid "**upload-uri-format**"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:85
+msgid ""
+"Template used in generation of URI for file upload. **(default: "
+"``{proto}://{serverName}:{port}/upload/{userJid}/{slotId}/{filename}``)**"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:88
+msgid "**download-uri-format**"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:88
+msgid ""
+"Template used in generation of URI for file download. **(default: "
+"``{proto}://{serverName}:{port}/upload/{slotId}/{filename}``)**"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:91
+msgid "URI template format"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:93
+msgid ""
+"Every block in the template between ``{`` and ``}`` is a named part which"
+" will be replaced by the property value during generation of URI for "
+"slot."
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:95
+msgid "Blocks possible to use:"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:98
+msgid "**proto**"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:98
+msgid "Name of protocol."
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:101
+msgid "Domain name of server."
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:104
+msgid "Port on which HTTPS (or HTTP) server is listening."
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:107
+msgid "**userJid**"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:107
+msgid "JID of user requesting slot allocation."
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_configuration.inc:64
+#: ../../Administration/HTTP_File_Upload_component.rst:110
+#: ../../Administration/HTTP_Server.rst:42
+msgid "**domain**"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:110
+msgid "Domain of user requesting slot allocation."
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:113
+msgid "**slotId**"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:113
+msgid "Generated ID of slot."
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:116
+msgid "**filename**"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:116
+msgid "Name of file to upload."
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:120
+msgid "``slotId`` and ``filename`` are required to be part of every URI template."
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:124
+msgid ""
+"Inclusion of ``userJid`` or ``domain`` will speed up the lookup for slot "
+"id during upload and download operation if more than one metadata "
+"repository is configured. However, this may lead to leak of user JID or "
+"user domain if message with URI containing this part will be send to "
+"recipient which is unaware of the senders' JID (ie. in case of anonymous "
+"MUC room)."
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:128
+msgid "File upload expiration"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:130
+msgid ""
+"From time to time it is required to remove expired file to make place for"
+" new uploads. This is done by the ``expiration`` task."
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:135
+msgid "**expiration-time**"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:135
+msgid ""
+"How long the server will keep uploaded files. Value in `Java Period "
+"format <https://docs.oracle.com/javase/8/docs/api/java/time/Period.html"
+"#parse-java.lang.CharSequence-:>`__ **(default: P30D - 30 days)**"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:138
+msgid "**period**"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:138
+msgid ""
+"How often the server should look for expired files to remove. Value in "
+"`Java Period format "
+"<https://docs.oracle.com/javase/8/docs/api/java/time/Period.html#parse-"
+"java.lang.CharSequence-:>`__ **(default: P1D - 1 day)**"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:141
+msgid "**delay**"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:141
+msgid ""
+"Time since server start up before the server should look for expired "
+"files to remove. Value in `Java Period format "
+"<https://docs.oracle.com/javase/8/docs/api/java/time/Period.html#parse-"
+"java.lang.CharSequence-:>`__ **(default: 0)**"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:144
+msgid "**limit**"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:144
+msgid ""
+"Maximum number of files to remove during a single execution of "
+"``expiration``. **(default: 10000)**"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:147
+#: ../../Administration/HTTP_Server.rst:62 ../../Development/REST_API.rst:724
+msgid "Examples"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:150
+msgid "Complex configuration example"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:152
+msgid ""
+"Configuration with a separate repository for metadata to ``example.com`` "
+"pointing to ``file_upload`` data source, custom upload and download URI, "
+"maximum file size set to 10MB, expiration done every 6 hours and grouping"
+" of slot folders by user jid."
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:154
+msgid "**Complex configuration example.**"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:183
+msgid "Example configuration for clustering with HA"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:185
+msgid ""
+"Configuration for high availability in a cluster with common storage at "
+"``/mnt/shared`` and both servers available as ``upload.example.com``"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_component.rst:187
+msgid "**Example configuration with HA.**"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_Component-S3.inc:2
+msgid "S3 support for HTTP File Upload"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_Component-S3.inc:4
+msgid ""
+"By default HTTP File Upload component shipped with Tigase XMPP Server "
+"stores uploaded files locally in the directory structure. If you are "
+"using AWS it may be better to store data using external service like S3 "
+"which are better suited for this task and are more resilient."
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_Component-S3.inc:8
+msgid ""
+"For this feature to work please make sure that you are using all required"
+" dependencies (either by using ``-dist-max`` package or obtaining them "
+"from `tigase-extras aws module <https://github.com/tigase/tigase-"
+"extras/tree/master/aws>`__)"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_Component-S3.inc:12
+msgid "Enabling storage in S3"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_Component-S3.inc:14
+msgid ""
+"To enable storage in S3, you need to add following lines to your "
+"configuration file:"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_Component-S3.inc:24
+msgid ""
+"This will enable HTTP File Upload component and configure it to be used "
+"with S3 bucket named ``bucket-name`` in the same region as your EC2 "
+"instance on which Tigase XMPP Server is running."
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_Component-S3.inc:28
+msgid ""
+"You would need to manually create this S3 bucket and allow your EC2 "
+"instance to access it (read and write). Alternatively, you could add "
+"``autocreateBucket = true`` inside ``store`` block, which will enable "
+"Tigase XMPP Server to create this S3 bucket in the local AWS region."
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_Component-S3.inc:30
+msgid ""
+"If you wish to use S3 bucket from another AWS region, you can do that by "
+"adding setting ``region`` property in the ``store`` block to the id of "
+"the AWS region, ie. set to ``us-west-2`` to use ``US West (Oregon)`` "
+"region:"
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_Component-S3.inc:41
+msgid ""
+"If you wish to share the same S3 bucket between different installations "
+"of Tigase XMPP Server, you should configure ``bucketKeyPrefix`` property "
+"of ``store`` with different identifiers for each installation. That will "
+"allow you to easily filter data uploaded for each installation and will "
+"allow Tigase XMPP Server to provide you with correct storage usage for "
+"each installation."
+msgstr ""
+
+#: ../../Administration/HTTP_File_Upload_Component-S3.inc:52
+msgid "S3Store requires appropriate IAM policy:"
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:2
+msgid "HTTP server"
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:4
+msgid ""
+"HTTP server instance is provided as ``httpServer`` by default. The server"
+" will only be active and enabled if either the HTTP API component or HTTP"
+" File Upload component is enabled. This project uses the default "
+"implementation of an http server provided by `HttpServer "
+"<https://docs.oracle.com/javase/8/docs/jre/api/net/httpserver/spec/com/sun/net/httpserver"
+"/package-summary.html>`__ found embedded in Java JDK."
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:8
+msgid ""
+"This implementation is good only for small installations of if there is "
+"**no requirement** for a high performance HTTP server. If this is do not "
+"match your requirements, it is recommended to use Jetty as the embedded "
+"HTTP server using `Tigase HTTP API - Jetty HTTP Server<jettyHttp>` "
+"project."
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:11
+msgid "Dependencies"
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:13
+msgid ""
+"The default HTTP server implementation requires almost no dependencies as"
+" most calls are already embedded within JDK 8. However as a common API "
+"for processing HTTP requests is needed, as is the same for HTTP server "
+"from JDK and Jetty, we have decided to use HTTP Servlet API in version "
+"3.1."
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:15
+msgid ""
+"The required files can be downloaded from `Tigase HTTP API project "
+"<https://projects.tigase.org/projects/tigase-http-api/files>`__ section "
+"or using following link `servlet-api-3.1.jar "
+"<https://projects.tigase.org/attachments/download/1504/servlet-"
+"api-3.1.jar>`__"
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:17
+msgid ""
+"Please note that this file is included in dist-max, exe, and jar "
+"installer distributions of Tigase XMPP server."
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:20
+msgid "Configuration Properties"
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:22
+msgid ""
+"The HTTP server can be configured using any of all of the following "
+"properties. Note that these settings only apply to the default "
+"implementation provided by Tigase HTTP API."
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:25
+msgid "**ports**"
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:25
+msgid ""
+"This property is used to configure on which ports on HTTP server should "
+"listen for incoming connections. If it is not set then default port "
+"``8080`` will be used"
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:42
+msgid "**connections**"
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:28
+msgid "It is used to group configurations passed to ports"
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:42
+msgid "**{port}**"
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:31
+msgid ""
+"For every ``{port}`` you can pass separate configuration. To do so you "
+"will need to replace ``{port}`` with port number, ie. ``8080``. For every"
+" port you can pass following properties:"
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:38
+msgid "**socket**"
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:34
+msgid ""
+"Sets type of socket used for handling incoming connections. Accepted "
+"values are:"
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:36
+msgid "``plain`` - port will work in plain HTTP mode **(default)**"
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:38
+msgid "``ssl`` - port will work in HTTPS mode"
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:41
+msgid ""
+"This property is used to configure domain name of SSL certificate which "
+"should be used by HTTP server running on this port (if ``socket`` is set "
+"to ``ssl``). If it is not set (or it will be omitted) then Tigase XMPP "
+"Server will try to use SSL certificate for the host to which client tries"
+" to connect. If there will be no SSL certificate for that domain name, "
+"then default SSL certificate of Tigase XMPP Server will be used."
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:45
+msgid "Additional properties of embedded HTTP server"
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:47
+msgid ""
+"With embedded HTTP server, you have a few additional properties within "
+"``executor`` section, which you can pass to adjust this HTTP server."
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:59
+msgid "**executor**"
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:50
+msgid "Name of the subsection"
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:53
+msgid "**threads**"
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:53
+msgid ""
+"This property is used to configure the number of threads used to handle "
+"HTTP requests, ie. ``10``"
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:56
+msgid "**request-timeout**"
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:56
+msgid ""
+"Property used to set timeout for processing a single HTTP request (in "
+"milliseconds), ie. ``30000``"
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:59
+msgid "**accept-timeout**"
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:59
+msgid ""
+"Property used to set timeout for reading HTTP request headers (in "
+"milliseconds), ie. ``2000``"
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:64
+msgid ""
+"Below are few examples for use in DSL based configuration format and "
+"older properties based format."
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:67
+msgid "HTTPS on port 8443 with SSL certificate for example.com"
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:69
+msgid ""
+"In configuration file ``httpServer`` related configuration should look "
+"like this:"
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:84
+msgid "Changing port from 8080 to 8081"
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:96
+msgid "Redirections from HTTP to HTTPS"
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:98
+msgid ""
+"It’s beneficial to use HTTPS as much as possible, however often it "
+"requires adding redirection from ``http`` to ``https``. While it’s "
+"possible to have it done using external solutions (additional http "
+"servers like nginx or apache or some sort of load balancer with such "
+"feature) it’s convenient to have it build-in."
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:100
+msgid ""
+"Feature implemented in Tigase XMPP Server allows specifying "
+"``redirectUri`` which consists of destination hostname and optionally "
+"port and path. Specifying any query parameters IS NOT supported. "
+"``redirectUri`` has support for ``{host}`` variable which can be used to "
+"keep original server name in the redirection from the original request, "
+"ie. ``redirectUri = 'https://{host}:8089'`` to redirect request to the "
+"same server but on port 8089 (original path URI and query string will be "
+"automatically appended to the redirection URL)."
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:102
+msgid ""
+"It’s also possible, that Tigase XMPP server handles on it’s plain socket "
+"port regular ``http`` request as well as ``https`` handled by load "
+"balancer/proxy that terminates HTTPS traffic and forwards the request "
+"using ``http`` protocol. In that case unconditional request would result "
+"in infinite redirection. Fortunately it’s possible to specify condition "
+"under which redirection should happen using ``redirectCondition`` option."
+" It has to be set for the redirection to wrok. Currently following values"
+" are supported (they should be self-explanatory):"
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:104
+msgid "``never``,"
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:106
+msgid "``http``,"
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:108
+msgid "``https``,"
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:110
+msgid "``always``"
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:126
+msgid "Usage of Jetty HTTP server as HTTP server"
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:128
+msgid ""
+"As mentioned before it is possible to use Jetty as HTTP server for "
+"improved performance. Jetty API can be used in one of two forms: "
+"Standalone and OSGi."
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:131
+msgid "Standalone"
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:133
+msgid ""
+"In this case the Jetty instance is created and configured internally by "
+"Tigase HTTP API. This allows for the same configuration properties used "
+"as for default HTTP server configuration."
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:135
+msgid "**Configuration with use of standalone Jetty HTTP Server.**"
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:144
+msgid "HTTP/2 and Jetty HTTP Server"
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:146
+msgid ""
+"If Jetty HTTP server is used in standalone mode, JDK which Tigase is "
+"using is newer then JDK 8 and HTTP server is configured to serve data "
+"over encrypted (``ssl`` or ``tls``) connections then HTTP/2 will be "
+"enabled by default."
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:148
+msgid ""
+"However it is possible to disable HTTP/2 by setting ``use-http2`` "
+"property of encrypted port to ``false``, ie. for port 8443:"
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:162
+msgid "OSGi"
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:164
+msgid ""
+"This can only be used when Tigase is running inside OSGi container. If "
+"this is used Tigase HTTP API will try to retrieve Jetty HTTP server from "
+"OSGi container and use it."
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:168
+msgid ""
+"Jetty HTTP server instance is not configured by Tigase. We would only use"
+" this instance for deployment."
+msgstr ""
+
+#: ../../Administration/HTTP_Server.rst:170
+msgid "**Configuration in OSGi mode with use of Jetty HTTP Server.**"
+msgstr ""
+
+#: ../../Administration/tigase-http-api-release-notes.rst:2
+#: ../../Administration/tigase-http-api-release-notes.rst:7
+msgid ""
+"Tigase HTTP API component is a generic container used to provide other "
+"HTTP related features as modules. It is configured by default to run "
+"under name of http. Installations of Tigase XMPP Server run this "
+"component enabled by default under the same name even if not configured."
+msgstr ""
+
+#: ../../Administration/tigase-http-api-release-notes.rst:5
+msgid "HTTP API component"
+msgstr ""
+
+#: ../../Administration/tigase-http-api-release-notes.rst:10
+msgid "Tigase HTTP-API Release Notes"
+msgstr ""
+
+#: ../../Administration/tigase-http-api-release-notes.rst:13
+msgid "Tigase HTTP-API 2.2.0 Release Notes"
+msgstr ""
+
+#: ../../Administration/tigase-http-api-release-notes.rst:15
+msgid ""
+"Welcome to Tigase HTTP-API 2.2.0! This is a feature release for with a "
+"number of fixes and update"
+msgstr ""
+
+#: ../../Administration/tigase-http-api-release-notes.rst:18
+msgid "Major Changes"
+msgstr ""
+
+#: ../../Administration/tigase-http-api-release-notes.rst:20
+msgid ""
+"Enable HTTP File Upload by default with additional, optional, AWS S3 "
+"compatible backend"
+msgstr ""
+
+#: ../../Administration/tigase-http-api-release-notes.rst:22
+msgid "Improvements to Web Setup to make installation even more straightforward"
+msgstr ""
+
+#: ../../Administration/tigase-http-api-release-notes.rst:24
+msgid ""
+"Allow exposing ``.well-known`` in the root context to facilitate "
+"`XEP-0156: Discovering Alternative XMPP Connection Methods "
+"<https://xmpp.org/extensions/xep-0156.html>`__"
+msgstr ""
+
+#: ../../Administration/tigase-http-api-release-notes.rst:26
+msgid "Add option to redirect requests from http to https"
+msgstr ""
+
+#: ../../Administration/tigase-http-api-release-notes.rst:29
+msgid "All Changes"
+msgstr ""
+
+#: ../../Administration/tigase-http-api-release-notes.rst:31
+msgid ""
+"`#http-65 <https://projects.tigase.net/issue/http-65>`__: More detailed "
+"logs"
+msgstr ""
+
+#: ../../Administration/tigase-http-api-release-notes.rst:33
+msgid ""
+"`#http-86 <https://projects.tigase.net/issue/http-86>`__: Add s3 backend "
+"for http-upload"
+msgstr ""
+
+#: ../../Administration/tigase-http-api-release-notes.rst:35
+msgid ""
+"`#http-91 <https://projects.tigase.net/issue/http-91>`__: Items in setup "
+"on Features screen are misaligned"
+msgstr ""
+
+#: ../../Administration/tigase-http-api-release-notes.rst:37
+msgid ""
+"`#http-93 <https://projects.tigase.net/issue/http-93>`__: Update web-"
+"installer documentation"
+msgstr ""
+
+#: ../../Administration/tigase-http-api-release-notes.rst:39
+msgid ""
+"`#http-95 <https://projects.tigase.net/issue/http-95>`__: Enable HTTP "
+"File Upload by default"
+msgstr ""
+
+#: ../../Administration/tigase-http-api-release-notes.rst:41
+msgid ""
+"`#http-96 <https://projects.tigase.net/issue/http-96>`__: Enabling "
+"cluster mode / ACS doesn’t add it to resulting configuration file"
+msgstr ""
+
+#: ../../Administration/tigase-http-api-release-notes.rst:43
+msgid ""
+"`#http-98 <https://projects.tigase.net/issue/http-98>`__: Setup tests are"
+" failing since Septempter"
+msgstr ""
+
+#: ../../Administration/tigase-http-api-release-notes.rst:45
+msgid ""
+"`#http-99 <https://projects.tigase.net/issue/http-99>`__: Enforce max-"
+"file-size limit"
+msgstr ""
+
+#: ../../Administration/tigase-http-api-release-notes.rst:47
+msgid ""
+"`#http-100 <https://projects.tigase.net/issue/http-100>`__: Prevent "
+"enabling all Message\\* plugins"
+msgstr ""
+
+#: ../../Administration/tigase-http-api-release-notes.rst:49
+msgid ""
+"`#http-101 <https://projects.tigase.net/issue/http-101>`__: Prevent "
+"enabling all Mobile\\* plugins"
+msgstr ""
+
+#: ../../Administration/tigase-http-api-release-notes.rst:51
+msgid ""
+"`#http-102 <https://projects.tigase.net/issue/http-102>`__: Last activity"
+" plugins handling should be improved"
+msgstr ""
+
+#: ../../Administration/tigase-http-api-release-notes.rst:53
+msgid ""
+"`#http-103 <https://projects.tigase.net/issue/http-103>`__: Enabling "
+"http-upload should give an info about requirement to set domain/store"
+msgstr ""
+
+#: ../../Administration/tigase-http-api-release-notes.rst:55
+msgid ""
+"`#http-105 <https://projects.tigase.net/issue/http-105>`__: Handle "
+"forbidden characters in filenames"
+msgstr ""
+
+#: ../../Administration/tigase-http-api-release-notes.rst:57
+msgid ""
+"`#http-106 <https://projects.tigase.net/issue/http-106>`__: Can’t remove "
+"user for non-existent VHost"
+msgstr ""
+
+#: ../../Administration/tigase-http-api-release-notes.rst:59
+msgid ""
+"`#http-107 <https://projects.tigase.net/issue/http-107>`__: Allow "
+"exposing ``.well-known`` in the root context"
+msgstr ""
+
+#: ../../Administration/tigase-http-api-release-notes.rst:61
+msgid ""
+"`#http-108 <https://projects.tigase.net/issue/http-108>`__: Add option to"
+" redirect requests from http to https"
+msgstr ""
+
+#: ../../Administration/tigase-http-api-release-notes.rst:63
+msgid ""
+"`#http-109 <https://projects.tigase.net/issue/http-109>`__: openAccess "
+"option is missing after migrating the component to TK"
+msgstr ""
+
+#: ../../Administration/tigase-http-api-release-notes.rst:65
+msgid ""
+"`#http-110 <https://projects.tigase.net/issue/http-110>`__: Add support "
+"for querying and managing uploaded files"
+msgstr ""
+
+#: ../../Administration/tigase-http-api-release-notes.rst:67
+msgid ""
+"`#http-111 <https://projects.tigase.net/issue/http-111>`__: "
+"DefaultLogic.removeExpired removal of slot failed"
+msgstr ""
+
+#: ../../Administration/tigase-http-api-release-notes.rst:69
+msgid ""
+"`#http-113 <https://projects.tigase.net/issue/http-113>`__: Add condition"
+" to redirect only if the X-Forwarded-Proto has certain value"
+msgstr ""
+
+#: ../../Administration/tigase-http-api-release-notes.rst:71
+msgid ""
+"`#http-114 <https://projects.tigase.net/issue/http-114>`__: "
+"TigaseDBException: Could not allocate slot"
+msgstr ""
+
+#: ../../Administration/tigase-http-api-release-notes.rst:73
+msgid ""
+"`#http-116 <https://projects.tigase.net/issue/http-116>`__: Limiting list"
+" of VHosts doesn’t work for JDK based http-server"
+msgstr ""
+
+#: ../../Administration/tigase-http-api-release-notes.rst:75
+msgid ""
+"`#http-117 <https://projects.tigase.net/issue/http-117>`__: Http "
+"redirection doesn’t work in docker"
+msgstr ""
+
+#: ../../Administration/tigase-http-api-release-notes.rst:77
+msgid ""
+"`#http-119 <https://projects.tigase.net/issue/http-119>`__: Can’t change "
+"VHost configuration via Admin WebUI"
+msgstr ""
+
+#: ../../Administration/tigase-http-api-release-notes.rst:79
+msgid ""
+"`#http-120 <https://projects.tigase.net/issue/http-120>`__: Improve S3 "
+"support for HTTP File Upload to accept custom URL and credentials for S3 "
+"storage configuration"
+msgstr ""
+
+#: ../../Administration/tigase-http-api-release-notes.rst:81
+msgid ""
+"`#http-121 <https://projects.tigase.net/issue/http-121>`__: Deprecate "
+"DnsWebService and rewrite /.well-known/host-meta generator"
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules.inc:3
+msgid "Available modules"
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules.inc:6
+msgid "Admin UI module"
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules.inc:8
+msgid ""
+"This is very simple module for administration of Tigase XMPP Server using"
+" HTTP browser. It allows administrators to execute ad-hoc commands from "
+"HTTP browser allowing to change some configuration options at runtime. It"
+" can be accessed by pointing your browser to "
+"http://server.address:8080/admin/ and logging in with admin credentials."
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules.inc:11
+msgid "Index module"
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules.inc:13
+msgid ""
+"This module is deployed at ``/`` by default and provides list of "
+"installed and available modules for the virtual host when requested."
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules.inc:18
+msgid "REST module"
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules.inc:20
+msgid ""
+"This module provides REST-like API for accessing Tigase XMPP Server. It "
+"uses Groovy scripts to process HTTP requests and prepare responses."
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules.inc:23
+msgid "Server status module"
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules.inc:27
+msgid "This module is still a work in progress!"
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules.inc:29
+msgid ""
+"This module is designed to present current server status and report "
+"possible issues."
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules.inc:32
+msgid "Setup module"
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules.inc:34
+msgid ""
+"Module is created to act as a web based installer and configuration "
+"utility for Tigase XMPP Server. Allows you to modify basic Tigase XMPP "
+"Server settings, ie. related to database access. Changes may be saved to "
+"configuration file from this module."
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules.inc:37
+msgid "Web UI module"
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules.inc:39
+msgid ""
+"This module contains full web client based on `Tigase JaXMPP "
+"<http://www.tigase.net/content/jaxmpp-library:>`__ client library "
+"allowing user to chat, manage contacts list (roster), browse message "
+"archive, etc. For more information on this module, consult the "
+"`Administration Guide <http://docs.tigase.org/tigase-"
+"server/snapshot/Administration_Guide/html/#_use_of_the_http_api>`__."
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules.inc:42
+#: ../../Administration/HTTP_API_Component_modules_configuration.inc:52
+msgid "DNS Web Service module"
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules.inc:44
+#: ../../Administration/HTTP_API_Component_modules_configuration.inc:54
+msgid ""
+"For web based XMPP clients it is not possible to execute DNS SRV requests"
+" to find address of XMPP server hosting for particular domain. To solve "
+"this the DNS Web Service module was created."
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules.inc:46
+msgid ""
+"It handles incoming HTTP GET request and using ``Host`` HTTP header "
+"executes DNS requests as specified in `XEP-0156: Discovering Alternative "
+"XMPP Connection Methods <https://xmpp.org/extensions/xep-0156.html>`__. "
+"Results are returned in XML or JSON as specified in the XEP mentioned "
+"before."
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules.inc:48
+msgid ""
+"By default it is deployed at ``dns-webservice`` and path for XML response"
+" is ``/dns-webservice/.well-known/host-meta`` and for JSON is ``/dns-"
+"webservice/-known/host-meta.json``."
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules.inc:51
+msgid "User Status Endpoint module"
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules.inc:53
+msgid ""
+"This module is designed as an endpoint required for REST API User Status "
+"to work properly. It is not accessible using HTTP/REST API, so it can "
+"(and in most cases should) be active."
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_common_configuration.inc:2
+msgid "Common module configuration"
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_common_configuration.inc:5
+msgid "Enabling/disabling module"
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_common_configuration.inc:7
+msgid ""
+"Every module can be activated or disabled by adjusting it’s activity in "
+"following way:"
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_common_configuration.inc:17
+msgid ""
+"You need to replace ``%module_id%`` with the id of module which you want "
+"to change activity (in this case, it will disable module)."
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_common_configuration.inc:19
+msgid "**Disabling REST module.**"
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_common_configuration.inc:28
+msgid "Context path"
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_common_configuration.inc:30
+msgid ""
+"This property allows you to change the context path that is used by "
+"module. In other words, it allows you to change the prefix used by "
+"module. By default every module (with exception of the Index module) uses"
+" a context path that is the same as module id. For example, the REST "
+"module ID results in the context path ``/rest``"
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_common_configuration.inc:32
+msgid "**Changing context path for REST module to ``/api``.**"
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_common_configuration.inc:44
+msgid "List of virtual hosts"
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_common_configuration.inc:46
+msgid ""
+"This provides the ability to limit modules to be available only on listed"
+" virtual hosts, and allows to set context path to ``/`` for more than one"
+" module. Property accepts list of strings, which in the case of "
+"config.tdsl file format is list of comma separated domain names and in "
+"DSL it is written as list of strings (see :ref:`Complex "
+"Example<complexExample>`)."
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_common_configuration.inc:48
+msgid ""
+"**Moving the REST module to be available only for requests directed to "
+"``api.example.com``.**"
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_common_configuration.inc:61
+msgid "Complex example"
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_common_configuration.inc:63
+msgid ""
+"In this example we will disable the Index module and move REST module to "
+"``http://api.example.com/`` and ``http://rest.example.com``."
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_configuration.inc:2
+msgid "Module specific configuration"
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_configuration.inc:4
+msgid ""
+"Tigase will try to start a standalone Jetty HTTP server at port 8080 and "
+"start up the default modules, including ``RestModule`` which will add "
+"context for REST API in the /rest path. ``RestModule`` will also load all"
+" groovy scripts located in ``scripts/rest/*`` directories and will bind "
+"them to proper actions for the ``/rest/*`` paths."
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_configuration.inc:6
+msgid ""
+"**NOTE:** Scripts that handle HTTP requests are available in the "
+"component repository in ``src/scriopts/groovy/tigase/rest/`` directory."
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_configuration.inc:8
+msgid ""
+"Tigase’s REST Component comes with two modules that can be enabled, "
+"disabled, and configured separately. Common settings for modules for "
+"component properties are used in the following format: ``component_name "
+"(module: value) {}`` the following settings are available for both listed"
+" modules:"
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_configuration.inc:10
+msgid "``active`` - Boolean values true/false to enable or disable the module."
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_configuration.inc:12
+msgid ""
+"``context-path`` - Path of HTTP context under which the module should be "
+"available."
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_configuration.inc:14
+msgid ""
+"``vhosts`` - Comma separated list of virtual hosts for which the module "
+"should be available. If not configured, the module will be available for "
+"all vhosts."
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_configuration.inc:17
+msgid "Rest Module"
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_configuration.inc:19
+msgid ""
+"This is the Module that provides support for the REST API. Available "
+"properties:"
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_configuration.inc:21
+msgid ""
+"``rest-scripts-dir`` - Provides ability to specify path to scripts "
+"processing REST requests if you do not wish to use default "
+"(scripts/rest)."
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_configuration.inc:24
+msgid "API keys"
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_configuration.inc:26
+msgid ""
+"In previous version it was possible to configure ``api-keys`` for REST "
+"module using entries within configuration file. In the recent version we "
+"decided to remove this configuration option. Now, by default Tigase XMPP "
+"Server requires API key to be passed to all requests and you need to "
+"configure them before you will be able to use REST API."
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_configuration.inc:28
+msgid "Instead, you should use ad-hocs available on the REST module JID to:"
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_configuration.inc:30
+msgid "Add API key (``api-key-add``)"
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_configuration.inc:32
+msgid "Update API key (``api-key-update``)"
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_configuration.inc:34
+msgid "Remove API key (``api-key-remove``);"
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_configuration.inc:38
+msgid ""
+"If you have Admin UI enabled, you may log in using admin credentials to "
+"this UI and when you select ``CONFIGURATION`` section on the left "
+"sidebar, it will expand and allow you to execute any of those ad-hoc "
+"commands mentioned above."
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_configuration.inc:40
+msgid ""
+"Requests made to the HTTP service must conclude with one of the API keys "
+"defined using ad-hoc commands: ``http://localhost:8080/rest/adhoc/sess-"
+"man@domain.com?api-key=test1``"
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_configuration.inc:44
+msgid ""
+"If you want to allow access to REST API without usage of any keys, it is "
+"possible. To do so, you need to add an API key with ``API key`` field "
+"value equal ``open_access``."
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_configuration.inc:48
+msgid ""
+"You can also completely disable api-keys by adding ``'open-access' = "
+"true`` to the TDSL configuration file, either in ``http`` bean or any of "
+"the modules of that bean, e.g. ``rest``, \\`admin, etc"
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_configuration.inc:56
+msgid ""
+"It handles incoming HTTP GET request and using passed ``domain`` and "
+"``callback`` HTTP parameters executes DNS requests as specified in "
+"`XEP-0156: Discovering Alternative XMPP Connection Methods "
+"<https://xmpp.org/extensions/xep-0156.html>`__. Results are returned in "
+"JSON format for easy processing by web based XMPP client."
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_configuration.inc:58
+msgid "By default it is deployed at ``dns-webservice``"
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_configuration.inc:61
+msgid "Parameters"
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_configuration.inc:64
+msgid "Domain name to look for XMPP SRV client records."
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_configuration.inc:67
+msgid "**callback**"
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_configuration.inc:67
+msgid ""
+"Due to security reasons web based client may not be able to access some "
+"DNS Web Service due to cross-domain AJAX requests. Passing optional "
+"``callback`` parameter sets name of callback for JSONP requests and "
+"results proper response in JSONP format."
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_configuration.inc:70
+msgid "Discover way to connect to XMPP server"
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_configuration.inc:73
+msgid "Using ``host-meta``"
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_configuration.inc:75
+msgid ""
+"You should access endpoint available at ``/dns-webservice/.well-known"
+"/host-meta``."
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_configuration.inc:77
+msgid ""
+"To make it follow specification you should configure a redirection from "
+"the root path of your http server to above path. For example, using "
+"nginx:"
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_configuration.inc:88
+msgid "Query particular domain"
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_configuration.inc:90
+msgid ""
+"If we want to know connectivity options for ``sure.im`` we should send "
+"HTTP GET request to ``http://our-xmpp-server:8080/dns-"
+"webservice/?domain=sure.im&version=2``. We will receive following "
+"response:"
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_configuration.inc:116
+msgid ""
+"As you can see in here we have names and IP address of XMPP servers "
+"hosting ``sure.im`` domain as well as list of URI for establishing "
+"connections using BOSH or WebSocket."
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_configuration.inc:118
+msgid ""
+"This module is activated by default. However, if you are operating in a "
+"test environment where you may not have SRV and A records setup to the "
+"domain you are using, you may want to disable this in your config.tdsl "
+"file with the following line:"
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_configuration.inc:127
+msgid "Enabling password reset mechanism"
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_configuration.inc:129
+msgid ""
+"It is possible to provide users with a mechanism for a password change in"
+" case if they forgot their password to the XMPP account. To do that you "
+"need to have ``tigase-extras.jar`` in your classpath (it is part of "
+"``-dist-max`` distribution package), enable ``mailer`` and ``account-"
+"email-password-resetter``."
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_configuration.inc:131
+msgid "**Example configuration.**"
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_configuration.inc:146
+msgid "You need to replace example configuration parameters with correct ones."
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_configuration.inc:148
+msgid ""
+"With this configuration in place and after restart of Tigase XMPP Server "
+"at url http://localhost:8080/rest/user/resetPassword will be available "
+"web form which may be used for password reset."
+msgstr ""
+
+#: ../../Administration/HTTP_API_Component_modules_configuration.inc:152
+msgid ""
+"This mechanism will only work if user provided real email address during "
+"account registration and if user still remembers and has access to email "
+"address used during registration."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:2
+msgid "Admin UI Guide"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:4
+msgid ""
+"The Admin User Interface is an HTTP-based interface that sends REST "
+"commands to the server to update configurations, change settings, and "
+"retrieve statistics."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:7
+msgid "A Note about REST"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:9
+msgid ""
+"REST stands for REpresentational State Transfer which is a stateless "
+"communication method that in our case passes commands using HTTP GET, "
+"PUT, POST, and DELETE commands to resources within the Tigase server."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:12
+msgid "General overview of the UI"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:14
+msgid ""
+"After navigating to the Admin WebUI you will see basic information about "
+"navigation. The panel itself consists of two main parts: \\* left "
+"navigation menu, which groups all configuration items into categories; "
+"\\* central, main configuration page displaying configuration options of "
+"the selected items."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:16
+msgid "|adminUI main|"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:590
+msgid "adminUI main"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:18
+msgid ""
+"Each configuration item has name (upper line) and associated component "
+"(lower line) as some features can be executed in the context of different"
+" component (for example ``Update Item Configuration`` can be executed for"
+" VirtualHost Manager or ExternalConnection Manager)"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:21
+#: ../../Administration/UI_Guide_Client.inc:79
+#: ../../Development/REST_API.rst:915
+msgid "Configuration"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:23
+msgid ""
+"Allows you to configure some of the servers settings, such as message of "
+"the day, welcome message or initialize shutdown of the cluster node."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:26
+msgid "Example Scripts"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:28
+msgid ""
+"This is a list of script examples that can be run and do menial functions"
+" for each component. They may not have particular value themselves, but "
+"are present to be used as reference when writing custom scripts. Get list"
+" of available commands is one script, that is present for every component"
+" that is active on the server, and as its title implies, will provide a "
+"list of all commands for that component. Lastly, the two scripts from the"
+" `Scripting section <#scriptingSupport>`__ of this guide. Generally, "
+"there is not much needed to see in this section."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:31
+#: ../../Administration/UI_Guide_Client.inc:84
+msgid "Notifications"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:33
+msgid ""
+"This section has one simple command: to be able to send a mass message to"
+" all logged in users. There are three types of messages that can be sent "
+"from this section: - **normal** Messages will show as a pop-up in most "
+"clients. - **headline** Certain clients will take headline messages and "
+"insert them into MUC or chats between users, otherwise it will create a "
+"pop-up like normal messages. - **chat** Chat messages will open up a chat"
+" dialog with users."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:36
+#: ../../Administration/UI_Guide_Client.inc:89
+msgid "Other"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:38
+#: ../../Administration/UI_Guide_Client.inc:91
+msgid ""
+"This section contains a considerable list of options and settings "
+"affecting server functions."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:41
+#: ../../Administration/UI_Guide_Client.inc:94
+msgid "Activate log tracker for a user"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:43
+msgid ""
+"This allows you to set a log file to track a specific user. Set the bare "
+"or full JID of the user you want to log, and a name of the files you wish"
+" the log to be written to. The files will be written in the root Tigase "
+"directory unless you give a directory like logs/filename. The log files "
+"will be named with a .0 extension and will be named .1, .2, .3 and so on "
+"as each file reaches 10MB by default. filename.0 will always be the most "
+"recent. Logging will start once the command has been issued, and cease "
+"once the server restarts."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:46
+#: ../../Administration/UI_Guide_Client.inc:99
+msgid "Add SSL certificate"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:48
+msgid ""
+"Here you can add SSL certificates from PEM files to specific virtual "
+"hosts. Although Tigase can generate its own self-signed certificates, "
+"this will override any default certificates. The certificates cannot "
+"contain a passphrase, or be encrypted. Be sure that the contents contain "
+"both the certificate and private key data. You also have the option to "
+"save the certificate to disk, making the change permanent."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:51
+msgid "Add listener script"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:53
+msgid ""
+"This section allows you to create a custom function for the eventbus "
+"component. These scripts can have the server conduct certain operations "
+"if set criteria are met. You may write the script in either Groovy or "
+"EMCAscript. Please see the `eventbus section <#eventbus>`__ for more "
+"details."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:56
+#: ../../Administration/UI_Guide_Client.inc:104
+msgid "Add Monitor Task"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:58
+msgid ""
+"You can write scripts for Groovy or ECMAScript to add to monitor tasks "
+"here. This only adds the script to available scripts however, you will "
+"need to run it from another prompt. Note that these scripts may only work"
+" with the monitor component."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:61
+#: ../../Administration/UI_Guide_Client.inc:109
+msgid "Add Monitor Timer Task"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:63
+#: ../../Administration/UI_Guide_Client.inc:111
+msgid ""
+"This section allows you to add monitor scripts in Groovy while using a "
+"delay setting which will delay the start of the script."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:67
+msgid "Add New Item -ext"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:69
+msgid ""
+"Depending on whether you have any external components loaded or not, this"
+" may show. This allows you to add additional external components to the "
+"running instance of Tigase."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:72
+msgid "Add New Item -Vhost"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:74
+#: ../../Administration/UI_Guide_Client.inc:121
+msgid ""
+"This allows you to add new virtual hosts to the XMPP server. A breakdown "
+"of the fields is as follows:"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:76
+#: ../../Administration/UI_Guide_Admin.inc:383
+#: ../../Administration/UI_Guide_Client.inc:123
+msgid ""
+"Domain name: the full domain name of the new vhost. Tigase will not add "
+"anything to this domain, so if it is ti be a subdomain of example.com, "
+"you will need to enter sub.domain.com."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:78
+#: ../../Administration/UI_Guide_Admin.inc:385
+#: ../../Administration/UI_Guide_Client.inc:125
+msgid "Enabled: Whether the domain is turned on or off."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:80
+#: ../../Administration/UI_Guide_Admin.inc:387
+#: ../../Administration/UI_Guide_Client.inc:127
+msgid "Anonymous enabled: Allow anonymous logins."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:82
+#: ../../Administration/UI_Guide_Admin.inc:389
+#: ../../Administration/UI_Guide_Client.inc:129
+msgid ""
+"In-band registration: Whether or not to allow users to register accounts "
+"upon login."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:84
+#: ../../Administration/UI_Guide_Admin.inc:391
+#: ../../Administration/UI_Guide_Client.inc:131
+msgid ""
+"TLS required: Require logins to the vhost to conduct a TLS handshake "
+"before opening streams."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:86
+#: ../../Administration/UI_Guide_Admin.inc:393
+#: ../../Administration/UI_Guide_Client.inc:133
+msgid ""
+"S2S secret: a server-generated code to differentiate traffic between "
+"servers, typically there is no need to enter your own, but you may if you"
+" need to get into low level code."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:88
+msgid ""
+"Domain filter policy: Sets the filter policy for this domain, see `This "
+"section <domainBasedPacketFiltering>`__ for a description of the rules."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:90
+#: ../../Administration/UI_Guide_Admin.inc:397
+#: ../../Administration/UI_Guide_Client.inc:137
+msgid ""
+"Domain filter domains: a specific setting to restrict or control cross "
+"domain traffic."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:92
+#: ../../Administration/UI_Guide_Admin.inc:399
+#: ../../Administration/UI_Guide_Client.inc:139
+msgid "Max users: maximum users allowed to be registered to the server."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:94
+#: ../../Administration/UI_Guide_Admin.inc:401
+#: ../../Administration/UI_Guide_Client.inc:141
+msgid ""
+"Allowed C2S, BOSH, Websocket ports: Comma separated list of ports that "
+"this vhost will check for all of these services."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:96
+#: ../../Administration/UI_Guide_Admin.inc:403
+#: ../../Administration/UI_Guide_Client.inc:143
+msgid ""
+"Presence forward address: specific address where presence information is "
+"forwarded too. This may be handy if you are looking to use a single "
+"domain for presence processing and handling."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:98
+#: ../../Administration/UI_Guide_Admin.inc:405
+#: ../../Administration/UI_Guide_Client.inc:145
+msgid ""
+"Message forward address: Specific address where all messages will be sent"
+" too. This may be useful to you if you have a single server handling AMP "
+"or message storage and want to keep the load there."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:100
+#: ../../Administration/UI_Guide_Admin.inc:407
+#: ../../Administration/UI_Guide_Client.inc:147
+msgid ""
+"Other Parameters: Other settings you may wish to pass to the server, "
+"consider this a section for options after a command."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:102
+#: ../../Administration/UI_Guide_Admin.inc:409
+#: ../../Administration/UI_Guide_Client.inc:149
+msgid ""
+"Owner: The owner of the vhost who will also be considered an "
+"administrator."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:104
+#: ../../Administration/UI_Guide_Admin.inc:411
+#: ../../Administration/UI_Guide_Client.inc:151
+msgid ""
+"Administrators: comma separated list of JIDs who will be considered "
+"admins for the vhost."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:106
+#: ../../Administration/UI_Guide_Admin.inc:413
+#: ../../Administration/UI_Guide_Client.inc:153
+msgid ""
+"XEP-0136 Message Archiving Enabled: Whether to turn on or off this "
+"feature."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:108
+#: ../../Administration/UI_Guide_Admin.inc:415
+#: ../../Administration/UI_Guide_Client.inc:155
+msgid ""
+"XEP-0136 Required store method: If XEP-0136 is turned on, you may "
+"restrict the portion of message that is saved. This is required for any "
+"archiving, if null, any portion of the message may be stored."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:110
+#: ../../Administration/UI_Guide_Admin.inc:417
+#: ../../Administration/UI_Guide_Client.inc:157
+msgid ""
+"Client certificate required: Whether the client should submit a "
+"certificate to login."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:112
+#: ../../Administration/UI_Guide_Client.inc:159
+msgid ""
+"Client certificate CA: The Certificate Authority of the client "
+"certificate."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:114
+#: ../../Administration/UI_Guide_Client.inc:161
+msgid ""
+"XEP-0136 retention period: integer of number of days message archives "
+"will be set."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:116
+#: ../../Administration/UI_Guide_Admin.inc:423
+#: ../../Administration/UI_Guide_Client.inc:163
+msgid ""
+"Trusted JIDs: Comma separated list of JIDs who will be added to the "
+"trusted list, these are JIDS that may conduct commands, edit settings, or"
+" other secure work without needed secure logins."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:118
+#: ../../Administration/UI_Guide_Admin.inc:425
+#: ../../Administration/UI_Guide_Client.inc:165
+msgid ""
+"XEP-0136 retention type: Sets the type of data that retention period will"
+" use. May be User defined (custom number type), Unlimited, or Number of "
+"Days."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:120
+#: ../../Administration/UI_Guide_Admin.inc:427
+msgid ""
+"XEP-0136 - store MUC messages: Whether or not to store MUC messages for "
+"archiving. Default is user, which allows users to individually set this "
+"setting, otherwise true/false will override."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:122
+#: ../../Administration/UI_Guide_Admin.inc:429
+#: ../../Administration/UI_Guide_Client.inc:169
+msgid ""
+"see-other-host redirection enabled: in servers that have multiple "
+"clusters, this feature will help to automatically repopulate the cluster "
+"list if one goes down, however if this is unchecked, that list will not "
+"change and may attempt to send traffic to a down server."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:124
+#: ../../Administration/UI_Guide_Admin.inc:431
+#: ../../Administration/UI_Guide_Client.inc:171
+msgid ""
+"XEP-0136 Default store method: The default section of messages that will "
+"be stored in the archive."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:127
+#: ../../Administration/UI_Guide_Client.inc:174
+msgid "Change user inter-domain communication permission"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:129
+msgid ""
+"Here you can restrict users to be able to communicate on specific "
+"domains, this works similar to the domain filtering policy using the same"
+" rule sets. For more details, see `Domain Based Packet Filtering "
+"<#domainBasedPacketFiltering>`__ section for rule details and specifics. "
+"Note that the changes may be made to multiple JIDs at the same time."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:132
+#: ../../Administration/UI_Guide_Client.inc:180
+msgid "Connections Time"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:134
+#: ../../Administration/UI_Guide_Client.inc:182
+msgid "Lists the longest and average connection time from clients to servers."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:137
+msgid "Create Node"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:139
+msgid ""
+"This section allows you to create a new node for the pubsub component. "
+"Here is a breakdown of the fields:"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:141
+msgid "The node to create: this is the name of the node that will be created."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:143
+msgid "Owner JID: user JID who will be considered the owner of the node."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:145
+msgid ""
+"pubsub#node type: sets the type of node the the new node will be. Options"
+" include:"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:147
+#: ../../Administration/UI_Guide_Client.inc:194
+msgid "**leaf** Node that can publish and be published too."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:149
+#: ../../Administration/UI_Guide_Client.inc:196
+msgid "**collection** A collection of other nodes."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:151
+#: ../../Administration/UI_Guide_Client.inc:198
+msgid ""
+"A friendly name for the node: Allows spaces and other characters to help "
+"differentiate it from other nodes."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:153
+#: ../../Administration/UI_Guide_Client.inc:200
+msgid ""
+"Whether to deliver payloads with event notifications: as it says, to "
+"publish events or not."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:155
+#: ../../Administration/UI_Guide_Client.inc:202
+msgid "Notify subscribers when the configuration changes: default is false"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:157
+#: ../../Administration/UI_Guide_Client.inc:204
+msgid ""
+"Persist items to storage: whether or not to physically store items in the"
+" node."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:159
+#: ../../Administration/UI_Guide_Client.inc:206
+msgid ""
+"Max # of items to persist: Limit how many items are kept in the node "
+"archive."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:161
+#: ../../Administration/UI_Guide_Client.inc:208
+msgid ""
+"The collection with which the node is affiliated: If the node is to be in"
+" a collection, place that node name here."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:163
+#: ../../Administration/UI_Guide_Client.inc:210
+msgid ""
+"Specify the subscriber model: Choose what type of subscriber model will "
+"be used for this node. Options include:"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:165
+#: ../../Administration/UI_Guide_Client.inc:212
+msgid ""
+"**authorize** - Requires all subscriptions to be approved by the node "
+"owner before items will be published to the user. Also only subscribers "
+"may retrieve items."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:167
+#: ../../Administration/UI_Guide_Client.inc:214
+msgid "**open** - All users may subscribe and retrieve items from the node."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:169
+#: ../../Administration/UI_Guide_Client.inc:216
+msgid ""
+"**presence** - Typically used in an instant message environment. Provides"
+" a system under which users who are subscribed to the owner JID’s "
+"presence with a from or both subscription may subscribe from and retrieve"
+" items from the node."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:171
+#: ../../Administration/UI_Guide_Client.inc:218
+msgid ""
+"**roster** - This is also used in an instant message environments, Users "
+"who are both subscribed to the owners presence AND is placed in specific "
+"allowed groups by the roster are able to subscribe to the node and "
+"retrieve items from it."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:173
+#: ../../Administration/UI_Guide_Client.inc:220
+msgid ""
+"**whitelist** - Only explicitly allowed JIDs are allowed to subscribe and"
+" retrieve items from the node, this list is set by the "
+"owner/administrator."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:175
+#: ../../Administration/UI_Guide_Client.inc:222
+msgid ""
+"Specify the Publisher model: Choose what type of publisher model will be "
+"used for this node. Options include:"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:177
+#: ../../Administration/UI_Guide_Client.inc:224
+msgid "**open** - Any user may publish to this node."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:179
+#: ../../Administration/UI_Guide_Client.inc:226
+msgid "**publishers** - Only users listed as publishers may be able to publish."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:181
+#: ../../Administration/UI_Guide_Client.inc:228
+msgid "**subscribers** - Only subscribers may publish to this node."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:183
+#: ../../Administration/UI_Guide_Client.inc:230
+msgid ""
+"When to send the last published item: This allows you to decide if and "
+"when the last published item to the node may be sent to newly subscribed "
+"users."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:185
+#: ../../Administration/UI_Guide_Client.inc:232
+msgid "**never** - Do not send the last published item."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:187
+#: ../../Administration/UI_Guide_Client.inc:234
+msgid ""
+"**on_sub** - Send the last published item when a user subscribes to the "
+"node."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:189
+#: ../../Administration/UI_Guide_Client.inc:236
+msgid ""
+"**on_sub_and_presence** - Send the last published item to the user after "
+"a subscription is made, and the user is available."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:191
+msgid ""
+"The domains allowed to access this node: Comma separated list of domains "
+"for which users can access this node. By default is is blank, and there "
+"is no domain restriction."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:193
+#: ../../Administration/UI_Guide_Client.inc:240
+msgid ""
+"Whether to deliver items to available users only: Items will only be "
+"published to users with available status if this is selected."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:195
+#: ../../Administration/UI_Guide_Client.inc:242
+msgid ""
+"Whether to subscription expired when subscriber going offline: This will "
+"make all subscriptions to the node valid for a single session and will "
+"need to be re-subscribed upon reconnect."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:197
+#: ../../Administration/UI_Guide_Client.inc:244
+msgid ""
+"The XSL transformation which can be applied to payloads in order to "
+"generate an appropriate message body element: Since you want a properly "
+"formatted <body> element, you can add an XSL transformation here to "
+"address any payloads or extra elements to be properly formatted here."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:199
+#: ../../Administration/UI_Guide_Client.inc:246
+msgid ""
+"The URL of the XSL transformation which can be applied to payloads in "
+"order to generate an appropriate message body element: This would be the "
+"URL of the XSL Transform, e.g. http://www.w3.org/1999/XSL/Transform."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:201
+#: ../../Administration/UI_Guide_Client.inc:248
+msgid ""
+"Roster groups allowed to subscribe: a list of groups for whom users will "
+"be able to subscribe. If this is blank, no user restriction will be "
+"imposed."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:203
+#: ../../Administration/UI_Guide_Client.inc:250
+msgid ""
+"Notify subscribers when owner changes their subscription or affiliation "
+"state: This will have the node send a message in the case of an owner "
+"changing affiliation or subscription state."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:205
+#: ../../Administration/UI_Guide_Client.inc:252
+msgid ""
+"Allows get list of subscribers for each subscriber: Allows subscribers to"
+" produce a list of other subscribers to the node."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:207
+#: ../../Administration/UI_Guide_Client.inc:254
+msgid ""
+"Whether to sort collection items by creation date or update time: options"
+" include"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:209
+#: ../../Administration/UI_Guide_Client.inc:256
+msgid ""
+"**byCreationDate** - Items will be sorted by the creation date, i.e. when"
+" the item was made."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:211
+#: ../../Administration/UI_Guide_Client.inc:258
+msgid ""
+"**byUpdateTime** - Items will be sorted by the last update time, i.e. "
+"when the item was last edited/published/etc.."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:214
+#: ../../Administration/UI_Guide_Client.inc:185
+msgid "DNS Query"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:216
+#: ../../Administration/UI_Guide_Client.inc:187
+msgid "A basic DNS Query form."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:219
+#: ../../Administration/UI_Guide_Client.inc:190
+msgid "Default config - Pubsub"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:221
+msgid ""
+"Here you may set the default configuration for any new pubsub node. These"
+" changes will be made for all future nodes, but will not affect currently"
+" active nodes."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:224
+#: ../../Administration/UI_Guide_Client.inc:261
+msgid "Default room config"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:226
+msgid ""
+"This page allows admins to set the default configuration for any new MUC "
+"rooms that may be made on the server."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:229
+#: ../../Administration/UI_Guide_Client.inc:267
+msgid "Delete Monitor Task"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:231
+#: ../../Administration/UI_Guide_Client.inc:269
+msgid ""
+"This removes a monitor task from the list of available monitor scripts. "
+"This action is not permanent as it will revert to initial settings on "
+"server restart."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:234
+msgid "Delete Node"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:236
+msgid ""
+"Provides a space to remove a node from the server. It must be the full "
+"name of the node, and only one node can be removed at a time."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:239
+msgid "Deleting ALL Nodes"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:241
+msgid ""
+"This page allows the logged in admin to delete all nodes from the "
+"associated vhost. This change is irreversible, be sure to read and check "
+"the box before submitting the command."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:244
+#: ../../Administration/UI_Guide_Client.inc:273
+msgid "Fix User’s Roster"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:246
+msgid ""
+"You can fix a users roster from this prompt. Fill out the bare JID of the"
+" user and the names you wish to add or remove from the roster. This will "
+"NOT edit a user’s roster, but rather compare client roster to database "
+"and fix any errors between them."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:249
+#: ../../Administration/UI_Guide_Client.inc:278
+msgid "Fix User’s Roster on Tigase Cluster"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:251
+msgid ""
+"This does the same as the Fix User’s Roster, but can apply to users who "
+"may not be logged into the local vhost, but are logged into a clustered "
+"server."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:254
+#: ../../Administration/UI_Guide_Client.inc:283
+msgid "Get User Roster"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:256
+#: ../../Administration/UI_Guide_Client.inc:285
+msgid ""
+"As the title implies this gets a users' roster and displays it on screen."
+" You can use a bare or full JID to get specific rosters."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:259
+#: ../../Administration/UI_Guide_Client.inc:288
+msgid "Get any file"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:261
+#: ../../Administration/UI_Guide_Client.inc:290
+msgid ""
+"Enables you to see the contents of any file in the tigase directory. By "
+"default you are in the root directory, if you wish to go into directory "
+"use the following format: logs/tigase.log.0"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:264
+#: ../../Administration/UI_Guide_Client.inc:293
+msgid "Get Configuration File"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:266
+#: ../../Administration/UI_Guide_Client.inc:295
+msgid ""
+"If you don’t want to type in the location of a configuration file, you "
+"can use this prompt to bring up the contents of either tigase.conf or "
+"config.tdsl."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:269
+#: ../../Administration/UI_Guide_Client.inc:299
+msgid "Get config.tdsl File"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:271
+#: ../../Administration/UI_Guide_Client.inc:301
+msgid ""
+"Will output the current config.tdsl file, this includes any modifications"
+" made during the current server session."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:274
+msgid "Get list available commands"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:276
+msgid ""
+"This may be listed multiple times for different components, but this will"
+" do as the section suggest and list available commands for that "
+"particular component."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:279
+msgid "Load test"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:281
+msgid ""
+"Here you can run a test with the pubsub component on any node to test "
+"functionality and proper settings for the node."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:284
+#: ../../Administration/UI_Guide_Client.inc:305
+msgid "Load Errors"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:286
+#: ../../Administration/UI_Guide_Client.inc:307
+msgid ""
+"Will display any errors the server encounters in loading and running. Can"
+" be useful if you need to address any issues."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:289
+msgid "New command script"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:291
+msgid ""
+"This space allows you to create a new command script that will work "
+"within the associated component. Note that under the hyperlinked title, "
+"there is a listing of muc.server.org or pubsub.server.org, use these to "
+"determine where the new command will operate."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:294
+msgid "OAuth Credentials"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:296
+msgid ""
+"This allows the setting of new custom OAuth credentials for the server, "
+"and you can also require the use of OAuth tokens for users when they "
+"login. This is a setting for the specific host you are logged into. If "
+"you are logged into xmpp1.domain.com, it will not affect settings for "
+"xmpp2.domain.com."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:299
+#: ../../Administration/UI_Guide_Client.inc:328
+msgid "Pre-Bind BOSH user session"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:301
+msgid ""
+"This allows a JID to be paired with a BOSH session before that user logs "
+"in, can reduce CPU use if you have a user that logs in via BOSH on a "
+"regular basis, or a web client that will regularly connect. You may also "
+"specify HOLD and WAIT integers to affect how BOSH operates with the "
+"associated JID."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:304
+msgid "Publish item to node"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:306
+msgid ""
+"This window allows you to not only test, but publish an item to the "
+"specified node. All fields must be filled in in order to avoid the server"
+" dropping an improperly formatted stanza."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:309
+msgid "Read ALL nodes"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:311
+msgid ""
+"This will load a tree of pubsub nodes in memory, it will not output "
+"anything as it is mainly for developer use."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:314
+msgid "Rebuild database"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:316
+msgid ""
+"This will force Tigase to rebuild databases for the pubsub component, "
+"this may be useful for pubsub subscribers who continue to get pushed "
+"events after they unsubscribe."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:319
+#: ../../Administration/UI_Guide_Client.inc:333
+msgid "Reload component repository"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:321
+msgid ""
+"This will reload any vhosts that the server is running. This may be "
+"useful if one is disconnected or broken during runtime."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:324
+msgid "Remove an item"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:326
+msgid ""
+"This will remove a running vhost from the server, you will be presented "
+"with a list to pick from."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:329
+msgid "Remove command script"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:331
+msgid ""
+"Like new command script, take a look at the subheading to determine which"
+" component you want to remove the script from. Once there, select the "
+"command you wish to remove from the server. If remove from disk is "
+"selected, then the change will be permanent. Otherwise, the command will "
+"be removed until the next server restart."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:334
+msgid "Remove listener script"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:336
+msgid ""
+"Select from a list the listener script you wish to remove. This will only"
+" affect custom listener scripts added to the eventbus component."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:339
+msgid "Remove room"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:341
+msgid ""
+"This provides fields to remove a room from the MUC component. you may "
+"suggest an alternative room which will move occupants to the alternative "
+"room once the current one is removed."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:344
+msgid "Retrieve items"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:346
+msgid ""
+"Here you can retrieve items from PubSub nodes, this simulates the get IQ "
+"stanza from the pubsub component. - Service name - The address of the "
+"pubsub component. - Node name - Item node to retrieve items from. - Item "
+"ID - The item ID of the item you wish to retrieve. - Items Since - UTC "
+"timestamp to start search from: YYYY-MM-DDTHH:MM:SSZ"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:349
+msgid "S2S Bad State Connections"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:351
+msgid ""
+"This will list any connections to other servers that are considered bad "
+"or stale. This will populate very rarely as Tigase automatically adjusts "
+"around clustered servers that go down. In the event a connection stays "
+"bad, it is recommended to reset those connections in the next space."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:354
+msgid "S2S Reset Bad State Connections"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:356
+msgid ""
+"This will reset the connections with other servers that are considered "
+"bad and have shown up in the S2S Bad State Connections page."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:359
+msgid "S2S Get CID Connection State"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:361
+msgid "For internal developer use only."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:364
+msgid "Subscribe to a node"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:366
+msgid ""
+"This provides a space for an administrator to manually have a JID "
+"subscribe to a particular node."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:369
+msgid "Unsubscribe from node"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:371
+msgid ""
+"Here you can unsubscribe users from a particular node. Users can be a "
+"comma separated list."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:374
+msgid "Update item configuration"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:376
+msgid ""
+"Typically you will see only one item for vhost-man, but some additional "
+"components (ie. ext) may provided them as well. They each have their own "
+"sections, but provide for a plethora of server options. Changes to the "
+"server are done in real time, and may not be permanent."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:379
+msgid "vhost-man"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:381
+msgid ""
+"You will be presented with a list of domains that Tigase is currently "
+"hosting, you will be able to change settings for one domain at a time "
+"using this function. Once a domain is selected, you will be able to set "
+"or change the following settings:"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:395
+#: ../../Administration/UI_Guide_Client.inc:135
+msgid ""
+"Domain filter policy: Sets the filter policy for this domain, see `This "
+"section <#domainBasedPacketFiltering>`__ for a description of the rules."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:419
+msgid "Client certificate CA: Client Certificate Authority."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:421
+msgid ""
+"XEP-0136 retention period: Integer of number of days message archives "
+"will be set."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:434
+msgid "Update user roster entry"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:436
+msgid ""
+"This section allows admins to edit individual users rosters, although it "
+"provides similar functionality to fix users roster, this is designed for "
+"precision editing of a user roster."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:438
+msgid "Roster owner JID: The BareJID of the user roster you wish to edit."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:440
+msgid "JID to manipulate: The specific BareJID you want to add/remove/change."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:442
+msgid "Comma separated groups: Groups you wish to add the JID too."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:444
+msgid "Operation Type: What function will be performed?"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:446
+msgid "**Add** - Add the JID to manipulate to the owner JID’s roster and groups."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:448
+msgid ""
+"**Remove** - Remove the JID to manipulate from the owner JID’s roster and"
+" groups."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:450
+msgid ""
+"Subscription type: The type of subscription stanza that will be sent to "
+"the server, and subsequently between the two users will be employed."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:452
+msgid ""
+"**None** - Select this if neither the owner or the user to be manipulated"
+" wishes to receive presence information."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:454
+msgid ""
+"**From** - The Roster Owner will not receive presence information from "
+"the JID to manipulate, but the opposite will be true."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:456
+msgid ""
+"**To** - The JID to manipulate will not receive presence information from"
+" the Roster Owner, but the opposite will be true."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:458
+msgid "**Both** - Both JIDs will receive presence information about each other."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:461
+msgid "Update user roster entry extended version"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:463
+msgid ""
+"This section is an expanded version of the previous one, all fields "
+"already specified are the same with these additions:"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:465
+msgid ""
+"Roster owner name: A friendly name or nickname if you wish to "
+"change/create one. **not required**"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:467
+msgid ""
+"Comma separated of owner groups: Groups that the user wants to "
+"join/leave. **not required**"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:469
+msgid "Roster item JID: The specific JID that needs to be edited."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:471
+msgid ""
+"Roster item name: A friendly name or nickname that will be "
+"changed/created. **not required**"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:473
+msgid ""
+"Comma separated list of item groups: A group or list of groups that the "
+"roster item JID will be added to/removed from."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:475
+msgid "Action:"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:477
+msgid ""
+"**Add/update item** - Will add or update the item JID in the roster "
+"owner’s roster."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:479
+msgid "**Remove item** - Will remove the item JID from the roster owner’s roster."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:481
+msgid ""
+"**Add/update both rosters** - Will add or update the item in both roster "
+"owner and roster item’s roster."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:483
+msgid ""
+"**Remove from both rosters** - Will remove the item from both roster "
+"owner and roster item’s roster."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:487
+#: ../../Administration/UI_Guide_Client.inc:338
+msgid "Scripts"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:489
+msgid ""
+"This section will enable administrators to custom write or enter their "
+"own scripts for specific components. Each active component will have an "
+"entry for new and remove command scripts and scripts written there will "
+"be for that component."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:492
+msgid "New Command Script"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:494
+msgid ""
+"Description: A friendly name of the script, will be the title of the link"
+" in the menu on the left."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:496
+msgid ""
+"Command ID: Internal command that Tigase will use when referencing this "
+"script."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:498
+msgid ""
+"Group: The group for the script, which may be any of the headings on the "
+"left (Configuration, Example scripts, Notifications, Other etc..) or your"
+" own. If no group exists, a new one will be created."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:500
+msgid ""
+"Language: The language the script is written in. Currently Tigase "
+"supports Groovy and EMCAScript."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:502
+msgid "Script text: the fulltext of the script."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:504
+msgid ""
+"Save to disk: Scripts that are saved to disk will be permanently stored "
+"in the server’s directory /scripts/admin/[Component]/commandID.js "
+"**NOTE** Scripts that are NOT saved to disk will not survive a server "
+"restart."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:507
+msgid "Remove Command Script"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:509
+msgid ""
+"As with New Command Script, there is an entry for each component. This "
+"page will provide a space to remove commands for the selected component. "
+"You will be provided a list of scripts associated with that component. "
+"You also have the open to remove from disk, which will permanently delete"
+" the script from the hard drive the server is on. If this is unchecked, "
+"the script will be unavailable until the next restart."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:512
+#: ../../Administration/UI_Guide_Client.inc:345
+msgid "Statistics"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:514
+msgid ""
+"This section is more useful to test statistics scripts and components, as"
+" many of them produce very small amounts of information, however these "
+"may be collected by other components or scripts for a better information "
+"display."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:517
+#: ../../Administration/UI_Guide_Client.inc:350
+msgid "Get User Statistics"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:519
+#: ../../Administration/UI_Guide_Client.inc:352
+msgid ""
+"Provides a script output of user statistics including how many active "
+"sessions are in use, number of packets used, specific connections and "
+"their packet usage and location. All resources will return individual "
+"stats along with IP addresses."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:522
+#: ../../Administration/UI_Guide_Client.inc:355
+msgid "Get Active User List"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:524
+#: ../../Administration/UI_Guide_Client.inc:357
+msgid ""
+"Provides a list of active users under the selected domain within the "
+"server. An active user is considered a user currently logged into the "
+"XMPP server."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:527
+#: ../../Administration/UI_Guide_Client.inc:361
+msgid "Get list of idle users"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:529
+msgid "Provides a list of users who are idle on the server."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:532
+#: ../../Administration/UI_Guide_Client.inc:367
+msgid "Get list of online users"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:534
+msgid "Provides a list of users who are currently online."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:537
+#: ../../Administration/UI_Guide_Client.inc:372
+msgid "Get number of active users"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:539
+msgid "Provides a list of active users, users who are not idle or away."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:542
+#: ../../Administration/UI_Guide_Client.inc:377
+msgid "Get number of idle users"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:544
+msgid "Provides a number of idle users."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:547
+#: ../../Administration/UI_Guide_Client.inc:381
+msgid "Get top active users"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:549
+msgid ""
+"Will produce a list of user-limited users who are considered most active "
+"in packets sent."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:552
+#: ../../Administration/UI_Guide_Client.inc:387
+msgid "Users"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:555
+msgid "Add User"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:557
+#: ../../Administration/UI_Guide_Client.inc:392
+msgid ""
+"Here you can add new users to any domain handled by vHosts, users are "
+"added to database immediately and are able to login. **NOTE: You cannot "
+"bestow admin status to these users in this section.**"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:560
+msgid "Change User Password"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:562
+msgid ""
+"This enables you to change the password of any user in the database. "
+"Although changes will take effect immediately, users currently logged in "
+"will not know the password has been changed until they try to log in "
+"again."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:565
+msgid "Delete User"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:567
+msgid ""
+"This removes the user or users (comma separated) from the database. The "
+"deleted users will be kicked from the server once submit is clicked."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:570
+msgid "End user session"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:572
+msgid ""
+"Disconnects the current selected user by ending their session with the "
+"server."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:575
+#: ../../Administration/UI_Guide_Client.inc:405
+msgid "Get User Info"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:577
+#: ../../Administration/UI_Guide_Client.inc:407
+msgid ""
+"This section allows admins to get information about a specific user "
+"including current connections as well as offline and online messages "
+"awaiting delivery."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:581
+#: ../../Administration/UI_Guide_Client.inc:410
+msgid "Get registered user list"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:583
+msgid ""
+"This will display all registered users for the selected domain up to the "
+"number specified."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:586
+#: ../../Administration/UI_Guide_Client.inc:415
+msgid "Modify User"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Admin.inc:588
+#: ../../Administration/UI_Guide_Client.inc:417
+msgid ""
+"Allows you to modify some user details including E-mail and whether it is"
+" an active user."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:2
+msgid "Tigase Web Client"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:4
+msgid ""
+"Tigase now has a fully featured XMPP client built right into the HTTP "
+"interface. Everything you would expect from an XMPP client can now be "
+"done from the comfort of your browser window with no software install "
+"required!"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:6
+msgid ""
+"The web client is active and available by default on servers v7.2.0 and "
+"later."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:8
+msgid ""
+"To access the client, point a browser to the following address: xmpp"
+".your-server.net:8080/ui/"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:10
+msgid ""
+"It will ask you for a login, any bare JID of users registered with the "
+"server will work. **NOTE: Use your bare JID for login**"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:12
+msgid ""
+"Once you have logged in successfully, you will be presented with the "
+"following screen."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:14
+msgid "|WebUI Home|"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:419
+msgid "WebUI Home"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:16
+msgid ""
+"The commands are broken into categories shown here. All changes made in "
+"these sections are instant and should be seen the same as if you were "
+"using an external XMPP client like Psi."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:18
+msgid ""
+"**NOTE** The BOSH client will automatically translate all requests to the"
+" server name. In some rare cases this may not be resolvable by the "
+"browser and you will be unable to login. Should that happen, you may "
+"disable that feature using the following line in your config.tdsl:"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:26
+msgid ""
+"You may have to specifically designate the bosh URL when using the "
+"advanced tag in the login screen."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:29
+msgid "Chat"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:31
+msgid ""
+"This is the default window, and your main interface for chatting inside "
+"XMPP with this server. **NOTE: you can only communicate to users logged "
+"onto the current server, or connected clusters** Users from your roster "
+"will be on the left panel, the right all active discussions and MUCs, as "
+"well as the currently selected chat will be available."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:33
+msgid "|WebUI Chat|"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:420
+msgid "WebUI Chat"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:35
+msgid ""
+"Users that are logged in and on your roster will be displayed on the left"
+" side. Double-clicking will bring up a new chat window with the user. You"
+" can Right-click on them to bring up a sub menu with the following;"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:37
+msgid "|WebUI Usersubmenu|"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:421
+msgid "WebUI Usersubmenu"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:39
+msgid "**Chat** replicates a double-click and opens a new window for chat."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:41
+msgid ""
+"**Modify** brings up a dialogue that allows you to change the JID of the "
+"contact, a nickname, and group."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:43
+msgid ""
+"**Delete** removes the user from your roster. This will also remove "
+"subscription authorization for the selected user to receive presence "
+"information effectively removing you from their roster. **NOTE: this will"
+" not block user packets from your JID**"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:45
+msgid ""
+"**Info** brings up the User Info (this is the disco#info command for the "
+"selected user)"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:47
+msgid ""
+"The top right section has a few icons with specific functionality, they "
+"are;"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:49
+msgid "|WebUI Chat Add New| adds a new user to your roster."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:422
+msgid "WebUI Chat Add New"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:51
+msgid "|WebUI Chat NewMUC| creates a new Multi-user chatroom."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:423
+msgid "WebUI Chat NewMUC"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:53
+msgid ""
+"|WebUI Chat Profile| allows you to edit your user information such as "
+"picture and nickname."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:424
+msgid "WebUI Chat Profile"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:55
+msgid "|WebUI Chat CloseWindow| closes the active chat window."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:425
+msgid "WebUI Chat CloseWindow"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:57
+msgid ""
+"|WebUI Chat settings| provides a place to change your password or publish"
+" changes to your user info. **NOTE: you are limited to changing the "
+"General fields**"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:426
+msgid "WebUI Chat settings"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:61
+msgid "Discovery"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:63
+msgid ""
+"This is your service discovery panel, which breaks down by component in "
+"the sidebar. Each component name and its associated JID is listed to help"
+" you find what you need. Most components give you an option to Execute "
+"commands with a few exceptions allowing browsing and the ability to join "
+"a MUC."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:65
+msgid ""
+"**Browse** allows you to dig deeper into certain components; for example "
+"list the chatrooms available in the MUC component. At the top of the page"
+" the specific JID of the component are you in will be displayed. This is "
+"a text field, and can be edited to reflect the JID of the component (or "
+"just the server name) to navigate."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:67
+msgid "|WebUI Browse Comp|"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:427
+msgid "WebUI Browse Comp"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:69
+msgid ""
+"**Join to Room** will join you to a MUC room that is selected. "
+"Alternatively, selecting Join to Room while MUC component is selected, "
+"you can join and start a new MUC room."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:71
+msgid ""
+"**Execute Command** Provides a hierarchy of commands and options to view "
+"and edit settings, run commands and scripts, view contents of files, and "
+"see statistics. Since each Component can have a unique structure it is "
+"best to explore each to see what options are available."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:74
+msgid "Management"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:76
+msgid ""
+"This is an advanced window for settings and management for the XMPP "
+"server."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:81
+msgid "Here you can manage some of the server settings."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:86
+msgid ""
+"This section has one simple command: to be able to send a mass message to"
+" all logged in users. You may choose to change the type of message to "
+"headline or Normal which will show as a pop-up in most XMPP clients. Chat"
+" messages will open up a chat dialog with users."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:96
+msgid ""
+"This allows you to set a log file to track a specific user. Set the bare "
+"or full JID of the user you want to log, and a name of the files you wish"
+" the log to be written to. The files will be written in the root Tigase "
+"directory unless you give a directory like logs/filename. The log files "
+"will be named with a .0 extension and will be named .1, .2, .3 and so on "
+"as each file reaches 10MB by default. filename.0 will always be the most "
+"recent. Logging will cease once the server restarts."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:101
+msgid ""
+"Here you can add SSL certificates from PEM files to specific virtual "
+"hosts. Although Tigase can generate its own self-signed certificates, "
+"this will override those default certificates."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:106
+msgid ""
+"You can write scripts for Groovy or ECMAScript to add to monitor tasks "
+"here. This only adds the script to available scripts however, you will "
+"need to run it from another prompt."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:114
+msgid "Add New Item - ext"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:116
+msgid ""
+"Provides a method to add external components to the server. By default "
+"you are considered the owner, and the Tigase load balancer is "
+"automatically filled in."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:119
+msgid "Add New Item - Vhost"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:167
+msgid ""
+"XEP-0136 - store MUC messages: Whether or not to store MUC messages for "
+"archiving. Default is user, which allows users to individually set this "
+"setting, otherwise tue/false will override."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:176
+msgid ""
+"You can restrict users to only be able to send and receive packets to and"
+" from certain virtual hosts. This may be helpful if you want to lock "
+"users to a specific domain, or prevent them from getting information from"
+" a statistics component."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:192
+msgid ""
+"This section enables you to change the default pubsub node configuration "
+"for all future nodes. **Note: these changes will be reset on server "
+"restart.** - pubsub#node type: sets the type of node the the new node "
+"will be. Options include:"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:238
+msgid ""
+"The domains allowed to access this node: Comma separated list of domains "
+"for which users can access this node. If left blank there is no domain "
+"restriction."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:263
+msgid ""
+"Allows you to set the default configuration for new MUC rooms. This will "
+"not be able to modify current in use and persistent rooms."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:275
+msgid ""
+"You can fix a users roster from this prompt. Fill out the bare JID of the"
+" user and the names you wish to add or remove from the roster. You can "
+"edit a users roster using this tool, and changes are permanent."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:280
+msgid ""
+"This does the same as the Fix User’s Roster, but can apply to users in "
+"clustered servers."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:311
+msgid "New command script - Monitor"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:313
+msgid ""
+"Allows you to write command scripts in Groovy and store them physically "
+"so they can be saved past server restart and run at any time. Scripts "
+"written here will only be able to work on the Monitor component."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:316
+msgid "New command script - MUC"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:318
+msgid ""
+"Allows you to write command scripts in Groovy and store them physically "
+"so they can be saved past server restart and run at any time. Scripts "
+"written here will only be able to work on the MUC component."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:322
+msgid "OAUth credentials"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:324
+msgid ""
+"Uses OAuth to set new credentials and enable or disable a registration "
+"requirement with a signed form."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:330
+msgid ""
+"Allows admins to pre-bind a BOSH session with a full or bare JID (with "
+"the resource automatically populated on connection). You may also specify"
+" HOLD or WAIT parameters."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:335
+msgid ""
+"This will show if you have any external components and will reload them "
+"in case of any stuck threads."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:340
+msgid ""
+"This section provides a list of command scripts for all active "
+"components. Each component has the following options - **New command "
+"script** provides a method to author new command scripts for specific "
+"components written in EMCAScript or Groovy. You do have an option to save"
+" the script to disk which will make the script permanent within the "
+"server. - **Remove command script** allows you to remove the selected "
+"script from the repository. If Remove from disk is not checked, the "
+"script will be unavailable until server restart. If it is, it will be "
+"permanently removed from the server."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:342
+msgid ""
+"Newly made commands will be listed under the Group listing in the left "
+"column."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:347
+msgid ""
+"These statistics might be more useful as script results yield small bits "
+"of data, but you may find them useful when looking for server loads or "
+"finding user issues."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:363
+msgid "This will list all idle users separated by vhost."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:369
+msgid ""
+"This will list users separated by the vhost they are connected to. The "
+"list will include the bare JID as well as any resources for that JID."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:374
+msgid "This displays the number of current active users."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:379
+msgid "This section returns the number of active users per specific vhost."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:383
+msgid ""
+"This will list the top number of active users by packets sent and online "
+"time. This list will only be built with users currently online and from "
+"all vhosts."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:390
+msgid "Add New User"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:395
+msgid "Change user password"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:397
+msgid ""
+"Allows for admins to change the password of a specific user without "
+"needing to know the original password for the selected bare JID. Users "
+"currently logged in will not know password has been changed until they "
+"attempt to re-login."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:400
+msgid "Delete user"
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:402
+msgid ""
+"Provides a text window for admins to input the bare JID of the user they "
+"wish to remove from the server."
+msgstr ""
+
+#: ../../Administration/UI_Guide_Client.inc:412
+msgid ""
+"Provides a list of vhosts to search and a maximum number of users to "
+"list. Once run, the script will display a list of registered bare JIDs of"
+" users from the selected vhost."
+msgstr ""
+
+#: ../../Development/REST_API.rst:2
+msgid "REST API"
+msgstr ""
+
+#: ../../Development/REST_API.rst:4
+msgid ""
+"Tigase’s HTTP API component uses the REST module and Groovy scripts "
+"responsible for handling and processing incoming HTTP. The end result is "
+"Tigase’s REST API. This API may be useful for various integration "
+"scenarios."
+msgstr ""
+
+#: ../../Development/REST_API.rst:6
+msgid ""
+"In these sections we will describe the basic REST endpoints provided by "
+"Tigase HTTP API and explain the basics of creating new custom endpoints."
+msgstr ""
+
+#: ../../Development/REST_API.rst:8
+msgid ""
+"Other endpoints, specific to particular Tigase XMPP Server modules, are "
+"described in documentation for the modules providing them. You may also "
+"look at ``http://localhost:8080/rest/`` on your local Tigase XMPP Server "
+"installation at HTTP API, which will provide you with basic usage "
+"examples for REST endpoints available at your installation."
+msgstr ""
+
+#: ../../Development/REST_API.rst:10
+msgid ""
+"For more informations about configuration of REST module please see "
+"section about :ref:`REST module<Rest_module>`"
+msgstr ""
+
+#: ../../Development/REST_API.rst:13
+msgid "Scripting introduction"
+msgstr ""
+
+#: ../../Development/REST_API.rst:15
+msgid "Scripts in the HTTP API component are used for processing all of requests."
+msgstr ""
+
+#: ../../Development/REST_API.rst:17
+msgid ""
+"To add a new action to the HTTP API component, you will need to create a "
+"script written in Groovy for which there will be implementation of class "
+"extending ``tigase.http.rest.Handler`` class. The URI of script will be "
+"created from the file’s location of in the scripts folder. For example, "
+"if script ``TestHandler`` with regular expression will be set to "
+"``/test`` and will be placed in ``scripts/rest/tested``, the handler will"
+" be called for using the following URI: ``/rest/tested/test``."
+msgstr ""
+
+#: ../../Development/REST_API.rst:20
+msgid "Properties"
+msgstr ""
+
+#: ../../Development/REST_API.rst:22
+msgid "If you are extending classes you will need to set following properties:"
+msgstr ""
+
+#: ../../Development/REST_API.rst:24
+msgid ""
+"**regex** - Regular expression which is used to match the request URI and"
+" parse parameters embedded in the URI. For example: "
+"``/\\/([@\\/]+)@([@\\/]+)/``"
+msgstr ""
+
+#: ../../Development/REST_API.rst:26
+msgid ""
+"**requiredRole** - Required role of user in order to be able to access "
+"this URI. Available values are: null, \"user\", and \"admin\". If "
+"``requiredRole`` is not null, authentication will be required."
+msgstr ""
+
+#: ../../Development/REST_API.rst:28
+msgid ""
+"**isAsync** - If set to true, it will be possible to wait for results, "
+"for example waiting for an response IQ stanza."
+msgstr ""
+
+#: ../../Development/REST_API.rst:30
+msgid ""
+"**decodeContent** - If set to false, then content of the request will not"
+" be parsed and your script will receive instance of "
+"``HttpServletRequest`` to handle incoming content."
+msgstr ""
+
+#: ../../Development/REST_API.rst:33
+msgid "Properties containing closures"
+msgstr ""
+
+#: ../../Development/REST_API.rst:35
+msgid ""
+"Extended class should also set closures for one or more of following "
+"properties: execGet, execPut, execPost, and execDelete depending on which"
+" HTTP action or actions you need to support for the URI. **Each closure "
+"has a dynamic arguments list**. Below is list of arguments passed to "
+"closure which describes how and when the list of arguments changes:"
+msgstr ""
+
+#: ../../Development/REST_API.rst:37
+msgid ""
+"**service** - Implementation of Service interface. This is used to access"
+" the server database or send/receive XMPP stanzas."
+msgstr ""
+
+#: ../../Development/REST_API.rst:39
+msgid ""
+"**callback** - The ``callback`` closure needs to be called to return "
+"data. ``callback`` accepts only one argument of type String,byte[],Map. "
+"If data is type of Map it will be encoded to JSON or XML depending of "
+"'Content-Type' header."
+msgstr ""
+
+#: ../../Development/REST_API.rst:41
+msgid ""
+"**user** - Will be passed only if ``requiredRole`` is not null. **In all "
+"other cases this argument will not be in arguments list!**"
+msgstr ""
+
+#: ../../Development/REST_API.rst:43
+msgid ""
+"**request** - Will be passed only if declared as instance of "
+"``HttpServletRequest`` and it will be instance of ``HttpServletRequest`` "
+"of the current HTTP request."
+msgstr ""
+
+#: ../../Development/REST_API.rst:45
+msgid ""
+"**content** - Parsed content of request. This closure will not be in "
+"arguments list if Content-Length of request is empty. If Content-Type is "
+"XML or JSON returned as Map, otherwise (or if ``decodeContent`` is set to"
+" ``false``) it will be an instance of ``HttpServletRequest``."
+msgstr ""
+
+#: ../../Development/REST_API.rst:47
+msgid ""
+"**x** - Additional arguments passed to callback are groups from regular "
+"expression matching the URI. **Groups are not passed as a list, but are "
+"added to list of arguments as next arguments.**"
+msgstr ""
+
+#: ../../Development/REST_API.rst:49
+msgid ""
+"If property for corresponding HTTP action is not set, then the component "
+"will return a 404 HTTP error."
+msgstr ""
+
+#: ../../Development/REST_API.rst:53
+msgid "Accessing beans"
+msgstr ""
+
+#: ../../Development/REST_API.rst:55
+msgid ""
+"It is possible to gain access to beans managed by Tigase XMPP Server from"
+" within groovy script implementing REST handler. To achieve that "
+"implementation of the handler class within groovy script needs to be "
+"annotated with ``@Bean`` annotation. In this annotation, you need to pass"
+" at least one parameter ``name``, which should contain desired name of "
+"the bean under which this handler will be available within the REST "
+"module kernel scope."
+msgstr ""
+
+#: ../../Development/REST_API.rst:57
+msgid ""
+"With that in place, it is possible to use ``@Inject`` annotation on any "
+"field of the ``Handler`` implementation class to tell Tigase Kernel to "
+"inject instance of a particular class (or instance of class implementing "
+"particular interface)."
+msgstr ""
+
+#: ../../Development/REST_API.rst:59
+msgid ""
+"For more details about Tigase Kernel and beans please check ``Tigase "
+"Kernel`` section of the Tigase XMPP Server Development Guide."
+msgstr ""
+
+#: ../../Development/REST_API.rst:61
+msgid "**Example.**"
+msgstr ""
+
+#: ../../Development/REST_API.rst:80
+msgid "Usage Examples"
+msgstr ""
+
+#: ../../Development/REST_API.rst:83
+msgid "Retrieving user avatar"
+msgstr ""
+
+#: ../../Development/REST_API.rst:85
+msgid ""
+"Request using GET method for url /rest/avatar/admin@test-domain.com will "
+"return an avatar image for user admin@test-domain.com if an avatar is set"
+" in user vCard or will otherwise return a http error 404. Example of full"
+" url for avatar of user admin@domain.com"
+msgstr ""
+
+#: ../../Development/REST_API.rst:91
+msgid ""
+"Entering this url in will execute GET request. It may be possible to use "
+"the url in your browser."
+msgstr ""
+
+#: ../../Development/REST_API.rst:94
+msgid "Retrieving list of available adhoc commands"
+msgstr ""
+
+#: ../../Development/REST_API.rst:97
+msgid "Using XML format"
+msgstr ""
+
+#: ../../Development/REST_API.rst:99
+msgid ""
+"To retrieve a list of available adhoc commands, make a request using GET "
+"method for ``/rest/adhoc/sess-man@domain.com`` where ``sess-"
+"man@domain.com`` is jid of component you wish to see commands for. For "
+"example, entering the following url: http://localhost:8080/rest/adhoc"
+"/sess-man@domain.com in your browser will retrieve a list of all ad-hoc "
+"commands available at ``sess-man@domain.com``. This action is protected "
+"by authentication done using ``HTTP Basic Authentication``. Valid "
+"credentials will be those of users available in user database of this "
+"Tigase XMPP Server installation (username in barejid form)."
+msgstr ""
+
+#: ../../Development/REST_API.rst:101
+msgid "Below is example result of that request:"
+msgstr ""
+
+#: ../../Development/REST_API.rst:124
+msgid "Using JSON format"
+msgstr ""
+
+#: ../../Development/REST_API.rst:126
+msgid ""
+"To retrieve a list of available adhoc commands in JSON, we need to pass "
+"``Content-Type: application/json`` to HTTP header of request or add "
+"``type`` parameter set to ``application/json``. Example result below:"
+msgstr ""
+
+#: ../../Development/REST_API.rst:151
+msgid "Retrieving command form"
+msgstr ""
+
+#: ../../Development/REST_API.rst:153
+msgid ""
+"In order to retrieve form with required fields for particular command, "
+"you have to sent ``POST`` request with only ``jid`` and ``name`` from the"
+" list with all available commands (returned using above command)"
+msgstr ""
+
+#: ../../Development/REST_API.rst:156 ../../Development/REST_API.rst:273
+#: ../../Development/REST_API.rst:375 ../../Development/REST_API.rst:491
+#: ../../Development/REST_API.rst:594 ../../Development/REST_API.rst:779
+msgid "Using XML"
+msgstr ""
+
+#: ../../Development/REST_API.rst:158
+msgid ""
+"For example, to get form for adding VHost item make a request using "
+"``POST`` method for ``/rest/adhoc/vhost-man@domain.com`` sending the "
+"following content (request requires authentication using Basic HTTP "
+"Authentication):"
+msgstr ""
+
+#: ../../Development/REST_API.rst:166 ../../Development/REST_API.rst:306
+msgid "Below is example result for request presented above:"
+msgstr ""
+
+#: ../../Development/REST_API.rst:211 ../../Development/REST_API.rst:324
+#: ../../Development/REST_API.rst:424 ../../Development/REST_API.rst:538
+#: ../../Development/REST_API.rst:645 ../../Development/REST_API.rst:830
+#: ../../Development/REST_API.rst:973
+msgid "Using JSON"
+msgstr ""
+
+#: ../../Development/REST_API.rst:213
+msgid ""
+"For example, to get form for adding VHost item make a request using "
+"``POST`` method for ``/rest/adhoc/vhost-man@domain.com`` using ``Content-"
+"Type: application/json`` and sending the following content (request "
+"requires authentication using Basic HTTP Authentication) :"
+msgstr ""
+
+#: ../../Development/REST_API.rst:223 ../../Development/REST_API.rst:348
+msgid "Below is an example result for request presented above:"
+msgstr ""
+
+#: ../../Development/REST_API.rst:267
+msgid "Executing example ad-hoc commands"
+msgstr ""
+
+#: ../../Development/REST_API.rst:270
+msgid "Retrieving list of active users"
+msgstr ""
+
+#: ../../Development/REST_API.rst:275
+msgid ""
+"To execute the command to get a list of active users, make a request "
+"using POST method for ``/rest/adhoc/sess-man@domain.com`` sending the "
+"following content (request requires authentication using Basic HTTP "
+"Authentication):"
+msgstr ""
+
+#: ../../Development/REST_API.rst:293
+msgid ""
+"In this request we passed all the parameters needed to execute adhoc "
+"command. We passed the node of the adhoc command and values for fields "
+"required by that command. We passed values of \"domain.com\" for "
+"\"domainjid\" field and \"25\" for \"max_items\" field. We also need to "
+"pass ``Content-Type: text/xml`` to HTTP header of request or add ``type``"
+" parameter set to ``text/xml``."
+msgstr ""
+
+#: ../../Development/REST_API.rst:297
+msgid "In case of multi value fields use following format:"
+msgstr ""
+
+#: ../../Development/REST_API.rst:326
+msgid ""
+"To execute the command to get active users in JSON format, make a request"
+" using POST method for /rest/adhoc/sess-man@domain.com sending the "
+"following content (this request also requires authentication using Basic "
+"HTTP Authentication):"
+msgstr ""
+
+#: ../../Development/REST_API.rst:346
+msgid ""
+"In this request we passed all parameters needed to execute adhoc command."
+" We passed the node of adhoc command and values for fields required by "
+"adhoc command. In this case we passed value of \"domain.com\" for "
+"\"domainjid\" field and \"25\" for \"max_items\" field."
+msgstr ""
+
+#: ../../Development/REST_API.rst:370
+msgid "Ending a user session"
+msgstr ""
+
+#: ../../Development/REST_API.rst:372
+msgid ""
+"To execute the end user session command, make a request using POST method"
+" for ``/rest/adhoc/sess-man@domain.com``. The Context of what is sent, "
+"may differ depending on circumstance. For example, it may require "
+"authentication using *Basic HTTP Authentication* with admin credentials. "
+"*sess-man@domain.com* in URL is the JID of session manager component "
+"which usually is in form of *sess-man@domain* where ``domain`` is hosted "
+"domain name."
+msgstr ""
+
+#: ../../Development/REST_API.rst:377
+msgid ""
+"To execute the command using XML content you need to set HTTP header "
+"``Content-Type`` to ``application/xml``"
+msgstr ""
+
+#: ../../Development/REST_API.rst:393
+msgid "Where ``test@domain.com`` is JID of user which should be disconnected."
+msgstr ""
+
+#: ../../Development/REST_API.rst:395 ../../Development/REST_API.rst:814
+msgid "As a result server will return following XML:"
+msgstr ""
+
+#: ../../Development/REST_API.rst:411
+msgid ""
+"This will confirm that user ``test@domain.com`` with resource "
+"``resource`` was connected and has been disconnected."
+msgstr ""
+
+#: ../../Development/REST_API.rst:413
+msgid "If the user was not connected server will return following response:"
+msgstr ""
+
+#: ../../Development/REST_API.rst:426
+msgid ""
+"To execute the command using JSON you will need to set HTTP header "
+"``Content-Type`` to ``application/json``"
+msgstr ""
+
+#: ../../Development/REST_API.rst:444
+msgid "Where ``test@domain.com`` is JID of user who will be disconnected"
+msgstr ""
+
+#: ../../Development/REST_API.rst:446 ../../Development/REST_API.rst:865
+msgid "As a result, the server will return following JSON:"
+msgstr ""
+
+#: ../../Development/REST_API.rst:466 ../../Development/REST_API.rst:699
+msgid ""
+"To confirm that user ``test@domain.com`` with resource ``resource`` was "
+"connect and it was disconnected."
+msgstr ""
+
+#: ../../Development/REST_API.rst:468 ../../Development/REST_API.rst:701
+msgid "If user was not connected server will return the following response:"
+msgstr ""
+
+#: ../../Development/REST_API.rst:481
+msgid "Operations on VHosts/Domains"
+msgstr ""
+
+#: ../../Development/REST_API.rst:483
+msgid ""
+"All operations on VHosts are done by making a ``POST`` request to "
+"``/rest/adhoc/vhost-man@domain.com`` (it may require authentication using"
+" *Basic HTTP Authentication* with admin credentials). When deciding to "
+"use XML or JSON set relevant ``Content-Type`` header."
+msgstr ""
+
+#: ../../Development/REST_API.rst:486
+msgid "Adding VHost"
+msgstr ""
+
+#: ../../Development/REST_API.rst:488
+msgid ""
+"Adding domain is done using ``comp-repo-item-add`` command sent with all "
+"required and desired fields (if something is missing form-to-fill-out "
+"will be returned). For the instructions how to retrieve the "
+"form/available fields please see `Retrieving command form "
+"<#RetrievingCommandForm>`__."
+msgstr ""
+
+#: ../../Development/REST_API.rst:493 ../../Development/REST_API.rst:596
+msgid ""
+"To execute the command using XML content you need to set HTTP header "
+"``Content-Type`` to ``application/xml`` and the filled out form (below is"
+" trimmed example, see `Retrieving command form "
+"<#RetrievingCommandForm>`__ for details how to get complete form):"
+msgstr ""
+
+#: ../../Development/REST_API.rst:497 ../../Development/REST_API.rst:544
+msgid ""
+"It’s essential to include ``command-marker`` in the request, otherwise "
+"the form will be returned without adding the VHost."
+msgstr ""
+
+#: ../../Development/REST_API.rst:521 ../../Development/REST_API.rst:570
+#: ../../Development/REST_API.rst:628 ../../Development/REST_API.rst:681
+msgid ""
+"If the domain was added correctly you will receive response with "
+"``Operation successful.`` Note field:"
+msgstr ""
+
+#: ../../Development/REST_API.rst:540 ../../Development/REST_API.rst:647
+msgid ""
+"To execute the command using XML content you need to set HTTP header "
+"``Content-Type`` to ``application/json`` and the filled out form (below "
+"is trimmed example, see `Retrieving command form "
+"<#RetrievingCommandForm>`__ for details how to get complete form):"
+msgstr ""
+
+#: ../../Development/REST_API.rst:542 ../../Development/REST_API.rst:649
+msgid "**Note**"
+msgstr ""
+
+#: ../../Development/REST_API.rst:589
+msgid "Configuring VHost"
+msgstr ""
+
+#: ../../Development/REST_API.rst:591
+msgid ""
+"Modifying domain configuration is done using ``comp-repo-item-update`` "
+"command sent with all required and desired fields (if something is "
+"missing form-to-fill-out will be returned). For the instructions how to "
+"retrieve the form/available fields please see `Retrieving command form "
+"<#RetrievingCommandForm>`__."
+msgstr ""
+
+#: ../../Development/REST_API.rst:600 ../../Development/REST_API.rst:651
+msgid ""
+"It’s essential to include ``command-marker`` in the request (otherwise "
+"the form will be returned without adding the VHost) and ``item-list`` "
+"with value set to the name of the VHost that’s being configured."
+msgstr ""
+
+#: ../../Development/REST_API.rst:714
+msgid "Sending any XMPP Stanza"
+msgstr ""
+
+#: ../../Development/REST_API.rst:716
+msgid ""
+"XMPP messages or any other XMPP stanza can be sent using this API by "
+"sending an HTTP POST request to (by default) "
+"``http://localhost:8080/rest/stream/?api-key=API_KEY`` with serialized "
+"XMPP stanza as a content, where ``API_KEY`` is the API key for HTTP API. "
+"This key is set in `etc/config.tdsl <#restModuleConfig>`__. Also, each "
+"request needs to be authorized by sending a valid administrator JID and "
+"password as user and password of BASIC HTTP authorization method. Content"
+" of HTTP request should be encoded in ``UTF-8`` and ``Content-Type`` "
+"should be set to ``application/xml``."
+msgstr ""
+
+#: ../../Development/REST_API.rst:719
+msgid "Handling of request"
+msgstr ""
+
+#: ../../Development/REST_API.rst:721
+msgid ""
+"If the sent XMPP stanza does not contain a ``from`` attribute, then the "
+"HTTP API component will provide it’s own JID. If ``iq`` stanza is being "
+"sent, and no ``from`` attribute is set then the received response will be"
+" returned as the content of the HTTP response. Successful requests will "
+"return HTTP response code 200."
+msgstr ""
+
+#: ../../Development/REST_API.rst:727
+msgid ""
+"**Sending an XMPP message with from set to HTTP API component to full "
+"JID.**"
+msgstr ""
+
+#: ../../Development/REST_API.rst:729
+msgid ""
+"Data needs to be sent as a HTTP POST request content to ``/rest/stream"
+"/?api-key=API_KEY`` URL of the HTTP API component to deliver the message "
+"*Example message 1* to *test@example.com/resource-1*."
+msgstr ""
+
+#: ../../Development/REST_API.rst:738
+msgid ""
+"**Sending an XMPP message with ``from`` set to HTTP API component to a "
+"bare JID.**"
+msgstr ""
+
+#: ../../Development/REST_API.rst:740
+msgid ""
+"Data needs to be sent as a HTTP POST request content to ``/rest/stream"
+"/?api-key=API_KEY`` URL of the HTTP API component to deliver message "
+"*Example message 2* to *test@example.com*."
+msgstr ""
+
+#: ../../Development/REST_API.rst:748
+msgid ""
+"**Sending an XMPP message with ``from`` set to specified JID and to a "
+"recipients' full JID.**"
+msgstr ""
+
+#: ../../Development/REST_API.rst:750
+msgid ""
+"Data needs to be sent as a HTTP POST request content to ``/rest/stream"
+"/?api-key=API_KEY`` URL of the HTTP API component to deliver message "
+"*Example message 3* to *test@example.com/resource-1* with sender of "
+"message set to *sender@example.com*."
+msgstr ""
+
+#: ../../Development/REST_API.rst:760
+msgid "Setting XMPP user status"
+msgstr ""
+
+#: ../../Development/REST_API.rst:762
+msgid ""
+"By default XMPP user is visible as unavailable when his client is "
+"disconnected. However in some cases we may want to present user a active "
+"with some particular presence being set. To control this presence of "
+"unavailable XMPP user we can use this feature."
+msgstr ""
+
+#: ../../Development/REST_API.rst:764
+msgid ""
+"Example contents shown below needs to be sent to (by default) "
+"``http://localhost:8080/rest/user/{user-jid}/status?api-key=API_KEY``, "
+"where:"
+msgstr ""
+
+#: ../../Development/REST_API.rst:766
+msgid "``API_KEY`` is the API key for HTTP API"
+msgstr ""
+
+#: ../../Development/REST_API.rst:768
+msgid ""
+"``{user-jid}`` is a bare jid of the user for which you want to set "
+"presence."
+msgstr ""
+
+#: ../../Development/REST_API.rst:772
+msgid ""
+"You may add ``/{resource}`` to the URL after ``/status`` part, where "
+"``{resource}`` is name of the resource for which you want to set "
+"presence."
+msgstr ""
+
+#: ../../Development/REST_API.rst:774
+msgid "**Warning**"
+msgstr ""
+
+#: ../../Development/REST_API.rst:776
+msgid ""
+"You need to add ``'user-status-endpoint@http.{clusterNode}'`` to the list"
+" of trusted jids to allow UserStatusEndpoint module to properly integrate"
+" with Tigase XMPP Server."
+msgstr ""
+
+#: ../../Development/REST_API.rst:781
+msgid ""
+"To set user status you need to set HTTP header ``Content-Type`` to "
+"``application/xml``"
+msgstr ""
+
+#: ../../Development/REST_API.rst:792 ../../Development/REST_API.rst:843
+msgid "where:"
+msgstr ""
+
+#: ../../Development/REST_API.rst:794 ../../Development/REST_API.rst:845
+msgid "``available`` - may be:"
+msgstr ""
+
+#: ../../Development/REST_API.rst:796 ../../Development/REST_API.rst:847
+msgid "``true`` - user is available/connected **(default)**"
+msgstr ""
+
+#: ../../Development/REST_API.rst:798 ../../Development/REST_API.rst:849
+msgid "``false`` - user is unavailable/disconnected"
+msgstr ""
+
+#: ../../Development/REST_API.rst:800 ../../Development/REST_API.rst:851
+msgid ""
+"``priority`` - an integer of presence priority. *(It should be always set"
+" as a negative value to make sure that messages are not dropped)* "
+"**(default: -1)**"
+msgstr ""
+
+#: ../../Development/REST_API.rst:802 ../../Development/REST_API.rst:853
+msgid "``show`` - may be one of ``presence/show`` element values **(optional)**"
+msgstr ""
+
+#: ../../Development/REST_API.rst:804 ../../Development/REST_API.rst:855
+msgid "``chat``"
+msgstr ""
+
+#: ../../Development/REST_API.rst:806 ../../Development/REST_API.rst:857
+msgid "``away``"
+msgstr ""
+
+#: ../../Development/REST_API.rst:808 ../../Development/REST_API.rst:859
+msgid "``xa``"
+msgstr ""
+
+#: ../../Development/REST_API.rst:810 ../../Development/REST_API.rst:861
+msgid "``dnd``"
+msgstr ""
+
+#: ../../Development/REST_API.rst:812 ../../Development/REST_API.rst:863
+msgid ""
+"``status`` - message which should be sent as a presence status message "
+"**(optional)**"
+msgstr ""
+
+#: ../../Development/REST_API.rst:827 ../../Development/REST_API.rst:880
+msgid ""
+"This will confirm that user ``test@domain.com`` with resource ``tigase-"
+"external`` has it presence changed (look for ``success`` element value)."
+msgstr ""
+
+#: ../../Development/REST_API.rst:832
+msgid ""
+"To set user status you need to set HTTP header ``Content-Type`` to "
+"``application/json``"
+msgstr ""
+
+#: ../../Development/REST_API.rst:883
+msgid "BOSH HTTP Pre-Binding"
+msgstr ""
+
+#: ../../Development/REST_API.rst:886
+msgid "Bosh (HTTP) Pre-Binding"
+msgstr ""
+
+#: ../../Development/REST_API.rst:888
+msgid ""
+"Binding a user session is done by sending a request using HTTP POST "
+"method for ``/rest/adhoc/bosh@domain.com`` with the following content:"
+msgstr ""
+
+#: ../../Development/REST_API.rst:892
+msgid "Request requires authentication using Basic HTTP Authentication"
+msgstr ""
+
+#: ../../Development/REST_API.rst:917
+msgid "The Following parameters can be adjusted:"
+msgstr ""
+
+#: ../../Development/REST_API.rst:919
+msgid ""
+"**from** This will be the JID of the user. You may change the "
+"``<value/>`` node of the item identified by the ``from`` variable; this "
+"can be either a FullJID or a BareJID. In the latter case, a random "
+"resource will be generated for the session being bound."
+msgstr ""
+
+#: ../../Development/REST_API.rst:921
+msgid ""
+"**hold** value. By changing value of ``<value/>`` node of the item "
+"identified by ``hold`` variable. This value matches the ``hold`` "
+"attribute specified in `XEP-0124: Session Creation Response "
+"<http://xmpp.org/extensions/xep-0124.html#session-request>`__"
+msgstr ""
+
+#: ../../Development/REST_API.rst:923
+msgid ""
+"**wait** value. By changing value of ``<value/>`` node of the item "
+"identified by ``wait`` variable. This value matches the ``wait`` "
+"attribute specified in `XEP-0124: Session Creation Response "
+"<http://xmpp.org/extensions/xep-0124.html#session-request>`__"
+msgstr ""
+
+#: ../../Development/REST_API.rst:925
+msgid ""
+"As a response one will receive and XML with the result containing "
+"additionally available session and RID that can be used in the client to "
+"attach to the session, e.g.:"
+msgstr ""
+
+#: ../../Development/REST_API.rst:966
+msgid ""
+"For example, having the above XML request stored in ``prebind`` file, one"
+" can execute the request using ``$curl``:"
+msgstr ""
+
+#: ../../Development/REST_API.rst:975
+msgid ""
+"To execute the command to pre-bind BOSH session in JSON format, make a "
+"request using POST method to ``/rest/adhoc/bosh@domain.com`` sending the "
+"following content:"
+msgstr ""
+
+#: ../../Development/REST_API.rst:999
+msgid "This example replicates the same request presented above in XML format."
+msgstr ""
+
+#: ../../Development/index.rst:3
+msgid "Rest API"
+msgstr ""
+
+#: ../../index.rst:13
+msgid "Admin Guide"
+msgstr ""
+
+#: ../../index.rst:21
+msgid "Development Guide"
+msgstr ""
+
+#: ../../index.rst:4
+msgid "Tigase HTTP API"
+msgstr ""
+
+#: ../../index.rst:6
+msgid ""
+"Welcome to the Tigase HTTP API users guide. The HTTP API allows you to "
+"manage, configure, chat, and send commands to Tigase server using a "
+"simple, easy-to-use interface right from your browser! We will guide you "
+"through setup, running, and going through some features of the HTTP API."
+msgstr ""
+
+#: ../../index.rst:8
+msgid "**Setup & Configuration**"
+msgstr ""
+
+#: ../../index.rst:10
+msgid "Tigase will by default start with the http servlet active and running."
+msgstr ""
+
