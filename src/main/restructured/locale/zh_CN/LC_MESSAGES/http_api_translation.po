@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: TigaseDoc\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-08-09 01:07-0700\n"
-"PO-Revision-Date: 2022-08-17 08:29+0000\n"
+"PO-Revision-Date: 2022-08-18 18:28+0000\n"
 "Last-Translator: Qian Luo <qian.luo@tigase.net>\n"
 "Language-Team: Chinese (Simplified) <http://translate.tigase.net/projects/"
 "http-api-documentation/http-api-documentation/zh_Hans/>\n"
@@ -3014,36 +3014,37 @@ msgstr ""
 
 #: ../../Administration/UI_Guide_Admin.inc:492
 msgid "New Command Script"
-msgstr ""
+msgstr "新的命令脚本"
 
 #: ../../Administration/UI_Guide_Admin.inc:494
 msgid ""
 "Description: A friendly name of the script, will be the title of the link"
 " in the menu on the left."
-msgstr ""
+msgstr "Description：脚本的友好名称，将是左侧菜单中链接的标题。"
 
 #: ../../Administration/UI_Guide_Admin.inc:496
 msgid ""
 "Command ID: Internal command that Tigase will use when referencing this "
 "script."
-msgstr ""
+msgstr "Command ID：Tigase 在引用此脚本时将使用的内部命令。"
 
 #: ../../Administration/UI_Guide_Admin.inc:498
 msgid ""
 "Group: The group for the script, which may be any of the headings on the "
 "left (Configuration, Example scripts, Notifications, Other etc..) or your"
 " own. If no group exists, a new one will be created."
-msgstr ""
+msgstr "Group：脚本的组，其可以是左侧的任何标题（配置、示例脚本、通知、其他等）或您自"
+"己的。如果不存在组，将创建一个新组。"
 
 #: ../../Administration/UI_Guide_Admin.inc:500
 msgid ""
 "Language: The language the script is written in. Currently Tigase "
 "supports Groovy and EMCAScript."
-msgstr ""
+msgstr "Language: 编写脚本的语言。目前 Tigase 支持 Groovy 和 EMCAScript。"
 
 #: ../../Administration/UI_Guide_Admin.inc:502
 msgid "Script text: the fulltext of the script."
-msgstr ""
+msgstr "Script text: 脚本的全文。"
 
 #: ../../Administration/UI_Guide_Admin.inc:504
 msgid ""
@@ -3052,10 +3053,13 @@ msgid ""
 "**NOTE** Scripts that are NOT saved to disk will not survive a server "
 "restart."
 msgstr ""
+"Save to disk：保存到磁盘的脚本将永久存储在服务器的目录 /scripts/admin/"
+"[Component]/commandID.js **注意** "
+"未保存到磁盘的脚本将无法在服务器重新启动后继续存在。"
 
 #: ../../Administration/UI_Guide_Admin.inc:507
 msgid "Remove Command Script"
-msgstr ""
+msgstr "删除命令脚本"
 
 #: ../../Administration/UI_Guide_Admin.inc:509
 msgid ""
@@ -3066,11 +3070,15 @@ msgid ""
 " the script from the hard drive the server is on. If this is unchecked, "
 "the script will be unavailable until the next restart."
 msgstr ""
+"与新命令脚本一样，每个组件都有一个条目。此页面将提供一个地方来删除所选组件的"
+"命令。您将获得与该组件关联的脚本列表。您还可以从磁盘中删除，这将从服务器所在"
+"的硬盘驱动器中永久删除脚本。如果未选中此项，则脚本将在下次重新启动之前不可用"
+"。"
 
 #: ../../Administration/UI_Guide_Admin.inc:512
 #: ../../Administration/UI_Guide_Client.inc:345
 msgid "Statistics"
-msgstr ""
+msgstr "统计数据"
 
 #: ../../Administration/UI_Guide_Admin.inc:514
 msgid ""
@@ -3078,12 +3086,13 @@ msgid ""
 " many of them produce very small amounts of information, however these "
 "may be collected by other components or scripts for a better information "
 "display."
-msgstr ""
+msgstr "这部分对于测试统计脚本和组件更有用，因为它们中的许多会产生非常少量的信息，但"
+"是这些可能会被其他组件或脚本收集以更好地显示信息。"
 
 #: ../../Administration/UI_Guide_Admin.inc:517
 #: ../../Administration/UI_Guide_Client.inc:350
 msgid "Get User Statistics"
-msgstr ""
+msgstr "获取用户统计信息"
 
 #: ../../Administration/UI_Guide_Admin.inc:519
 #: ../../Administration/UI_Guide_Client.inc:352
@@ -3093,11 +3102,13 @@ msgid ""
 "their packet usage and location. All resources will return individual "
 "stats along with IP addresses."
 msgstr ""
+"提供用户统计信息的脚本输出，包括正在使用的活动会话数、使用的数据包数量、特定"
+"连接及其数据包使用情况和位置。所有资源都将返回个人统计信息以及 IP 地址。"
 
 #: ../../Administration/UI_Guide_Admin.inc:522
 #: ../../Administration/UI_Guide_Client.inc:355
 msgid "Get Active User List"
-msgstr ""
+msgstr "获取活跃用户列表"
 
 #: ../../Administration/UI_Guide_Admin.inc:524
 #: ../../Administration/UI_Guide_Client.inc:357
@@ -3105,63 +3116,64 @@ msgid ""
 "Provides a list of active users under the selected domain within the "
 "server. An active user is considered a user currently logged into the "
 "XMPP server."
-msgstr ""
+msgstr "提供服务器内选定域下的活动用户列表。活动用户被认为是当前登录到 XMPP "
+"服务器的用户。"
 
 #: ../../Administration/UI_Guide_Admin.inc:527
 #: ../../Administration/UI_Guide_Client.inc:361
 msgid "Get list of idle users"
-msgstr ""
+msgstr "获取空闲用户列表"
 
 #: ../../Administration/UI_Guide_Admin.inc:529
 msgid "Provides a list of users who are idle on the server."
-msgstr ""
+msgstr "提供服务器上空闲的用户列表。"
 
 #: ../../Administration/UI_Guide_Admin.inc:532
 #: ../../Administration/UI_Guide_Client.inc:367
 msgid "Get list of online users"
-msgstr ""
+msgstr "获取在线用户列表"
 
 #: ../../Administration/UI_Guide_Admin.inc:534
 msgid "Provides a list of users who are currently online."
-msgstr ""
+msgstr "提供当前在线的用户列表。"
 
 #: ../../Administration/UI_Guide_Admin.inc:537
 #: ../../Administration/UI_Guide_Client.inc:372
 msgid "Get number of active users"
-msgstr ""
+msgstr "获取活跃用户数"
 
 #: ../../Administration/UI_Guide_Admin.inc:539
 msgid "Provides a list of active users, users who are not idle or away."
-msgstr ""
+msgstr "提供活动用户列表，即非空闲或离开的用户。"
 
 #: ../../Administration/UI_Guide_Admin.inc:542
 #: ../../Administration/UI_Guide_Client.inc:377
 msgid "Get number of idle users"
-msgstr ""
+msgstr "获取空闲用户数"
 
 #: ../../Administration/UI_Guide_Admin.inc:544
 msgid "Provides a number of idle users."
-msgstr ""
+msgstr "提供多个空闲用户。"
 
 #: ../../Administration/UI_Guide_Admin.inc:547
 #: ../../Administration/UI_Guide_Client.inc:381
 msgid "Get top active users"
-msgstr ""
+msgstr "获取顶级活跃用户"
 
 #: ../../Administration/UI_Guide_Admin.inc:549
 msgid ""
 "Will produce a list of user-limited users who are considered most active "
 "in packets sent."
-msgstr ""
+msgstr "将生成一个用户限制用户列表，这些用户在发送的数据包中被认为是最活跃的。"
 
 #: ../../Administration/UI_Guide_Admin.inc:552
 #: ../../Administration/UI_Guide_Client.inc:387
 msgid "Users"
-msgstr ""
+msgstr "用户"
 
 #: ../../Administration/UI_Guide_Admin.inc:555
 msgid "Add User"
-msgstr ""
+msgstr "添加用户"
 
 #: ../../Administration/UI_Guide_Admin.inc:557
 #: ../../Administration/UI_Guide_Client.inc:392
@@ -3170,10 +3182,13 @@ msgid ""
 "added to database immediately and are able to login. **NOTE: You cannot "
 "bestow admin status to these users in this section.**"
 msgstr ""
+"在这里，您可以将新用户添加到 vHosts "
+"处理的任何域，用户会立即添加到数据库并能够登录。 "
+"**注意：您不能在此部分中授予这些用户管理员身份。**"
 
 #: ../../Administration/UI_Guide_Admin.inc:560
 msgid "Change User Password"
-msgstr ""
+msgstr "更改用户密码"
 
 #: ../../Administration/UI_Guide_Admin.inc:562
 msgid ""
@@ -3181,32 +3196,34 @@ msgid ""
 "Although changes will take effect immediately, users currently logged in "
 "will not know the password has been changed until they try to log in "
 "again."
-msgstr ""
+msgstr "这使您可以更改数据库中任何用户的密码。虽然更改会立即生效，但当前登录的用户在"
+"尝试再次登录之前不会知道密码已更改。"
 
 #: ../../Administration/UI_Guide_Admin.inc:565
 msgid "Delete User"
-msgstr ""
+msgstr "删除用户"
 
 #: ../../Administration/UI_Guide_Admin.inc:567
 msgid ""
 "This removes the user or users (comma separated) from the database. The "
 "deleted users will be kicked from the server once submit is clicked."
-msgstr ""
+msgstr "这将从数据库中删除一个或多个用户（逗号分隔）。单击提交后，删除的用户将被踢出"
+"服务器。"
 
 #: ../../Administration/UI_Guide_Admin.inc:570
 msgid "End user session"
-msgstr ""
+msgstr "结束用户会话"
 
 #: ../../Administration/UI_Guide_Admin.inc:572
 msgid ""
 "Disconnects the current selected user by ending their session with the "
 "server."
-msgstr ""
+msgstr "通过结束与服务器的会话来断开当前选定用户的连接。"
 
 #: ../../Administration/UI_Guide_Admin.inc:575
 #: ../../Administration/UI_Guide_Client.inc:405
 msgid "Get User Info"
-msgstr ""
+msgstr "获取用户信息"
 
 #: ../../Administration/UI_Guide_Admin.inc:577
 #: ../../Administration/UI_Guide_Client.inc:407
@@ -3214,34 +3231,35 @@ msgid ""
 "This section allows admins to get information about a specific user "
 "including current connections as well as offline and online messages "
 "awaiting delivery."
-msgstr ""
+msgstr "此部分允许管理员获取有关特定用户的信息，包括当前连接以及等待传递的离线和在线"
+"消息。"
 
 #: ../../Administration/UI_Guide_Admin.inc:581
 #: ../../Administration/UI_Guide_Client.inc:410
 msgid "Get registered user list"
-msgstr ""
+msgstr "获取注册用户列表"
 
 #: ../../Administration/UI_Guide_Admin.inc:583
 msgid ""
 "This will display all registered users for the selected domain up to the "
 "number specified."
-msgstr ""
+msgstr "这将显示所选域的所有注册用户，直到指定数量。"
 
 #: ../../Administration/UI_Guide_Admin.inc:586
 #: ../../Administration/UI_Guide_Client.inc:415
 msgid "Modify User"
-msgstr ""
+msgstr "修改用户"
 
 #: ../../Administration/UI_Guide_Admin.inc:588
 #: ../../Administration/UI_Guide_Client.inc:417
 msgid ""
 "Allows you to modify some user details including E-mail and whether it is"
 " an active user."
-msgstr ""
+msgstr "允许您修改一些用户详细信息，包括电子邮件以及是否为活动用户。"
 
 #: ../../Administration/UI_Guide_Client.inc:2
 msgid "Tigase Web Client"
-msgstr ""
+msgstr "Tigase 网络客户端"
 
 #: ../../Administration/UI_Guide_Client.inc:4
 msgid ""
@@ -3250,45 +3268,49 @@ msgid ""
 "done from the comfort of your browser window with no software install "
 "required!"
 msgstr ""
+"Tigase 现在在 HTTP 接口中内置了一个功能齐全的 XMPP 客户端。您对 XMPP "
+"客户端的所有期望现在都可以在浏览器窗口中轻松完成，无需安装软件！"
 
 #: ../../Administration/UI_Guide_Client.inc:6
 msgid ""
 "The web client is active and available by default on servers v7.2.0 and "
 "later."
-msgstr ""
+msgstr "默认情况下，Web 客户端在服务器 v7.2.0 及更高版本上处于活动状态且可用。"
 
 #: ../../Administration/UI_Guide_Client.inc:8
 msgid ""
 "To access the client, point a browser to the following address: xmpp"
 ".your-server.net:8080/ui/"
-msgstr ""
+msgstr "要访问客户端，请将浏览器指向以下地址：xmpp.your-server.net:8080/ui/"
 
 #: ../../Administration/UI_Guide_Client.inc:10
 msgid ""
 "It will ask you for a login, any bare JID of users registered with the "
 "server will work. **NOTE: Use your bare JID for login**"
-msgstr ""
+msgstr "它会要求您登录，任何在服务器上注册的用户的裸 JID 都可以使用。 **注意："
+"使用您的裸 JID 登录**"
 
 #: ../../Administration/UI_Guide_Client.inc:12
 msgid ""
 "Once you have logged in successfully, you will be presented with the "
 "following screen."
-msgstr ""
+msgstr "一旦成功登录后，您将看到以下屏幕。"
 
 #: ../../Administration/UI_Guide_Client.inc:14
 msgid "|WebUI Home|"
-msgstr ""
+msgstr "|WebUI Home|"
 
 #: ../../Administration/UI_Guide_Client.inc:419
 msgid "WebUI Home"
-msgstr ""
+msgstr "WebUI Home"
 
 #: ../../Administration/UI_Guide_Client.inc:16
 msgid ""
 "The commands are broken into categories shown here. All changes made in "
 "these sections are instant and should be seen the same as if you were "
 "using an external XMPP client like Psi."
-msgstr ""
+msgstr "这些命令分为此处显示的类别。在这些部分中所做的所有更改都是即时的，"
+"并且应该与您使用外部 XMPP 客户端（如 Psi）相同。"
 
 #: ../../Administration/UI_Guide_Client.inc:18
 msgid ""
@@ -3297,16 +3319,19 @@ msgid ""
 "browser and you will be unable to login. Should that happen, you may "
 "disable that feature using the following line in your config.tdsl:"
 msgstr ""
+"**注意** BOSH 客户端会自动将所有请求转换为服务器名称。在极少数情况下，浏览器"
+"可能无法解决此问题，您将无法登录。如果发生这种情况，您可以使用 config.tdsl "
+"中的以下行禁用该功能："
 
 #: ../../Administration/UI_Guide_Client.inc:26
 msgid ""
 "You may have to specifically designate the bosh URL when using the "
 "advanced tag in the login screen."
-msgstr ""
+msgstr "在登录屏幕中使用高级标签时，您可能必须专门指定 bosh URL。"
 
 #: ../../Administration/UI_Guide_Client.inc:29
 msgid "Chat"
-msgstr ""
+msgstr "聊天"
 
 #: ../../Administration/UI_Guide_Client.inc:31
 msgid ""
@@ -3316,39 +3341,44 @@ msgid ""
 "will be on the left panel, the right all active discussions and MUCs, as "
 "well as the currently selected chat will be available."
 msgstr ""
+"这是默认窗口，也是您在 XMPP 中与该服务器聊天的主界面。 "
+"**注意：您只能与登录到当前服务器或连接的集群的用户交流** "
+"您名册中的用户将在左侧面板上，右侧所有活跃的讨论和 "
+"MUC，以及当前选择的聊天将可用。"
 
 #: ../../Administration/UI_Guide_Client.inc:33
 msgid "|WebUI Chat|"
-msgstr ""
+msgstr "|WebUI Chat|"
 
 #: ../../Administration/UI_Guide_Client.inc:420
 msgid "WebUI Chat"
-msgstr ""
+msgstr "WebUI Chat"
 
 #: ../../Administration/UI_Guide_Client.inc:35
 msgid ""
 "Users that are logged in and on your roster will be displayed on the left"
 " side. Double-clicking will bring up a new chat window with the user. You"
 " can Right-click on them to bring up a sub menu with the following;"
-msgstr ""
+msgstr "登录并在您的花名册上的用户将显示在左侧。双击将弹出一个与用户的新聊天窗口。您"
+"可以右键单击它们以显示带有以下内容的子菜单；"
 
 #: ../../Administration/UI_Guide_Client.inc:37
 msgid "|WebUI Usersubmenu|"
-msgstr ""
+msgstr "|WebUI Usersubmenu|"
 
 #: ../../Administration/UI_Guide_Client.inc:421
 msgid "WebUI Usersubmenu"
-msgstr ""
+msgstr "WebUI Usersubmenu"
 
 #: ../../Administration/UI_Guide_Client.inc:39
 msgid "**Chat** replicates a double-click and opens a new window for chat."
-msgstr ""
+msgstr "**Chat** 复制双击并打开一个新的聊天窗口。"
 
 #: ../../Administration/UI_Guide_Client.inc:41
 msgid ""
 "**Modify** brings up a dialogue that allows you to change the JID of the "
 "contact, a nickname, and group."
-msgstr ""
+msgstr "**Modify** 弹出一个对话框，允许您更改联系人的 JID、昵称和组。"
 
 #: ../../Administration/UI_Guide_Client.inc:43
 msgid ""
@@ -3357,67 +3387,70 @@ msgid ""
 "information effectively removing you from their roster. **NOTE: this will"
 " not block user packets from your JID**"
 msgstr ""
+"**Delete** 从您的名册中删除该用户。这还将删除所选用户的订阅授权，以便有效地将"
+"您从他们的名册中删除。 **注意：这不会阻止来自您的 JID 的用户数据包**"
 
 #: ../../Administration/UI_Guide_Client.inc:45
 msgid ""
 "**Info** brings up the User Info (this is the disco#info command for the "
 "selected user)"
-msgstr ""
+msgstr "**Info** 调出用户信息（这是所选用户的 disco#info 命令）"
 
 #: ../../Administration/UI_Guide_Client.inc:47
 msgid ""
 "The top right section has a few icons with specific functionality, they "
 "are;"
-msgstr ""
+msgstr "右上角有几个具有特定功能的图标，它们是；"
 
 #: ../../Administration/UI_Guide_Client.inc:49
 msgid "|WebUI Chat Add New| adds a new user to your roster."
-msgstr ""
+msgstr "|WebUI Chat Add New| 将新用户添加到您的名册中。"
 
 #: ../../Administration/UI_Guide_Client.inc:422
 msgid "WebUI Chat Add New"
-msgstr ""
+msgstr "WebUI Chat Add New"
 
 #: ../../Administration/UI_Guide_Client.inc:51
 msgid "|WebUI Chat NewMUC| creates a new Multi-user chatroom."
-msgstr ""
+msgstr "|WebUI Chat NewMUC| 创建一个新的多用户聊天室。"
 
 #: ../../Administration/UI_Guide_Client.inc:423
 msgid "WebUI Chat NewMUC"
-msgstr ""
+msgstr "WebUI Chat NewMUC"
 
 #: ../../Administration/UI_Guide_Client.inc:53
 msgid ""
 "|WebUI Chat Profile| allows you to edit your user information such as "
 "picture and nickname."
-msgstr ""
+msgstr "|WebUI Chat Profile| 允许您编辑您的用户信息，例如图片和昵称。"
 
 #: ../../Administration/UI_Guide_Client.inc:424
 msgid "WebUI Chat Profile"
-msgstr ""
+msgstr "WebUI Chat Profile"
 
 #: ../../Administration/UI_Guide_Client.inc:55
 msgid "|WebUI Chat CloseWindow| closes the active chat window."
-msgstr ""
+msgstr "|WebUI Chat CloseWindow| 关闭活动聊天窗口。"
 
 #: ../../Administration/UI_Guide_Client.inc:425
 msgid "WebUI Chat CloseWindow"
-msgstr ""
+msgstr "WebUI Chat CloseWindow"
 
 #: ../../Administration/UI_Guide_Client.inc:57
 msgid ""
 "|WebUI Chat settings| provides a place to change your password or publish"
 " changes to your user info. **NOTE: you are limited to changing the "
 "General fields**"
-msgstr ""
+msgstr "|WebUI Chat settings| 提供更改密码或发布对用户信息的更改的地方。 "
+"**注意：您只能更改常规字段**"
 
 #: ../../Administration/UI_Guide_Client.inc:426
 msgid "WebUI Chat settings"
-msgstr ""
+msgstr "WebUI Chat settings"
 
 #: ../../Administration/UI_Guide_Client.inc:61
 msgid "Discovery"
-msgstr ""
+msgstr "发现"
 
 #: ../../Administration/UI_Guide_Client.inc:63
 msgid ""
@@ -3427,6 +3460,10 @@ msgid ""
 "commands with a few exceptions allowing browsing and the ability to join "
 "a MUC."
 msgstr ""
+"这是您的服务发现面板，它按侧边栏中的组件进行细分。"
+"列出了每个组件名称及其关联的 "
+"JID，以帮助您找到所需的内容。大多数组件都为您提供了执行命令的选项，"
+"但有少数例外允许浏览和加入 MUC。"
 
 #: ../../Administration/UI_Guide_Client.inc:65
 msgid ""
@@ -3436,14 +3473,18 @@ msgid ""
 "a text field, and can be edited to reflect the JID of the component (or "
 "just the server name) to navigate."
 msgstr ""
+"**Browse** 允许您深入挖掘某些组件；例如列出 MUC "
+"组件中可用的聊天室。在页面顶部，将显示您所在组件的特定 "
+"JID。这是一个文本字段，可以进行编辑以反映要导航的组件的 "
+"JID（或只是服务器名称）。"
 
 #: ../../Administration/UI_Guide_Client.inc:67
 msgid "|WebUI Browse Comp|"
-msgstr ""
+msgstr "|WebUI Browse Comp|"
 
 #: ../../Administration/UI_Guide_Client.inc:427
 msgid "WebUI Browse Comp"
-msgstr ""
+msgstr "WebUI Browse Comp"
 
 #: ../../Administration/UI_Guide_Client.inc:69
 msgid ""
@@ -3451,6 +3492,8 @@ msgid ""
 "Alternatively, selecting Join to Room while MUC component is selected, "
 "you can join and start a new MUC room."
 msgstr ""
+"**Join to Room** 将加入您选择的 MUC 房间。或者，在选择 MUC "
+"组件时选择加入房间，您可以加入并开始一个新的 MUC 房间。"
 
 #: ../../Administration/UI_Guide_Client.inc:71
 msgid ""
@@ -3459,20 +3502,23 @@ msgid ""
 "see statistics. Since each Component can have a unique structure it is "
 "best to explore each to see what options are available."
 msgstr ""
+"**Execute Command** 提供命令和选项的层次结构以查看和编辑设置、运行命令和脚本"
+"、查看文件内容以及查看统计信息。由于每个组件都可以具有独特的结构，因此最好探"
+"索每个组件以查看可用的选项。"
 
 #: ../../Administration/UI_Guide_Client.inc:74
 msgid "Management"
-msgstr ""
+msgstr "管理"
 
 #: ../../Administration/UI_Guide_Client.inc:76
 msgid ""
 "This is an advanced window for settings and management for the XMPP "
 "server."
-msgstr ""
+msgstr "这是 XMPP 服务器设置和管理的高级窗口。"
 
 #: ../../Administration/UI_Guide_Client.inc:81
 msgid "Here you can manage some of the server settings."
-msgstr ""
+msgstr "在这里您可以管理一些服务器设置。"
 
 #: ../../Administration/UI_Guide_Client.inc:86
 msgid ""
@@ -3481,6 +3527,9 @@ msgid ""
 "headline or Normal which will show as a pop-up in most XMPP clients. Chat"
 " messages will open up a chat dialog with users."
 msgstr ""
+"本节有一个简单的命令：能够向所有登录用户发送大量消息。您可以选择将消息类型更"
+"改为标题或普通，这将在大多数 XMPP "
+"客户端中显示为弹出窗口。聊天消息将打开与用户的聊天对话框。"
 
 #: ../../Administration/UI_Guide_Client.inc:96
 msgid ""
@@ -3492,13 +3541,19 @@ msgid ""
 "as each file reaches 10MB by default. filename.0 will always be the most "
 "recent. Logging will cease once the server restarts."
 msgstr ""
+"这允许您设置日志文件来跟踪特定用户。设置您要记录的用户的裸机或完整 "
+"JID，以及您希望写入日志的文件的名称。除非您提供类似日志/文件名的目录，"
+"否则这些文件将被写入根 Tigase 目录。日志文件将以 .0 扩展名命名，"
+"默认情况下每个文件达到 10MB 时将命名为 .1、.2、.3 等。 filename.0 "
+"将始终是最新的。一旦服务器重新启动，日志记录将停止。"
 
 #: ../../Administration/UI_Guide_Client.inc:101
 msgid ""
 "Here you can add SSL certificates from PEM files to specific virtual "
 "hosts. Although Tigase can generate its own self-signed certificates, "
 "this will override those default certificates."
-msgstr ""
+msgstr "在这里，您可以将 PEM 文件中的 SSL 证书添加到特定的虚拟主机。尽管 Tigase "
+"可以生成自己的自签名证书，但这将覆盖那些默认证书。"
 
 #: ../../Administration/UI_Guide_Client.inc:106
 msgid ""
@@ -3506,21 +3561,24 @@ msgid ""
 "here. This only adds the script to available scripts however, you will "
 "need to run it from another prompt."
 msgstr ""
+"您可以在此处为 Groovy 或 ECMAScript 编写脚本以添加到监视任务。这只会将脚本添"
+"加到可用脚本中，但是，您需要从另一个提示符运行它。"
 
 #: ../../Administration/UI_Guide_Client.inc:114
 msgid "Add New Item - ext"
-msgstr ""
+msgstr "添加新项目 - ext"
 
 #: ../../Administration/UI_Guide_Client.inc:116
 msgid ""
 "Provides a method to add external components to the server. By default "
 "you are considered the owner, and the Tigase load balancer is "
 "automatically filled in."
-msgstr ""
+msgstr "提供一种将外部组件添加到服务器的方法。默认情况下，您被视为所有者，"
+"并且自动填充 Tigase 负载均衡器。"
 
 #: ../../Administration/UI_Guide_Client.inc:119
 msgid "Add New Item - Vhost"
-msgstr ""
+msgstr "添加新项目 - Vhost"
 
 #: ../../Administration/UI_Guide_Client.inc:167
 msgid ""
@@ -3528,6 +3586,8 @@ msgid ""
 "archiving. Default is user, which allows users to individually set this "
 "setting, otherwise tue/false will override."
 msgstr ""
+"XEP-0136 - 存储 MUC 消息：是否存储 MUC 消息以进行归档。默认为 "
+"user，允许用户单独进行此设置，否则 tue/false 将覆盖。"
 
 #: ../../Administration/UI_Guide_Client.inc:176
 msgid ""
@@ -3535,7 +3595,8 @@ msgid ""
 " from certain virtual hosts. This may be helpful if you want to lock "
 "users to a specific domain, or prevent them from getting information from"
 " a statistics component."
-msgstr ""
+msgstr "您可以限制用户只能向某些虚拟主机发送和接收数据包。如果您想将用户锁定到特定域"
+"，或者阻止他们从统计组件获取信息，这可能会很有帮助。"
 
 #: ../../Administration/UI_Guide_Client.inc:192
 msgid ""
@@ -3544,36 +3605,41 @@ msgid ""
 "restart.** - pubsub#node type: sets the type of node the the new node "
 "will be. Options include:"
 msgstr ""
+"此部分使您能够对所有未来节点的默认 pubsub 节点配置进行更改。 "
+"**注意：这些更改将在服务器重新启动时重置。** - pubsub#node "
+"type：设置新节点的节点类型。选项包括："
 
 #: ../../Administration/UI_Guide_Client.inc:238
 msgid ""
 "The domains allowed to access this node: Comma separated list of domains "
 "for which users can access this node. If left blank there is no domain "
 "restriction."
-msgstr ""
+msgstr "允许访问此节点的域：用户可以访问此节点的域的逗号分隔列表。如果留空，则没有域"
+"限制。"
 
 #: ../../Administration/UI_Guide_Client.inc:263
 msgid ""
 "Allows you to set the default configuration for new MUC rooms. This will "
 "not be able to modify current in use and persistent rooms."
-msgstr ""
+msgstr "允许您为新的 MUC 房间设置默认配置。这将无法修改当前使用的房间和永久房间。"
 
 #: ../../Administration/UI_Guide_Client.inc:275
 msgid ""
 "You can fix a users roster from this prompt. Fill out the bare JID of the"
 " user and the names you wish to add or remove from the roster. You can "
 "edit a users roster using this tool, and changes are permanent."
-msgstr ""
+msgstr "您可以从此提示修复用户名册。填写用户的裸 JID 以及您希望从名册中添加或删除的名"
+"称。您可以使用此工具编辑用户名册，并且更改是永久性的。"
 
 #: ../../Administration/UI_Guide_Client.inc:280
 msgid ""
 "This does the same as the Fix User’s Roster, but can apply to users in "
 "clustered servers."
-msgstr ""
+msgstr "这与修复用户名册的作用相同，但可以应用于集群服务器中的用户。"
 
 #: ../../Administration/UI_Guide_Client.inc:311
 msgid "New command script - Monitor"
-msgstr ""
+msgstr "新命令脚本 - 监视器"
 
 #: ../../Administration/UI_Guide_Client.inc:313
 msgid ""
@@ -3581,10 +3647,12 @@ msgid ""
 "so they can be saved past server restart and run at any time. Scripts "
 "written here will only be able to work on the Monitor component."
 msgstr ""
+"允许您在 Groovy 中编写命令脚本并将它们物理存储，以便它们可以在服务器重新启动"
+"后保存并随时运行。此处编写的脚本将只能在 Monitor 组件上运行。"
 
 #: ../../Administration/UI_Guide_Client.inc:316
 msgid "New command script - MUC"
-msgstr ""
+msgstr "新命令脚本 - MUC"
 
 #: ../../Administration/UI_Guide_Client.inc:318
 msgid ""
@@ -3592,29 +3660,32 @@ msgid ""
 "so they can be saved past server restart and run at any time. Scripts "
 "written here will only be able to work on the MUC component."
 msgstr ""
+"允许您在 Groovy 中编写命令脚本并将它们物理存储，以便它们可以在服务器重新启动"
+"后保存并随时运行。此处编写的脚本将只能在 MUC 组件上运行。"
 
 #: ../../Administration/UI_Guide_Client.inc:322
 msgid "OAUth credentials"
-msgstr ""
+msgstr "OAUth 凭据"
 
 #: ../../Administration/UI_Guide_Client.inc:324
 msgid ""
 "Uses OAuth to set new credentials and enable or disable a registration "
 "requirement with a signed form."
-msgstr ""
+msgstr "使用 OAuth 设置新凭据并启用或禁用带有签名表单的注册要求。"
 
 #: ../../Administration/UI_Guide_Client.inc:330
 msgid ""
 "Allows admins to pre-bind a BOSH session with a full or bare JID (with "
 "the resource automatically populated on connection). You may also specify"
 " HOLD or WAIT parameters."
-msgstr ""
+msgstr "允许管理员将 BOSH 会话与完整或裸 JID 预绑定（在连接时自动填充资源）。"
+"您还可以指定 HOLD 或 WAIT 参数。"
 
 #: ../../Administration/UI_Guide_Client.inc:335
 msgid ""
 "This will show if you have any external components and will reload them "
 "in case of any stuck threads."
-msgstr ""
+msgstr "这将显示您是否有任何外部组件，并在任何线程卡住的情况下重新加载它们。"
 
 #: ../../Administration/UI_Guide_Client.inc:340
 msgid ""
@@ -3628,52 +3699,60 @@ msgid ""
 "script will be unavailable until server restart. If it is, it will be "
 "permanently removed from the server."
 msgstr ""
+"本节提供所有活动组件的命令脚本列表。每个组件都有以下选项 - **新命令脚本** "
+"提供了一种为使用 EMCAScript 或 Groovy 编写的特定组件编写新命令脚本的方法。您"
+"确实可以选择将脚本保存到磁盘，这将使脚本在服务器中永久存在。 - "
+"**删除命令脚本** 允许您从存储库中删除选定的脚本。如果未选中从磁盘中删除，则脚"
+"本将在服务器重新启动之前不可用。如果是，它将从服务器中永久删除。"
 
 #: ../../Administration/UI_Guide_Client.inc:342
 msgid ""
 "Newly made commands will be listed under the Group listing in the left "
 "column."
-msgstr ""
+msgstr "新创建的命令将列在左列的组列表下。"
 
 #: ../../Administration/UI_Guide_Client.inc:347
 msgid ""
 "These statistics might be more useful as script results yield small bits "
 "of data, but you may find them useful when looking for server loads or "
 "finding user issues."
-msgstr ""
+msgstr "这些统计信息可能更有用，因为脚本结果会产生少量数据，但您可能会发现它们在查找"
+"服务器负载或查找用户问题时很有用。"
 
 #: ../../Administration/UI_Guide_Client.inc:363
 msgid "This will list all idle users separated by vhost."
-msgstr ""
+msgstr "这将列出由 vhost 分隔的所有空闲用户。"
 
 #: ../../Administration/UI_Guide_Client.inc:369
 msgid ""
 "This will list users separated by the vhost they are connected to. The "
 "list will include the bare JID as well as any resources for that JID."
-msgstr ""
+msgstr "这将列出由他们连接到的虚拟主机分隔的用户。该列表将包括裸 JID 以及该 JID "
+"的任何资源。"
 
 #: ../../Administration/UI_Guide_Client.inc:374
 msgid "This displays the number of current active users."
-msgstr ""
+msgstr "这将显示当前活动用户的数量。"
 
 #: ../../Administration/UI_Guide_Client.inc:379
 msgid "This section returns the number of active users per specific vhost."
-msgstr ""
+msgstr "此部分返回每个特定虚拟主机的活动用户数。"
 
 #: ../../Administration/UI_Guide_Client.inc:383
 msgid ""
 "This will list the top number of active users by packets sent and online "
 "time. This list will only be built with users currently online and from "
 "all vhosts."
-msgstr ""
+msgstr "这将按发送的数据包和在线时间列出活跃用户的最高数量。此列表仅由当前在线的用户"
+"和来自所有虚拟主机的用户构建。"
 
 #: ../../Administration/UI_Guide_Client.inc:390
 msgid "Add New User"
-msgstr ""
+msgstr "添加新用户"
 
 #: ../../Administration/UI_Guide_Client.inc:395
 msgid "Change user password"
-msgstr ""
+msgstr "更改用户密码"
 
 #: ../../Administration/UI_Guide_Client.inc:397
 msgid ""
@@ -3681,28 +3760,30 @@ msgid ""
 "needing to know the original password for the selected bare JID. Users "
 "currently logged in will not know password has been changed until they "
 "attempt to re-login."
-msgstr ""
+msgstr "允许管理员更改特定用户的密码，而无需知道所选裸 JID "
+"的原始密码。当前登录的用户在尝试重新登录之前不会知道密码已更改。"
 
 #: ../../Administration/UI_Guide_Client.inc:400
 msgid "Delete user"
-msgstr ""
+msgstr "删除用户"
 
 #: ../../Administration/UI_Guide_Client.inc:402
 msgid ""
 "Provides a text window for admins to input the bare JID of the user they "
 "wish to remove from the server."
-msgstr ""
+msgstr "为管理员提供一个文本窗口，以输入他们希望从服务器中删除的用户的裸 JID。"
 
 #: ../../Administration/UI_Guide_Client.inc:412
 msgid ""
 "Provides a list of vhosts to search and a maximum number of users to "
 "list. Once run, the script will display a list of registered bare JIDs of"
 " users from the selected vhost."
-msgstr ""
+msgstr "提供要搜索的虚拟主机列表和要列出的最大用户数。运行后，"
+"脚本将显示来自所选虚拟主机的已注册用户裸 JID 列表。"
 
 #: ../../Development/REST_API.rst:2
 msgid "REST API"
-msgstr ""
+msgstr "REST API"
 
 #: ../../Development/REST_API.rst:4
 msgid ""
@@ -3711,12 +3792,15 @@ msgid ""
 "Tigase’s REST API. This API may be useful for various integration "
 "scenarios."
 msgstr ""
+"Tigase 的 HTTP API 组件使用负责处理传入 HTTP 的 REST 模块和 Groovy 脚本。"
+"最终结果是 Tigase 的 REST API。此 API 可能对各种集成场景很有用。"
 
 #: ../../Development/REST_API.rst:6
 msgid ""
 "In these sections we will describe the basic REST endpoints provided by "
 "Tigase HTTP API and explain the basics of creating new custom endpoints."
-msgstr ""
+msgstr "在这些部分中，我们将描述 Tigase HTTP API 提供的基本 REST "
+"端点，并解释创建新自定义端点的基础知识。"
 
 #: ../../Development/REST_API.rst:8
 msgid ""
@@ -3726,20 +3810,24 @@ msgid ""
 "installation at HTTP API, which will provide you with basic usage "
 "examples for REST endpoints available at your installation."
 msgstr ""
+"具体于特定 Tigase XMPP "
+"服务器模块的其他端点在提供它们的模块的文档中进行了描述。您还可以在 HTTP API "
+"上查看本地 Tigase XMPP 服务器安装上的 ``http://localhost:8080/rest/``，"
+"它将为您提供安装时可用的 REST 端点的基本使用示例。"
 
 #: ../../Development/REST_API.rst:10
 msgid ""
 "For more informations about configuration of REST module please see "
 "section about :ref:`REST module<Rest_module>`"
-msgstr ""
+msgstr "有关 REST 模块配置的更多信息，请参阅 :ref:`REST module<Rest_module>` 部分"
 
 #: ../../Development/REST_API.rst:13
 msgid "Scripting introduction"
-msgstr ""
+msgstr "脚本介绍"
 
 #: ../../Development/REST_API.rst:15
 msgid "Scripts in the HTTP API component are used for processing all of requests."
-msgstr ""
+msgstr "HTTP API 组件中的脚本用于处理所有请求。"
 
 #: ../../Development/REST_API.rst:17
 msgid ""
@@ -3751,14 +3839,19 @@ msgid ""
 "``/test`` and will be placed in ``scripts/rest/tested``, the handler will"
 " be called for using the following URI: ``/rest/tested/test``."
 msgstr ""
+"要向 HTTP API 组件添加新操作，您需要创建一个用 Groovy 编写的脚本，"
+"其中将实现扩展 ``tigase.http.rest.Handler`` 类的类。脚本的 URI "
+"将从脚本文件夹中的文件位置创建。例如，如果带有正则表达式的脚本 "
+"``TestHandler`` 将被设置为 ``/test`` 并将被放置在 ``scripts/rest/tested`` "
+"中，则将使用以下 URI 调用处理程序：``/rest/tested/test``。"
 
 #: ../../Development/REST_API.rst:20
 msgid "Properties"
-msgstr ""
+msgstr "属性"
 
 #: ../../Development/REST_API.rst:22
 msgid "If you are extending classes you will need to set following properties:"
-msgstr ""
+msgstr "如果要扩展类，则需要设置以下属性："
 
 #: ../../Development/REST_API.rst:24
 msgid ""
@@ -3766,6 +3859,8 @@ msgid ""
 " parse parameters embedded in the URI. For example: "
 "``/\\/([@\\/]+)@([@\\/]+)/``"
 msgstr ""
+"**regex** - 用于匹配请求 URI 并解析 URI 中嵌入的参数的正则表达式。例如： ``/"
+"\\/([@\\/]+)@([@\\/]+)/``"
 
 #: ../../Development/REST_API.rst:26
 msgid ""
@@ -3773,12 +3868,14 @@ msgid ""
 "this URI. Available values are: null, \"user\", and \"admin\". If "
 "``requiredRole`` is not null, authentication will be required."
 msgstr ""
+"**requiredRole** - 用户的必需角色才能访问此 URI。可用值为：null、\"user\"和"
+"\"admin\"。如果 ``requiredRole`` 不为空，则需要身份验证。"
 
 #: ../../Development/REST_API.rst:28
 msgid ""
 "**isAsync** - If set to true, it will be possible to wait for results, "
 "for example waiting for an response IQ stanza."
-msgstr ""
+msgstr "**isAsync** - 如果设置为 true，则可以等待结果，例如等待响应 IQ 节。"
 
 #: ../../Development/REST_API.rst:30
 msgid ""
@@ -3786,10 +3883,12 @@ msgid ""
 " be parsed and your script will receive instance of "
 "``HttpServletRequest`` to handle incoming content."
 msgstr ""
+"**decodeContent** - 如果设置为 false，则不会解析请求的内容，"
+"并且您的脚本将接收 ``HttpServletRequest`` 的实例来处理传入的内容。"
 
 #: ../../Development/REST_API.rst:33
 msgid "Properties containing closures"
-msgstr ""
+msgstr "包含闭包的属性"
 
 #: ../../Development/REST_API.rst:35
 msgid ""
@@ -3799,12 +3898,16 @@ msgid ""
 "has a dynamic arguments list**. Below is list of arguments passed to "
 "closure which describes how and when the list of arguments changes:"
 msgstr ""
+"扩展类还应该为以下一个或多个属性设置闭包：execGet、execPut、execPost 和 "
+"execDelete，这具体取决于您需要为 URI 支持的 HTTP 操作或操作。 **每个闭包都有"
+"一个动态参数列表**。下面是传递给闭包的参数列表，它描述了参数列表如何以及何时"
+"更改："
 
 #: ../../Development/REST_API.rst:37
 msgid ""
 "**service** - Implementation of Service interface. This is used to access"
 " the server database or send/receive XMPP stanzas."
-msgstr ""
+msgstr "**service** - 服务接口的实现。这用于访问服务器数据库或发送/接收 XMPP 节。"
 
 #: ../../Development/REST_API.rst:39
 msgid ""
@@ -3813,12 +3916,16 @@ msgid ""
 "If data is type of Map it will be encoded to JSON or XML depending of "
 "'Content-Type' header."
 msgstr ""
+"**callback** - 需要调用 ``callback`` 闭包来返回数据。 ``callback`` "
+"只接受一个 String,byte[],Map 类型的参数。如果数据是 Map 类型，它将根据"
+"'Content-Type' 标头编码为 JSON 或 XML。"
 
 #: ../../Development/REST_API.rst:41
 msgid ""
 "**user** - Will be passed only if ``requiredRole`` is not null. **In all "
 "other cases this argument will not be in arguments list!**"
-msgstr ""
+msgstr "**user** - 仅当 ``requiredRole`` 不为空时才会传递。 "
+"**在所有其他情况下，此参数将不在参数列表中！**"
 
 #: ../../Development/REST_API.rst:43
 msgid ""
@@ -3826,6 +3933,8 @@ msgid ""
 "``HttpServletRequest`` and it will be instance of ``HttpServletRequest`` "
 "of the current HTTP request."
 msgstr ""
+"**request** - 只有声明为 ``HttpServletRequest`` 的实例时才会被传递，"
+"并且它将是当前 HTTP 请求的 ``HttpServletRequest`` 的实例。"
 
 #: ../../Development/REST_API.rst:45
 msgid ""
@@ -3834,23 +3943,28 @@ msgid ""
 "XML or JSON returned as Map, otherwise (or if ``decodeContent`` is set to"
 " ``false``) it will be an instance of ``HttpServletRequest``."
 msgstr ""
+"**content** - 解析的请求内容。如果请求的 Content-Length "
+"为空，此闭包将不在参数列表中。如果 Content-Type 是 XML 或 JSON 作为 Map "
+"返回，否则（或如果 ``decodeContent`` 设置为 ``false``）它将是 "
+"``HttpServletRequest`` 的实例。"
 
 #: ../../Development/REST_API.rst:47
 msgid ""
 "**x** - Additional arguments passed to callback are groups from regular "
 "expression matching the URI. **Groups are not passed as a list, but are "
 "added to list of arguments as next arguments.**"
-msgstr ""
+msgstr "**x** - 传递给回调的附加参数是来自与 URI 匹配的正则表达式的组。 "
+"**组不作为列表传递，而是作为下一个参数添加到参数列表中。**"
 
 #: ../../Development/REST_API.rst:49
 msgid ""
 "If property for corresponding HTTP action is not set, then the component "
 "will return a 404 HTTP error."
-msgstr ""
+msgstr "如果未设置相应 HTTP 操作的属性，则组件将返回 404 HTTP 错误。"
 
 #: ../../Development/REST_API.rst:53
 msgid "Accessing beans"
-msgstr ""
+msgstr "访问 beans"
 
 #: ../../Development/REST_API.rst:55
 msgid ""
@@ -3862,6 +3976,10 @@ msgid ""
 "the bean under which this handler will be available within the REST "
 "module kernel scope."
 msgstr ""
+"可以从实现 REST 处理程序的 groovy 脚本中访问由 Tigase XMPP 服务器管理的 "
+"bean。要在 groovy 脚本中实现处理程序类的实现，需要使用 ``@Bean`` "
+"注释进行注释。在此注解中，您需要传递至少一个参数 ``name``，"
+"该参数应包含所需的 bean 名称，该处理程序将在 REST 模块内核范围内可用。"
 
 #: ../../Development/REST_API.rst:57
 msgid ""
@@ -3870,24 +3988,28 @@ msgid ""
 "inject instance of a particular class (or instance of class implementing "
 "particular interface)."
 msgstr ""
+"有了它，就可以在 ``Handler`` 实现类的任何字段上使用 ``@Inject`` 注释来告诉 "
+"Tigase 内核注入特定类的实例（或实现特定接口的类的实例）。"
 
 #: ../../Development/REST_API.rst:59
 msgid ""
 "For more details about Tigase Kernel and beans please check ``Tigase "
 "Kernel`` section of the Tigase XMPP Server Development Guide."
 msgstr ""
+"有关 Tigase 内核和 bean 的更多详细信息，请查看 Tigase XMPP 服务器开发指南的 "
+"``Tigase Kernel`` 部分。"
 
 #: ../../Development/REST_API.rst:61
 msgid "**Example.**"
-msgstr ""
+msgstr "**实例。**"
 
 #: ../../Development/REST_API.rst:80
 msgid "Usage Examples"
-msgstr ""
+msgstr "使用示例"
 
 #: ../../Development/REST_API.rst:83
 msgid "Retrieving user avatar"
-msgstr ""
+msgstr "检索用户头像"
 
 #: ../../Development/REST_API.rst:85
 msgid ""
@@ -3896,20 +4018,23 @@ msgid ""
 " in user vCard or will otherwise return a http error 404. Example of full"
 " url for avatar of user admin@domain.com"
 msgstr ""
+"如果在用户 vCard 中设置了头像，则对 url /rest/avatar/admin@test-domain.com "
+"使用 GET 方法的请求将返回用户 admin@test-domain.com 的头像图片，否则将返回 "
+"http 错误 404。 用户 admin@domain.com 头像的完整 url 示例"
 
 #: ../../Development/REST_API.rst:91
 msgid ""
 "Entering this url in will execute GET request. It may be possible to use "
 "the url in your browser."
-msgstr ""
+msgstr "输入这个 url 将执行 GET 请求。您可以在浏览器中使用该网址。"
 
 #: ../../Development/REST_API.rst:94
 msgid "Retrieving list of available adhoc commands"
-msgstr ""
+msgstr "检索可用的临时命令列表"
 
 #: ../../Development/REST_API.rst:97
 msgid "Using XML format"
-msgstr ""
+msgstr "使用 XML 格式"
 
 #: ../../Development/REST_API.rst:99
 msgid ""
@@ -3923,14 +4048,21 @@ msgid ""
 "credentials will be those of users available in user database of this "
 "Tigase XMPP Server installation (username in barejid form)."
 msgstr ""
+"要检索可用的临时命令列表，请使用 GET 方法对 ``/rest/adhoc/sess-man@domain."
+"com`` 发出请求，其中 ``sess-man@domain.com`` 您希望查看命令的组件的 "
+"jid。例如，在浏览器中输入以下 url：http://localhost:8080/rest/adhoc/sess-man@"
+"domain.com 将检索 ``sess-man@domain.com`` 中可用的所有临时命令的列表。"
+"此操作受使用 ``HTTP Basic Authentication`` 完成的身份验证保护。"
+"有效凭据将是此 Tigase XMPP 服务器安装的用户数据库中可用的用户（以 barejid "
+"形式的用户名）。"
 
 #: ../../Development/REST_API.rst:101
 msgid "Below is example result of that request:"
-msgstr ""
+msgstr "以下是该请求的示例结果："
 
 #: ../../Development/REST_API.rst:124
 msgid "Using JSON format"
-msgstr ""
+msgstr "使用 JSON 格式"
 
 #: ../../Development/REST_API.rst:126
 msgid ""
@@ -3938,10 +4070,13 @@ msgid ""
 "``Content-Type: application/json`` to HTTP header of request or add "
 "``type`` parameter set to ``application/json``. Example result below:"
 msgstr ""
+"要检索 JSON 中可用的即席命令列表，我们需要将 ``Content-Type: application/"
+"json`` 传递给请求的 HTTP 标头或将 ``type`` 参数集添加到 ``application/"
+"json``。示例结果如下所示："
 
 #: ../../Development/REST_API.rst:151
 msgid "Retrieving command form"
-msgstr ""
+msgstr "检索命令表单"
 
 #: ../../Development/REST_API.rst:153
 msgid ""
@@ -3949,12 +4084,14 @@ msgid ""
 "you have to sent ``POST`` request with only ``jid`` and ``name`` from the"
 " list with all available commands (returned using above command)"
 msgstr ""
+"为了检索具有特定命令的必填字段的表单，您必须从所有可用命令的列表中发送仅带有 "
+"``jid`` 和 ``name`` 的 ``POST`` 请求（使用上述命令返回）"
 
 #: ../../Development/REST_API.rst:156 ../../Development/REST_API.rst:273
 #: ../../Development/REST_API.rst:375 ../../Development/REST_API.rst:491
 #: ../../Development/REST_API.rst:594 ../../Development/REST_API.rst:779
 msgid "Using XML"
-msgstr ""
+msgstr "使用 XML"
 
 #: ../../Development/REST_API.rst:158
 msgid ""
@@ -3963,17 +4100,20 @@ msgid ""
 "following content (request requires authentication using Basic HTTP "
 "Authentication):"
 msgstr ""
+"例如，要获取添加 VHost 项目的表单，请使用 ``/rest/adhoc/vhost-man@domain."
+"com`` 的 ``POST`` 方法发送以下内容（请求需要使用基本 HTTP "
+"身份验证进行身份验证） ："
 
 #: ../../Development/REST_API.rst:166 ../../Development/REST_API.rst:306
 msgid "Below is example result for request presented above:"
-msgstr ""
+msgstr "以下是上述请求的示例结果："
 
 #: ../../Development/REST_API.rst:211 ../../Development/REST_API.rst:324
 #: ../../Development/REST_API.rst:424 ../../Development/REST_API.rst:538
 #: ../../Development/REST_API.rst:645 ../../Development/REST_API.rst:830
 #: ../../Development/REST_API.rst:973
 msgid "Using JSON"
-msgstr ""
+msgstr "使用 JSON"
 
 #: ../../Development/REST_API.rst:213
 msgid ""
@@ -3982,18 +4122,21 @@ msgid ""
 "Type: application/json`` and sending the following content (request "
 "requires authentication using Basic HTTP Authentication) :"
 msgstr ""
+"例如，要获取添加 VHost 项目的表单，请使用 ``/rest/adhoc/vhost-man@domain."
+"com`` 的 ``POST`` 方法使用 ``Content-Type: application/json`` "
+"和发送以下内容（请求需要使用基本 HTTP 身份验证进行身份验证）："
 
 #: ../../Development/REST_API.rst:223 ../../Development/REST_API.rst:348
 msgid "Below is an example result for request presented above:"
-msgstr ""
+msgstr "以下是上述请求的示例结果："
 
 #: ../../Development/REST_API.rst:267
 msgid "Executing example ad-hoc commands"
-msgstr ""
+msgstr "执行示例临时命令"
 
 #: ../../Development/REST_API.rst:270
 msgid "Retrieving list of active users"
-msgstr ""
+msgstr "检索活跃用户列表"
 
 #: ../../Development/REST_API.rst:275
 msgid ""
@@ -4002,6 +4145,9 @@ msgid ""
 "following content (request requires authentication using Basic HTTP "
 "Authentication):"
 msgstr ""
+"要执行命令以获取活动用户列表，请使用 POST 方法对 ``/rest/adhoc/sess-"
+"man@domain.com`` 发出请求，发送以下内容（请求需要使用基本 HTTP "
+"身份验证进行身份验证）："
 
 #: ../../Development/REST_API.rst:293
 msgid ""
@@ -4012,10 +4158,14 @@ msgid ""
 "pass ``Content-Type: text/xml`` to HTTP header of request or add ``type``"
 " parameter set to ``text/xml``."
 msgstr ""
+"在这个请求中，我们传递了执行 adhoc 命令所需的所有参数。我们传递了 adhoc "
+"命令的节点和该命令所需字段的值。我们为 \"domainjid\"字段传递了\"domain.com\" "
+"的值，为\"max_items\"字段传递了''25''的值。我们还需要将 ``Content-Type: text/"
+"xml`` 传递给请求的 HTTP 标头，或者将 ``type`` 参数集添加到 ``text/xml``。"
 
 #: ../../Development/REST_API.rst:297
 msgid "In case of multi value fields use following format:"
-msgstr ""
+msgstr "如果是多值字段，请使用以下格式："
 
 #: ../../Development/REST_API.rst:326
 msgid ""
@@ -4024,6 +4174,9 @@ msgid ""
 "following content (this request also requires authentication using Basic "
 "HTTP Authentication):"
 msgstr ""
+"要执行命令以获取 JSON 格式的活动用户，请使用 POST 方法向 /rest/adhoc/sess-"
+"man@domain.com 发出请求，发送以下内容（此请求还需要使用基本 HTTP "
+"身份验证进行身份验证）："
 
 #: ../../Development/REST_API.rst:346
 msgid ""
@@ -4032,10 +4185,14 @@ msgid ""
 "adhoc command. In this case we passed value of \"domain.com\" for "
 "\"domainjid\" field and \"25\" for \"max_items\" field."
 msgstr ""
+"在这个请求中，我们传递了执行 adhoc 命令所需的所有参数。我们传递了 adhoc "
+"命令的节点和 adhoc "
+"命令所需字段的值。在这种情况下，我们为''domainjid''字段传递了''domain."
+"com''的值，为''max_items''字段传递了''25''。"
 
 #: ../../Development/REST_API.rst:370
 msgid "Ending a user session"
-msgstr ""
+msgstr "结束用户会话"
 
 #: ../../Development/REST_API.rst:372
 msgid ""
@@ -4047,58 +4204,65 @@ msgid ""
 "which usually is in form of *sess-man@domain* where ``domain`` is hosted "
 "domain name."
 msgstr ""
+"要执行最终用户会话命令，请使用 POST 方法对 ``/rest/adhoc/sess-man@domain."
+"com`` 发出请求。发送内容的上下文可能因情况而异。例如，"
+"它可能需要使用带有管理员凭据的 *Basic HTTP 身份验证* 进行身份验证。 URL 中的 "
+"*sess-man@domain.com* 是会话管理器组件的 JID，通常采用 *sess-man@domain* "
+"的形式，其中 ``domain`` 是托管域名。"
 
 #: ../../Development/REST_API.rst:377
 msgid ""
 "To execute the command using XML content you need to set HTTP header "
 "``Content-Type`` to ``application/xml``"
-msgstr ""
+msgstr "要使用 XML 内容执行命令，您需要将 HTTP 标头 ``Content-Type`` 设置为 ``"
+"application/xml``"
 
 #: ../../Development/REST_API.rst:393
 msgid "Where ``test@domain.com`` is JID of user which should be disconnected."
-msgstr ""
+msgstr "其中 ``test@domain.com`` 是应该断开的用户的 JID。"
 
 #: ../../Development/REST_API.rst:395 ../../Development/REST_API.rst:814
 msgid "As a result server will return following XML:"
-msgstr ""
+msgstr "结果服务器将返回以下 XML："
 
 #: ../../Development/REST_API.rst:411
 msgid ""
 "This will confirm that user ``test@domain.com`` with resource "
 "``resource`` was connected and has been disconnected."
-msgstr ""
+msgstr "这将确认具有资源 ``resource`` 的用户 ``test@domain.com`` 已连接并已断开连接。"
 
 #: ../../Development/REST_API.rst:413
 msgid "If the user was not connected server will return following response:"
-msgstr ""
+msgstr "如果用户未连接服务器将返回以下响应："
 
 #: ../../Development/REST_API.rst:426
 msgid ""
 "To execute the command using JSON you will need to set HTTP header "
 "``Content-Type`` to ``application/json``"
-msgstr ""
+msgstr "要使用 JSON 执行命令，您需要将 HTTP 标头 ``Content-Type`` 设置为 ``"
+"application/json``"
 
 #: ../../Development/REST_API.rst:444
 msgid "Where ``test@domain.com`` is JID of user who will be disconnected"
-msgstr ""
+msgstr "其中 ``test@domain.com`` 是要断开连接的用户的 JID"
 
 #: ../../Development/REST_API.rst:446 ../../Development/REST_API.rst:865
 msgid "As a result, the server will return following JSON:"
-msgstr ""
+msgstr "结果，服务器将返回以下 JSON："
 
 #: ../../Development/REST_API.rst:466 ../../Development/REST_API.rst:699
 msgid ""
 "To confirm that user ``test@domain.com`` with resource ``resource`` was "
 "connect and it was disconnected."
-msgstr ""
+msgstr "这将确认具有资源 ``resource`` 的用户 ``test@domain.com`` 已连接并已断开连接。"
 
 #: ../../Development/REST_API.rst:468 ../../Development/REST_API.rst:701
 msgid "If user was not connected server will return the following response:"
-msgstr ""
+msgstr "如果用户未连接服务器将返回以下响应："
 
 #: ../../Development/REST_API.rst:481
 msgid "Operations on VHosts/Domains"
-msgstr ""
+msgstr "虚拟主机/域上的操作"
 
 #: ../../Development/REST_API.rst:483
 msgid ""
@@ -4107,10 +4271,14 @@ msgid ""
 " *Basic HTTP Authentication* with admin credentials). When deciding to "
 "use XML or JSON set relevant ``Content-Type`` header."
 msgstr ""
+"在决定使用 XML 或 JSON 设置相关的 ``Content-Type`` 标头时，VHosts "
+"上的所有操作都是通过向 ``/rest/adhoc/vhost-man@domain.com`` 发出 ``POST`` "
+"请求来完成的（它可能需要使用带有管理员凭据的 *Basic HTTP 身份验证* "
+"进行身份验证）。"
 
 #: ../../Development/REST_API.rst:486
 msgid "Adding VHost"
-msgstr ""
+msgstr "添加 VHost"
 
 #: ../../Development/REST_API.rst:488
 msgid ""
@@ -4120,6 +4288,9 @@ msgid ""
 "form/available fields please see `Retrieving command form "
 "<#RetrievingCommandForm>`__."
 msgstr ""
+"添加域是使用带有所有必需和所需字段的 ``comp-repo-item-add`` 命令完成的（如果"
+"缺少某些内容，则将返回要填写的表单）。有关如何检索表单/可用字段的说明，"
+"请参阅 :ref:`检索命令表单<RetrievingCommandForm>`。"
 
 #: ../../Development/REST_API.rst:493 ../../Development/REST_API.rst:596
 msgid ""
@@ -4128,19 +4299,22 @@ msgid ""
 " trimmed example, see `Retrieving command form "
 "<#RetrievingCommandForm>`__ for details how to get complete form):"
 msgstr ""
+"要使用 XML 内容执行命令，您需要将 HTTP 标头 ``Content-Type`` 设置为 ``"
+"application/xml`` 和填写的表单（下面是修剪的示例，请参阅 :ref:`Retrieving "
+"command form<RetrievingCommandForm>` 了解如何获取完整表单的详细信息）："
 
 #: ../../Development/REST_API.rst:497 ../../Development/REST_API.rst:544
 msgid ""
 "It’s essential to include ``command-marker`` in the request, otherwise "
 "the form will be returned without adding the VHost."
-msgstr ""
+msgstr "在请求中包含 ``command-marker`` 是很重要的，否则将返回表单而不添加 VHost。"
 
 #: ../../Development/REST_API.rst:521 ../../Development/REST_API.rst:570
 #: ../../Development/REST_API.rst:628 ../../Development/REST_API.rst:681
 msgid ""
 "If the domain was added correctly you will receive response with "
 "``Operation successful.`` Note field:"
-msgstr ""
+msgstr "如果域添加正确，您将收到 ``Operation successful.`` 的响应。备注栏："
 
 #: ../../Development/REST_API.rst:540 ../../Development/REST_API.rst:647
 msgid ""
@@ -4149,14 +4323,17 @@ msgid ""
 "is trimmed example, see `Retrieving command form "
 "<#RetrievingCommandForm>`__ for details how to get complete form):"
 msgstr ""
+"要使用 XML 内容执行命令，您需要将 HTTP 标头 ``Content-Type`` 设置为 ``"
+"application/xml`` 和填写的表单（下面是修剪的示例，请参阅 :ref:`Retrieving "
+"command form<RetrievingCommandForm>` 了解如何获取完整表单的详细信息）："
 
 #: ../../Development/REST_API.rst:542 ../../Development/REST_API.rst:649
 msgid "**Note**"
-msgstr ""
+msgstr "**注意**"
 
 #: ../../Development/REST_API.rst:589
 msgid "Configuring VHost"
-msgstr ""
+msgstr "配置VHost"
 
 #: ../../Development/REST_API.rst:591
 msgid ""
@@ -4166,6 +4343,9 @@ msgid ""
 "retrieve the form/available fields please see `Retrieving command form "
 "<#RetrievingCommandForm>`__."
 msgstr ""
+"使用带有所有必需和所需字段的 ``comp-repo-item-update`` 命令修改域配置（如果缺"
+"少某些内容，将返回表单填写）。有关如何检索表单/可用字段的说明，请参阅 "
+":ref:`检索命令表单<RetrievingCommandForm>`。"
 
 #: ../../Development/REST_API.rst:600 ../../Development/REST_API.rst:651
 msgid ""
@@ -4173,10 +4353,12 @@ msgid ""
 "the form will be returned without adding the VHost) and ``item-list`` "
 "with value set to the name of the VHost that’s being configured."
 msgstr ""
+"在请求中包含 ``command-marker`` 是很重要的（否则将返回表单而不添加 VHost）和 "
+"``item-list``，其值设置为正在配置的 VHost 的名称。"
 
 #: ../../Development/REST_API.rst:714
 msgid "Sending any XMPP Stanza"
-msgstr ""
+msgstr "发送任何 XMPP 节"
 
 #: ../../Development/REST_API.rst:716
 msgid ""
@@ -4190,10 +4372,17 @@ msgid ""
 " of HTTP request should be encoded in ``UTF-8`` and ``Content-Type`` "
 "should be set to ``application/xml``."
 msgstr ""
+"XMPP 消息或任何其他 XMPP 节可以使用此 API 通过发送 HTTP POST "
+"请求到（默认情况下）带有序列化 XMPP 节的 ``http://localhost:8080/rest/stream/"
+"?api-key=API_KEY`` 来发送作为内容，其中 ``API_KEY`` 是 HTTP API 的 API 密钥。"
+"该键在 :ref:`etc/config.tdsl<restModuleConfig>` 中设置。此外，"
+"每个请求都需要通过发送一个有效的管理员 JID 和密码作为 BASIC HTTP "
+"授权方法的用户和密码来进行授权。 HTTP 请求的内容应使用 ``UTF-8`` 编码，并且 "
+"``Content-Type`` 应设置为 ``application/xml``。"
 
 #: ../../Development/REST_API.rst:719
 msgid "Handling of request"
-msgstr ""
+msgstr "处理请求"
 
 #: ../../Development/REST_API.rst:721
 msgid ""
@@ -4203,12 +4392,15 @@ msgid ""
 " returned as the content of the HTTP response. Successful requests will "
 "return HTTP response code 200."
 msgstr ""
+"如果发送的 XMPP 节不包含 ``from`` 属性，则 HTTP API 组件将提供它自己的 JID。"
+"如果正在发送 ``iq`` 节，并且没有设置 ``from`` 属性，则接收到的响应将作为 "
+"HTTP 响应的内容返回。成功的请求将返回 HTTP 响应代码 200。"
 
 #: ../../Development/REST_API.rst:727
 msgid ""
 "**Sending an XMPP message with from set to HTTP API component to full "
 "JID.**"
-msgstr ""
+msgstr "**发送一条 XMPP 消息，从集合到 HTTP API 组件到完整的 JID。**"
 
 #: ../../Development/REST_API.rst:729
 msgid ""
@@ -4216,12 +4408,15 @@ msgid ""
 "/?api-key=API_KEY`` URL of the HTTP API component to deliver the message "
 "*Example message 1* to *test@example.com/resource-1*."
 msgstr ""
+"数据需要作为 HTTP POST 请求内容发送到 HTTP API 组件的 URL ``/rest/stream/"
+"?api-key=API_KEY`` 以将消息 *Example message 1* 传递到 *test@example.com/"
+"resource-1*。"
 
 #: ../../Development/REST_API.rst:738
 msgid ""
 "**Sending an XMPP message with ``from`` set to HTTP API component to a "
 "bare JID.**"
-msgstr ""
+msgstr "**用** ``from`` **发送一个 XMPP 消息，将 HTTP API 组件设置为裸 JID。**"
 
 #: ../../Development/REST_API.rst:740
 msgid ""
@@ -4229,12 +4424,14 @@ msgid ""
 "/?api-key=API_KEY`` URL of the HTTP API component to deliver message "
 "*Example message 2* to *test@example.com*."
 msgstr ""
+"数据需要作为 HTTP POST 请求内容发送到 HTTP API 组件的 ``/rest/stream/?api-"
+"key=API_KEY`` URL， 以将消息 *Example message 2* 传递到 *test@example.com*。"
 
 #: ../../Development/REST_API.rst:748
 msgid ""
 "**Sending an XMPP message with ``from`` set to specified JID and to a "
 "recipients' full JID.**"
-msgstr ""
+msgstr "**发送 XMPP 消息，其中** ``from`` **设置为指定的 JID 和收件人的完整 JID。**"
 
 #: ../../Development/REST_API.rst:750
 msgid ""
@@ -4243,10 +4440,13 @@ msgid ""
 "*Example message 3* to *test@example.com/resource-1* with sender of "
 "message set to *sender@example.com*."
 msgstr ""
+"数据需要作为 HTTP POST 请求内容发送到 HTTP API 组件的 URL ``/rest/stream/"
+"?api-key=API_KEY`` 以将消息 *示例消息 3* 传递到 *test@example.com/resource "
+"-1* 并将消息的发件人设置为 *sender@example.com*。"
 
 #: ../../Development/REST_API.rst:760
 msgid "Setting XMPP user status"
-msgstr ""
+msgstr "设置 XMPP 用户状态"
 
 #: ../../Development/REST_API.rst:762
 msgid ""
@@ -4255,6 +4455,9 @@ msgid ""
 "with some particular presence being set. To control this presence of "
 "unavailable XMPP user we can use this feature."
 msgstr ""
+"默认情况下，当客户端断开连接时，XMPP 用户显示为不可用。然而，在某些情况下，我"
+"们可能希望向用户展示一个活动，并设置了一些特定的存在。为了控制不可用 XMPP "
+"用户的存在，我们可以使用此功能。"
 
 #: ../../Development/REST_API.rst:764
 msgid ""
@@ -4262,16 +4465,18 @@ msgid ""
 "``http://localhost:8080/rest/user/{user-jid}/status?api-key=API_KEY``, "
 "where:"
 msgstr ""
+"下面显示的示例内容需要发送到（默认情况下） ``http://localhost:8080/rest/user/"
+"{user-jid}/status?api-key=API_KEY``，其中："
 
 #: ../../Development/REST_API.rst:766
 msgid "``API_KEY`` is the API key for HTTP API"
-msgstr ""
+msgstr "``API_KEY`` 是 HTTP API 的 API 密钥"
 
 #: ../../Development/REST_API.rst:768
 msgid ""
 "``{user-jid}`` is a bare jid of the user for which you want to set "
 "presence."
-msgstr ""
+msgstr "``{user-jid}`` 是您要为其设置状态的用户的裸 jid。"
 
 #: ../../Development/REST_API.rst:772
 msgid ""
@@ -4279,10 +4484,12 @@ msgid ""
 "``{resource}`` is name of the resource for which you want to set "
 "presence."
 msgstr ""
+"您可以在 ``/status`` 部分之后添加 ``/{resource}`` 到 URL 中，其中 "
+"``{resource}`` 是要为其设置存在的资源的名称。"
 
 #: ../../Development/REST_API.rst:774
 msgid "**Warning**"
-msgstr ""
+msgstr "**警告**"
 
 #: ../../Development/REST_API.rst:776
 msgid ""
@@ -4290,95 +4497,104 @@ msgid ""
 " of trusted jids to allow UserStatusEndpoint module to properly integrate"
 " with Tigase XMPP Server."
 msgstr ""
+"您需要将 ``'user-status-endpoint@http.{clusterNode}'`` 添加到受信任的 jid "
+"列表中，以允许 UserStatusEndpoint 模块与 Tigase XMPP 服务器正确集成。"
 
 #: ../../Development/REST_API.rst:781
 msgid ""
 "To set user status you need to set HTTP header ``Content-Type`` to "
 "``application/xml``"
-msgstr ""
+msgstr "要设置用户状态，您需要将 HTTP 标头 ``Content-Type`` 设置为 ``application/"
+"xml``"
 
 #: ../../Development/REST_API.rst:792 ../../Development/REST_API.rst:843
 msgid "where:"
-msgstr ""
+msgstr "其中："
 
 #: ../../Development/REST_API.rst:794 ../../Development/REST_API.rst:845
 msgid "``available`` - may be:"
-msgstr ""
+msgstr "``available`` - 或许："
 
 #: ../../Development/REST_API.rst:796 ../../Development/REST_API.rst:847
 msgid "``true`` - user is available/connected **(default)**"
-msgstr ""
+msgstr "``true`` - 用户可用/已连接 **（默认）**"
 
 #: ../../Development/REST_API.rst:798 ../../Development/REST_API.rst:849
 msgid "``false`` - user is unavailable/disconnected"
-msgstr ""
+msgstr "``false`` - 用户不可用/断开连接"
 
 #: ../../Development/REST_API.rst:800 ../../Development/REST_API.rst:851
 msgid ""
 "``priority`` - an integer of presence priority. *(It should be always set"
 " as a negative value to make sure that messages are not dropped)* "
 "**(default: -1)**"
-msgstr ""
+msgstr "``priority`` - 存在优先级的整数。 *（应始终设置为负值以确保不丢弃消息）* "
+"**（默认值：-1）**"
 
 #: ../../Development/REST_API.rst:802 ../../Development/REST_API.rst:853
 msgid "``show`` - may be one of ``presence/show`` element values **(optional)**"
-msgstr ""
+msgstr "``show`` - 可能是 ``presence/show`` 元素值之一 **（可选）**"
 
 #: ../../Development/REST_API.rst:804 ../../Development/REST_API.rst:855
 msgid "``chat``"
-msgstr ""
+msgstr "``chat``"
 
 #: ../../Development/REST_API.rst:806 ../../Development/REST_API.rst:857
 msgid "``away``"
-msgstr ""
+msgstr "``away``"
 
 #: ../../Development/REST_API.rst:808 ../../Development/REST_API.rst:859
 msgid "``xa``"
-msgstr ""
+msgstr "``xa``"
 
 #: ../../Development/REST_API.rst:810 ../../Development/REST_API.rst:861
 msgid "``dnd``"
-msgstr ""
+msgstr "``dnd``"
 
 #: ../../Development/REST_API.rst:812 ../../Development/REST_API.rst:863
 msgid ""
 "``status`` - message which should be sent as a presence status message "
 "**(optional)**"
-msgstr ""
+msgstr "``status`` - 应该作为存在状态消息所发送的消息 **（可选）**"
 
 #: ../../Development/REST_API.rst:827 ../../Development/REST_API.rst:880
 msgid ""
 "This will confirm that user ``test@domain.com`` with resource ``tigase-"
 "external`` has it presence changed (look for ``success`` element value)."
 msgstr ""
+"这将确认具有资源 ``tigase-external`` 的用户 ``test@domain.com`` "
+"已更改其存在（查找 ``success`` 元素值）。"
 
 #: ../../Development/REST_API.rst:832
 msgid ""
 "To set user status you need to set HTTP header ``Content-Type`` to "
 "``application/json``"
-msgstr ""
+msgstr "要设置用户状态，您需要将 HTTP 标头 ``Content-Type`` 设置为 ``application/"
+"json``"
 
 #: ../../Development/REST_API.rst:883
 msgid "BOSH HTTP Pre-Binding"
-msgstr ""
+msgstr "BOSH HTTP 预绑定"
 
 #: ../../Development/REST_API.rst:886
 msgid "Bosh (HTTP) Pre-Binding"
-msgstr ""
+msgstr "Bosh (HTTP) 预绑定"
 
 #: ../../Development/REST_API.rst:888
 msgid ""
 "Binding a user session is done by sending a request using HTTP POST "
 "method for ``/rest/adhoc/bosh@domain.com`` with the following content:"
 msgstr ""
+"绑定用户会话是通过使用 HTTP POST 方法为 ``/rest/adhoc/bosh@domain.com`` "
+"发送具有以下内容的请求来完成的："
 
 #: ../../Development/REST_API.rst:892
 msgid "Request requires authentication using Basic HTTP Authentication"
-msgstr ""
+msgstr "请求需要使用基本 HTTP 身份验证进行身份验证"
 
 #: ../../Development/REST_API.rst:917
 msgid "The Following parameters can be adjusted:"
-msgstr ""
+msgstr "可以调整以下参数："
 
 #: ../../Development/REST_API.rst:919
 msgid ""
@@ -4387,6 +4603,9 @@ msgid ""
 "can be either a FullJID or a BareJID. In the latter case, a random "
 "resource will be generated for the session being bound."
 msgstr ""
+"**from** 这将是用户的 JID。您可以更改由 ``from`` 变量标识的项目的 ``<value/"
+">`` 节点；这可以是 FullJID 或 "
+"BareJID。在后一种情况下，将为正在绑定的会话生成一个随机资源。"
 
 #: ../../Development/REST_API.rst:921
 msgid ""
@@ -4395,6 +4614,9 @@ msgid ""
 "attribute specified in `XEP-0124: Session Creation Response "
 "<http://xmpp.org/extensions/xep-0124.html#session-request>`__"
 msgstr ""
+"**hold** 值。通过更改由 ``hold`` 变量标识的项目的 ``<value/>`` 节点的值。"
+"该值与 `XEP-0124: Session Creation Response <http://xmpp.org/extensions/"
+"xep-0124.html#session-request>`__ 中指定的 ``hold`` 属性匹配"
 
 #: ../../Development/REST_API.rst:923
 msgid ""
@@ -4403,19 +4625,23 @@ msgid ""
 "attribute specified in `XEP-0124: Session Creation Response "
 "<http://xmpp.org/extensions/xep-0124.html#session-request>`__"
 msgstr ""
+"**wait** 值。通过更改由 ``wait`` 变量标识的项目的 ``<value/>`` 节点的值。"
+"该值与 `XEP-0124: Session Creation Response <http://xmpp.org/extensions/"
+"xep-0124.html#session-request>`__ 中指定的 ``wait`` 属性匹配"
 
 #: ../../Development/REST_API.rst:925
 msgid ""
 "As a response one will receive and XML with the result containing "
 "additionally available session and RID that can be used in the client to "
 "attach to the session, e.g.:"
-msgstr ""
+msgstr "作为响应，将收到一个 XML，其结果包含额外的可用会话和 "
+"RID，其可用于客户端附加到会话，例如："
 
 #: ../../Development/REST_API.rst:966
 msgid ""
 "For example, having the above XML request stored in ``prebind`` file, one"
 " can execute the request using ``$curl``:"
-msgstr ""
+msgstr "例如，将上述 XML 请求存储在 ``prebind`` 文件中，可以使用 ``$curl`` 执行请求："
 
 #: ../../Development/REST_API.rst:975
 msgid ""
@@ -4423,26 +4649,28 @@ msgid ""
 "request using POST method to ``/rest/adhoc/bosh@domain.com`` sending the "
 "following content:"
 msgstr ""
+"要执行命令以 JSON 格式预绑定 BOSH 会话，请使用 POST 方法向 ``/rest/adhoc/"
+"bosh@domain.com`` 发出请求，发送以下内容："
 
 #: ../../Development/REST_API.rst:999
 msgid "This example replicates the same request presented above in XML format."
-msgstr ""
+msgstr "此示例以 XML 格式复制上述相同的请求。"
 
 #: ../../Development/index.rst:3
 msgid "Rest API"
-msgstr ""
+msgstr "Rest API"
 
 #: ../../index.rst:13
 msgid "Admin Guide"
-msgstr ""
+msgstr "管理员指南"
 
 #: ../../index.rst:21
 msgid "Development Guide"
-msgstr ""
+msgstr "开发指南"
 
 #: ../../index.rst:4
 msgid "Tigase HTTP API"
-msgstr ""
+msgstr "Tigase HTTP API"
 
 #: ../../index.rst:6
 msgid ""
@@ -4451,11 +4679,14 @@ msgid ""
 "simple, easy-to-use interface right from your browser! We will guide you "
 "through setup, running, and going through some features of the HTTP API."
 msgstr ""
+"欢迎使用 Tigase HTTP API 用户指南。 HTTP API "
+"允许您直接从浏览器使用简单易用的界面管理、配置、聊天和向 Tigase "
+"服务器发送命令！我们将指导您完成设置、运行和了解 HTTP API 的一些功能。"
 
 #: ../../index.rst:8
 msgid "**Setup & Configuration**"
-msgstr ""
+msgstr "**设置和配置**"
 
 #: ../../index.rst:10
 msgid "Tigase will by default start with the http servlet active and running."
-msgstr ""
+msgstr "默认情况下，Tigase 将启动并运行 http servlet。"
