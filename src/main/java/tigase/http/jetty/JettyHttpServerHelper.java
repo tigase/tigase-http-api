@@ -17,6 +17,7 @@
  */
 package tigase.http.jetty;
 
+import org.eclipse.jetty.security.authentication.BasicAuthenticator;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import tigase.http.DeploymentInfo;
@@ -54,6 +55,7 @@ public class JettyHttpServerHelper {
 		}
 		Service service = deployment.getService();
 		if (service != null) {
+			context.getSecurityHandler().setAuthenticator(new BasicAuthenticator());
 			context.getSecurityHandler()
 					.setLoginService(new tigase.http.jetty.security.TigasePlainLoginService(service));
 		}
