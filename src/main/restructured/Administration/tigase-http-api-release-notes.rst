@@ -9,6 +9,12 @@ Tigase HTTP API component is a generic container used to provide other HTTP rela
 Tigase HTTP-API Release Notes
 --------------------------------
 
+Tigase HTTP-API 2.3.0 Release Notes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- Switch from jtds to MS own jdbc driver; #serverdist-12
+- Adjust log levels; #server-1115
+
 Tigase HTTP-API 2.2.0 Release Notes
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
