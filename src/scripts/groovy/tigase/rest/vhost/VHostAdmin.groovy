@@ -47,7 +47,16 @@ Example response:
 		requiredRole = "admin"
 		isAsync = true
 		execGet = { Service service, callback, user ->
-			callback([ vhosts: vHostManager.getAllVHosts() ]);
+			var mainVhost = vHostManager.getDefVHostItem();
+			callback([ vhosts: vHostManager.getAllVHosts()
+					.findAll { it -> "default" != it.toString()}
+					.collect {it -> {
+						var item = [vhost: it.toString()]
+						if (it.getBareJID() == mainVhost) {
+							item."default-virtual-host" = true;
+						}
+						return item;
+			} } ]);
 		}
 	}
 
