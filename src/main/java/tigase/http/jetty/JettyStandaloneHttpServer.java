@@ -59,6 +59,10 @@ public class JettyStandaloneHttpServer
 		extends AbstractHttpServer
 		implements Initializable, UnregisterAware {
 
+	private static final String REQUEST_TIMEOUT_KEY = "request-timeout";
+	@ConfigField(desc = "Request timeout", alias = REQUEST_TIMEOUT_KEY)
+	private int timeout = 30 * 1000;
+
 	private static final Logger log = Logger.getLogger(JettyStandaloneHttpServer.class.getCanonicalName());
 	private final ContextHandlerCollection contexts = new ContextHandlerCollection();
 	private List<DeploymentInfo> deploymentInfos = new CopyOnWriteArrayList<>();
@@ -156,16 +160,8 @@ public class JettyStandaloneHttpServer
 
 	protected ServerConnector createConnector(Server server, PortConfigBean config) {
 		ServerConnector connector;
-//				boolean http2Enabled = (Boolean) config.getOrDefault(HTTP2_ENABLED_KEY, true);
 		if (config.getSocket() == SocketType.plain) {
-//					if (http2Enabled) {
-//						HttpConfiguration httpConfig = new HttpConfiguration();
-//						HttpConnectionFactory http1 = new HttpConnectionFactory(httpConfig);
-//						HTTP2CServerConnectionFactory http2 = new HTTP2CServerConnectionFactory(httpConfig);
-//						connector = new ServerConnector(server, http1, http2);
-//					} else {
 			connector = new ServerConnector(server);
-//					}
 		} else {
 			String domain = config.getDomain();
 			SSLContext context = sslContextContainer.getSSLContext("TLS", domain, false);
@@ -205,6 +201,7 @@ public class JettyStandaloneHttpServer
 			}
 		}
 		connector.setPort(config.getPort());
+		connector.setIdleTimeout(timeout);
 		return connector;
 	}
 
@@ -212,11 +209,7 @@ public class JettyStandaloneHttpServer
 			extends AbstractHttpServer.PortConfigBean {
 
 		private static final boolean isHttp2Available() {
-			return Optional.ofNullable(System.getProperty("java.version"))
-					.map(version -> version.split("\\.")[0])
-					.map(Integer::parseInt)
-					.map(version -> version >= 9)
-					.orElse(false);
+			return Runtime.version().feature() >= 9;
 		}
 
 		private ServerConnector connector = null;
