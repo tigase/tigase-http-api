@@ -19,10 +19,10 @@ package tigase.rest.user
 
 import tigase.db.UserNotFoundException
 import tigase.http.rest.Service
-import tigase.server.Iq
-import tigase.server.Packet
-import tigase.xml.Element
-import tigase.xmpp.StanzaType
+import tigase.kernel.beans.Bean
+import tigase.kernel.beans.Inject
+import tigase.vhosts.VHostItem
+import tigase.vhosts.VHostManager
 import tigase.xmpp.jid.BareJID
 
 import java.util.logging.Level
@@ -34,6 +34,7 @@ import java.util.logging.Logger
  *
  * Example format of content of request or response:
  * <user><jid>user@domain</jid><password>Paa$$w0rd</password></jid></user>*/
+@Bean(name = "user-admin-handler", active = true)
 class UserAdminHandler
 		extends tigase.http.rest.Handler {
 
@@ -41,6 +42,9 @@ class UserAdminHandler
 
 	def TIMEOUT = 30 * 1000;
 	def COMMAND_XMLNS = "http://jabber.org/protocol/commands";
+
+	@Inject
+	private VHostManager vHostManager;
 
 	public UserAdminHandler() {
 		description = [ regex : "/{user_jid}",
@@ -87,7 +91,8 @@ Example response:
 			if (!service.getUserRepository().userExists(jid)) {
 				callback(null);
 			} else {
-				callback([ user: [ jid: jid.toString(), domain: domain, uid: uid ] ]);
+				def isAdmin = vHostManager.getVHostItem(jid.getDomain()).isAdmin(jid.toString())
+				callback([ user: [ jid: jid.toString(), domain: domain, isAdmin: isAdmin, uid: uid ] ]);
 			}
 		}
 		execPut = { Service service, callback, user, content, localPart, domain ->
@@ -100,7 +105,12 @@ Example response:
 				if (service.getUserRepository().userExists(jid) && email) {
 					service.getUserRepository().setData(jid, "email", email);
 				}
-				callback([ user: [ jid: jid.toString(), domain: domain, uid: uid ] ]);
+				def setAsAdmin = content.user.isAdmin;
+				if (setAsAdmin != null) {
+					updateIsAdmin(jid.domain, jid, setAsAdmin);
+				}
+				def isAdmin = vHostManager.getVHostItem(jid.getDomain()).isAdmin(jid.toString())
+				callback([ user: [ jid: jid.toString(), domain: domain, isAdmin: isAdmin, uid: uid ] ]);
 			} catch (tigase.db.UserExistsException ex) {
 				callback({ req, resp -> resp.sendError(409, "User exists");
 				});
@@ -128,9 +138,35 @@ Example response:
 		execPost = { Service service, callback, user, content, localPart, domain ->
 			def jid = BareJID.bareJIDInstance(localPart, domain);
 			def password = content.user.password;
-			service.getAuthRepository().updatePassword(jid, password)
+			if (password != null) {
+				service.getAuthRepository().updatePassword(jid, password)
+			}
+			def setAsAdmin = content.user.isAdmin;
+			if (setAsAdmin != null) {
+				 updateIsAdmin(jid.domain, jid, setAsAdmin);
+			}
 			def uid = service.getUserRepository().getUserUID(jid);
-			callback([ user: [ jid: jid.toString(), domain: domain, uid: uid ] ]);
+			def isAdmin = vHostManager.getVHostItem(jid.getDomain()).isAdmin(jid.toString())
+			callback([ user: [ jid: jid.toString(), domain: domain, isAdmin: isAdmin, uid: uid ] ]);
+		}
+	}
+
+	void updateIsAdmin(String domain, BareJID jid, Object setAsAdmin) {
+		setAsAdmin = Boolean.parseBoolean("$setAsAdmin");
+		VHostItem oldVhost = vHostManager.componentRepository.getItem(jid.getDomain());
+		if (oldVhost != null) {
+			if (oldVhost.isAdmin(jid.toString()) != setAsAdmin) {
+				def vhost = vHostManager.componentRepository.getItemInstance();
+				vhost.initFromElement(oldVhost.toElement());
+				def admins = (vhost.getAdmins() as List<String>) ?: [];
+				admins.remove(jid.toString());
+				if (setAsAdmin) {
+					admins.add(jid.toString());
+				}
+				vhost.item.setAdmins(admins as String[]);
+				vhost.refresh();
+				vHostManager.componentRepository.addItem(vhost);
+			}
 		}
 	}
 

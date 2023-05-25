@@ -18,6 +18,9 @@
 package tigase.rest.user
 
 import tigase.http.rest.Service
+import tigase.kernel.beans.Bean
+import tigase.kernel.beans.Inject
+import tigase.vhosts.VHostManager
 
 /**
  * Class implements ability to change user password or remove account by user
@@ -25,8 +28,12 @@ import tigase.http.rest.Service
  *
  * Example format of content of request or response:
  * <user><jid>user@domain</jid><password>Paa$$w0rd</password></jid></user>*/
+@Bean(name = "user-user-handler", active = true)
 class UserUserHandler
 		extends tigase.http.rest.Handler {
+
+	@Inject
+	private VHostManager vHostManager;
 
 	public UserUserHandler() {
 		description = [ regex : "/",
@@ -61,14 +68,15 @@ Example response:
 			if (!service.getUserRepository().userExists(jid)) {
 				callback(null);
 			} else {
-				callback([ user: [ jid: "${jid.toString()}", domain: jid.getDomain(), uid: uid ] ]);
+				def isAdmin = vHostManager.getVHostItem(jid.getDomain()).isAdmin(jid.toString())
+				callback([ user: [ jid: "${jid.toString()}", domain: jid.getDomain(), isAdmin: isAdmin, uid: uid ] ]);
 			}
 		}
 		execDelete = { Service service, callback, jid ->
 			def uid = service.getUserRepository().getUserUID(jid);
 			service.getAuthRepository().removeUser(jid)
 			try {
-				service.getUserRepository().removeUser(bareJID)
+				service.getUserRepository().removeUser(jid)
 			} catch (tigase.db.UserNotFoundException ex) {
 
 			}
