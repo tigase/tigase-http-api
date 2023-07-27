@@ -1,4 +1,4 @@
-/**
+/*
  * Tigase HTTP API component - Tigase HTTP API component
  * Copyright (C) 2013 Tigase, Inc. (office@tigase.com)
  *
