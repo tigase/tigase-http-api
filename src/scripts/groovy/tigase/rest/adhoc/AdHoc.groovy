@@ -159,17 +159,17 @@ In result of this operation you will receive ie. following XML:
 
 				command = result.getElement().getChild("command", COMMAND_XMLNS);
 				def data = command.getChild("x", DATA_XMLNS);
-				def fieldElems = data.getChildren().findAll({ it.getName() == "field" });
+				def fieldElems = data?.getChildren()?.findAll({ it.getName() == "field" }) ?: [];
 
 				fields = [ ];
 				def results = [ jid: (localPart != null ? "$localPart@$domain" : domain), node: node, fields: fields ];
 
-				def titleEl = data.getChild("title");
+				def titleEl = data?.getChild("title");
 				if (titleEl) {
 					results.title = titleEl.getCData()
 				};
 
-				def instructionsEl = data.getChild("instructions");
+				def instructionsEl = data?.getChild("instructions");
 				if (instructionsEl) {
 					results.instructions = instructionsEl.getCData()
 				};
@@ -218,7 +218,7 @@ In result of this operation you will receive ie. following XML:
 
 				def tables = [ ];
 				def table = null;
-				data.getChildren().each { child ->
+				data?.getChildren()?.each { child ->
 					if (!(child.getName() == "reported" || child.getName() == "item")) {
 						return
 					};
@@ -246,13 +246,13 @@ In result of this operation you will receive ie. following XML:
 				if (!tables.isEmpty()) {
 					results.reported = tables;
 				}
-				def roster = data.getChild("query", "jabber:iq:roster")?.getChildren().collect { el ->
+				def roster = data?.getChild("query", "jabber:iq:roster")?.getChildren()?.collect { el ->
 					def item = [ jid: el.getAttribute("jid"), subscription: el.getAttribute("subscription") ];
 					def tmp = el.getAttribute("name");
 					if (tmp) {
 						item.name = tmp;
 					}
-					def groups = el.getChildren()?.findAll { it -> it.name == "group"}.collect { it -> XMLUtils.unescape(it.getCData()) };
+					def groups = el.getChildren()?.findAll { it -> it.name == "group"}?.collect { it -> XMLUtils.unescape(it.getCData()) };
 					if (groups) {
 						item.groups = groups;
 					}
