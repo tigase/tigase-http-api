@@ -58,6 +58,7 @@ public class HttpMessageReceiver
 	private Map<String, Module> modules = new ConcurrentHashMap<String, Module>();
 	private ConcurrentHashMap<String, Request> pendingRequest = new ConcurrentHashMap<String, Request>();
 	private ScheduledExecutorService scheduler;
+	private boolean delayStartup = false;
 
 	@Inject(nullAllowed = true)
 	private List<HttpStatsCollector> statsCollectors = Collections.emptyList();
