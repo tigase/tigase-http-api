@@ -27,6 +27,10 @@ import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
+import tigase.cluster.ClusterConnectionManager;
+import tigase.eventbus.EventBus;
+import tigase.eventbus.EventBusFactory;
+import tigase.eventbus.HandleEvent;
 import tigase.http.AbstractHttpServer;
 import tigase.http.DeploymentInfo;
 import tigase.kernel.beans.Bean;
@@ -34,14 +38,15 @@ import tigase.kernel.beans.Initializable;
 import tigase.kernel.beans.Inject;
 import tigase.kernel.beans.UnregisterAware;
 import tigase.kernel.beans.config.ConfigField;
+import tigase.kernel.beans.selector.ConfigTypeEnum;
+import tigase.kernel.beans.selector.ServerBeanSelector;
+import tigase.kernel.core.Kernel;
 import tigase.net.SocketType;
 
 import javax.net.ssl.*;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -66,7 +71,11 @@ public class JettyStandaloneHttpServer
 	private static final Logger log = Logger.getLogger(JettyStandaloneHttpServer.class.getCanonicalName());
 	private final ContextHandlerCollection contexts = new ContextHandlerCollection();
 	private List<DeploymentInfo> deploymentInfos = new CopyOnWriteArrayList<>();
+	private EventBus eventBus = EventBusFactory.getInstance();
 	private Server server = new Server();
+
+	private boolean delayStartup = false;
+	private Timer timer;
 
 	@Override
 	public List<DeploymentInfo> listDeployed() {
@@ -93,6 +102,11 @@ public class JettyStandaloneHttpServer
 	@Override
 	public void beforeUnregister() {
 		try {
+			if (timer != null) {
+				timer.cancel();
+				timer = null;
+			}
+			eventBus.unregisterAll(this);
 			server.stop();
 		} catch (Exception ex) {
 			log.log(Level.SEVERE, "Exception stopping internal HTTP server", ex);
@@ -102,13 +116,50 @@ public class JettyStandaloneHttpServer
 
 	@Override
 	public void initialize() {
+		eventBus.registerAll(this);
 		server.setHandler(contexts);
-		try {
-			server.start();
-		} catch (Exception ex) {
-			log.log(Level.SEVERE, "Exception starting internal HTTP server", ex);
-		}
+		startupServer();
 		super.initialize();;
+	}
+
+	@Override
+	public void register(Kernel kernel) {
+		delayStartup = ServerBeanSelector.getClusterMode(kernel) &&
+				ServerBeanSelector.getConfigType(kernel) != ConfigTypeEnum.SetupMode;
+		super.register(kernel);
+	}
+
+	@HandleEvent
+	public void serverInitialized(ClusterConnectionManager.ClusterInitializedEvent event) {
+		delayStartup = false;
+		startupServer();
+	}
+	
+	protected void startupServer() {
+		if (delayStartup) {
+			if (timer == null) {
+				log.log(Level.INFO, () -> "Delaying opening of ports of HTTP server");
+				timer = new Timer(true);
+				timer.schedule(new TimerTask() {
+					@Override
+					public void run() {
+						delayStartup = false;
+						startupServer();
+					}
+				}, TimeUnit.SECONDS.toMillis(30));
+			}
+		} else {
+			if (timer != null) {
+				timer.cancel();
+				timer = null;
+			}
+			log.log(Level.INFO, () -> "Starting listening on ports of HTTP server");
+			try {
+				server.start();
+			} catch (Exception ex) {
+				log.log(Level.SEVERE, "Exception starting internal HTTP server", ex);
+			}
+		}
 	}
 
 	protected void deploy(ServletContextHandler ctx) {
