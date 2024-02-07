@@ -18,6 +18,10 @@
 package tigase.http.java;
 
 import com.sun.net.httpserver.*;
+import tigase.cluster.ClusterConnectionManager;
+import tigase.eventbus.EventBus;
+import tigase.eventbus.EventBusFactory;
+import tigase.eventbus.HandleEvent;
 import tigase.http.AbstractHttpServer;
 import tigase.http.DeploymentInfo;
 import tigase.kernel.beans.Bean;
@@ -28,6 +32,7 @@ import tigase.kernel.beans.config.ConfigField;
 import tigase.kernel.beans.config.ConfigurationChangedAware;
 import tigase.kernel.beans.selector.ConfigType;
 import tigase.kernel.beans.selector.ConfigTypeEnum;
+import tigase.kernel.beans.selector.ServerBeanSelector;
 import tigase.kernel.core.Kernel;
 import tigase.net.SocketType;
 
@@ -65,6 +70,7 @@ public class JavaStandaloneHttpServer
 
 	@Inject
 	private ExecutorWithTimeout executor;
+	private boolean delayStartup = false;
 
 	@Override
 	public void deploy(DeploymentInfo deployment) {
@@ -85,6 +91,13 @@ public class JavaStandaloneHttpServer
 	@Override
 	public List<DeploymentInfo> listDeployed() {
 		return Collections.unmodifiableList(deployments);
+	}
+
+	@Override
+	public void register(Kernel kernel) {
+		delayStartup = ServerBeanSelector.getClusterMode(kernel) &&
+				ServerBeanSelector.getConfigType(kernel) != ConfigTypeEnum.SetupMode;
+		super.register(kernel);
 	}
 
 	protected HttpServer createServer(PortConfigBean config) throws IOException {
@@ -305,11 +318,13 @@ public class JavaStandaloneHttpServer
 			extends AbstractHttpServer.PortConfigBean {
 
 		protected HttpServer httpServer;
+		private final EventBus eventBus = EventBusFactory.getInstance();
 		@Inject(bean = "executor")
 		private ExecutorWithTimeout executor;
 		@Inject
 		private JavaStandaloneHttpServer serverManager;
-
+		private ScheduledFuture startupFuture;
+		
 		public void beanConfigurationChanged(Collection<String> changedFields) {
 			if (serverManager == null) {
 				return;
@@ -321,6 +336,8 @@ public class JavaStandaloneHttpServer
 
 		@Override
 		public void beforeUnregister() {
+			startupFuture.cancel(true);
+			eventBus.unregisterAll(this);
 			if (httpServer != null) {
 				serverManager.unregisterServer(httpServer);
 				httpServer.stop(1);
@@ -330,14 +347,39 @@ public class JavaStandaloneHttpServer
 
 		@Override
 		public void initialize() {
+			eventBus.registerAll(this);
+			startServers();
+		}
+
+		@HandleEvent
+		public void serverInitialized(ClusterConnectionManager.ClusterInitializedEvent event) {
+		    if (serverManager != null) {
+				serverManager.delayStartup = false;
+			}
+			startServers();
+		}
+
+		protected void startServers() {
 			if (httpServer == null) {
-				try {
-					httpServer = serverManager.createServer(this);
-					httpServer.setExecutor(executor);
-					httpServer.start();
-					serverManager.registerServer(httpServer);
-				} catch (IOException ex) {
-					throw new RuntimeException("Could not initialize HTTP server for port " + getPort());
+				if (!serverManager.delayStartup) {
+					log.log(Level.INFO, () -> "Starting listening on port " + getPort() + " of HTTP server");
+					try {
+						httpServer = serverManager.createServer(this);
+						httpServer.setExecutor(executor);
+						httpServer.start();
+						serverManager.registerServer(httpServer);
+					} catch (IOException ex) {
+						throw new RuntimeException("Could not initialize HTTP server for port " + getPort());
+					}
+				} else {
+					log.log(Level.INFO, () -> "Delaying opening of port " + getPort() + " of HTTP server");
+					startupFuture = executor.timer.executor.schedule(() -> {
+						if (this.serverManager != null) {
+							this.serverManager.delayStartup = false;
+						}
+						startServers();
+						;
+					}, 30, TimeUnit.SECONDS);
 				}
 			}
 		}
