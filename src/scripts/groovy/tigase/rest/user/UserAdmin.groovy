@@ -17,6 +17,7 @@
  */
 package tigase.rest.user
 
+import tigase.db.AuthRepository
 import tigase.db.UserNotFoundException
 import tigase.http.rest.Service
 import tigase.kernel.beans.Bean
@@ -45,6 +46,8 @@ class UserAdminHandler
 
 	@Inject
 	private VHostManager vHostManager;
+	@Inject
+	private AuthRepository authRepository;
 
 	public UserAdminHandler() {
 		description = [ regex : "/{user_jid}",
@@ -92,7 +95,9 @@ Example response:
 				callback(null);
 			} else {
 				def isAdmin = vHostManager.getVHostItem(jid.getDomain()).isAdmin(jid.toString())
-				callback([ user: [ jid: jid.toString(), domain: domain, isAdmin: isAdmin, uid: uid ] ]);
+				def accountStatus = Optional.ofNullable(authRepository.getAccountStatus(jid)).orElse(
+						AuthRepository.AccountStatus.undefined_active);
+				callback([ user: [ jid: jid.toString(), domain: domain, isAdmin: isAdmin, accountStatus: accountStatus.name(), uid: uid ] ]);
 			}
 		}
 		execPut = { Service service, callback, user, content, localPart, domain ->
