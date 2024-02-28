@@ -115,7 +115,9 @@ Example response:
 					updateIsAdmin(jid.domain, jid, setAsAdmin);
 				}
 				def isAdmin = vHostManager.getVHostItem(jid.getDomain()).isAdmin(jid.toString())
-				callback([ user: [ jid: jid.toString(), domain: domain, isAdmin: isAdmin, uid: uid ] ]);
+				def accountStatus = Optional.ofNullable(authRepository.getAccountStatus(jid)).orElse(
+						AuthRepository.AccountStatus.undefined_active);
+				callback([ user: [ jid: jid.toString(), domain: domain, isAdmin: isAdmin, accountStatus: accountStatus.name(), uid: uid ] ]);
 			} catch (tigase.db.UserExistsException ex) {
 				callback({ req, resp -> resp.sendError(409, "User exists");
 				});
@@ -152,7 +154,9 @@ Example response:
 			}
 			def uid = service.getUserRepository().getUserUID(jid);
 			def isAdmin = vHostManager.getVHostItem(jid.getDomain()).isAdmin(jid.toString())
-			callback([ user: [ jid: jid.toString(), domain: domain, isAdmin: isAdmin, uid: uid ] ]);
+			def accountStatus = Optional.ofNullable(authRepository.getAccountStatus(jid)).orElse(
+					AuthRepository.AccountStatus.undefined_active);
+			callback([ user: [ jid: jid.toString(), domain: domain, isAdmin: isAdmin, accountStatus: accountStatus.name(), uid: uid ] ]);
 		}
 	}
 
