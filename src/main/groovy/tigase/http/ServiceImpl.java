@@ -85,7 +85,7 @@ public class ServiceImpl<T extends Module>
 			return false;
 		}
 
-		return (!credentials.isAccountDisabled() &&
+		return (!credentials.isAccountDisabled()) &&
 				Optional.ofNullable(credentials.getFirst()).map(e -> e.verifyPlainPassword(password)).orElse(false);
 	}
 
