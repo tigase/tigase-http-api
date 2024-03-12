@@ -15,16 +15,14 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://www.gnu.org/licenses/.
  */
-package tigase.http.api.rest;
+package tigase.http.rest
 
-import tigase.http.api.Handler;
+import tigase.server.Packet
+import tigase.http.modules.Module;
 
-public interface RestHandler extends Handler {
-	Security getSecurity();
+public interface Service<T extends Module>
+		extends tigase.http.api.Service<T> {
 
-	enum Security {
-		None,
-		ApiKey
-	}
+	void sendPacket(Packet packet, Long timeout, Closure closure)
 
 }

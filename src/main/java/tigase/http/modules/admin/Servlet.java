@@ -78,7 +78,7 @@ public class Servlet
 		super.init();
 		ServletConfig cfg = super.getServletConfig();
 		String moduleName = cfg.getInitParameter(MODULE_ID_KEY);
-		service = new ServiceImpl(moduleName);
+		service = new ServiceImpl<>(moduleName);
 		scriptsDir = new File(cfg.getInitParameter(SCRIPTS_DIR_KEY));
 		try {
 			loadTemplate();

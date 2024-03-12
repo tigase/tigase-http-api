@@ -15,16 +15,33 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://www.gnu.org/licenses/.
  */
-package tigase.http.api.rest;
+package tigase.http.api.marshallers;
 
-import tigase.http.api.Handler;
+import java.io.IOException;
+import java.io.Writer;
 
-public interface RestHandler extends Handler {
-	Security getSecurity();
+public class StringBuilderWriter
+		extends Writer {
 
-	enum Security {
-		None,
-		ApiKey
+	private final StringBuilder sb = new StringBuilder();
+
+	@Override
+	public void write(char[] cbuf, int off, int len) throws IOException {
+		sb.append(cbuf, off, len);
 	}
 
+	@Override
+	public void flush() throws IOException {
+
+	}
+
+	@Override
+	public void close() throws IOException {
+
+	}
+
+	@Override
+	public String toString() {
+		return sb.toString();
+	}
 }

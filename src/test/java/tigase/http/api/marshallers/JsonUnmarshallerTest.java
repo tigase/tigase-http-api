@@ -15,16 +15,18 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://www.gnu.org/licenses/.
  */
-package tigase.http.api.rest;
+package tigase.http.api.marshallers;
 
-import tigase.http.api.Handler;
+class JsonUnmarshallerTest
+		extends AbstractUnmarshallerTest {
 
-public interface RestHandler extends Handler {
-	Security getSecurity();
-
-	enum Security {
-		None,
-		ApiKey
+	@Override
+	Marshaller createMarshaller() {
+		return new JsonMarshaller();
 	}
 
+	@Override
+	Unmarshaller createUnmarshaller() {
+		return new JsonUnmarshaller();
+	}
 }

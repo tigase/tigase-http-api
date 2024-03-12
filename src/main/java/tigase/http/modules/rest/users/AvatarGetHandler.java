@@ -71,7 +71,7 @@ public class AvatarGetHandler extends AbstractRestHandler {
 
 	public void setRestModule(RestModule restModule) {
 		this.restModule = restModule;
-		service = new ServiceImpl<>(restModule);
+		service = (Service<RestModule>) new ServiceImpl<RestModule>(restModule);
 	}
 
 	@GET

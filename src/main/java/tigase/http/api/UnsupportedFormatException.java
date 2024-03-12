@@ -15,16 +15,13 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://www.gnu.org/licenses/.
  */
-package tigase.http.api.rest;
+package tigase.http.api;
 
-import tigase.http.api.Handler;
+import tigase.http.api.HttpException;
 
-public interface RestHandler extends Handler {
-	Security getSecurity();
+public class UnsupportedFormatException extends HttpException {
 
-	enum Security {
-		None,
-		ApiKey
+	public UnsupportedFormatException(String message) {
+		super(message, 422);
 	}
-
 }

@@ -1,0 +1,426 @@
+/*
+ * Tigase HTTP API component - Tigase HTTP API component
+ * Copyright (C) 2013 Tigase, Inc. (office@tigase.com)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. Look for COPYING file in the top folder.
+ * If not, see http://www.gnu.org/licenses/.
+ */
+package tigase.http.util;
+
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.container.Suspended;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.xml.bind.MarshalException;
+import jakarta.xml.bind.UnmarshalException;
+import tigase.http.api.Handler;
+import tigase.http.api.HttpException;
+import tigase.http.api.marshallers.*;
+import tigase.http.api.AcceptedType;
+import tigase.http.api.HttpMethod;
+import tigase.http.api.UnsupportedFormatException;
+import tigase.xmpp.jid.BareJID;
+import tigase.xmpp.jid.JID;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Parameter;
+import java.util.*;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+public class JakartaRequestHandler
+		implements tigase.http.util.RequestHandler {
+
+	private static final Map<Class, Function<String,Object>> DESERIALIZERS = new HashMap<>();
+	static {
+		DESERIALIZERS.put(Long.class, Long::parseLong);
+		DESERIALIZERS.put(Integer.class, Integer::parseInt);
+		DESERIALIZERS.put(Double.class, Double::parseDouble);
+		DESERIALIZERS.put(Float.class, Float::parseFloat);
+		DESERIALIZERS.put(String.class, s -> s);
+		DESERIALIZERS.put(BareJID.class, BareJID::bareJIDInstanceNS);
+		DESERIALIZERS.put(JID.class, JID::jidInstanceNS);
+	}
+
+	private final Handler.Role requiredRole;
+	private final Handler handler;
+	private final Method method;
+	private final Pattern pattern;
+	private final HttpMethod httpMethod;
+	private final Set<String> supportedContentTypes;
+
+	public static List<JakartaRequestHandler> create(Handler instance) {
+		Path path = instance.getClass().getAnnotation(Path.class);
+		if (path == null) {
+			return Collections.emptyList();
+		}
+
+		ArrayList<JakartaRequestHandler> handlers = new ArrayList<>();
+		Method[] methods = instance.getClass().getDeclaredMethods();
+		for (Method method : methods) {
+			JakartaRequestHandler handler = JakartaRequestHandler.create(path.value(), instance, method);
+			if (handler != null) {
+				handlers.add(handler);
+			}
+		}
+		return handlers;
+	}
+
+	public static JakartaRequestHandler create(String contextPath, Handler instance, Method method) {
+		if (!Modifier.isPublic(method.getModifiers())) {
+			return null;
+		}
+
+		HttpMethod httpMethod = getHttpMethod(method);
+		if (httpMethod == null) {
+			return null;
+		}
+
+		Path pathAnnotation = method.getAnnotation(Path.class);
+		if (pathAnnotation == null) {
+			return null;
+		}
+
+		String fullPath = contextPath;
+		if (!pathAnnotation.value().startsWith("/")) {
+			fullPath = fullPath + "/";
+		}
+
+		fullPath = fullPath + pathAnnotation.value();
+
+		Pattern pattern = prepareMatcher(fullPath, method);
+		return new JakartaRequestHandler(instance, method, httpMethod, pattern, instance.getRequiredRole());
+	}
+
+	public static HttpMethod getHttpMethod(Method method) {
+		if (method.getAnnotation(GET.class) != null) {
+			return HttpMethod.GET;
+		}
+		if (method.getAnnotation(POST.class) != null) {
+			return HttpMethod.POST;
+		}
+		if (method.getAnnotation(PUT.class) != null) {
+			return HttpMethod.PUT;
+		}
+		if (method.getAnnotation(DELETE.class) != null) {
+			return HttpMethod.DELETE;
+		}
+		return null;
+	}
+
+	public Handler getHandler() {
+		return handler;
+	}
+
+	@Override
+	public Handler.Role getRequiredRole() {
+		return requiredRole;
+	}
+
+	public static Pattern prepareMatcher(String path, Method method) {
+		Map<String, Class> paramClasses = methodsPathParams(method);
+
+		int idx = -1;
+
+		List<Param> params = new ArrayList<>();
+
+		while ((idx = path.indexOf('{', idx + 1)) > -1) {
+			int startIdx = idx;
+			int endIdx = idx;
+			while ((endIdx = path.indexOf('}', endIdx) ) > -1 && path.charAt(endIdx) == '\\') {
+			}
+			if (endIdx == -1) {
+				// this will not work
+				return null;
+			}
+
+			String paramName = path.substring(idx+1, endIdx).trim();
+			String paramRegex = regexForClass(paramClasses.get(paramName));
+
+			if (paramRegex == null) {
+				return null;
+			}
+
+			params.add(new Param(paramName, paramRegex, startIdx, endIdx+1));
+		}
+
+		String regex = path;
+
+		for (int i=params.size() - 1; i >= 0; i--) {
+			Param param = params.get(i);
+			String prefix = regex.substring(0, param.startIdx);
+			String suffix = regex.substring(param.endIdx);
+			regex = prefix + "(?<" + param.name + ">" + param.regex + ")" + suffix;
+		}
+
+		return Pattern.compile(regex);
+	}
+
+	private static class Param {
+		private final String name;
+		private final String regex;
+		private final int startIdx;
+		private final int endIdx;
+
+		private Param(String name, String regex, int startIdx, int endIdx) {
+			this.name = name;
+			this.regex = regex;
+			this.startIdx = startIdx;
+			this.endIdx = endIdx;
+		}
+	}
+
+	private static String regexForClass(Class clazz) {
+		if (Long.class.isAssignableFrom(clazz) || Integer.class.isAssignableFrom(clazz)) {
+			return "[0-9]+";
+		}
+		if (String.class.isAssignableFrom(clazz)) {
+			return "[^\\/]+";
+		}
+		try {
+			System.out.println("checking if class " + clazz + " has fromString(String) method");
+			Method m = clazz.getDeclaredMethod("fromString", String.class);
+			if (Modifier.isStatic(m.getModifiers())) {
+				System.out.println("method found");
+				return "[^\\/]+";
+			}
+			System.out.println("method not static");
+		} catch (NoSuchMethodException e) {
+			System.out.println("method not found");
+			// nothing to do..
+		}
+		return null;
+	}
+
+	private static Map<String,Class> methodsPathParams(Method method) {
+		Map<String, Class> params = new HashMap<>();
+		for (Parameter parameter : method.getParameters()) {
+			PathParam pathParam = parameter.getAnnotation(PathParam.class);
+			if (pathParam == null) {
+				continue;
+			}
+			params.put(pathParam.value(), parameter.getType());
+		}
+		return params;
+	}
+
+	public JakartaRequestHandler(Handler handler, Method method, HttpMethod httpMethod, Pattern pattern, Handler.Role requiredRole) {
+		this.requiredRole = requiredRole;
+		this.httpMethod = httpMethod;
+		this.handler = handler;
+		this.method = method;
+		this.pattern = pattern;
+		Consumes consumes = method.getAnnotation(Consumes.class);
+		if (consumes != null) {
+			supportedContentTypes = Arrays.stream(consumes.value()).collect(Collectors.toSet());
+		} else {
+			supportedContentTypes = Collections.emptySet();
+		}
+	}
+
+	public HttpMethod getHttpMethod() {
+		return httpMethod;
+	}
+	
+	public Matcher test(HttpServletRequest request, String requestUri) {
+		if (supportedContentTypes.contains(request.getContentType()) || supportedContentTypes.isEmpty()) {
+			return pattern.matcher(requestUri);
+		}
+		return null;
+	}
+
+	public void execute(HttpServletRequest request, HttpServletResponse response, Matcher matcher, ScheduledExecutorService executorService)
+			throws HttpException, IOException {
+		Optional<String> acceptedType = selectResponseMimeType(method, request);
+
+		List values = new ArrayList<>();
+		AsyncResponseImpl asyncResponse = null;
+		try {
+			for (Parameter param : method.getParameters()) {
+				PathParam pathParam = param.getAnnotation(PathParam.class);
+				if (pathParam != null) {
+					String valueStr = matcher.group(pathParam.value());
+					Object value = null;
+					if (valueStr != null) {
+						value = convertToValue(param.getType(), valueStr);
+					}
+					values.add(value);
+					continue;
+				}
+
+				HeaderParam headerParam = param.getAnnotation(HeaderParam.class);
+				if (headerParam != null) {
+					String valueStr = request.getHeader(headerParam.value());
+					Object value = null;
+					if (valueStr != null) {
+						value = convertToValue(param.getType(), valueStr);
+					}
+					values.add(value);
+					continue;
+				}
+
+				if (param.getAnnotation(Suspended.class) != null) {
+					if (asyncResponse == null) {
+						asyncResponse = new AsyncResponseImpl(this, executorService, request, acceptedType);
+					}
+					values.add(asyncResponse);
+					continue;
+				}
+
+				String contentType = request.getContentType();
+				if (contentType != null) {
+					values.add(decodeContent(param.getType(), request));
+				} else {
+					values.add(null);
+				}
+			}
+
+			try {
+				Object result = method.invoke(handler, values.toArray());
+				if (Void.TYPE.equals(method.getReturnType())) {
+					return;
+				} else {
+					if (result != null) {
+						sendEncodedContent(result, acceptedType, response);
+					} else {
+						response.setStatus(200);
+					}
+				}
+			} catch (InvocationTargetException | IllegalAccessException ex) {
+				throw new HttpException(ex, 500);
+			}
+		} catch (Throwable ex) {
+			if (asyncResponse != null) {
+				asyncResponse.resume(ex);
+			}
+			throw ex;
+		}
+	}
+	
+	private Object convertToValue(Class expectedClass, String valueStr) {
+		Function<String, Object> mapper = DESERIALIZERS.get(expectedClass);
+		if (mapper == null) {
+			try {
+				Method method = expectedClass.getDeclaredMethod("fromString", String.class);
+				return method.invoke(null, valueStr);
+			} catch (NoSuchMethodException|InvocationTargetException|IllegalAccessException e) {
+				// nothing to do..
+			}
+			return null;
+		}
+		return mapper.apply(valueStr);
+	}
+
+	private Object decodeContent(Class clazz, HttpServletRequest request) throws HttpException, IOException {
+		Unmarshaller unmarshaller = newUnmarshaller(request.getContentType());
+		try (InputStream inputStream = request.getInputStream()) {
+			return unmarshaller.unmarshal(clazz, inputStream);
+		} catch (UnmarshalException e) {
+			throw new HttpException(e, 422);
+		}
+	}
+
+	public void sendEncodedContent(Object object, Optional<String> acceptedType, HttpServletResponse response) throws HttpException, IOException {
+		try {
+			if (object instanceof Response) {
+				Response resp = (Response) object;
+
+				for (Map.Entry<String,List<String>> entry : resp.getStringHeaders().entrySet()) {
+					for (String it : entry.getValue()) {
+						response.addHeader(entry.getKey(), it);
+					}
+				}
+
+				Object entity = resp.getEntity();
+				if (entity != null && entity instanceof byte[]) {
+					response.setContentLength(((byte[]) entity).length);
+				}
+
+				Response.StatusType status = resp.getStatusInfo();
+				response.setStatus(status.getStatusCode());
+
+				if (entity != null) {
+					if (entity instanceof byte[]) {
+						response.getOutputStream().write((byte[]) entity);
+					} else if (entity instanceof String) {
+						response.getWriter().write((String) entity);
+					} else {
+						encodeObject(object, acceptedType.orElse(MediaType.APPLICATION_XML), response);
+					}
+				} else {
+					if (status.getReasonPhrase() != null) {
+						response.getWriter().write(status.getReasonPhrase());
+					}
+				}
+			} else {
+				encodeObject(object, acceptedType.orElse(MediaType.APPLICATION_XML), response);
+			}
+		} catch (MarshalException e) {
+			throw new HttpException(e, 500);
+		}
+	}
+
+	private void encodeObject(Object object, String mimeType, HttpServletResponse response)
+			throws UnsupportedFormatException, MarshalException, IOException {
+		Marshaller marshaller = newMarshaller(mimeType);
+		response.setContentType(mimeType);
+		try (OutputStream outputStream = response.getOutputStream()) {
+			marshaller.marshall(object, outputStream);
+		}
+	}
+
+	private Marshaller newMarshaller(String acceptedType) throws UnsupportedFormatException {
+		return switch (acceptedType) {
+			case "application/json" -> new JsonMarshaller();
+			case "application/xml" -> new XmlMarshaller();
+			default -> throw new UnsupportedFormatException("Format '" + acceptedType + "' is not supported!");
+		};
+	}
+
+	protected Optional<String> selectResponseMimeType(Method method, HttpServletRequest request) throws HttpException {
+		Produces produces = method.getAnnotation(Produces.class);
+		if (produces == null) {
+			return Optional.empty();
+		}
+
+		Set<String> supported = Arrays.stream(produces.value()).collect(Collectors.toSet());
+		String header = request.getHeader("Accept");
+		if (header == null) {
+			return Optional.empty();
+		}
+		
+		return Arrays.stream(header.split(",")).map(
+				AcceptedType::new).filter(it -> supported.contains(it.getMimeType())).sorted(Comparator.comparing(
+				AcceptedType::getPreference).reversed()).findFirst().map(
+				AcceptedType::getMimeType);
+	}
+
+
+	private Unmarshaller newUnmarshaller(String contentType) throws UnsupportedFormatException {
+		return switch (contentType) {
+			case "application/json" -> new JsonUnmarshaller();
+			case "application/xml" -> new XmlUnmarshaller();
+			default -> throw new UnsupportedFormatException("Format '" + contentType + "' is not supported!");
+		};
+	}
+}

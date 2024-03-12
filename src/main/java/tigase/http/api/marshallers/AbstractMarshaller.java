@@ -15,16 +15,18 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://www.gnu.org/licenses/.
  */
-package tigase.http.api.rest;
+package tigase.http.api.marshallers;
 
-import tigase.http.api.Handler;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
-public interface RestHandler extends Handler {
-	Security getSecurity();
+public abstract class AbstractMarshaller implements Marshaller {
 
-	enum Security {
-		None,
-		ApiKey
+	protected Object getFieldValue(Object object, Field field)
+			throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+		Method getter = object.getClass().getDeclaredMethod("get" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1));
+		return getter.invoke(object);
 	}
 
 }

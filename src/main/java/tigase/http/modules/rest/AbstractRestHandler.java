@@ -17,7 +17,7 @@
  */
 package tigase.http.modules.rest;
 
-import tigase.http.api.rest2.RestHandler;
+import tigase.http.api.rest.RestHandler;
 import tigase.kernel.beans.config.ConfigField;
 
 public abstract class AbstractRestHandler implements RestHandler {

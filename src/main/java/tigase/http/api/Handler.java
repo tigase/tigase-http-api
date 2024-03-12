@@ -15,16 +15,20 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://www.gnu.org/licenses/.
  */
-package tigase.http.api.rest;
+package tigase.http.api;
 
-import tigase.http.api.Handler;
+public interface Handler {
 
-public interface RestHandler extends Handler {
-	Security getSecurity();
+	Role getRequiredRole();
 
-	enum Security {
+	enum Role {
 		None,
-		ApiKey
+		User,
+		Admin;
+
+		public boolean isAuthenticationRequired() {
+			return this != None;
+		}
 	}
 
 }

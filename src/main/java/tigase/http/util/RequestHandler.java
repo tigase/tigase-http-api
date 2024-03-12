@@ -15,16 +15,28 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://www.gnu.org/licenses/.
  */
-package tigase.http.api.rest;
+package tigase.http.util;
 
 import tigase.http.api.Handler;
+import tigase.http.api.HttpException;
+import tigase.http.api.HttpMethod;
 
-public interface RestHandler extends Handler {
-	Security getSecurity();
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.regex.Matcher;
 
-	enum Security {
-		None,
-		ApiKey
-	}
+public interface RequestHandler {
 
+	Handler getHandler();
+
+	HttpMethod getHttpMethod();
+
+	Handler.Role getRequiredRole();
+
+	Matcher test(HttpServletRequest request, String requestUri);
+
+	void execute(HttpServletRequest request, HttpServletResponse response, Matcher matcher,
+						ScheduledExecutorService executorService) throws HttpException, IOException;
 }

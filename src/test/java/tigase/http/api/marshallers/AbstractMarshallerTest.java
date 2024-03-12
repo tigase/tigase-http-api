@@ -15,16 +15,26 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://www.gnu.org/licenses/.
  */
-package tigase.http.api.rest;
+package tigase.http.api.marshallers;
 
-import tigase.http.api.Handler;
+import jakarta.xml.bind.MarshalException;
 
-public interface RestHandler extends Handler {
-	Security getSecurity();
+import java.io.IOException;
 
-	enum Security {
-		None,
-		ApiKey
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+abstract class AbstractMarshallerTest {
+
+	abstract Marshaller createMarshaller();
+
+	protected void assertMarshalling(String expected, Object object) throws MarshalException, IOException {
+		Marshaller marshaller = createMarshaller();
+
+		StringBuilderWriter writer = new StringBuilderWriter();
+
+		marshaller.marshall(object, writer);
+
+		assertEquals(expected, writer.toString(), "Marshalling returned unexpected result!");
 	}
 
 }

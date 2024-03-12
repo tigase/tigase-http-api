@@ -54,17 +54,8 @@ def colors = [
 	'PUT' : '#c5862b',
 	'DELETE' : '#a41e22'
 ];
-def servlets = [];
-servlets.addAll(result.service.module.restServlets);
-servlets = servlets.findAll { it.handlers.values().find { !it.isEmpty() } }
-servlets.sort { it.getServletConfig()?.getInitParameter("mapping") }
-servlets.unique { servlet -> servlet.getServletConfig()?.getInitParameter("mapping") }
-servlets.each {
-	def prefix = request.getContextPath() + it.getInitParameter("mapping").replace("/*","");
-	def handlers = [];
-	it.handlers.values().each { v ->
-		handlers.addAll(v);
-	}
+result.prefixes.each { prefix ->
+	def handlers = result.handlersByPrefix[prefix];
 	handlers = handlers.unique();
 	handlers.sort { it.regexDescription ?: it.regex }
 	handlers.each { handler ->

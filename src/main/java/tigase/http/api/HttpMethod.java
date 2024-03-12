@@ -15,16 +15,20 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://www.gnu.org/licenses/.
  */
-package tigase.http.api.rest;
+package tigase.http.api;
 
-import tigase.http.api.Handler;
+public enum HttpMethod {
+	GET,
+	POST,
+	DELETE,
+	PUT;
 
-public interface RestHandler extends Handler {
-	Security getSecurity();
-
-	enum Security {
-		None,
-		ApiKey
-	}
-
+//	public boolean requestContainsBody() {
+//		switch (this) {
+//			case POST, PUT:
+//				return true;
+//			case GET, DELETE:
+//				return
+//		}
+//	}
 }

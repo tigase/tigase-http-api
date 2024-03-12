@@ -20,24 +20,35 @@ package tigase.http.modules.rest;
 import tigase.http.DeploymentInfo;
 import tigase.http.HttpMessageReceiver;
 import tigase.http.ServletInfo;
-import tigase.http.api.rest2.RestHandler;
+import tigase.http.api.Handler;
 import tigase.http.modules.AbstractModule;
-import tigase.http.modules.Module;
+import tigase.http.util.AbstractRequestHandlerServlet;
 import tigase.kernel.beans.Bean;
 import tigase.kernel.beans.Inject;
+import tigase.kernel.beans.config.ConfigField;
 import tigase.kernel.beans.selector.ConfigType;
 import tigase.kernel.beans.selector.ConfigTypeEnum;
+import tigase.kernel.core.Kernel;
 
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @Bean(name = "rest", parent = HttpMessageReceiver.class, active = true)
 @ConfigType({ConfigTypeEnum.DefaultMode, ConfigTypeEnum.SessionManagerMode, ConfigTypeEnum.ConnectionManagersMode,
 			 ConfigTypeEnum.ComponentMode})
 public class RestModule extends AbstractModule
-		implements Module {
+		implements AbstractRequestHandlerServlet.ModuleWithExecutor {
+
+	private static final Logger log = Logger.getLogger(RestModule.class.getCanonicalName());
+	private static final String DEF_SCRIPTS_DIR_VAL = "scripts/rest";
+	private static final String SCRIPTS_DIR_KEY = "rest-scripts-dir";
 
 	private ScheduledExecutorService executorService;
 
@@ -45,20 +56,39 @@ public class RestModule extends AbstractModule
 	private ApiKeyRepository apiKeyRepository;
 
 	@Inject(nullAllowed = true)
-	private List<RestHandler> handlers;
+	private List<Handler> handlers;
 
 	private DeploymentInfo httpDeployment;
+
+	@ConfigField(desc = "Scripts directory", alias = SCRIPTS_DIR_KEY)
+	private String scriptsDir = DEF_SCRIPTS_DIR_VAL;
 
 	@Override
 	public String getDescription() {
 		return "REST support - handles HTTP REST access using scripts";
 	}
 
-	public void setHandlers(List<RestHandler> handlers) {
+	public void setHandlers(List<Handler> handlers) {
 		if (handlers == null) {
 			this.handlers = new ArrayList<>();
 		} else {
 			this.handlers = handlers;
+		}
+	}
+
+	public static File[] getGroovyFiles(File scriptsDirFile) {
+		if (scriptsDirFile.exists()) {
+			return scriptsDirFile.listFiles(new FilenameFilter() {
+				@Override
+				public boolean accept(File file, String s) {
+					return s.endsWith("groovy");
+				}
+			});
+		} else {
+			if (log.isLoggable(Level.WARNING)) {
+				log.log(Level.WARNING, "scripts directory {0} does not exist!", scriptsDirFile);
+			}
+			return new File[0];
 		}
 	}
 
@@ -70,10 +100,14 @@ public class RestModule extends AbstractModule
 		return executorService;
 	}
 
-	public List<RestHandler> getHandlers() {
+	public List<Handler> getHandlers() {
 		return handlers;
 	}
 
+	public Kernel getKernel() {
+		return getKernel(uuid);
+	}
+	
 	@Override
 	public void start() {
 		if (httpDeployment != null) {
@@ -89,16 +123,24 @@ public class RestModule extends AbstractModule
 		httpDeployment = httpServer.deployment()
 				.setClassLoader(this.getClass().getClassLoader())
 				.setContextPath(contextPath)
+				.setService(new tigase.http.ServiceImpl<>(this))
 				.setDeploymentName("Server")
 				.setDeploymentDescription(getDescription());
 		if (vhosts != null) {
 			httpDeployment.setVHosts(vhosts);
 		}
 
-		ServletInfo servletInfo = httpServer.servlet("RestServlet", RestServlet.class);
-		servletInfo.addInitParam(RestServlet.REST_MODULE_KEY, uuid).addMapping("/*");
-		httpDeployment.addServlets(servletInfo);
+		try {
+			File scriptsDirFile = new File(scriptsDir);
+			ServletInfo servletInfo = httpServer.servlet("RestServlet", RestServlet.class);
+			servletInfo.addInitParam(RestServlet.REST_MODULE_KEY, uuid)
+					.addInitParam(RestServlet.SCRIPTS_DIR_KEY, scriptsDirFile.getCanonicalPath())
+					.addMapping("/*");
 
+			httpDeployment.addServlets(servletInfo);
+		} catch (IOException ex) {
+			log.log(Level.FINE, "Exception while scanning for scripts to load", ex);
+		}
 		httpServer.deploy(httpDeployment);
 	}
 
@@ -112,5 +154,10 @@ public class RestModule extends AbstractModule
 			executorService.shutdown();
 		}
 		super.stop();
+	}
+
+	@Override
+	public boolean isRequestAllowed(String key, String domain, String path) {
+		return apiKeyRepository.isAllowed(key, domain, path);
 	}
 }

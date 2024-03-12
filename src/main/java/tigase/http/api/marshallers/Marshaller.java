@@ -15,16 +15,18 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://www.gnu.org/licenses/.
  */
-package tigase.http.api.rest;
+package tigase.http.api.marshallers;
 
-import tigase.http.api.Handler;
+import jakarta.xml.bind.MarshalException;
 
-public interface RestHandler extends Handler {
-	Security getSecurity();
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Writer;
 
-	enum Security {
-		None,
-		ApiKey
-	}
+public interface Marshaller {
 
+	void marshall(Object object, OutputStream outputStream) throws MarshalException, IOException;
+
+	void marshall(Object object, Writer writer)
+			throws IOException, MarshalException;
 }

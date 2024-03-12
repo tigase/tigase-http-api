@@ -15,16 +15,19 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://www.gnu.org/licenses/.
  */
-package tigase.http.api.rest;
+package tigase.http.api.marshallers;
 
-import tigase.http.api.Handler;
+import jakarta.xml.bind.UnmarshalException;
 
-public interface RestHandler extends Handler {
-	Security getSecurity();
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
-	enum Security {
-		None,
-		ApiKey
+public abstract class AbstractUnmarshaller implements Unmarshaller {
+
+	public Object unmarshal(Class clazz, InputStream inputStream) throws UnmarshalException, IOException {
+		return unmarshal(clazz, new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 	}
-
+	
 }

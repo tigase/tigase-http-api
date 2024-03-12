@@ -15,16 +15,16 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://www.gnu.org/licenses/.
  */
-package tigase.http.api.rest;
+package tigase.http.util;
 
-import tigase.http.api.Handler;
+import jakarta.ws.rs.core.AbstractMultivaluedMap;
 
-public interface RestHandler extends Handler {
-	Security getSecurity();
+import java.util.TreeMap;
 
-	enum Security {
-		None,
-		ApiKey
+public class Headers<V> extends AbstractMultivaluedMap<String,V> {
+
+	public Headers() {
+		super(new TreeMap(String.CASE_INSENSITIVE_ORDER));
 	}
 
 }

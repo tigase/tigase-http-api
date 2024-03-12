@@ -17,12 +17,13 @@
  */
 package tigase.http;
 
+import groovy.lang.Closure;
 import tigase.auth.credentials.Credentials;
 import tigase.db.AuthRepository;
 import tigase.db.AuthorizationException;
 import tigase.db.TigaseDBException;
 import tigase.db.UserRepository;
-import tigase.http.api.Service;
+import tigase.http.rest.Service;
 import tigase.http.modules.AbstractBareModule;
 import tigase.http.modules.Module;
 import tigase.server.Packet;
@@ -49,6 +50,15 @@ public class ServiceImpl<T extends Module>
 
 	public CompletableFuture<Packet> sendPacketAndAwait(Packet packet, Long timeout) {
 		return module.addOutPacket(packet, (Integer) (timeout == null ? null : timeout.intValue()));
+	}
+
+	// for groovy scripts, do not use in other places
+	public void sendPacket(Packet packet, Long timeout, Closure closure) {
+		if (closure != null) {
+			sendPacketAndAwait(packet, timeout).exceptionally(ex -> null).thenApply(result -> closure.call(result));
+		} else {
+			sendPacket(packet);
+		}
 	}
 
 	public UserRepository getUserRepository() {
