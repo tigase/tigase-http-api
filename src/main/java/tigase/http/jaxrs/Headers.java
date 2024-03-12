@@ -15,7 +15,7 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://www.gnu.org/licenses/.
  */
-package tigase.http.util;
+package tigase.http.jaxrs;
 
 import jakarta.ws.rs.core.AbstractMultivaluedMap;
 

@@ -15,20 +15,18 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://www.gnu.org/licenses/.
  */
-package tigase.http.util;
+package tigase.http.jaxrs;
 
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.container.Suspended;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.SecurityContext;
 import jakarta.xml.bind.MarshalException;
 import jakarta.xml.bind.UnmarshalException;
-import tigase.http.api.Handler;
 import tigase.http.api.HttpException;
-import tigase.http.api.marshallers.*;
-import tigase.http.api.AcceptedType;
-import tigase.http.api.HttpMethod;
 import tigase.http.api.UnsupportedFormatException;
+import tigase.http.jaxrs.marshallers.*;
 import tigase.xmpp.jid.BareJID;
 import tigase.xmpp.jid.JID;
 
@@ -37,19 +35,17 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-public class JakartaRequestHandler
-		implements tigase.http.util.RequestHandler {
+public class JaxRsRequestHandler
+		implements RequestHandler {
 
 	private static final Map<Class, Function<String,Object>> DESERIALIZERS = new HashMap<>();
 	static {
@@ -69,16 +65,16 @@ public class JakartaRequestHandler
 	private final HttpMethod httpMethod;
 	private final Set<String> supportedContentTypes;
 
-	public static List<JakartaRequestHandler> create(Handler instance) {
+	public static List<JaxRsRequestHandler> create(Handler instance) {
 		Path path = instance.getClass().getAnnotation(Path.class);
 		if (path == null) {
 			return Collections.emptyList();
 		}
 
-		ArrayList<JakartaRequestHandler> handlers = new ArrayList<>();
+		ArrayList<JaxRsRequestHandler> handlers = new ArrayList<>();
 		Method[] methods = instance.getClass().getDeclaredMethods();
 		for (Method method : methods) {
-			JakartaRequestHandler handler = JakartaRequestHandler.create(path.value(), instance, method);
+			JaxRsRequestHandler handler = JaxRsRequestHandler.create(path.value(), instance, method);
 			if (handler != null) {
 				handlers.add(handler);
 			}
@@ -86,7 +82,7 @@ public class JakartaRequestHandler
 		return handlers;
 	}
 
-	public static JakartaRequestHandler create(String contextPath, Handler instance, Method method) {
+	public static JaxRsRequestHandler create(String contextPath, Handler instance, Method method) {
 		if (!Modifier.isPublic(method.getModifiers())) {
 			return null;
 		}
@@ -109,7 +105,7 @@ public class JakartaRequestHandler
 		fullPath = fullPath + pathAnnotation.value();
 
 		Pattern pattern = prepareMatcher(fullPath, method);
-		return new JakartaRequestHandler(instance, method, httpMethod, pattern, instance.getRequiredRole());
+		return new JaxRsRequestHandler(instance, method, httpMethod, pattern, instance.getRequiredRole());
 	}
 
 	public static HttpMethod getHttpMethod(Method method) {
@@ -224,7 +220,7 @@ public class JakartaRequestHandler
 		return params;
 	}
 
-	public JakartaRequestHandler(Handler handler, Method method, HttpMethod httpMethod, Pattern pattern, Handler.Role requiredRole) {
+	public JaxRsRequestHandler(Handler handler, Method method, HttpMethod httpMethod, Pattern pattern, Handler.Role requiredRole) {
 		this.requiredRole = requiredRole;
 		this.httpMethod = httpMethod;
 		this.handler = handler;
@@ -287,6 +283,25 @@ public class JakartaRequestHandler
 					continue;
 				}
 
+				if (param.getAnnotation(BeanParam.class) != null) {
+					try {
+						values.add(new WWWFormUrlEncodedUnmarshaller().unmarshal(param.getType(), request));
+					} catch (UnmarshalException ex) {
+						throw new HttpException(ex, HttpServletResponse.SC_NOT_ACCEPTABLE);
+					}
+					continue;
+				}
+
+				if (SecurityContext.class.isAssignableFrom(param.getType())) {
+					values.add(new SecurityContextImpl(request));
+					continue;
+				}
+
+				if (HttpServletRequest.class.isAssignableFrom(param.getType())) {
+					values.add(request);
+					continue;
+				}
+				
 				String contentType = request.getContentType();
 				if (contentType != null) {
 					values.add(decodeContent(param.getType(), request));
@@ -316,8 +331,50 @@ public class JakartaRequestHandler
 			throw ex;
 		}
 	}
-	
-	private Object convertToValue(Class expectedClass, String valueStr) {
+
+	private String getParamDefaultValue(Parameter param) {
+		DefaultValue defValue = param.getAnnotation(DefaultValue.class);
+		if (defValue == null) {
+			return null;
+		}
+		return defValue.value();
+	}
+
+	public static Object convertToValue(Type expectedType, String[] valueStrs) {
+		if (expectedType instanceof ParameterizedType) {
+			Type[] params = ((ParameterizedType) expectedType).getActualTypeArguments();
+			if (params == null || params.length != 1 || (!(params[0] instanceof Class<?>))) {
+				return null;
+			}
+			return convertToValue((Class<?>) ((ParameterizedType) expectedType).getRawType(), (Class<?>) params[0], valueStrs);
+		} else {
+			return convertToValue((Class<?>) expectedType, null, valueStrs);
+		}
+	}
+
+	public static Object convertToValue(Class<?> expectedClass, Class<?> parameterClass, String[] valueStrs) {
+		if (Collection.class.isAssignableFrom(expectedClass)) {
+			if (parameterClass == null) {
+				return null;
+			}
+			Stream<Object> stream = Arrays.stream(valueStrs).map(str -> convertToValue(parameterClass, str));
+			if (List.class.isAssignableFrom(expectedClass)) {
+				return stream.collect(Collectors.toUnmodifiableList());
+			} else if (Set.class.isAssignableFrom(expectedClass)) {
+				return stream.collect(Collectors.toUnmodifiableSet());
+			} else if (SortedSet.class.isAssignableFrom(expectedClass)) {
+				return Collections.unmodifiableSortedSet(new TreeSet<>(stream.collect(Collectors.toList())));
+			} else {
+				return null;
+			}
+		}
+		if (valueStrs.length != 1) {
+			return null;
+		}
+		return convertToValue(expectedClass, valueStrs[0]);
+	}
+
+	private static Object convertToValue(Class expectedClass, String valueStr) {
 		Function<String, Object> mapper = DESERIALIZERS.get(expectedClass);
 		if (mapper == null) {
 			try {

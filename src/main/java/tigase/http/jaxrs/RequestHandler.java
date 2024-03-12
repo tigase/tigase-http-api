@@ -15,18 +15,26 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://www.gnu.org/licenses/.
  */
-package tigase.http.api.marshallers;
+package tigase.http.jaxrs;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import tigase.http.api.HttpException;
 
-public abstract class AbstractMarshaller implements Marshaller {
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.regex.Matcher;
 
-	protected Object getFieldValue(Object object, Field field)
-			throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-		Method getter = object.getClass().getDeclaredMethod("get" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1));
-		return getter.invoke(object);
-	}
+public interface RequestHandler {
 
+	Handler getHandler();
+
+	HttpMethod getHttpMethod();
+
+	Handler.Role getRequiredRole();
+
+	Matcher test(HttpServletRequest request, String requestUri);
+
+	void execute(HttpServletRequest request, HttpServletResponse response, Matcher matcher,
+						ScheduledExecutorService executorService) throws HttpException, IOException;
 }

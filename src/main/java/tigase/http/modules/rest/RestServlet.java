@@ -17,12 +17,12 @@
  */
 package tigase.http.modules.rest;
 
-import tigase.http.api.Handler;
 import tigase.http.api.HttpException;
 import tigase.http.api.rest.RestHandler;
-import tigase.http.util.AbstractRequestHandlerServlet;
-import tigase.http.util.JakartaRequestHandler;
-import tigase.http.util.RequestHandler;
+import tigase.http.jaxrs.Handler;
+import tigase.http.jaxrs.JaxRsRequestHandler;
+import tigase.http.jaxrs.JaxRsServlet;
+import tigase.http.jaxrs.RequestHandler;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -35,7 +35,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class RestServlet
-		extends AbstractRequestHandlerServlet<RestModule> {
+		extends JaxRsServlet<RestModule> {
 
 	private static final Logger log = Logger.getLogger(RestServlet.class.getCanonicalName());
 
@@ -46,7 +46,7 @@ public class RestServlet
 		super.init();
 		List<Handler> handlers = service.getModule().getHandlers();
 		for (Handler handler : handlers) {
-			registerHandlers(JakartaRequestHandler.create(handler));
+			registerHandlers(JaxRsRequestHandler.create(handler));
 		}
 		initGroovyScripts();
 	}

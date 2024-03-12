@@ -19,6 +19,8 @@ package tigase.http.api.marshallers;
 
 import jakarta.xml.bind.MarshalException;
 import org.junit.jupiter.api.Test;
+import tigase.http.jaxrs.marshallers.JsonMarshaller;
+import tigase.http.jaxrs.marshallers.Marshaller;
 
 import java.io.IOException;
 import java.time.ZoneId;

@@ -15,10 +15,11 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://www.gnu.org/licenses/.
  */
-package tigase.http.util;
+package tigase.http.jaxrs;
 
 import jakarta.ws.rs.core.*;
 import jakarta.ws.rs.ext.RuntimeDelegate;
+import tigase.http.jaxrs.ResponseImpl;
 
 public class RuntimeDelegateImpl extends RuntimeDelegate {
 

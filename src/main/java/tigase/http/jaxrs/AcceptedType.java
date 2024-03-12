@@ -15,23 +15,32 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://www.gnu.org/licenses/.
  */
-package tigase.http.api.marshallers;
+package tigase.http.jaxrs;
 
-import tigase.http.jaxrs.marshallers.JsonMarshaller;
-import tigase.http.jaxrs.marshallers.JsonUnmarshaller;
-import tigase.http.jaxrs.marshallers.Marshaller;
-import tigase.http.jaxrs.marshallers.Unmarshaller;
+import java.util.Arrays;
 
-class JsonUnmarshallerTest
-		extends AbstractUnmarshallerTest {
+public class AcceptedType {
+	private final String mimeType;
+	private final double preference;
 
-	@Override
-	Marshaller createMarshaller() {
-		return new JsonMarshaller();
+	public AcceptedType(String in) {
+		String[] parts = in.split(";");
+		mimeType = parts[0].trim();
+		preference = Arrays.stream(parts)
+				.skip(1)
+				.map(String::trim)
+				.filter(str -> str.startsWith("q="))
+				.map(str -> str.substring(2).trim())
+				.map(Double::parseDouble)
+				.findFirst()
+				.orElse(1.0);
 	}
 
-	@Override
-	Unmarshaller createUnmarshaller() {
-		return new JsonUnmarshaller();
+	public String getMimeType() {
+		return mimeType;
+	}
+
+	public double getPreference() {
+		return preference;
 	}
 }

@@ -15,28 +15,20 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://www.gnu.org/licenses/.
  */
-package tigase.http.util;
+package tigase.http.modules;
 
-import tigase.http.api.Handler;
-import tigase.http.api.HttpException;
-import tigase.http.api.HttpMethod;
+import tigase.server.Packet;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.regex.Matcher;
+import java.util.concurrent.CompletableFuture;
 
-public interface RequestHandler {
+public interface PacketSender {
 
-	Handler getHandler();
+	boolean sendPacket(Packet packet);
 
-	HttpMethod getHttpMethod();
+	default CompletableFuture<Packet> sendPacketAndWait(Packet packet) {
+		return sendPacketAndWait(packet, null);
+	}
 
-	Handler.Role getRequiredRole();
-
-	Matcher test(HttpServletRequest request, String requestUri);
-
-	void execute(HttpServletRequest request, HttpServletResponse response, Matcher matcher,
-						ScheduledExecutorService executorService) throws HttpException, IOException;
+	CompletableFuture<Packet> sendPacketAndWait(Packet packet, Integer timeout);
+	
 }

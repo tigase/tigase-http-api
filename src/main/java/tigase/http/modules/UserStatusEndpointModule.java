@@ -74,7 +74,7 @@ public class UserStatusEndpointModule extends AbstractBareModule {
 
 		// we do not know what to do, so lets just return feature-not-implemented
 		if (packet instanceof Iq && packet.isCommand() && packet.getCommand() == Command.CHECK_USER_CONNECTION) {
-			this.addOutPacket(packet.okResult((String) null, 0));
+			this.sendPacket(packet.okResult((String) null, 0));
 			return true;
 		}
 		return false;

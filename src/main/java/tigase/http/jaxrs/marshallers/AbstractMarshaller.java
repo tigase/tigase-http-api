@@ -15,18 +15,18 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://www.gnu.org/licenses/.
  */
-package tigase.http.api.marshallers;
+package tigase.http.jaxrs.marshallers;
 
-import jakarta.xml.bind.MarshalException;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Writer;
+public abstract class AbstractMarshaller implements Marshaller {
 
-public interface Marshaller {
+	protected Object getFieldValue(Object object, Field field)
+			throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+		Method getter = object.getClass().getDeclaredMethod("get" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1));
+		return getter.invoke(object);
+	}
 
-	void marshall(Object object, OutputStream outputStream) throws MarshalException, IOException;
-
-	void marshall(Object object, Writer writer)
-			throws IOException, MarshalException;
 }

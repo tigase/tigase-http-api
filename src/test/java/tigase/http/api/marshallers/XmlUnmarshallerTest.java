@@ -17,6 +17,11 @@
  */
 package tigase.http.api.marshallers;
 
+import tigase.http.jaxrs.marshallers.Marshaller;
+import tigase.http.jaxrs.marshallers.Unmarshaller;
+import tigase.http.jaxrs.marshallers.XmlMarshaller;
+import tigase.http.jaxrs.marshallers.XmlUnmarshaller;
+
 class XmlUnmarshallerTest
 		extends AbstractUnmarshallerTest {
 

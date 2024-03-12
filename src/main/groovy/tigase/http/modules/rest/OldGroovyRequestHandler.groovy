@@ -18,15 +18,15 @@
 package tigase.http.modules.rest
 
 import groovy.transform.CompileStatic
-import tigase.http.api.Handler
+import tigase.http.jaxrs.Handler
 import tigase.http.api.HttpException
-import tigase.http.api.HttpMethod
+import tigase.http.jaxrs.HttpMethod
 import tigase.http.api.Service
 import tigase.http.api.rest.RestHandler
 import tigase.http.coders.Coder
 import tigase.http.coders.JsonCoder
 import tigase.http.coders.XmlCoder
-import tigase.http.util.RequestHandler
+import tigase.http.jaxrs.RequestHandler
 import tigase.xmpp.jid.BareJID
 
 import javax.servlet.AsyncContext

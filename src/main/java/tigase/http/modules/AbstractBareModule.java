@@ -71,12 +71,12 @@ public abstract class AbstractBareModule
 	}
 
 	@Override
-	public boolean addOutPacket(Packet packet) {
+	public boolean sendPacket(Packet packet) {
 		return writer.write(this, packet);
 	}
 
 	@Override
-	public CompletableFuture<Packet> addOutPacket(Packet packet, Integer timeout) {
+	public CompletableFuture<Packet> sendPacketAndWait(Packet packet, Integer timeout) {
 		return writer.write(this, packet, timeout);
 	}
 

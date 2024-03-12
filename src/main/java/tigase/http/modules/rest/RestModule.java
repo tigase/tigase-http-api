@@ -20,9 +20,9 @@ package tigase.http.modules.rest;
 import tigase.http.DeploymentInfo;
 import tigase.http.HttpMessageReceiver;
 import tigase.http.ServletInfo;
-import tigase.http.api.Handler;
+import tigase.http.jaxrs.Handler;
+import tigase.http.jaxrs.JaxRsModule;
 import tigase.http.modules.AbstractModule;
-import tigase.http.util.AbstractRequestHandlerServlet;
 import tigase.kernel.beans.Bean;
 import tigase.kernel.beans.Inject;
 import tigase.kernel.beans.config.ConfigField;
@@ -44,7 +44,7 @@ import java.util.logging.Logger;
 @ConfigType({ConfigTypeEnum.DefaultMode, ConfigTypeEnum.SessionManagerMode, ConfigTypeEnum.ConnectionManagersMode,
 			 ConfigTypeEnum.ComponentMode})
 public class RestModule extends AbstractModule
-		implements AbstractRequestHandlerServlet.ModuleWithExecutor {
+		implements JaxRsModule {
 
 	private static final Logger log = Logger.getLogger(RestModule.class.getCanonicalName());
 	private static final String DEF_SCRIPTS_DIR_VAL = "scripts/rest";

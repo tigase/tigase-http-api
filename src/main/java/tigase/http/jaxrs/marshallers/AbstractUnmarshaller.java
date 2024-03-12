@@ -15,23 +15,19 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://www.gnu.org/licenses/.
  */
-package tigase.http.api.marshallers;
+package tigase.http.jaxrs.marshallers;
 
-import tigase.http.jaxrs.marshallers.JsonMarshaller;
-import tigase.http.jaxrs.marshallers.JsonUnmarshaller;
-import tigase.http.jaxrs.marshallers.Marshaller;
-import tigase.http.jaxrs.marshallers.Unmarshaller;
+import jakarta.xml.bind.UnmarshalException;
 
-class JsonUnmarshallerTest
-		extends AbstractUnmarshallerTest {
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
-	@Override
-	Marshaller createMarshaller() {
-		return new JsonMarshaller();
+public abstract class AbstractUnmarshaller implements Unmarshaller {
+
+	public Object unmarshal(Class clazz, InputStream inputStream) throws UnmarshalException, IOException {
+		return unmarshal(clazz, new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 	}
-
-	@Override
-	Unmarshaller createUnmarshaller() {
-		return new JsonUnmarshaller();
-	}
+	
 }

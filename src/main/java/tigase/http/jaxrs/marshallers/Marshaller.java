@@ -15,18 +15,18 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://www.gnu.org/licenses/.
  */
-package tigase.http.api.marshallers;
+package tigase.http.jaxrs.marshallers;
 
-import jakarta.xml.bind.UnmarshalException;
+import jakarta.xml.bind.MarshalException;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
+import java.io.OutputStream;
+import java.io.Writer;
 
-public interface Unmarshaller {
+public interface Marshaller {
 
-	Object unmarshal(Class clazz, InputStream inputStream) throws UnmarshalException, IOException;
+	void marshall(Object object, OutputStream outputStream) throws MarshalException, IOException;
 
-	Object unmarshal(Class clazz, Reader reader) throws UnmarshalException, IOException;
-
+	void marshall(Object object, Writer writer)
+			throws IOException, MarshalException;
 }

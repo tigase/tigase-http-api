@@ -15,14 +15,11 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://www.gnu.org/licenses/.
  */
-package tigase.http.util;
+package tigase.http.jaxrs;
 
 import tigase.http.ServiceImpl;
-import tigase.http.api.Handler;
 import tigase.http.api.HttpException;
 import tigase.http.api.Service;
-import tigase.http.modules.Module;
-import tigase.http.api.HttpMethod;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -37,7 +34,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.regex.Matcher;
 
-public abstract class AbstractRequestHandlerServlet<M extends AbstractRequestHandlerServlet.ModuleWithExecutor>
+public abstract class JaxRsServlet<M extends JaxRsModule>
 		extends HttpServlet {
 
 	protected ScheduledExecutorService executorService;
@@ -99,10 +96,5 @@ public abstract class AbstractRequestHandlerServlet<M extends AbstractRequestHan
 	protected void registerHandler(RequestHandler requestHandler) {
 		requestHandlers.computeIfAbsent(requestHandler.getHttpMethod(), x -> new CopyOnWriteArrayList<>()).add(requestHandler);
 	}
-
-	public interface ModuleWithExecutor extends Module {
-
-		ScheduledExecutorService getExecutorService();
-
-	}
+	
 }

@@ -15,7 +15,7 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://www.gnu.org/licenses/.
  */
-package tigase.http.api;
+package tigase.http.jaxrs;
 
 public enum HttpMethod {
 	GET,

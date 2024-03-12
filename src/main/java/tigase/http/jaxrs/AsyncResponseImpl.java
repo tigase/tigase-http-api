@@ -15,7 +15,7 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://www.gnu.org/licenses/.
  */
-package tigase.http.util;
+package tigase.http.jaxrs;
 
 import jakarta.ws.rs.container.AsyncResponse;
 import jakarta.ws.rs.container.TimeoutHandler;
@@ -41,13 +41,13 @@ public class AsyncResponseImpl implements AsyncResponse {
 
 	private final Optional<String> acceptedType;
 	private final ScheduledExecutorService executorService;
-	private final JakartaRequestHandler requestHandler;
+	private final JaxRsRequestHandler requestHandler;
 	private Future timeoutFuture;
 	private TimeoutHandler timeoutHandler;
 	private final AsyncContext context;
 	private State state = State.suspended;
 
-	public AsyncResponseImpl(JakartaRequestHandler requestHandler, ScheduledExecutorService executorService, HttpServletRequest request, Optional<String> acceptedType) {
+	public AsyncResponseImpl(JaxRsRequestHandler requestHandler, ScheduledExecutorService executorService, HttpServletRequest request, Optional<String> acceptedType) {
 		this.requestHandler = requestHandler;
 		this.executorService = executorService;
 		this.context = request.startAsync();

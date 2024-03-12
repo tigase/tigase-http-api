@@ -15,32 +15,18 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://www.gnu.org/licenses/.
  */
-package tigase.http.api;
+package tigase.http.jaxrs;
 
-import java.util.Arrays;
+import tigase.http.modules.Module;
 
-public class AcceptedType {
-	private final String mimeType;
-	private final double preference;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
 
-	public AcceptedType(String in) {
-		String[] parts = in.split(";");
-		mimeType = parts[0].trim();
-		preference = Arrays.stream(parts)
-				.skip(1)
-				.map(String::trim)
-				.filter(str -> str.startsWith("q="))
-				.map(str -> str.substring(2).trim())
-				.map(Double::parseDouble)
-				.findFirst()
-				.orElse(1.0);
-	}
+public interface JaxRsModule
+		extends Module {
 
-	public String getMimeType() {
-		return mimeType;
-	}
+	ScheduledExecutorService getExecutorService();
 
-	public double getPreference() {
-		return preference;
-	}
+	List<Handler> getHandlers();
+
 }

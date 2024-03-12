@@ -15,19 +15,20 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://www.gnu.org/licenses/.
  */
-package tigase.http.api.marshallers;
+package tigase.http.jaxrs;
 
-import jakarta.xml.bind.UnmarshalException;
+public interface Handler {
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
+	Role getRequiredRole();
 
-public abstract class AbstractUnmarshaller implements Unmarshaller {
+	enum Role {
+		None,
+		User,
+		Admin;
 
-	public Object unmarshal(Class clazz, InputStream inputStream) throws UnmarshalException, IOException {
-		return unmarshal(clazz, new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+		public boolean isAuthenticationRequired() {
+			return this != None;
+		}
 	}
-	
+
 }

@@ -20,6 +20,8 @@ package tigase.http.api.marshallers;
 import jakarta.xml.bind.MarshalException;
 import jakarta.xml.bind.UnmarshalException;
 import org.junit.jupiter.api.Test;
+import tigase.http.jaxrs.marshallers.Marshaller;
+import tigase.http.jaxrs.marshallers.Unmarshaller;
 
 import java.io.IOException;
 import java.io.StringReader;

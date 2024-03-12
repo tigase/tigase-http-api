@@ -17,7 +17,7 @@
  */
 package tigase.http.api.rest;
 
-import tigase.http.api.Handler;
+import tigase.http.jaxrs.Handler;
 
 public interface RestHandler extends Handler {
 	Security getSecurity();

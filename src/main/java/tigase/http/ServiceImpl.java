@@ -45,11 +45,11 @@ public class ServiceImpl<T extends Module>
 	}
 
 	public void sendPacket(Packet packet) {
-		module.addOutPacket(packet);
+		module.sendPacket(packet);
 	}
 
 	public CompletableFuture<Packet> sendPacketAndAwait(Packet packet, Long timeout) {
-		return module.addOutPacket(packet, (Integer) (timeout == null ? null : timeout.intValue()));
+		return module.sendPacketAndWait(packet, (Integer) (timeout == null ? null : timeout.intValue()));
 	}
 
 	// for groovy scripts, do not use in other places
