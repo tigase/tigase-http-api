@@ -22,21 +22,11 @@ import tigase.db.AuthorizationException;
 import tigase.db.TigaseDBException;
 import tigase.db.UserRepository;
 import tigase.http.modules.Module;
-import tigase.server.Packet;
+import tigase.http.modules.PacketSender;
 import tigase.util.stringprep.TigaseStringprepException;
 import tigase.xmpp.jid.BareJID;
 
-import java.util.concurrent.CompletableFuture;
-
-public interface Service<T extends Module> {
-
-	void sendPacket(Packet packet);
-
-	default CompletableFuture<Packet> sendPacketAndAwait(Packet packet) {
-		return sendPacketAndAwait(packet,null);
-	}
-
-	CompletableFuture<Packet> sendPacketAndAwait(Packet packet, Long timeout);
+public interface Service<T extends Module> extends PacketSender {
 	
 	UserRepository getUserRepository();
 

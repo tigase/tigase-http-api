@@ -15,8 +15,17 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://www.gnu.org/licenses/.
  */
-package tigase.http.modules.setup.pages;
+package tigase.http;
 
-public interface SimpleConfigPage {
+import tigase.db.AuthorizationException;
+import tigase.db.TigaseDBException;
+import tigase.util.stringprep.TigaseStringprepException;
+import tigase.xmpp.jid.BareJID;
 
+public interface AuthProvider {
+
+	boolean isAdmin(BareJID user);
+
+	boolean checkCredentials(String user, String password)
+			throws TigaseStringprepException, TigaseDBException, AuthorizationException;
 }

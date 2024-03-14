@@ -17,6 +17,7 @@
  */
 package tigase.http.modules.rest;
 
+import tigase.http.ServiceImpl;
 import tigase.http.api.HttpException;
 import tigase.http.api.rest.RestHandler;
 import tigase.http.jaxrs.Handler;
@@ -39,19 +40,20 @@ public class RestServlet
 
 	private static final Logger log = Logger.getLogger(RestServlet.class.getCanonicalName());
 
-	public static String REST_MODULE_KEY = "rest-module-uuid";
+	private ServiceImpl<RestModule> service;
 	
 	@Override
 	public void init() throws ServletException {
 		super.init();
-		List<Handler> handlers = service.getModule().getHandlers();
+		List<Handler> handlers = module.getHandlers();
 		for (Handler handler : handlers) {
 			registerHandlers(JaxRsRequestHandler.create(handler));
 		}
+		service = new ServiceImpl<>(module);
 		initGroovyScripts();
 	}
 
-	public static String SCRIPTS_DIR_KEY = "script-dir";
+	public final static String SCRIPTS_DIR_KEY = "script-dir";
 	private final OldGroovyResultEncoder oldGroovyResultEncoder = new OldGroovyResultEncoder();
 	
 	private void initGroovyScripts() {
@@ -65,7 +67,7 @@ public class RestServlet
 				File[] scriptFiles = RestModule.getGroovyFiles(scriptsDir);
 				if (scriptFiles != null) {
 					List<tigase.http.rest.Handler> listOfHandlers = HandlersLoader.getInstance().
-							loadHandlers(service.getModule().getKernel(), Arrays.asList(scriptFiles));
+							loadHandlers(module.getKernel(), Arrays.asList(scriptFiles));
 
 					for (tigase.http.rest.Handler handler : listOfHandlers) {
 						this.registerHandlers(OldGroovyRequestHandler.create(service, handler, scriptsDir.getName(), oldGroovyResultEncoder));
@@ -98,12 +100,7 @@ public class RestServlet
 		}
 		super.service(request, response);
 	}
-
-	@Override
-	public String getModuleKey() {
-		return REST_MODULE_KEY;
-	}
-
+	
 	protected void canAccess(RequestHandler requestHandler, HttpServletRequest request, HttpServletResponse response)
 			throws HttpException, IOException, ServletException {
 		switch (((RestHandler) requestHandler.getHandler()).getSecurity()) {

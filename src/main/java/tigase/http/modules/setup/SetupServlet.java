@@ -17,20 +17,42 @@
  */
 package tigase.http.modules.setup;
 
+import tigase.http.jaxrs.JaxRsRequestHandler;
+import tigase.http.jaxrs.JaxRsServlet;
+
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 
-/**
- * Created by andrzej on 06.04.2017.
- */
-public class SetupModeRedirectServlet
-		extends HttpServlet {
+public class SetupServlet extends JaxRsServlet<SetupModule> {
+
+	public SetupServlet() {
+	}
+
+	@Override
+	public void init() throws ServletException {
+		super.init();
+		List<SetupHandler> handlers = module.getHandlers();
+		for (SetupHandler handler : handlers) {
+			registerHandlers(JaxRsRequestHandler.create(handler));
+		}
+	}
 
 	@Override
 	protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		resp.sendRedirect("/setup/");
+		if ((req.getContextPath() + "/").equals(req.getRequestURI())) {
+			String redirectTo = req.getRequestURL().toString() + module.getHandlers()
+					.stream()
+					.map(SetupHandler::getPath)
+					.findFirst()
+					.map(path -> path.substring(1))
+					.get();
+			resp.sendRedirect(redirectTo);
+			return;
+		}
+		super.service(req, resp);
 	}
+	
 }

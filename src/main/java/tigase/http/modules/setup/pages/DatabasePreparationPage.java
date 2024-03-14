@@ -1,0 +1,129 @@
+/*
+ * Tigase HTTP API component - Tigase HTTP API component
+ * Copyright (C) 2013 Tigase, Inc. (office@tigase.com)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. Look for COPYING file in the top folder.
+ * If not, see http://www.gnu.org/licenses/.
+ */
+package tigase.http.modules.setup.pages;
+
+import gg.jte.output.StringOutput;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import tigase.db.util.SchemaManager;
+import tigase.http.modules.setup.NextPage;
+import tigase.http.modules.setup.SetupModule;
+import tigase.kernel.beans.Bean;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@Path("/databasePreparation")
+@NextPage(SetupSecurityPage.class)
+@Bean(name = "databasePreparationPage", parent = SetupModule.class, active = true)
+public class DatabasePreparationPage
+		extends AbstractPage {
+
+	@Override
+	public String getTitle() {
+		return "Database preparation";
+	}
+
+	@GET
+	public Response executeDbSchemaInstallation(HttpServletRequest request) {
+		Map<SchemaManager.DataSourceInfo, List<SchemaManager.ResultEntry>> execResult = executeSchemaManager();
+		StringOutput output = new StringOutput();
+		Map<String, Object> context = prepareContext();
+
+		List<SchemaManager.Pair<SchemaManager.DataSourceInfo, List<ResultEntry>>> result = execResult.entrySet()
+				.stream()
+				.map(e -> new SchemaManager.Pair<>(e.getKey(), e.getValue()
+						.stream()
+						.map(ResultEntry::new)
+						.collect(Collectors.toList())))
+				.collect(Collectors.toList());
+
+		context.put("result", result);
+		engine.render("dbPrepare.jte", context, output);
+		return Response.ok(output.toString(), MediaType.TEXT_HTML).build();
+	}
+
+	@POST
+	public Response processForm(HttpServletRequest request) {
+		return redirectToNext(request);
+	}
+
+	public Map<SchemaManager.DataSourceInfo, List<SchemaManager.ResultEntry>> executeSchemaManager() {
+		Map<String, Object> config = getConfig().getAsMap();
+
+		SchemaManager schemaManager = new SchemaManager();
+		schemaManager.setConfig(config);
+		if (getConfig().getDbConfig().hasDbRootCredentials()) {
+			schemaManager.setDbRootCredentials(getConfig().getDbConfig().getDbRootName(), getConfig().getDbConfig().getDbRootPassword());
+		}
+		if (!getConfig().getAdmins().isEmpty()) {
+			schemaManager.setAdmins(getConfig().getAdmins().stream().toList(), getConfig().getAdminPwd());
+		}
+
+		return schemaManager.loadSchemas();
+	}
+
+	public static class ResultEntry {
+
+		private final SchemaManager.ResultEntry entry;
+
+		public ResultEntry(SchemaManager.ResultEntry entry) {
+			this.entry = entry;
+		}
+
+		public String getName() {
+			return entry.name;
+		}
+
+		public String getResultName() {
+			return entry.result.name();
+		}
+
+		public String getMessage() {
+			return switch (entry.result) {
+				case ok -> null;
+				default -> entry.message;
+			};
+		}
+
+		public String getHeaderBackgroundClass() {
+			return switch (entry.result) {
+				case ok -> "bg-success";
+				case skipped -> "bg-secondary";
+				case warning -> "bg-warning";
+				case error -> "bg-danger";
+			};
+		}
+
+		public String getResultTextClass() {
+			return switch (entry.result) {
+				case ok -> "text-success";
+				case skipped -> "text-secondary";
+				case warning -> "text-warning";
+				case error -> "text-danger";
+			};
+		}
+
+	}
+
+}

@@ -17,155 +17,62 @@
  */
 package tigase.http.modules.setup.pages;
 
-import tigase.http.modules.setup.Config;
-import tigase.http.modules.setup.questions.Question;
-import tigase.http.modules.setup.questions.SingleAnswerQuestion;
+import gg.jte.output.StringOutput;
+import jakarta.ws.rs.FormParam;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import tigase.http.modules.setup.NextPage;
+import tigase.http.modules.setup.SetupModule;
+import tigase.kernel.beans.Bean;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
+import javax.servlet.http.HttpServletRequest;
+import java.util.HashSet;
+import java.util.Set;
 
-public class FeaturesPage extends Page implements SimpleConfigPage {
-
-	private final Config config;
-
-	private final List<SingleAnswerQuestion> clusteringQuestions = new ArrayList<>();
-
-	private final List<SingleAnswerQuestion> featureQuestions = new ArrayList<>();
-
-	public FeaturesPage(Config config) {
-		super("Features", "features.html", Stream.empty());
-		this.config = config;
-
-		addClusteringQuestions();
-		addFeatureQuestions();
-	}
-
-	public List<SingleAnswerQuestion> getClusteringQuestions() {
-		return clusteringQuestions;
-	}
-
-	public List<SingleAnswerQuestion> getFeatureQuestions() {
-		return featureQuestions;
-	}
+@Path("/features")
+@NextPage(DatabaseConfigPage.class)
+@Bean(name = "featuresPage", parent = SetupModule.class, active = true)
+public class FeaturesPage extends AbstractPage {
 
 	@Override
-	public void setValues(Map<String, String[]> params) {
-		super.setValues(params);
-
-		if (config.getClusterMode() && (config.optionalComponents.contains("muc") || config.optionalComponents.contains("pubsub"))) {
-			config.setACS(true);
-		}
+	public String getTitle() {
+		return "Features";
 	}
 
-	@Override
-	protected void addQuestion(Question question) {
-		super.addQuestion(question);
-		if (question instanceof ClusteringQuestion) {
-			clusteringQuestions.add((ClusteringQuestion) question);
-		}
-		if (question instanceof FeatureQuestion) {
-			featureQuestions.add((FeatureQuestion) question);
-		}
+	@GET
+	public Response getForm() {
+		StringOutput output = new StringOutput();
+		engine.render("features.jte", prepareContext(), output);
+		return Response.ok(output.toString(), MediaType.TEXT_HTML).build();
 	}
 
-	private void addClusteringQuestions() {
-		SingleAnswerQuestion question = new ClusteringQuestion("clusterMode", "Do you want your server to run in the cluster mode?", () -> String.valueOf(config.getClusterMode()),
-								 val -> config.setClusterMode(
-										 val != null ? (Boolean.parseBoolean(val) || "on".equals(val)) : false));
-		addQuestion(question);
-		question = new ClusteringQuestion("acsComponent", "Tigase Advanced Clustering Strategy (ACS)", () -> String.valueOf(config.getACS()), val -> config.setACS(
-						val != null ? (Boolean.parseBoolean(val) || "on".equals(val)) : false));
-		addQuestion(question);
-	}
+	@POST
+	public Response processForm(HttpServletRequest request, @FormParam("clusterMode") boolean clusterMode,
+								@FormParam("acs") boolean acs, @FormParam("muc") boolean muc,
+								@FormParam("pubsub") boolean pubsub, @FormParam("mix") boolean mix,
+								@FormParam("mam") boolean mam, @FormParam("push") boolean push,
+								@FormParam("upload") boolean upload, @FormParam("carbons") boolean carbons,
+								@FormParam("csi") boolean csi, @FormParam("motd") boolean motd,
+								@FormParam("lastActivity") boolean lastActivity, @FormParam("spam") boolean spam) {
+		getConfig().setClusterMode(clusterMode);
+		getConfig().setACSEnabled(acs);
+		Set<String> features = new HashSet<>();
+		if (muc) features.add("muc");
+		if (pubsub) features.add("pubsub");
+		if (mix) features.add("mix");
+		if (mam) features.add("mam");
+		if (push) features.add("push");
+		if (upload) features.add("upload");
+		if (carbons) features.add("carbons");
+		if (csi) features.add("csi");
+		if (motd) features.add("motd");
+		if (lastActivity) features.add("lastActivity");
+		if (spam) features.add("spam");
 
-	private void addFeatureQuestions() {
-		SingleAnswerQuestion question = new ComponentFeatureQuestion("muc", "Multi User Chat", config);
-		addQuestion(question);
-		question = new ComponentAndProcessorsFeatureQuestion("pubsub", "Publish-Subscribe", new String[]{"pep"}, config,
-															 null);
-		addQuestion(question);
-		question = new ComponentFeatureQuestion("mix", "Mediated Information eXchange", config );
-		addQuestion(question);
-		question = new ComponentAndProcessorsFeatureQuestion("message-archive", "Message Archive",
-															 new String[]{"urn:xmpp:mam:1", "urn:xmpp:mam:2"}, config,
-															 () -> config.optionalComponents.remove("unified-archive"));
-		addQuestion(question);
-		question = new ProcessorFeatureQuestion("urn:xmpp:push:0", "PUSH Notifications", config);
-		addQuestion(question);
-		question = new ComponentFeatureQuestion("upload", "HTTP File Upload", config);
-		addQuestion(question);
-		question = new ProcessorFeatureQuestion("message-carbons", "Message Carbons", config);
-		addQuestion(question);
-		question = new ProcessorFeatureQuestion("urn:xmpp:csi:0", "Client State Indication", config);
-		addQuestion(question);
-		question = new ProcessorFeatureQuestion("motd", "Message of a Day", config);
-		addQuestion(question);
-		question = new ProcessorFeatureQuestion("jabber:iq:last-marker", "Last Activity", config);
-		addQuestion(question);
-		question = new ProcessorFeatureQuestion("spam-filter", "SPAM Filter", config);
-		addQuestion(question);
-	}
-
-	private static class ClusteringQuestion extends SingleAnswerQuestion {
-
-		public ClusteringQuestion(String id, String label, Supplier<String> getter, Consumer<String> setter) {
-			super(id, label, getter, setter);
-		}
-	}
-
-	private static class FeatureQuestion extends SingleAnswerQuestion {
-
-		public FeatureQuestion(String id, String label, Supplier<String> getter, Consumer<String> setter) {
-			super(id, label, getter, setter);
-		}
-	}
-
-	private static class ComponentFeatureQuestion extends FeatureQuestion {
-
-		public ComponentFeatureQuestion(String id, String label, Config config) {
-			super(id, label, ()-> config.optionalComponents.contains(id) ? id : null, (val) -> {
-				if (val != null ? (Boolean.parseBoolean(val) || "on".equals(val)) : false) {
-					config.optionalComponents.add(id);
-				} else {
-					config.optionalComponents.remove(id);
-				}
-			});
-		}
-	}
-
-	private static class ComponentAndProcessorsFeatureQuestion extends FeatureQuestion {
-
-		public ComponentAndProcessorsFeatureQuestion(String id, String label, String[] processorIds, Config config, Runnable changeListener) {
-			super(id, label, ()-> (config.optionalComponents.contains(id) && config.plugins.containsAll(Arrays.asList(processorIds))) ? id : null, (val) -> {
-				if (val != null ? (Boolean.parseBoolean(val) || "on".equals(val)) : false) {
-					config.optionalComponents.add(id);
-					config.plugins.addAll(Arrays.asList(processorIds));
-				} else {
-					config.optionalComponents.remove(id);
-					config.plugins.removeAll(Arrays.asList(processorIds));
-				}
-				if (changeListener != null) {
-					changeListener.run();
-				}
-			});
-		}
-	}
-
-	private static class ProcessorFeatureQuestion extends FeatureQuestion {
-
-		public ProcessorFeatureQuestion(String id, String label, Config config) {
-			super(id, label, ()-> (config.plugins.contains(id)) ? id : null, (val) -> {
-				if (val != null ? (Boolean.parseBoolean(val) || "on".equals(val)) : false) {
-					config.plugins.add(id);
-				} else {
-					config.plugins.remove(id);
-				}
-			});
-		}
+		getConfig().setFeatures(features);
+		return redirectToNext(request);
 	}
 }

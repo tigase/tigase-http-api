@@ -17,9 +17,8 @@
  */
 package tigase.http.jaxrs;
 
-import tigase.http.ServiceImpl;
 import tigase.http.api.HttpException;
-import tigase.http.api.Service;
+import tigase.http.modules.AbstractBareModule;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -37,11 +36,11 @@ import java.util.regex.Matcher;
 public abstract class JaxRsServlet<M extends JaxRsModule>
 		extends HttpServlet {
 
+	public static final String MODULE_KEY = "module-uuid";
 	protected ScheduledExecutorService executorService;
-	protected Service<M> service;
+	protected M module;
 	protected ConcurrentHashMap<HttpMethod, CopyOnWriteArrayList<RequestHandler>> requestHandlers = new ConcurrentHashMap<>();
 
-	public abstract String getModuleKey();
 	protected void canAccess(RequestHandler requestHandler, HttpServletRequest request, HttpServletResponse response) throws HttpException, IOException, ServletException {
 		Handler.Role requiredRole = requestHandler.getRequiredRole();
 		if (requiredRole.isAuthenticationRequired()) {
@@ -57,9 +56,9 @@ public abstract class JaxRsServlet<M extends JaxRsModule>
 	public void init() throws ServletException {
 		super.init();
 		ServletConfig cfg = super.getServletConfig();
-		String moduleName = cfg.getInitParameter(getModuleKey());
-		service = new ServiceImpl<>(moduleName);
-		executorService = service.getModule().getExecutorService();
+		String moduleName = cfg.getInitParameter(MODULE_KEY);
+		module = AbstractBareModule.getModuleByUUID(moduleName);
+		executorService = module.getExecutorService();
 	}
 
 	@Override
@@ -67,18 +66,20 @@ public abstract class JaxRsServlet<M extends JaxRsModule>
 		try {
 			HttpMethod httpMethod = HttpMethod.valueOf(req.getMethod());
 			List<RequestHandler> handlers = requestHandlers.get(httpMethod);
-			String requestUri = req.getRequestURI();
-			if (!req.getContextPath().equals("/")) {
-				if (!req.getContextPath().isEmpty()) {
-					requestUri = requestUri.substring(req.getContextPath().length());
+			if (handlers != null) {
+				String requestUri = req.getRequestURI();
+				if (!req.getContextPath().equals("/")) {
+					if (!req.getContextPath().isEmpty()) {
+						requestUri = requestUri.substring(req.getContextPath().length());
+					}
 				}
-			}
-			for (RequestHandler handler : handlers) {
-				Matcher matcher = handler.test(req, requestUri);
-				if (matcher != null && matcher.matches()) {
-					canAccess(handler, req, resp);
-					handler.execute(req, resp, matcher, executorService);
-					return;
+				for (RequestHandler handler : handlers) {
+					Matcher matcher = handler.test(req, requestUri);
+					if (matcher != null && matcher.matches()) {
+						canAccess(handler, req, resp);
+						handler.execute(req, resp, matcher, executorService);
+						return;
+					}
 				}
 			}
 			resp.sendError(404, "Not found");

@@ -17,8 +17,6 @@
  */
 package tigase.http.modules;
 
-import tigase.db.AuthRepository;
-import tigase.db.UserRepository;
 import tigase.http.PacketWriter;
 import tigase.server.Packet;
 import tigase.stats.StatisticHolder;
@@ -56,16 +54,10 @@ public interface Module
 
 	void init(JID jid, String componentName, PacketWriter writer);
 
-	boolean isRequestAllowed(String key, String domain, String path);
-
 	boolean isAdmin(BareJID user);
 
 	void start();
 
 	void stop();
-
-	UserRepository getUserRepository();
-
-	AuthRepository getAuthRepository();
-
+	
 }

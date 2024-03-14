@@ -15,8 +15,17 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://www.gnu.org/licenses/.
  */
-package tigase.http.modules.setup.pages;
+package tigase.http.modules.setup;
 
-public interface AdvancedConfigPage {
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+public @interface NextPage {
+
+	Class<? extends SetupHandler> value();
 
 }

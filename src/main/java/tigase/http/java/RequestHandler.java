@@ -19,6 +19,7 @@ package tigase.http.java;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import tigase.http.AuthProvider;
 import tigase.http.DeploymentInfo;
 import tigase.http.ServletInfo;
 import tigase.http.api.Service;
@@ -64,7 +65,7 @@ public class RequestHandler
 	};
 	private final String contextPath;
 	private final JavaStandaloneHttpServer server;
-	private final Service service;
+	private final AuthProvider authProvider;
 	private final Map<String, HttpServlet> servlets = new ConcurrentHashMap<String, HttpServlet>();
 	private final JavaStandaloneHttpServer.ExecutorWithTimeout.Timer timer;
 	private final ProtocolRedirectFilter protocolRedirectFilter;
@@ -87,7 +88,7 @@ public class RequestHandler
 		protocolRedirectFilter.init(filterConfig);
 		this.timer = timer;
 		contextPath = info.getContextPath();
-		service = info.getService();
+		authProvider = info.getAuthProvider();
 		ServletInfo[] servletInfos = info.getServlets();
 		for (ServletInfo servletInfo : servletInfos) {
 			registerServlet(servletInfo);
@@ -140,7 +141,7 @@ public class RequestHandler
 							servletPath = "/";
 						}
 						resp = new DummyServletResponse(he);
-						req = new DummyServletRequest(reqId, he, contextPath, servletPath, service, timer.getScheduledExecutorService(),
+						req = new DummyServletRequest(reqId, he, contextPath, servletPath, authProvider, timer.getScheduledExecutorService(),
 													  timer.requestTimeoutSupplier.get(), resp);
 						//
 //						if (key.endsWith(path) && !key.equals("/")) {

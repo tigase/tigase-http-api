@@ -4,6 +4,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<meta name="viewport" content="width=device-width, initial-scale=0.86">
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 	<meta charset="UTF-8"/>
 	<title>Tigase XMPP Server</title>
@@ -11,55 +12,46 @@
 	<link rel="stylesheet" type="text/css" href="assets/css/custom.css">
 	<link rel="stylesheet" type="text/css" href="assets/css/http-api-custom.css">
 </head>
-<body>
+<body class="d-flex flex-column h-100">
 <noscript>
 	<div style="border: 2px solid red; margin: 3px">
 		<div style="color: red; font-weight: bold; padding: 10px "><span>WARNING:</span><span>Your browser does not support JavaScript or JavaScript is disabled.</span></div>
 		<div style="font-size: 0.9em; padding: 5px 15px">Tigase XMPP Server Setup uses JavaScript to validate chosen configuration options - it may not work properly without JavaScript and may result in an incorrect configuration.<br/>We strongly recommend changing web browser or enabling JavaScript in web browser configuration.</div>
 	</div>
 </noscript>
-<div id="wrapper">
-	<nav class="navbar navbar-default navbar-static-top" role = "navigation" style="margin-bottom: 0;">
-		<div class="navbar-header">
-			<a class="navbar-brand" href="/" id="logo">
-				<p>Tigase XMPP Server</p>
-			</a>
-		</div>
-	</nav>
-	<div id="page-wrapper" class="no-sidebar"}>
+<nav class="navbar navbar-expand-md navbar-dark" role = "navigation" style="margin-bottom: 0;">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="/" id="logo">
+			<p>Tigase XMPP Server</p>
+		</a>
+	</div>
+</nav>
+<main class="container" style="max-width: 85%;" role="main">
 	<div class="row">
-		<div class="col-sm-12 col-md-12 col-lg-12">
-			<div class="panel panel-default">
-				<div class="panel-heading panel-xs">
-					<h4>List of available endpoints for this server instance</h4>
-				</div>
-			</div>
-
-			@for(DeploymentInfo info : deployments)
-			<div class="col-sm-6 col-md-6 col-lg-6">
-				<a href="${info.getContextPath()}/">
-			<div class="panel panel-primary">
-				<div class="panel-heading panel-xs">
-					<span style="float: left;"><h4 style="display: inline;">${info.getContextPath()}</h4></span><span style="float: right;"><h4 style="display: inline;">${info.getDeploymentName()}</h4></span>
-					<div style="clear: both;"></div>
-				</div>
-				<div class="panel-body">
-					<h4 style="text-decoration: none;">${info.getDeploymentDescription()}</h4>
-				</div>
-			</div>
-				</a>
-			</div>
-			@endfor
+		<div class="card panel-default mb-4">
+			<div class="card-body">
+				<h5 class="card-title">List of available endpoints for this server instance</h5>
 			</div>
 		</div>
 	</div>
-</div>
-<div id="footer" class="container-fluid">
 	<div class="row">
-		<div class="panel-footer text-right">
-			<p>Powered by Tigase XMPP Server ${tigase.server.XMPPServer.getImplementationVersion()}</p>
-		</div>
+		@for(DeploymentInfo info : deployments)
+			<div class="col-sm-12 col-xl-6 p-2">
+				<div class="card panel-primary">
+					<div class="card-body">
+						<h5 class="card-title">${info.getDeploymentName()}</h5>
+						<p class="card-text">${info.getDeploymentDescription()}</p>
+						<a href="${info.getContextPath()}/" class="btn btn-tigase text-light">Go to ${info.getContextPath()}</a>
+					</div>
+				</div>
+			</div>
+		@endfor
 	</div>
-</div>
+</main>
+<footer class="footer mt-auto">
+	<div class="container-fluid d-flex flex-row-reverse">
+		<p class="text-secondary">Powered by Tigase XMPP Server ${tigase.server.XMPPServer.getImplementationVersion()}</p>
+	</div>
+</footer>
 </body>
 </html>

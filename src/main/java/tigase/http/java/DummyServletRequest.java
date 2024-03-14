@@ -21,7 +21,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpsServer;
 import tigase.db.AuthorizationException;
 import tigase.db.TigaseDBException;
-import tigase.http.api.Service;
+import tigase.http.AuthProvider;
 import tigase.util.Base64;
 import tigase.util.stringprep.TigaseStringprepException;
 import tigase.xmpp.jid.BareJID;
@@ -51,7 +51,7 @@ public class DummyServletRequest
 	private final Integer executionTimeout;
 	private final Map<String, String[]> params;
 	private final Cookie[] cookies;
-	private final Service service;
+	private final AuthProvider authProvider;
 	private final String servletPath;
 	private final ScheduledExecutorService timer;
 	private AsyncContext async;
@@ -61,7 +61,7 @@ public class DummyServletRequest
 	private int requestId;
 	private HttpServletResponse response;
 
-	public DummyServletRequest(int requestId, HttpExchange exchange, String contextPath, String servletPath, Service service,
+	public DummyServletRequest(int requestId, HttpExchange exchange, String contextPath, String servletPath, AuthProvider authProvider,
 							   ScheduledExecutorService timer, Integer executionTimeout, HttpServletResponse response) {
 		this.requestId = requestId;
 		this.exchange = exchange;
@@ -97,7 +97,7 @@ public class DummyServletRequest
 
 		this.contextPath = contextPath;
 		this.servletPath = servletPath;
-		this.service = service;
+		this.authProvider = authProvider;
 		this.timer = timer;
 		this.executionTimeout = executionTimeout;
 	}
@@ -438,7 +438,7 @@ public class DummyServletRequest
 		}
 		try {
 			if ("admin".equals(role)) {
-				return principal != null && service.isAdmin(BareJID.bareJIDInstance(principal.getName()));
+				return principal != null && authProvider.isAdmin(BareJID.bareJIDInstance(principal.getName()));
 			}
 		} catch (Exception ex) {
 		}
@@ -456,7 +456,7 @@ public class DummyServletRequest
 				String user = authStr.substring(0, idx);
 				String pass = authStr.substring(idx + 1);
 				try {
-					if (service.checkCredentials(user, pass)) {
+					if (authProvider.checkCredentials(user, pass)) {
 						final String jid = user;
 						principal = new Principal() {
 							@Override

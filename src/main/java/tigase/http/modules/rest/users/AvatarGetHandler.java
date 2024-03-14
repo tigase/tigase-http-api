@@ -108,7 +108,7 @@ public class AvatarGetHandler extends AbstractRestHandler {
 
 		Iq iq = new Iq(iqEl, null, JID.jidInstance(userJid));
 
-		return service.sendPacketAndAwait(iq, 30l).thenCompose(result -> {
+		return service.sendPacketAndWait(iq, 30).thenCompose(result -> {
 			Optional<Element> infos = Optional.ofNullable(result.getElement().getChildren(PEP_METADATA_PATH))
 					.flatMap(el -> el.stream().filter(it -> "info".equals(it.getName())).findFirst());
 			if (infos.isPresent()) {
@@ -146,7 +146,7 @@ public class AvatarGetHandler extends AbstractRestHandler {
 
 		Iq iq = new Iq(iqEl, null, JID.jidInstance(userJid));
 
-		return service.sendPacketAndAwait(iq, 30l).thenCompose(result -> {
+		return service.sendPacketAndWait(iq, 30).thenCompose(result -> {
 			Optional<byte[]> data = Optional.ofNullable(result.getElement().getChildCData(PEP_DATA_PATH))
 					.map(XMLUtils::unescape)
 					.map(str -> str.replace("\n", "").replace("\r", ""))
@@ -166,7 +166,7 @@ public class AvatarGetHandler extends AbstractRestHandler {
 
 		Iq iq = new Iq(iqEl, null, JID.jidInstance(userJid));
 
-		return service.sendPacketAndAwait(iq, 30l).thenCompose(result -> {
+		return service.sendPacketAndWait(iq, 30).thenCompose(result -> {
 			Optional<String> photoUri = Optional.ofNullable(result.getElement().getCData(VCARD4_PHOTO_URI_PATH))
 					.map(XMLUtils::unescape)
 					.map(str -> str.replace("\n", "").replace("\r", ""));
@@ -196,7 +196,7 @@ public class AvatarGetHandler extends AbstractRestHandler {
 
 		Iq iq = new Iq(iqEl, null, JID.jidInstance(userJid));
 
-		return service.sendPacketAndAwait(iq, 30l).thenCompose(result -> {
+		return service.sendPacketAndWait(iq, 30).thenCompose(result -> {
 			Element photoEl = result.getElement().findChild(VCARD_TEMP_PHOTO_PATH);
 			if (photoEl != null) {
 				Optional<java.net.URI> url = Optional.ofNullable(photoEl.getChild("EXTVAL"))

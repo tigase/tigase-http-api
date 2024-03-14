@@ -17,20 +17,13 @@
  */
 package tigase.http.modules.setup;
 
-import tigase.db.AuthRepository;
-import tigase.db.AuthorizationException;
-import tigase.db.TigaseDBException;
-import tigase.db.UserRepository;
 import tigase.http.DeploymentInfo;
 import tigase.http.HttpMessageReceiver;
-import tigase.http.ServiceImpl;
 import tigase.http.ServletInfo;
 import tigase.http.modules.AbstractBareModule;
 import tigase.kernel.beans.Bean;
 import tigase.kernel.beans.selector.ConfigType;
 import tigase.kernel.beans.selector.ConfigTypeEnum;
-import tigase.util.stringprep.TigaseStringprepException;
-import tigase.xmpp.jid.BareJID;
 
 /**
  * Created by andrzej on 06.04.2017.
@@ -41,7 +34,6 @@ public class SetupModeRedirectModule
 		extends AbstractBareModule {
 
 	private DeploymentInfo httpDeployment;
-	private ServiceImpl service;
 
 	public SetupModeRedirectModule() {
 		contextPath = "/";
@@ -58,47 +50,16 @@ public class SetupModeRedirectModule
 	}
 
 	@Override
-	public boolean isRequestAllowed(String key, String domain, String path) {
-		return true;
-	}
-
-	@Override
-	public UserRepository getUserRepository() {
-		return null;
-	}
-
-	@Override
-	public AuthRepository getAuthRepository() {
-		return null;
-	}
-
-	@Override
 	public void start() {
 		if (httpDeployment != null) {
 			stop();
 		}
-
-		service = new tigase.http.ServiceImpl(this) {
-
-			@Override
-			public boolean isAdmin(BareJID user) {
-				return true;
-			}
-
-			@Override
-			public boolean checkCredentials(String user, String password)
-					throws TigaseStringprepException, TigaseDBException, AuthorizationException {
-				return true;
-			}
-
-		};
 
 		super.start();
 
 		httpDeployment = httpServer.deployment()
 				.setClassLoader(this.getClass().getClassLoader())
 				.setContextPath(contextPath)
-				.setService(service)
 				.setDeploymentName("Setup")
 				.setDeploymentDescription(getDescription());
 		if (vhosts != null) {

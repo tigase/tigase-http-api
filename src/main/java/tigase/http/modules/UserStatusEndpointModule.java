@@ -17,8 +17,6 @@
  */
 package tigase.http.modules;
 
-import tigase.db.AuthRepository;
-import tigase.db.UserRepository;
 import tigase.http.HttpMessageReceiver;
 import tigase.kernel.beans.Bean;
 import tigase.kernel.beans.selector.ConfigType;
@@ -38,22 +36,7 @@ public class UserStatusEndpointModule extends AbstractBareModule {
 	public String getDescription() {
 		return "User Status Endpoint";
 	}
-
-	@Override
-	public boolean isRequestAllowed(String key, String domain, String path) {
-		return false;
-	}
-
-	@Override
-	public UserRepository getUserRepository() {
-		return null;
-	}
-
-	@Override
-	public AuthRepository getAuthRepository() {
-		return null;
-	}
-
+	
 	@Override
 	public boolean processPacket(Packet packet) {
 		if (packet.getStanzaTo().getResource() == null) {

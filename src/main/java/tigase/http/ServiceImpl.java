@@ -23,9 +23,9 @@ import tigase.db.AuthRepository;
 import tigase.db.AuthorizationException;
 import tigase.db.TigaseDBException;
 import tigase.db.UserRepository;
-import tigase.http.rest.Service;
 import tigase.http.modules.AbstractBareModule;
-import tigase.http.modules.Module;
+import tigase.http.modules.rest.RestModule;
+import tigase.http.rest.Service;
 import tigase.server.Packet;
 import tigase.util.stringprep.TigaseStringprepException;
 import tigase.xmpp.jid.BareJID;
@@ -33,7 +33,7 @@ import tigase.xmpp.jid.BareJID;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-public class ServiceImpl<T extends Module>
+public class ServiceImpl<T extends RestModule>
 		implements Service<T> {
 
 	public ServiceImpl(String moduleUUID) {
@@ -44,18 +44,18 @@ public class ServiceImpl<T extends Module>
 		this.module = module;
 	}
 
-	public void sendPacket(Packet packet) {
-		module.sendPacket(packet);
+	public boolean sendPacket(Packet packet) {
+		return module.sendPacket(packet);
 	}
 
-	public CompletableFuture<Packet> sendPacketAndAwait(Packet packet, Long timeout) {
+	public CompletableFuture<Packet> sendPacketAndWait(Packet packet, Integer timeout) {
 		return module.sendPacketAndWait(packet, (Integer) (timeout == null ? null : timeout.intValue()));
 	}
 
 	// for groovy scripts, do not use in other places
 	public void sendPacket(Packet packet, Long timeout, Closure closure) {
 		if (closure != null) {
-			sendPacketAndAwait(packet, timeout).exceptionally(ex -> null).thenApply(result -> closure.call(result));
+			sendPacketAndWait(packet, timeout != null ? timeout.intValue() : null).exceptionally(ex -> null).thenApply(result -> closure.call(result));
 		} else {
 			sendPacket(packet);
 		}

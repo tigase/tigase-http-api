@@ -17,11 +17,13 @@
  */
 package tigase.http.modules.rest;
 
+import tigase.http.AuthProvider;
 import tigase.http.DeploymentInfo;
 import tigase.http.HttpMessageReceiver;
 import tigase.http.ServletInfo;
 import tigase.http.jaxrs.Handler;
 import tigase.http.jaxrs.JaxRsModule;
+import tigase.http.jaxrs.JaxRsServlet;
 import tigase.http.modules.AbstractModule;
 import tigase.kernel.beans.Bean;
 import tigase.kernel.beans.Inject;
@@ -54,6 +56,8 @@ public class RestModule extends AbstractModule
 
 	@Inject
 	private ApiKeyRepository apiKeyRepository;
+	@Inject
+	private AuthProvider authProvider;
 
 	@Inject(nullAllowed = true)
 	private List<Handler> handlers;
@@ -123,8 +127,8 @@ public class RestModule extends AbstractModule
 		httpDeployment = httpServer.deployment()
 				.setClassLoader(this.getClass().getClassLoader())
 				.setContextPath(contextPath)
-				.setService(new tigase.http.ServiceImpl<>(this))
-				.setDeploymentName("Server")
+				.setAuthProvider(authProvider)
+				.setDeploymentName("HTTP/REST API")
 				.setDeploymentDescription(getDescription());
 		if (vhosts != null) {
 			httpDeployment.setVHosts(vhosts);
@@ -133,7 +137,7 @@ public class RestModule extends AbstractModule
 		try {
 			File scriptsDirFile = new File(scriptsDir);
 			ServletInfo servletInfo = httpServer.servlet("RestServlet", RestServlet.class);
-			servletInfo.addInitParam(RestServlet.REST_MODULE_KEY, uuid)
+			servletInfo.addInitParam(JaxRsServlet.MODULE_KEY, uuid)
 					.addInitParam(RestServlet.SCRIPTS_DIR_KEY, scriptsDirFile.getCanonicalPath())
 					.addMapping("/*");
 
@@ -156,7 +160,6 @@ public class RestModule extends AbstractModule
 		super.stop();
 	}
 
-	@Override
 	public boolean isRequestAllowed(String key, String domain, String path) {
 		return apiKeyRepository.isAllowed(key, domain, path);
 	}

@@ -15,28 +15,14 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://www.gnu.org/licenses/.
  */
-package tigase.http.modules.setup.pages;
+package tigase.http.modules.setup;
 
-import tigase.http.modules.setup.Config;
-import tigase.http.modules.setup.questions.SingleAnswerQuestion;
+import tigase.http.jaxrs.Handler;
 
-public class ACSInfoPage extends Page {
+public interface SetupHandler extends Handler {
 
-	private final Config config;
+	String getPath();
 
-	public ACSInfoPage(Config config) {
-		super("License", "acsInfo.html",
-				new SingleAnswerQuestion("acsName", true, config::getAcsName, config::setAcsName));
-		this.config = config;
-	}
-
-	public boolean containsACS() {
-		try {
-			Class.forName("tigase.licence.LicenceChecker");
-			return true;
-		} catch (ClassNotFoundException e) {
-			return false;
-		}
-	}
+	String getTitle();
 
 }

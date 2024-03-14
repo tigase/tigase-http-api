@@ -17,10 +17,10 @@
  */
 package tigase.http.rest
 
+import tigase.http.modules.rest.RestModule
 import tigase.server.Packet
-import tigase.http.modules.Module;
 
-public interface Service<T extends Module>
+public interface Service<T extends RestModule>
 		extends tigase.http.api.Service<T> {
 
 	void sendPacket(Packet packet, Long timeout, Closure closure)

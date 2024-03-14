@@ -91,18 +91,15 @@ public class JaxRsRequestHandler
 		if (httpMethod == null) {
 			return null;
 		}
-
-		Path pathAnnotation = method.getAnnotation(Path.class);
-		if (pathAnnotation == null) {
-			return null;
-		}
+		
+		String methodPath = Optional.ofNullable(method.getAnnotation(Path.class)).map(Path::value).orElse("");
 
 		String fullPath = contextPath;
-		if (!pathAnnotation.value().startsWith("/")) {
+		if (!methodPath.isEmpty() && !methodPath.startsWith("/")) {
 			fullPath = fullPath + "/";
 		}
 
-		fullPath = fullPath + pathAnnotation.value();
+		fullPath = fullPath + methodPath;
 
 		Pattern pattern = prepareMatcher(fullPath, method);
 		return new JaxRsRequestHandler(instance, method, httpMethod, pattern, instance.getRequiredRole());
