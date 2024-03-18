@@ -19,7 +19,6 @@ package tigase.http.java;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpsServer;
-import tigase.db.AuthorizationException;
 import tigase.db.TigaseDBException;
 import tigase.http.AuthProvider;
 import tigase.util.Base64;
@@ -60,6 +59,7 @@ public class DummyServletRequest
 	private BufferedReader reader;
 	private int requestId;
 	private HttpServletResponse response;
+	private Map<String, Object> attributes = null;
 
 	public DummyServletRequest(int requestId, HttpExchange exchange, String contextPath, String servletPath, AuthProvider authProvider,
 							   ScheduledExecutorService timer, Integer executionTimeout, HttpServletResponse response) {
@@ -257,10 +257,17 @@ public class DummyServletRequest
 
 	@Override
 	public void setAttribute(String string, Object o) {
+		if (attributes == null) {
+			attributes = new HashMap<>();
+		}
+		attributes.put(string, o);
 	}
 
 	@Override
 	public void removeAttribute(String string) {
+		if (attributes != null) {
+			attributes.remove(string);
+		}
 	}
 
 	@Override
@@ -448,26 +455,27 @@ public class DummyServletRequest
 	@Override
 	public Principal getUserPrincipal() {
 		if (principal == null) {
-			String authStr = getHeader("Authorization");
-			if (authStr != null && authStr.startsWith("Basic")) {
-				authStr = authStr.replace("Basic ", "");
-				authStr = new String(Base64.decode(authStr));
-				int idx = authStr.indexOf(":");
-				String user = authStr.substring(0, idx);
-				String pass = authStr.substring(idx + 1);
-				try {
-					if (authProvider.checkCredentials(user, pass)) {
-						final String jid = user;
-						principal = new Principal() {
-							@Override
-							public String getName() {
-								return jid;
-							}
-						};
+			AuthProvider.JWTPayload payload = authProvider.authenticateWithCookie(this);
+			if (payload != null) {
+				principal = () -> payload.subject().toString();
+			}
+			if (principal == null) {
+				String authStr = getHeader("Authorization");
+				if (authStr != null && authStr.startsWith("Basic")) {
+					authStr = authStr.replace("Basic ", "");
+					authStr = new String(Base64.decode(authStr));
+					int idx = authStr.indexOf(":");
+					String user = authStr.substring(0, idx);
+					String pass = authStr.substring(idx + 1);
+					try {
+						if (authProvider.checkCredentials(user, pass)) {
+							final String jid = user;
+							principal = () -> jid;
+						}
+					} catch (TigaseStringprepException | TigaseDBException ex) {
+						Logger.getLogger(DummyServletRequest.class.getName())
+								.log(Level.FINEST, "could not authorize user", ex);
 					}
-				} catch (TigaseStringprepException | TigaseDBException | AuthorizationException ex) {
-					Logger.getLogger(DummyServletRequest.class.getName())
-							.log(Level.FINEST, "could not authorize user", ex);
 				}
 			}
 		}

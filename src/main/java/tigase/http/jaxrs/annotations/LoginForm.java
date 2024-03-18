@@ -15,21 +15,15 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://www.gnu.org/licenses/.
  */
-package tigase.http.jaxrs;
+package tigase.http.jaxrs.annotations;
 
-import tigase.http.AuthProvider;
-import tigase.http.modules.Module;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-
-public interface JaxRsModule<H extends Handler>
-		extends Module {
-
-	AuthProvider getAuthProvider();
-
-	ScheduledExecutorService getExecutorService();
-
-	List<H> getHandlers();
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD})
+public @interface LoginForm {
 
 }

@@ -17,9 +17,23 @@
  */
 package tigase.http.json;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class JsonParser {
+
+	public static Object parseJson(String text) throws InvalidJsonException {
+		return new JsonParser().parse(text);
+	}
+
+	public static Object parseJson(byte[] data) throws InvalidJsonException {
+	    return parseJson(data, StandardCharsets.UTF_8);
+	}
+
+	public static Object parseJson(byte[] data, Charset charset) throws InvalidJsonException {
+		return parseJson(new String(data, charset));
+	}
 
 	enum State {
 		READ_OBJECT,
@@ -120,7 +134,11 @@ public class JsonParser {
 					if (string.contains(".")) {
 						yield Double.parseDouble(string);
 					}
-					yield Integer.parseInt(string);
+					long value = Long.parseLong(string);
+					if (value < Integer.MAX_VALUE) {
+						yield (int) value;
+					}
+					yield value;
 				}
 				yield string;
 			}
@@ -183,7 +201,7 @@ public class JsonParser {
 		}
 
 		int start = i;
-		while (i < chars.length && (!Character.isWhitespace(chars[i])) && chars[i] != ':' && chars[i] != ',') {
+		while (i < chars.length && (!Character.isWhitespace(chars[i])) && chars[i] != ':' && chars[i] != ',' && chars[i] != '}') {
 			i++;
 		}
 		return new String(Arrays.copyOfRange(chars, start, i));

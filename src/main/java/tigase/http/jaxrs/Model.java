@@ -17,14 +17,14 @@
  */
 package tigase.http.jaxrs;
 
-import jakarta.ws.rs.core.AbstractMultivaluedMap;
+import java.util.HashMap;
 
-import java.util.TreeMap;
+public class Model extends HashMap<String,Object> {
 
-public class Headers<V> extends AbstractMultivaluedMap<String,V> {
-
-	public Headers() {
-		super(new TreeMap(String.CASE_INSENSITIVE_ORDER));
+	public Model(ContainerRequestContext context) {
+		put("request", context.getRequest());
+		put("uriInfo", context.getUriInfo());
+		put("securityContext", context.getSecurityContext());
 	}
 
 }

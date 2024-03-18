@@ -142,6 +142,8 @@
             <resource>
                 <directory>src/main/resources/</directory>
                 <includes>
+                    <include>**/*.woff</include>
+                    <include>**/*.woff2</include>
                     <include>**/*.css</include>
                     <include>**/*.js</include>
                     <include>**/*.html</include>
@@ -259,7 +261,7 @@
             <groupId>jakarta.ws.rs</groupId>
             <artifactId>jakarta.ws.rs-api</artifactId>
             <version>3.0.0</version>
-            <scope>compile</scope>
+            <scope>compile</scope>               
         </dependency>
         <dependency>
             <groupId>mysql</groupId>

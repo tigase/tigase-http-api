@@ -22,6 +22,7 @@ import jakarta.ws.rs.container.Suspended;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
+import jakarta.ws.rs.core.UriInfo;
 import jakarta.xml.bind.MarshalException;
 import jakarta.xml.bind.UnmarshalException;
 import tigase.http.api.HttpException;
@@ -33,6 +34,8 @@ import tigase.xmpp.jid.JID;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.ValidationException;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.io.InputStream;
@@ -72,14 +75,14 @@ public class JaxRsRequestHandler
 
 	public static List<JaxRsRequestHandler> create(Handler instance) {
 		Path path = instance.getClass().getAnnotation(Path.class);
-		if (path == null) {
-			return Collections.emptyList();
-		}
+//		if (path == null) {
+//			return Collections.emptyList();
+//		}
 
 		ArrayList<JaxRsRequestHandler> handlers = new ArrayList<>();
 		Method[] methods = instance.getClass().getDeclaredMethods();
 		for (Method method : methods) {
-			JaxRsRequestHandler handler = JaxRsRequestHandler.create(path.value(), instance, method);
+			JaxRsRequestHandler handler = JaxRsRequestHandler.create(path == null ? "" : path.value(), instance, method);
 			if (handler != null) {
 				handlers.add(handler);
 			}
@@ -128,6 +131,14 @@ public class JaxRsRequestHandler
 
 	public Handler getHandler() {
 		return handler;
+	}
+
+	public Method getMethod() {
+		return method;
+	}
+
+	public Pattern getPattern() {
+		return pattern;
 	}
 
 	@Override
@@ -204,7 +215,14 @@ public class JaxRsRequestHandler
 				return "[^\\/]+";
 			}
 		} catch (NoSuchMethodException e) {
-			log.log(Level.FINEST, "Method 'fromString' for conversation to object from String not found", e);
+			try {
+				Method m = clazz.getDeclaredMethod("valueOf", String.class);
+				if (Modifier.isStatic(m.getModifiers())) {
+					return "[^\\/]+";
+				}
+			} catch (NoSuchMethodException ex) {
+				log.log(Level.FINEST, "Method 'fromString' or 'valueOf' for conversation to object from String not found", e);
+			}
 			throw new RuntimeException(e);
 			// nothing to do..
 		}
@@ -250,8 +268,9 @@ public class JaxRsRequestHandler
 
 	public void execute(HttpServletRequest request, HttpServletResponse response, Matcher matcher, ScheduledExecutorService executorService)
 			throws HttpException, IOException {
-		Optional<String> acceptedType = selectResponseMimeType(method, request);
+		ContainerRequestContext context = new ContainerRequestContext(request);
 
+		Optional<String> acceptedType = selectResponseMimeType(method, request);
 		List values = new ArrayList<>();
 		AsyncResponseImpl asyncResponse = null;
 		try {
@@ -260,6 +279,7 @@ public class JaxRsRequestHandler
 				PathParam pathParam = param.getAnnotation(PathParam.class);
 				HeaderParam headerParam = param.getAnnotation(HeaderParam.class);
 				FormParam formParam = param.getAnnotation(FormParam.class);
+				QueryParam queryParam = param.getAnnotation(QueryParam.class);
 				
 				if (pathParam != null) {
 					String valueStr = matcher.group(pathParam.value());
@@ -289,6 +309,18 @@ public class JaxRsRequestHandler
 							value = convertToValue(param.getParameterizedType(), valuesStr);
 						}
 					}
+				} else if (queryParam != null) {
+					String[] valuesStr = request.getParameterValues(queryParam.value());
+					if (valuesStr == null) {
+						valuesStr = new String[]{getParamDefaultValue(param)};
+					}
+					if (boolean.class.equals(param.getType())) {
+						value = valuesStr != null && valuesStr.length == 1 && "on".equals(valuesStr[0]);
+					} else {
+						if (valuesStr != null) {
+							value = convertToValue(param.getParameterizedType(), valuesStr);
+						}
+					}
 				} else if (param.getAnnotation(Suspended.class) != null) {
 					if (asyncResponse == null) {
 						asyncResponse = new AsyncResponseImpl(this, executorService, request, acceptedType);
@@ -300,10 +332,18 @@ public class JaxRsRequestHandler
 					} catch (UnmarshalException ex) {
 						throw new HttpException(ex, HttpServletResponse.SC_NOT_ACCEPTABLE);
 					}
+				} else if (Pageable.class.isAssignableFrom(param.getType())) {
+					value = Pageable.from(request);
 				} else if (SecurityContext.class.isAssignableFrom(param.getType())) {
-					value = new SecurityContextImpl(request);
+					value = context.getSecurityContext();
 				} else if (HttpServletRequest.class.isAssignableFrom(param.getType())) {
-					value = request;
+					value = context.getRequest();
+				} else if (HttpServletResponse.class.isAssignableFrom(param.getType())) {
+					value = response;
+				} else if (UriInfo.class.isAssignableFrom(param.getType())) {
+					value = context.getUriInfo();
+				} else if (Model.class.isAssignableFrom(param.getType())) {
+					value = new Model(context);
 				} else {
 					// if non on the above..
 					String contentType = request.getContentType();
@@ -315,18 +355,17 @@ public class JaxRsRequestHandler
 					}
 				}
 
-				boolean notNull = param.getAnnotation(NotNull.class) != null;
-				if (notNull && value == null) {
-					throw new ValidationException("Parameter " + param.getName() + " cannot be NULL!");
-				}
+				validateContent(param, value);
 				values.add(value);
 			}
 
 			try {
+				ContainerRequestContext.setContext(context);
 				Object result = method.invoke(handler, values.toArray());
 				if (Void.TYPE.equals(method.getReturnType())) {
 					return;
 				} else {
+
 					if (result != null) {
 						sendEncodedContent(result, acceptedType, response);
 					} else {
@@ -338,25 +377,71 @@ public class JaxRsRequestHandler
 					throw (HttpException) ex.getCause();
 				}
 				throw new HttpException(ex, 500);
+			} finally {
+				ContainerRequestContext.resetContext();
 			}
 		} catch (Throwable ex) {
 			if (asyncResponse != null) {
 				asyncResponse.resume(ex);
 			}
+			log.log(Level.WARNING, "Exception while processing request", ex);
 			throw ex;
 		}
+	}
+
+	private void validateContent(AnnotatedElement store, Object value) {
+		boolean notNull = store.isAnnotationPresent(NotNull.class);
+		if (notNull && value == null) {
+			throwValidationError(store, notNull, ValidationError.notNull);
+		}
+		boolean notEmpty = store.isAnnotationPresent(NotEmpty.class);
+		if (notEmpty) {
+			if (value instanceof String) {
+				if (((String) value).isEmpty()) {
+					throwValidationError(store, notNull, ValidationError.notNull);
+				}
+			} else if (value instanceof Collection<?>) {
+				if (((Collection<?>) value).isEmpty()) {
+					throwValidationError(store, notNull, ValidationError.notNull);
+				}
+			}
+		}
+		boolean notBlank = store.isAnnotationPresent(NotBlank.class);
+		if (notBlank && value instanceof String str) {
+			if (str.isBlank()) {
+				throwValidationError(store, value, ValidationError.notBlank);
+			}
+		}
+	}
+
+	enum ValidationError {
+		notNull,
+		notEmpty,
+		notBlank
+	}
+	
+	private void throwValidationError(AnnotatedElement store, Object value, ValidationError error) {
+		StringBuilder sb = new StringBuilder();
+		if (store instanceof Field field) {
+			sb.append("Field ").append(field.getName()).append(" in object ").append(field.getDeclaringClass());
+		} else if (store instanceof Parameter parameter) {
+			sb.append("Parameter ").append(parameter.getName());
+		} else {
+			sb.append("Validation failed for ").append(store).append(" = ").append(value);
+		}
+		sb.append(" cannot be ").append(switch (error) {
+			case notNull -> "NULL";
+			case notBlank -> "BLANK";
+			case notEmpty -> "EMPTY";
+		}).append("!");
+		throw new ValidationException(sb.toString());
 	}
 
 	private void validateContent(Object object) throws HttpException {
 		try {
 			for (Field field : object.getClass().getDeclaredFields()) {
 				field.setAccessible(true);
-				if (field.getAnnotation(NotNull.class) != null) {
-					if (field.get(object) == null) {
-						throw new ValidationException(
-								"Field " + field.getName() + " in object " + object.getClass() + " cannot be null!");
-					}
-				}
+				validateContent(field, field.get(object));
 			}
 		} catch (IllegalAccessException ex) {
 			throw new HttpException(ex, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

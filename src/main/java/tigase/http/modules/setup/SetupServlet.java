@@ -17,27 +17,16 @@
  */
 package tigase.http.modules.setup;
 
-import tigase.http.jaxrs.JaxRsRequestHandler;
 import tigase.http.jaxrs.JaxRsServlet;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.List;
 
 public class SetupServlet extends JaxRsServlet<SetupModule> {
 
 	public SetupServlet() {
-	}
-
-	@Override
-	public void init() throws ServletException {
-		super.init();
-		List<SetupHandler> handlers = module.getHandlers();
-		for (SetupHandler handler : handlers) {
-			registerHandlers(JaxRsRequestHandler.create(handler));
-		}
 	}
 
 	@Override

@@ -17,19 +17,29 @@
  */
 package tigase.http.jaxrs;
 
-import tigase.http.AuthProvider;
-import tigase.http.modules.Module;
+import jakarta.ws.rs.core.AbstractMultivaluedMap;
 
+import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 
-public interface JaxRsModule<H extends Handler>
-		extends Module {
+public class MultivaluedMapImpl<V> extends AbstractMultivaluedMap<String,V> {
 
-	AuthProvider getAuthProvider();
+	public MultivaluedMapImpl() {
+		this(new TreeMap(String.CASE_INSENSITIVE_ORDER));
+	}
 
-	ScheduledExecutorService getExecutorService();
-
-	List<H> getHandlers();
+	public MultivaluedMapImpl(Map<String, List<V>> store) {
+		super(store);
+	}
+	
+	public static <V> MultivaluedMapImpl<V> fromArrayMap(Map<String, V[]> data) {
+		return new MultivaluedMapImpl<>(data.entrySet()
+												.stream()
+												.collect(Collectors.toMap(Map.Entry::getKey,
+																		  e -> Arrays.asList(e.getValue()))));
+	}
 
 }

@@ -71,6 +71,11 @@ public class RestModule extends AbstractModule
 														   new ApiKeyUpdateCmd(this)};
 
 	@Override
+	public AuthProvider getAuthProvider() {
+		return authProvider;
+	}
+
+	@Override
 	public String getDescription() {
 		return "REST support - handles HTTP REST access using scripts";
 	}

@@ -19,7 +19,6 @@ package tigase.http.jaxrs;
 
 import jakarta.ws.rs.core.*;
 import jakarta.ws.rs.ext.RuntimeDelegate;
-import tigase.http.jaxrs.ResponseImpl;
 
 public class RuntimeDelegateImpl extends RuntimeDelegate {
 
@@ -28,7 +27,7 @@ public class RuntimeDelegateImpl extends RuntimeDelegate {
 
 	@Override
 	public UriBuilder createUriBuilder() {
-		throw new UnsupportedOperationException("Feature not implemented");
+		return new UriBuilderImpl();
 	}
 
 	@Override

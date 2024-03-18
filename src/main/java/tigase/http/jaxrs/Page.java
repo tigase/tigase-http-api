@@ -17,19 +17,40 @@
  */
 package tigase.http.jaxrs;
 
-import tigase.http.AuthProvider;
-import tigase.http.modules.Module;
-
 import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
 
-public interface JaxRsModule<H extends Handler>
-		extends Module {
+public record Page<T>(Pageable pageable, int totalCount, List<T> items) {
 
-	AuthProvider getAuthProvider();
+	public boolean isFirst() {
+		return pageable.pageNumber() == 0;
+	}
 
-	ScheduledExecutorService getExecutorService();
+	public boolean isLast() {
+		return (pageable.pageNumber() + 1) * pageable.pageSize() >= totalCount;
+	}
 
-	List<H> getHandlers();
+	public boolean hasPrevous() {
+		return !isFirst();
+	}
+
+	public boolean hasNext() {
+		return !isLast();
+	}
+
+	public Pageable pageable() {
+		return pageable;
+	}
+
+	public Pageable nextPageable() {
+		return pageable.next();
+	}
+
+	public Pageable previousPageable() {
+		return pageable.previous();
+	}
+
+	public int totalPages() {
+		return (int) Math.ceil((double) totalCount) / pageable.pageSize();
+	}
 
 }

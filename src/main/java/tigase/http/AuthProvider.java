@@ -17,15 +17,38 @@
  */
 package tigase.http;
 
-import tigase.db.AuthorizationException;
 import tigase.db.TigaseDBException;
 import tigase.util.stringprep.TigaseStringprepException;
 import tigase.xmpp.jid.BareJID;
+
+import javax.naming.AuthenticationException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.time.LocalDateTime;
 
 public interface AuthProvider {
 
 	boolean isAdmin(BareJID user);
 
 	boolean checkCredentials(String user, String password)
-			throws TigaseStringprepException, TigaseDBException, AuthorizationException;
+			throws TigaseStringprepException, TigaseDBException;
+
+	String generateToken(JWTPayload token)
+			throws NoSuchAlgorithmException, InvalidKeyException;
+
+	JWTPayload parseToken(String token) throws AuthenticationException;
+
+	record JWTPayload(BareJID subject, String issuer, LocalDateTime expireAt) {
+	}
+
+	JWTPayload authenticateWithCookie(HttpServletRequest request);
+
+	void setAuthenticationCookie(HttpServletResponse response, JWTPayload payload, String domain, String path)
+			throws NoSuchAlgorithmException, InvalidKeyException;
+
+	void resetAuthenticationCookie(HttpServletResponse response, String domain, String path);
+
+	void refreshJwtToken(HttpServletRequest request, HttpServletResponse response);
 }

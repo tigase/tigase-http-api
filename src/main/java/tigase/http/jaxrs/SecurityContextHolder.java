@@ -17,19 +17,30 @@
  */
 package tigase.http.jaxrs;
 
-import tigase.http.AuthProvider;
-import tigase.http.modules.Module;
+import jakarta.ws.rs.core.SecurityContext;
 
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
+public class SecurityContextHolder {
+	
+	public static void setSecurityContext(SecurityContext securityContext) {
+		ContainerRequestContext context = ContainerRequestContext.getContext();
+		if (context != null) {
+			context.setSecurityContext(securityContext);
+		}
+	}
 
-public interface JaxRsModule<H extends Handler>
-		extends Module {
+	public static SecurityContext getSecurityContext() {
+		ContainerRequestContext context = ContainerRequestContext.getContext();
+		if (context != null) {
+			return context.getSecurityContext();
+		}
+		return null;
+	}
 
-	AuthProvider getAuthProvider();
-
-	ScheduledExecutorService getExecutorService();
-
-	List<H> getHandlers();
+	public static void resetSecurityContext() {
+		ContainerRequestContext context = ContainerRequestContext.getContext();
+		if (context != null) {
+			context.setSecurityContext(null);
+		}
+	}
 
 }

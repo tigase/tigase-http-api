@@ -30,9 +30,9 @@ public class ResponseImpl
 	private final Object entity;
 	private final int status;
 	private final String reasonPhase;
-	private final Headers<Object> metadata;
+	private final MultivaluedMap<String,Object> metadata;
 
-	public ResponseImpl(int status, String reasonPhase, Headers<Object> metadata, Object entity) {
+	public ResponseImpl(int status, String reasonPhase, MultivaluedMap<String,Object> metadata, Object entity) {
 		this.status = status;
 		this.reasonPhase = reasonPhase;
 		this.metadata = metadata;
@@ -197,13 +197,13 @@ public class ResponseImpl
 	}
 
 	@Override
-	public MultivaluedMap<String, Object> getMetadata() {
+	public jakarta.ws.rs.core.MultivaluedMap<String, Object> getMetadata() {
 		return metadata;
 	}
 
 	@Override
-	public MultivaluedMap<String, String> getStringHeaders() {
-		Headers<String> headers = new Headers<>();
+	public jakarta.ws.rs.core.MultivaluedMap<String, String> getStringHeaders() {
+		MultivaluedMap<String,String> headers = new MultivaluedMapImpl<>();
 		for (Map.Entry<String,List<Object>> entry : metadata.entrySet()) {
 			for (Object it : entry.getValue()) {
 				headers.add(entry.getKey(), toHeaderString(it));
@@ -249,7 +249,7 @@ public class ResponseImpl
 		private Object entity;
 		private int status = -1;
 		private String reasonPhase;
-		private Headers<Object> metadata = new Headers<>();
+		private MultivaluedMap<String, Object> metadata = new MultivaluedMapImpl<>();
 
 		@Override
 		public jakarta.ws.rs.core.Response build() {
@@ -328,7 +328,8 @@ public class ResponseImpl
 		}
 
 		@Override
-		public jakarta.ws.rs.core.Response.ResponseBuilder replaceAll(MultivaluedMap<String, Object> multivaluedMap) {
+		public jakarta.ws.rs.core.Response.ResponseBuilder replaceAll(
+				jakarta.ws.rs.core.MultivaluedMap<String, Object> multivaluedMap) {
 			throw new UnsupportedOperationException("Feature not implemented");
 		}
 

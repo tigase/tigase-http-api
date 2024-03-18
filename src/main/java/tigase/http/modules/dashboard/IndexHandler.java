@@ -15,21 +15,30 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://www.gnu.org/licenses/.
  */
-package tigase.http.jaxrs;
+package tigase.http.modules.dashboard;
 
-import tigase.http.AuthProvider;
-import tigase.http.modules.Module;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
+import tigase.http.jaxrs.Model;
+import tigase.kernel.beans.Bean;
 
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
+@Bean(name = "index", parent = DashboardModule.class, active = true)
+public class IndexHandler extends DashboardHandler {
+	@Override
+	public Role getRequiredRole() {
+		return Role.Admin;
+	}
 
-public interface JaxRsModule<H extends Handler>
-		extends Module {
-
-	AuthProvider getAuthProvider();
-
-	ScheduledExecutorService getExecutorService();
-
-	List<H> getHandlers();
+	@GET
+	@Path("/")
+	@Produces(MediaType.TEXT_HTML)
+	public Response index(UriInfo uriInfo, Model model) {
+		String output = renderTemplate("index.jte", model);
+		return Response.ok(output, MediaType.TEXT_HTML).build();
+	}
 
 }

@@ -18,6 +18,7 @@
 package tigase.http.jaxrs;
 
 import tigase.http.api.HttpException;
+import tigase.http.jaxrs.annotations.LoginForm;
 import tigase.http.modules.AbstractBareModule;
 
 import javax.servlet.ServletConfig;
@@ -27,32 +28,44 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.ValidationException;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.regex.Matcher;
 
-public abstract class JaxRsServlet<M extends JaxRsModule>
+public class JaxRsServlet<M extends JaxRsModule>
 		extends HttpServlet {
 
 	public static final String MODULE_KEY = "module-uuid";
 	protected ScheduledExecutorService executorService;
 	protected M module;
 	protected ConcurrentHashMap<HttpMethod, CopyOnWriteArrayList<RequestHandler>> requestHandlers = new ConcurrentHashMap<>();
+	private String loginFormPath;
 
 	protected void canAccess(RequestHandler requestHandler, HttpServletRequest request, HttpServletResponse response) throws HttpException, IOException, ServletException {
 		Handler.Role requiredRole = requestHandler.getRequiredRole();
 		if (requiredRole.isAuthenticationRequired()) {
 			if (!request.isUserInRole(requiredRole.name().toLowerCase())) {
-				response.setHeader("WWW-Authenticate", "Basic realm=\"TigasePlain\"");
-				request.authenticate(response);
+				if (loginFormPath != null && Optional.ofNullable(request.getHeader("Accept"))
+						.stream()
+						.flatMap(str -> Arrays.stream(str.split(",")))
+						.anyMatch(part -> part.contains("text/html"))) {
+					// we have a login form and request is from the browser, so redirect to it...
+					response.sendRedirect(request.getContextPath() + loginFormPath);
+				} else {
+					response.setHeader("WWW-Authenticate", "Basic realm=\"TigasePlain\"");
+					request.authenticate(response);
+				}
 				return;
 			}
+			module.getAuthProvider().refreshJwtToken(request, response);
 		}
 	}
-
+	
 	@Override
 	public void init() throws ServletException {
 		super.init();
@@ -60,6 +73,12 @@ public abstract class JaxRsServlet<M extends JaxRsModule>
 		String moduleName = cfg.getInitParameter(MODULE_KEY);
 		module = AbstractBareModule.getModuleByUUID(moduleName);
 		executorService = module.getExecutorService();
+		List<Handler> handlers = module.getHandlers();
+		if (handlers != null) {
+			for (Handler handler : handlers) {
+				registerHandlers(JaxRsRequestHandler.create(handler));
+			}
+		}
 	}
 
 	@Override
@@ -99,6 +118,13 @@ public abstract class JaxRsServlet<M extends JaxRsModule>
 
 	protected void registerHandler(RequestHandler requestHandler) {
 		requestHandlers.computeIfAbsent(requestHandler.getHttpMethod(), x -> new CopyOnWriteArrayList<>()).add(requestHandler);
+		if (requestHandler instanceof JaxRsRequestHandler) {
+			JaxRsRequestHandler jaxRsRequestHandler = (JaxRsRequestHandler) requestHandler;
+			if (jaxRsRequestHandler.getMethod().isAnnotationPresent(LoginForm.class)) {
+				// this is default login URL to which we should redirect for authentication with forms
+				loginFormPath = jaxRsRequestHandler.getPattern().pattern();
+			}
+		}
 	}
 	
 }

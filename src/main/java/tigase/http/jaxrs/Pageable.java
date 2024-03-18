@@ -17,19 +17,27 @@
  */
 package tigase.http.jaxrs;
 
-import tigase.http.AuthProvider;
-import tigase.http.modules.Module;
+import javax.servlet.http.HttpServletRequest;
+import java.util.Optional;
 
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
+public record Pageable(int pageNumber, int pageSize, Sort sort) {
 
-public interface JaxRsModule<H extends Handler>
-		extends Module {
+	public static Pageable from(HttpServletRequest request) {
+		int page = Optional.ofNullable(request.getParameter("page")).map(Integer::parseInt).orElse(0);
+		int size = Optional.ofNullable(request.getParameter("size")).map(Integer::parseInt).orElse(30);
+		Sort sort = Optional.ofNullable(request.getParameter("sort")).map(Sort::valueOf).orElse(Sort.asc);
+		return new Pageable(page, size, sort);
+	}
 
-	AuthProvider getAuthProvider();
+	public int offset() {
+		return pageSize * pageNumber;
+	}
 
-	ScheduledExecutorService getExecutorService();
+	public Pageable next() {
+		return new Pageable(pageNumber + 1, pageSize, sort);
+	}
 
-	List<H> getHandlers();
-
+	public Pageable previous() {
+		return new Pageable(pageNumber - 1, pageSize, sort);
+	}
 }

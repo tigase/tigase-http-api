@@ -18,15 +18,13 @@
 package tigase.http.modules.setup;
 
 import tigase.db.AuthRepository;
-import tigase.db.AuthorizationException;
 import tigase.db.TigaseDBException;
 import tigase.http.AuthProvider;
 import tigase.http.DeploymentInfo;
 import tigase.http.HttpMessageReceiver;
 import tigase.http.ServletInfo;
-import tigase.http.jaxrs.JaxRsModule;
+import tigase.http.jaxrs.AbstractJaxRsModule;
 import tigase.http.jaxrs.JaxRsServlet;
-import tigase.http.modules.AbstractBareModule;
 import tigase.http.util.AssetsServlet;
 import tigase.kernel.beans.Bean;
 import tigase.kernel.beans.Inject;
@@ -34,22 +32,24 @@ import tigase.kernel.beans.config.ConfigField;
 import tigase.util.stringprep.TigaseStringprepException;
 import tigase.xmpp.jid.BareJID;
 
+import javax.naming.AuthenticationException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Logger;
 
 @Bean(name = "setup", parent = HttpMessageReceiver.class, active = true)
-public class SetupModule extends AbstractBareModule
-		implements JaxRsModule<SetupHandler> {
+public class SetupModule extends AbstractJaxRsModule<SetupHandler> {
 
 	private static final Logger log = Logger.getLogger(SetupModule.class.getCanonicalName());
 	@ConfigField(desc = "Allow access to setup with password", alias = "admin-password")
 	private String adminPassword = null;
 	@ConfigField(desc = "Allow access to setup for user", alias = "admin-user")
 	private String adminUser = null;
-	@Inject
-	private AuthProvider authProvider;
 
 	private Config config = new Config();
 
@@ -71,7 +71,7 @@ public class SetupModule extends AbstractBareModule
 	public String getDescription() {
 		return "Setup";
 	}
-
+	
 	public void setHandlersAll(List<SetupHandler> handlers) {
 		if (handlers == null) {
 			this.handlersAll = new ArrayList<>();
@@ -137,16 +137,48 @@ public class SetupModule extends AbstractBareModule
 						return Optional.ofNullable(user)
 								.map(BareJID::toString)
 								.filter(userStr -> Objects.equals(userStr, adminUser))
-								.isPresent() || authProvider.isAdmin(user);
+								.isPresent() || getAuthProvider().isAdmin(user);
 					}
 
 					@Override
 					public boolean checkCredentials(String user, String password)
-							throws TigaseStringprepException, TigaseDBException, AuthorizationException {
+							throws TigaseStringprepException, TigaseDBException {
 						if (Objects.equals(user, adminUser) && Objects.equals(password, adminPassword)) {
 							return true;
 						}
-						return authProvider.checkCredentials(user, password);
+						return getAuthProvider().checkCredentials(user, password);
+					}
+
+					@Override
+					public String generateToken(JWTPayload token) throws NoSuchAlgorithmException, InvalidKeyException {
+						throw new RuntimeException("Feature not implemented!");
+					}
+
+					@Override
+					public JWTPayload parseToken(String token) throws AuthenticationException {
+						throw new RuntimeException("Feature not implemented!");
+					}
+
+					@Override
+					public JWTPayload authenticateWithCookie(HttpServletRequest request) {
+						throw new RuntimeException("Feature not implemented!");
+					}
+
+					@Override
+					public void setAuthenticationCookie(HttpServletResponse response, JWTPayload payload, String domain,
+														String path)
+							throws NoSuchAlgorithmException, InvalidKeyException {
+						throw new RuntimeException("Feature not implemented!");
+					}
+
+					@Override
+					public void resetAuthenticationCookie(HttpServletResponse response, String domain, String path) {
+						throw new RuntimeException("Feature not implemented!");
+					}
+
+					@Override
+					public void refreshJwtToken(HttpServletRequest request, HttpServletResponse response) {
+						// nothing to do...
 					}
 				})
 				.setDeploymentName("Setup")
