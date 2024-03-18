@@ -23,11 +23,12 @@ import org.eclipse.jetty.security.IdentityService;
 import org.eclipse.jetty.security.LoginService;
 import org.eclipse.jetty.server.UserIdentity;
 import org.eclipse.jetty.util.security.Password;
-import tigase.http.api.Service;
+import tigase.http.AuthProvider;
 import tigase.xmpp.jid.BareJID;
 
 import javax.security.auth.Subject;
 import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletRequest;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,10 +41,10 @@ public class TigasePlainLoginService
 
 	private static final Logger log = Logger.getLogger(TigasePlainLoginService.class.getCanonicalName());
 	private DefaultIdentityService identityService = new DefaultIdentityService();
-	private Service service = null;
+	private AuthProvider authProvider = null;
 
-	public TigasePlainLoginService(Service service) {
-		this.service = service;
+	public TigasePlainLoginService(AuthProvider authProvider) {
+		this.authProvider = authProvider;
 	}
 
 	@Override
@@ -53,6 +54,13 @@ public class TigasePlainLoginService
 
 	@Override
 	public UserIdentity login(String s, Object o, ServletRequest request) {
+		if (request instanceof HttpServletRequest) {
+			AuthProvider.JWTPayload payload = authProvider.authenticateWithCookie((HttpServletRequest) request);
+			if (payload != null) {
+				return newUserIdentity(payload.subject());
+			}
+		}
+
 		String cred = null;
 		if (o instanceof String) {
 			cred = (String) o;
@@ -69,38 +77,41 @@ public class TigasePlainLoginService
 			// authenticate using Tigase authentication repository
 			boolean authOk = false;
 			try {
-				authOk = getService().checkCredentials(s, cred);
+				authOk = getAuthProvider().checkCredentials(s, cred);
 			} catch (Exception ex) {
 				log.log(Level.FINE, "not authorized used = " + jid, ex);
 			}
 
 			// we are authenticated so set correct authentication principal
 			if (authOk) {
-				Principal p = new AbstractLoginService.UserPrincipal(s, null);
-
-				Subject subject = new Subject();
-				subject.getPrincipals().add(p);
-				subject.setReadOnly();
-
-				List<String> roles = new ArrayList<String>(Arrays.asList("user"));
-
-				// add admin role if user is in admins list
-				if (getService().isAdmin(jid)) {
-					roles.add("admin");
-				}
-
-				return getIdentityService().newUserIdentity(subject, p, roles.toArray(new String[0]));
+				return newUserIdentity(jid);
 			}
 
 		}
+		return null;
+	}
 
-		return null;//To change body of implemented methods use File | Settings | File Templates.
+	private UserIdentity newUserIdentity(BareJID jid) {
+		Principal p = new AbstractLoginService.UserPrincipal(jid.toString(), null);
+
+		Subject subject = new Subject();
+		subject.getPrincipals().add(p);
+		subject.setReadOnly();
+
+		List<String> roles = new ArrayList<String>(Arrays.asList("user"));
+
+		// add admin role if user is in admins list
+		if (getAuthProvider().isAdmin(jid)) {
+			roles.add("admin");
+		}
+
+		return getIdentityService().newUserIdentity(subject, p, roles.toArray(new String[0]));
 	}
 
 	@Override
 	public boolean validate(UserIdentity userIdentity) {
 		// validate if user identity is valid
-		return getService().getUserRepository().userExists(BareJID.bareJIDInstanceNS(userIdentity.getUserPrincipal().getName()));
+		return true;
 	}
 
 	@Override
@@ -117,12 +128,12 @@ public class TigasePlainLoginService
 	public void logout(UserIdentity userIdentity) {
 	}
 
-	public Service getService() {
-		return service;
+	public AuthProvider getAuthProvider() {
+		return authProvider;
 	}
 
-	public void setService(Service service) {
-		this.service = service;
+	public void setAuthProvider(AuthProvider authProvider) {
+		this.authProvider = authProvider;
 	}
 
 }

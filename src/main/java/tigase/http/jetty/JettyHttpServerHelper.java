@@ -17,14 +17,14 @@
  */
 package tigase.http.jetty;
 
-import org.eclipse.jetty.security.authentication.BasicAuthenticator;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import tigase.http.AuthProvider;
 import tigase.http.DeploymentInfo;
 import tigase.http.ServletInfo;
 import tigase.http.api.HttpServerIfc;
-import tigase.http.api.Service;
 import tigase.http.java.filters.ProtocolRedirectFilter;
+import tigase.http.jetty.security.BasicAndJWTAuthenticator;
 
 import javax.servlet.DispatcherType;
 import java.util.Collections;
@@ -53,11 +53,11 @@ public class JettyHttpServerHelper {
 		} catch (IllegalAccessException ex) {
 			log.log(Level.SEVERE, null, ex);
 		}
-		Service service = deployment.getService();
-		if (service != null) {
-			context.getSecurityHandler().setAuthenticator(new BasicAuthenticator());
+		AuthProvider authProvider = deployment.getAuthProvider();
+		if (authProvider != null) {
+			context.getSecurityHandler().setAuthenticator(new BasicAndJWTAuthenticator());
 			context.getSecurityHandler()
-					.setLoginService(new tigase.http.jetty.security.TigasePlainLoginService(service));
+					.setLoginService(new tigase.http.jetty.security.TigasePlainLoginService(authProvider));
 		}
 		context.setContextPath(deployment.getContextPath());
 		if (deployment.getClassLoader() != null) {
