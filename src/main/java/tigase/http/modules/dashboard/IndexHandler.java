@@ -41,4 +41,7 @@ public class IndexHandler extends DashboardHandler {
 		return Response.ok(output, MediaType.TEXT_HTML).build();
 	}
 
+	public static Response redirectToIndex(UriInfo uriInfo) {
+		return Response.seeOther(uriInfo.getBaseUriBuilder().path(IndexHandler.class, "index").build()).build();
+	}
 }

@@ -70,13 +70,13 @@ public class AuthHandler extends DashboardHandler {
 		authProvider.setAuthenticationCookie(response, new AuthProvider.JWTPayload(jid, request.getServerName(),
 																				   LocalDateTime.now().plusMinutes(5)),
 											 request.getServerName(), request.getContextPath());
-		return UsersHandler.redirectToIndex(uriInfo);
+		return IndexHandler.redirectToIndex(uriInfo);
 	}
 
 	@POST
 	@Path("/logout")
 	public Response logout(HttpServletRequest request, HttpServletResponse response, UriInfo uriInfo) {
 		authProvider.resetAuthenticationCookie(response, request.getServerName(), request.getContextPath());
-		return UsersHandler.redirectToIndex(uriInfo);
+		return IndexHandler.redirectToIndex(uriInfo);
 	}
 }
