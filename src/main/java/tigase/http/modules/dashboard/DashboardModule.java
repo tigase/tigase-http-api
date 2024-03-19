@@ -33,7 +33,7 @@ public class DashboardModule extends AbstractJaxRsModule<Handler> {
 
 	@Override
 	public String getDescription() {
-		return "Dashboard";
+		return "Dashboard of Tigase XMPP Server";
 	}
 	
 	@Override
@@ -48,7 +48,7 @@ public class DashboardModule extends AbstractJaxRsModule<Handler> {
 				.setClassLoader(this.getClass().getClassLoader())
 				.setContextPath(contextPath)
 				.setAuthProvider(getAuthProvider())
-				.setDeploymentName("Setup")
+				.setDeploymentName("Dashboard")
 				.setDeploymentDescription(getDescription());
 		if (vhosts != null) {
 			httpDeployment.setVHosts(vhosts);
