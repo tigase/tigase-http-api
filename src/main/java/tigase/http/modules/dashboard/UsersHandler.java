@@ -17,10 +17,19 @@
  */
 package tigase.http.modules.dashboard;
 
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.EncodeHintType;
+import com.google.zxing.WriterException;
+import com.google.zxing.client.j2se.MatrixToImageConfig;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
+import tigase.auth.credentials.entries.XTokenCredentialsEntry;
+import tigase.auth.mechanisms.SaslXTOKEN;
 import tigase.db.AuthRepository;
 import tigase.db.TigaseDBException;
 import tigase.db.UserRepository;
@@ -29,6 +38,7 @@ import tigase.http.jaxrs.Page;
 import tigase.http.jaxrs.Pageable;
 import tigase.kernel.beans.Bean;
 import tigase.kernel.beans.Inject;
+import tigase.util.Base64;
 import tigase.util.stringprep.TigaseStringprepException;
 import tigase.vhosts.VHostManager;
 import tigase.xmpp.jid.BareJID;
@@ -36,12 +46,17 @@ import tigase.xmpp.jid.JID;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
 import java.util.*;
 
 @Bean(name = "users", parent = DashboardModule.class, active = true)
 @Path("/users")
 public class UsersHandler extends DashboardHandler {
 
+	private final SecureRandom secureRandom = new SecureRandom();
 	@Inject
 	private AuthRepository authRepository;
 	@Inject
@@ -90,6 +105,9 @@ public class UsersHandler extends DashboardHandler {
 		model.put("query", query);
 		model.put("users", new Page<>(pageable, jids.size(), users));
 		model.put("domains", domains);
+
+		model.put("isXTokenActive", authRepository.isMechanismSupported("default", SaslXTOKEN.NAME));
+
 		String output = renderTemplate("users/index.jte", model);
 		return Response.ok(output, MediaType.TEXT_HTML).build();
 	}
@@ -152,6 +170,38 @@ public class UsersHandler extends DashboardHandler {
 	
 	public static Response redirectToIndex(UriInfo uriInfo, String query) {
 		return Response.seeOther(uriInfo.getBaseUriBuilder().path(UsersHandler.class, "index").replaceQueryParam("query", query).build()).build();
+	}
+
+	@POST
+	@Path("/{jid}/qrCode")
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	@Produces("image/png")
+	public Response generateAuthQrCode(@PathParam("jid") @NotEmpty BareJID jid)
+			throws IOException, WriterException, TigaseDBException {
+		String token = generateAuthQrCodeToken(jid);
+
+		QRCodeWriter qrCodeWriter = new QRCodeWriter();
+		BitMatrix bitMatrix = qrCodeWriter.encode(token.toString(), BarcodeFormat.QR_CODE, 300, 300, Map.of(
+				EncodeHintType.CHARACTER_SET, StandardCharsets.UTF_8, EncodeHintType.MARGIN, 0));
+		MatrixToImageConfig imageConfig = new MatrixToImageConfig(MatrixToImageConfig.BLACK, MatrixToImageConfig.WHITE);
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		MatrixToImageWriter.writeToStream(bitMatrix, "PNG", baos, imageConfig);
+		return Response.ok(baos.toByteArray(), "image/png").build();
+	}
+
+	private String generateAuthQrCodeToken(BareJID jid) throws TigaseDBException {
+		byte[] secret = new byte[32];
+		secureRandom.nextBytes(secret);
+
+		byte[] jidBytes = jid.toString().getBytes(StandardCharsets.UTF_8);
+		byte[] data = new byte[secret.length + 1 + jidBytes.length];
+		System.arraycopy(secret, 0, data, 0, secret.length);
+		System.arraycopy(jidBytes, 0, data, secret.length + 1, jidBytes.length);
+		String token = Base64.encode(data);
+
+		authRepository.removeCredential(jid, "default");
+		authRepository.updateCredential(jid, "default", SaslXTOKEN.NAME, new XTokenCredentialsEntry(secret, true).encoded());
+		return token;
 	}
 
 	public record User(BareJID jid, AuthRepository.AccountStatus accountStatus) {}

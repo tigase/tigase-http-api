@@ -32,7 +32,7 @@ import java.util.Map;
 public abstract class DashboardHandler implements Handler {
 
 	protected TemplateEngine engine;
-	@ConfigField(desc = "Path to template files")
+	@ConfigField(desc = "Path to template files", alias = "templatesPath")
 	private String templatesPath;
 	
 	DashboardHandler() {

@@ -13,6 +13,7 @@
 @param List<String> domains
 @param String query
 @param HttpServletRequest request
+@param boolean isXTokenActive
 
 @template.layout(securityContext = securityContext, uriInfo = uriInfo, request = request, content = @`
     <div class="card m-3 bg-white">
@@ -76,6 +77,14 @@
                                             <i class="bi bi-safe2-fill me-2"></i>Change password
                                         </a>
                                     </li>
+                                    @if(isXTokenActive)
+                                    <li>
+                                        <a class="dropdown-item text-warning text-nowrap" href="#" data-bs-toggle="modal"
+                                           data-bs-target="#generateAuthToken-${user.jid().toString().replace('@','-').replace('.','-')}">
+                                            <i class="bi bi-qr-code me-2"></i>New QR code
+                                        </a>
+                                    </li>
+                                    @endif
                                     <li>
                                         <a class="dropdown-item text-danger text-nowrap" href="#" data-bs-toggle="modal"
                                                  data-bs-target="#deleteUser-${user.jid().toString().replace('@','-').replace('.','-')}">
@@ -133,10 +142,95 @@
                                     </div>
                                 </div>
                             </div>
+                            @if(isXTokenActive)
+                            <div class="modal fade" id="generateAuthToken-${user.jid().toString().replace('@','-').replace('.','-')}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="#generateAuthTokenModalLabel-${user.toString().replace('@','-').replace('.','-')}" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <form action="${uriInfo.getBaseUriBuilder().path(UsersHandler.class,"generateAuthQrCode").build(user.jid().toString()).toString()}" method="post">
+                                            <div class="modal-header">
+                                                <h1 class="modal-title fs-5" id="generateAuthTokenModalLabel-${user.jid().toString().replace('@','-').replace('.','-')}">Generate new token</h1>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Do you wish to generate a new authentication token for user ${user.jid().toString()}?</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                <a type="submit" class="btn btn-primary" onclick="generateQrCode('${user.jid().toString()}')">Generate</a>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            @endif
                         </td>
                     </tr>
                 @endfor
                 </tbody>
+                @if(isXTokenActive)
+                <script>
+                    let generateQrCode = function (jid) {
+                        let escapedJid = jid.replace("@","-").replace(".","-");
+                        let modalBody = document.querySelector("#generateAuthToken-" + escapedJid + " div.modal-body");
+                        let generateButton = document.querySelector("#generateAuthToken-" + escapedJid + " div.modal-footer a[type='submit']");
+                        // remove existing error message
+                        document.querySelector("#generateAuthToken-" + escapedJid + " div.modal-body span.error-message")?.remove();
+                        // update "generate" button label
+                        let originalGenerateButtonLabel = generateButton.textContent;
+                        generateButton.classList.add("disabled");
+                        generateButton.innerHTML = "";
+                        let spinner = document.createElement("div");
+                        spinner.setAttribute("role", "status");
+                        spinner.classList.add("spinner-border", "spinner-border-sm", "me-2");
+                        generateButton.append(spinner);
+                        generateButton.append(document.createTextNode("Processing..."));
+                        // send request
+                        let xhr = new XMLHttpRequest();
+                        let url = "${uriInfo.getBaseUriBuilder().path(UsersHandler.class,"generateAuthQrCode").build("@").toString()}".replace("@", jid);
+                        xhr.open("POST", url, true);
+                        xhr.setRequestHeader('Content-type', "application/x-www-form-urlencoded");
+                        xhr.send("");
+                        xhr.responseType = "blob";
+                        let handleResult = function () {
+                            // update generate button
+                            spinner.remove();
+                            generateButton.classList.remove("disabled");
+                            generateButton.innerHTML = "";
+                            generateButton.append(document.createTextNode(originalGenerateButtonLabel));
+                            if (xhr.status === 200) {
+                                // replace content of modal
+                                modalBody.innerHTML = "";
+                                let image = new Image();
+                                image.classList.add("d-block", "mx-auto", "w-50");
+                                let qrCodeImageDataUrl = URL.createObjectURL(xhr.response);
+                                image.src = qrCodeImageDataUrl;
+                                modalBody.append(image);
+                                let p = document.createElement("p");
+                                p.classList.add("text-secondary", "small", "w-100", "text-center", "m-0", "pt-1")
+                                p.append(document.createTextNode("Scan QR code to authenticate account."))
+                                modalBody.append(p);
+                                // replace generate button with "save" button
+                                let modalFooter = generateButton.parentElement;
+                                generateButton.remove();
+                                let saveLink = document.createElement("a");
+                                saveLink.classList.add("btn", "btn-secondary");
+                                saveLink.append(document.createTextNode("Save to file"))
+                                saveLink.href = qrCodeImageDataUrl;
+                                saveLink.setAttribute("download", "qrcode-" + jid + ".png");
+                                modalFooter.append(saveLink);
+                            } else {
+                                // show error
+                                let errorSpan = document.createElement("span");
+                                errorSpan.append(document.createTextNode("An error occurred. Please try again later."));
+                                errorSpan.classList.add("text-danger", "error-message");
+                                modalBody.append(errorSpan);
+                            }
+                        }
+                        xhr.onerror = handleResult;
+                        xhr.onload = handleResult;
+                    }
+                </script>
+                @endif
             </table>
             @template.pagination(uriInfo = uriInfo, page = users)
         </div>
