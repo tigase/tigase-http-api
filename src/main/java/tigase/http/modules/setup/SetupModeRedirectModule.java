@@ -67,6 +67,7 @@ public class SetupModeRedirectModule
 		}
 		ServletInfo servletInfo = httpServer.servlet("SetupModeRedirectServlet", SetupModeRedirectServlet.class)
 				.addInitParam("module", uuid);
+		servletInfo.addMapping("/");
 		servletInfo.addMapping("/*");
 		httpDeployment.addServlets(servletInfo);
 		httpServer.deploy(httpDeployment);

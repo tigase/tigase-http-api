@@ -25,8 +25,12 @@ import tigase.http.jaxrs.Handler;
 import tigase.http.jaxrs.JaxRsServlet;
 import tigase.http.util.AssetsServlet;
 import tigase.kernel.beans.Bean;
+import tigase.kernel.beans.selector.ConfigType;
+import tigase.kernel.beans.selector.ConfigTypeEnum;
 
 @Bean(name = "dashboard", parent = HttpMessageReceiver.class, active = true)
+@ConfigType({ConfigTypeEnum.DefaultMode, ConfigTypeEnum.SessionManagerMode, ConfigTypeEnum.ConnectionManagersMode,
+			 ConfigTypeEnum.ComponentMode})
 public class DashboardModule extends AbstractJaxRsModule<Handler> {
 
 	private DeploymentInfo httpDeployment;

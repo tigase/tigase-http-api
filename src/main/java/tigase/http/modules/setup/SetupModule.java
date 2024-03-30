@@ -161,7 +161,7 @@ public class SetupModule extends AbstractJaxRsModule<SetupHandler> {
 
 					@Override
 					public JWTPayload authenticateWithCookie(HttpServletRequest request) {
-						throw new RuntimeException("Feature not implemented!");
+						return null;
 					}
 
 					@Override
