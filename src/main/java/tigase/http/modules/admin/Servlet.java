@@ -20,10 +20,10 @@ package tigase.http.modules.admin;
 import gg.jte.ContentType;
 import gg.jte.TemplateEngine;
 import gg.jte.output.WriterOutput;
-import gg.jte.resolve.ResourceCodeResolver;
 import tigase.http.modules.AbstractBareModule;
 import tigase.http.modules.Module;
 import tigase.http.modules.admin.form.Form;
+import tigase.http.util.TemplateUtils;
 import tigase.server.Command;
 import tigase.server.Packet;
 import tigase.xml.Element;
@@ -77,7 +77,7 @@ public class Servlet
 		String moduleName = cfg.getInitParameter(MODULE_ID_KEY);
 		module = AbstractBareModule.getModuleByUUID(moduleName);
 		scriptsDir = new File(cfg.getInitParameter(SCRIPTS_DIR_KEY));
-		engine = TemplateEngine.create(new ResourceCodeResolver("tigase/admin"), ContentType.Html);
+		engine =  TemplateUtils.create(null, "tigase.admin", ContentType.Html);
 	}
 
 	@Override

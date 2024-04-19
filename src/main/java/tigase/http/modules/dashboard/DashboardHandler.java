@@ -20,13 +20,10 @@ package tigase.http.modules.dashboard;
 import gg.jte.ContentType;
 import gg.jte.TemplateEngine;
 import gg.jte.output.StringOutput;
-import gg.jte.resolve.DirectoryCodeResolver;
-import gg.jte.resolve.ResourceCodeResolver;
 import tigase.http.jaxrs.Handler;
+import tigase.http.util.TemplateUtils;
 import tigase.kernel.beans.config.ConfigField;
 
-import java.net.URI;
-import java.nio.file.Paths;
 import java.util.Map;
 
 public abstract class DashboardHandler implements Handler {
@@ -45,13 +42,7 @@ public abstract class DashboardHandler implements Handler {
 
 	public void setTemplatesPath(String templatesPath) {
 		this.templatesPath = templatesPath;
-		if (templatesPath == null || templatesPath.isBlank()) {
-			this.engine = TemplateEngine.create(new ResourceCodeResolver("tigase/dashboard"), ContentType.Html);
-		} else {
-			this.engine = TemplateEngine.create(new DirectoryCodeResolver(Paths.get(URI.create(
-														"file:///" + templatesPath))),
-												ContentType.Html);
-		}
+		this.engine = TemplateUtils.create(templatesPath, "tigase.dashboard", ContentType.Html);
 	}
 
 	protected String renderTemplate(String templateFile, Map<String, Object> model) {

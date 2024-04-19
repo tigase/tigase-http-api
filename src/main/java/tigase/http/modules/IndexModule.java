@@ -17,15 +17,14 @@
  */
 package tigase.http.modules;
 
-import gg.jte.CodeResolver;
 import gg.jte.ContentType;
 import gg.jte.TemplateEngine;
 import gg.jte.output.WriterOutput;
-import gg.jte.resolve.ResourceCodeResolver;
 import tigase.http.DeploymentInfo;
 import tigase.http.HttpMessageReceiver;
 import tigase.http.ServletInfo;
 import tigase.http.util.AssetsServlet;
+import tigase.http.util.TemplateUtils;
 import tigase.kernel.beans.Bean;
 import tigase.kernel.beans.selector.ConfigType;
 import tigase.kernel.beans.selector.ConfigTypeEnum;
@@ -81,8 +80,7 @@ public class IndexModule
 			stop();
 		}
 
-		CodeResolver codeResolver = new ResourceCodeResolver("tigase/index");
-		templateEngine = TemplateEngine.create(codeResolver, ContentType.Html);
+		templateEngine =  TemplateUtils.create(null, "tigase.index", ContentType.Html);
 		super.start();
 		modules.put(uuid, this);
 		httpDeployment = httpServer.deployment()

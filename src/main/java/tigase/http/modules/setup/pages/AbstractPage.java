@@ -19,13 +19,13 @@ package tigase.http.modules.setup.pages;
 
 import gg.jte.ContentType;
 import gg.jte.TemplateEngine;
-import gg.jte.resolve.ResourceCodeResolver;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Response;
 import tigase.http.modules.setup.Config;
 import tigase.http.modules.setup.NextPage;
 import tigase.http.modules.setup.SetupHandler;
 import tigase.http.modules.setup.SetupModule;
+import tigase.http.util.TemplateUtils;
 import tigase.kernel.beans.Inject;
 
 import javax.servlet.http.HttpServletRequest;
@@ -40,7 +40,7 @@ public abstract class AbstractPage implements SetupHandler {
 	protected SetupModule setupModule;
 
 	public AbstractPage() {
-		this.engine = TemplateEngine.create(new ResourceCodeResolver("tigase/setup"), ContentType.Html);
+		this.engine = TemplateUtils.create(null, "tigase.setup", ContentType.Html);
 	}
 
 	public Config getConfig() {

@@ -51,7 +51,7 @@ public class Config {
 	private boolean clusterMode = false;
 	private boolean acs = false;
 	private DBConfig dbConfig = DBConfig.getDefaults();
-	private SetupHelper.HttpSecurity httpSecurity;
+	private SetupHelper.HttpSecurity httpSecurity = new SetupHelper.HttpSecurity();
 	private String setupPassword;
 	private String setupUser;
 
