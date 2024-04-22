@@ -101,7 +101,7 @@ public class RestServlet
 		super.service(request, response);
 	}
 	
-	protected void canAccess(RequestHandler requestHandler, HttpServletRequest request, HttpServletResponse response)
+	protected boolean canAccess(RequestHandler requestHandler, HttpServletRequest request, HttpServletResponse response)
 			throws HttpException, IOException, ServletException {
 		switch (((RestHandler) requestHandler.getHandler()).getSecurity()) {
 			case None:
@@ -110,7 +110,7 @@ public class RestServlet
 				checkApiKey(request);
 		}
 
-		super.canAccess(requestHandler, request, response);
+		return super.canAccess(requestHandler, request, response);
 	}
 
 	protected void checkApiKey(HttpServletRequest request) throws HttpException {

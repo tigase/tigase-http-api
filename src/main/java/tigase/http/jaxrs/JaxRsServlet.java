@@ -46,7 +46,7 @@ public class JaxRsServlet<M extends JaxRsModule>
 	protected ConcurrentHashMap<HttpMethod, CopyOnWriteArrayList<RequestHandler>> requestHandlers = new ConcurrentHashMap<>();
 	private String loginFormPath;
 
-	protected void canAccess(RequestHandler requestHandler, HttpServletRequest request, HttpServletResponse response) throws HttpException, IOException, ServletException {
+	protected boolean canAccess(RequestHandler requestHandler, HttpServletRequest request, HttpServletResponse response) throws HttpException, IOException, ServletException {
 		Handler.Role requiredRole = requestHandler.getRequiredRole();
 		if (requiredRole.isAuthenticationRequired()) {
 			if (!request.isUserInRole(requiredRole.name().toLowerCase())) {
@@ -60,10 +60,11 @@ public class JaxRsServlet<M extends JaxRsModule>
 					response.setHeader("WWW-Authenticate", "Basic realm=\"TigasePlain\"");
 					request.authenticate(response);
 				}
-				return;
+				return false;
 			}
 			module.getAuthProvider().refreshJwtToken(request, response);
 		}
+		return true;
 	}
 	
 	@Override
@@ -96,8 +97,9 @@ public class JaxRsServlet<M extends JaxRsModule>
 				for (RequestHandler handler : handlers) {
 					Matcher matcher = handler.test(req, requestUri);
 					if (matcher != null && matcher.matches()) {
-						canAccess(handler, req, resp);
-						handler.execute(req, resp, matcher, executorService);
+						if (canAccess(handler, req, resp)) {
+							handler.execute(req, resp, matcher, executorService);
+						} 
 						return;
 					}
 				}

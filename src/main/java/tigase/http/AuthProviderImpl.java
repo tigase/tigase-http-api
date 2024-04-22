@@ -18,10 +18,7 @@
 package tigase.http;
 
 import tigase.auth.credentials.Credentials;
-import tigase.db.AuthRepository;
-import tigase.db.TigaseDBException;
-import tigase.db.UserNotFoundException;
-import tigase.db.UserRepository;
+import tigase.db.*;
 import tigase.http.json.JsonParser;
 import tigase.http.json.JsonSerializer;
 import tigase.kernel.beans.Bean;
@@ -71,7 +68,15 @@ public class AuthProviderImpl
 	public void initialize() {
 		if (userRepository != null) {
 			BareJID user = BareJID.bareJIDInstanceNS(receiver.getName());
+
 			try {
+				try {
+					if (!userRepository.userExists(user)) {
+						userRepository.addUser(user);
+					}
+				} catch (UserExistsException e) {
+				}
+				
 				String secretKeyStr = userRepository.getData(user, JWT_SECRET_KEY);
 				if (secretKeyStr == null) {
 					SecureRandom random = new SecureRandom();
@@ -91,7 +96,7 @@ public class AuthProviderImpl
 				}
 				secretKey = new SecretKeySpec(Base64.decode(secretKeyStr), "HmacSHA256");
 			} catch (Throwable ex) {
-				throw new RuntimeException("Failed to generate and store secret key!");
+				throw new RuntimeException("Failed to generate and store secret key!", ex);
 			}
 		}
 	}
