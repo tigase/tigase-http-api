@@ -151,8 +151,13 @@
 													multiple="${formField.isMultiple()}"
 													required="${formField.isRequired()}">
 												@for(Field.Option option : formField.getOptions())
-													<option value='${option.getValue()}'
-															selected="${formField.isSelected(option)}">${option.getLabel()}</option>
+													@if(option.getValue() != null)
+														<option value="${option.getValue()}"
+																selected="${formField.isSelected(option)}">${option.getLabel()}</option>
+													@else
+														<option value=""
+																selected="${formField.isSelected(option)}">${option.getLabel()}</option>
+													@endif
 												@endfor
 											</select>
 										</div>
