@@ -20,7 +20,7 @@ package tigase.http.modules.wellknown;
 import tigase.http.DeploymentInfo;
 import tigase.http.HttpMessageReceiver;
 import tigase.http.ServletInfo;
-import tigase.http.modules.AbstractModule;
+import tigase.http.modules.AbstractBareModule;
 import tigase.http.modules.admin.Servlet;
 import tigase.kernel.beans.Bean;
 import tigase.kernel.beans.RegistrarBean;
@@ -41,7 +41,8 @@ import java.util.stream.Stream;
 @Bean(name = "well-known", parent = HttpMessageReceiver.class, active = true)
 @ConfigType({ConfigTypeEnum.DefaultMode, ConfigTypeEnum.SessionManagerMode, ConfigTypeEnum.ConnectionManagersMode,
 			 ConfigTypeEnum.ComponentMode})
-public class WellKnownModule extends AbstractModule implements RegistrarBean {
+public class WellKnownModule extends AbstractBareModule
+		implements RegistrarBean {
 
 	private DeploymentInfo deployment = null;
 

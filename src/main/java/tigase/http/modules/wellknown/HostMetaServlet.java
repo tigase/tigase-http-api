@@ -17,8 +17,7 @@
  */
 package tigase.http.modules.wellknown;
 
-import tigase.http.ServiceImpl;
-import tigase.http.api.Service;
+import tigase.http.modules.AbstractBareModule;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -35,14 +34,15 @@ public class HostMetaServlet extends HttpServlet {
 
 	public static final String MODULE_ID_KEY = "module-id-key";
 
-	private Service<WellKnownModule> service;
+	///private Service<WellKnownModule> service;
+	private WellKnownModule module;
 
 	@Override
 	public void init() throws ServletException {
 		super.init();
 		ServletConfig cfg = super.getServletConfig();
 		String moduleName = cfg.getInitParameter(MODULE_ID_KEY);
-		service = new ServiceImpl(moduleName);
+		module = AbstractBareModule.getModuleByUUID(moduleName);
 	}
 
 	/**
@@ -81,7 +81,7 @@ public class HostMetaServlet extends HttpServlet {
 		PrintWriter out = null;
 
 		try {
-			List<Link> links = service.getModule().getHostMetaLinks(domain);
+			List<Link> links = module.getHostMetaLinks(domain);
 			if (links == null) {
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			} else {
