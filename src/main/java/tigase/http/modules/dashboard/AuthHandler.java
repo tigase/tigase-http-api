@@ -61,11 +61,11 @@ public class AuthHandler extends DashboardHandler {
 	@POST
 	@Path("/login")
 	public Response login(@FormParam("jid") @NotEmpty BareJID jid, @FormParam("password") @NotBlank String password,
-						  HttpServletRequest request, HttpServletResponse response, UriInfo uriInfo)
+						  HttpServletRequest request, HttpServletResponse response, UriInfo uriInfo, Model model)
 			throws NoSuchAlgorithmException, InvalidKeyException, TigaseDBException, TigaseStringprepException {
 		if (!authProvider.checkCredentials(jid.toString(), password)) {
-			return Response.seeOther(uriInfo.getBaseUriBuilder().path(AuthHandler.class, "loginForm").build())
-					.build();
+			model.put("error", "Invalid username or password.");
+			return loginForm(uriInfo, model);
 		}
 		authProvider.setAuthenticationCookie(response, new AuthProvider.JWTPayload(jid, request.getServerName(),
 																				   LocalDateTime.now().plusMinutes(5)),

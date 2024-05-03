@@ -1,6 +1,7 @@
 @import jakarta.ws.rs.core.UriInfo
 @import tigase.server.XMPPServer
 @param UriInfo uriInfo
+@param String error = null
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/html">
 <head>
@@ -22,6 +23,9 @@
     </style>
 </head>
 <body class="d-flex flex-column bg-light vh-100 overflow-auto">
+@if(error != null)
+<div class="alert alert-danger text-center" role="alert">${error}</div>
+@endif
 <main class="text-center m-auto" style="height: unset">
     <form style="width: 300px" method="post" action="${uriInfo.getBaseUriBuilder().path("/login").build().getPath()}">
         <img class="logo mb-4" style="width: 170px">
