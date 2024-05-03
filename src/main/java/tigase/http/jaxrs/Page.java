@@ -17,6 +17,7 @@
  */
 package tigase.http.jaxrs;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public record Page<T>(Pageable pageable, int totalCount, List<T> items) {
@@ -50,7 +51,26 @@ public record Page<T>(Pageable pageable, int totalCount, List<T> items) {
 	}
 
 	public int totalPages() {
-		return (int) Math.ceil((double) totalCount) / pageable.pageSize();
+		return (int) Math.ceil((double) totalCount / pageable.pageSize());
 	}
 
+	public List<Integer> paginate(int oddNoOfItems) {
+		int part = (oddNoOfItems / 2);
+		int currentPage = pageable.pageNumber();
+		int start = 0;
+		int end = 0;
+		if (totalPages() / 2 > currentPage) {
+			start = Math.max(1, currentPage + 1 - part);
+			end = Math.min(totalPages(), start + oddNoOfItems - 1);
+		} else {
+			end = Math.min(totalPages(), currentPage + 1 + part);
+			start = Math.max(1, end - oddNoOfItems + 1);
+		}
+
+		List<Integer> pages = new ArrayList<>();
+		for (int i = start; i <= end; i++) {
+			pages.add(i);
+		}
+		return pages;
+	}
 }

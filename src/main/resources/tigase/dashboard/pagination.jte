@@ -9,7 +9,7 @@
         <li class="page-item ${page.isFirst() ? " disabled" : ""}">
             <a class="page-link" href="${builder.clone().replaceQueryParam("page", page.previousPageable().pageNumber()).replaceQueryParam("size", page.pageable().pageSize()).build().toString()}">Previous</a>
         </li>
-        @for(int i=1; i<=page.totalPages() + 1; i++)
+        @for(int i : page.paginate(9))
             <li class="page-item ${((i-1) == page.pageable().pageNumber()) ? " active" : ""}">
                 <a class="page-link" href="${builder.clone().replaceQueryParam("page", i-1).replaceQueryParam("size", page.pageable().pageSize()).build().toString()}">${i}</a>
             </li>

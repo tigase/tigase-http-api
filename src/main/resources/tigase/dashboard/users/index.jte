@@ -170,7 +170,7 @@
                 @if(isXTokenActive)
                 <script>
                     let generateQrCode = function (jid) {
-                        let escapedJid = jid.replace("@","-").replace(".","-");
+                        let escapedJid = jid.replaceAll("@","-").replaceAll(".","-");
                         let modalBody = document.querySelector("#generateAuthToken-" + escapedJid + " div.modal-body");
                         let generateButton = document.querySelector("#generateAuthToken-" + escapedJid + " div.modal-footer a[type='submit']");
                         // remove existing error message
