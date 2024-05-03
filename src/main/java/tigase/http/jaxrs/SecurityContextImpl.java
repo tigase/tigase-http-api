@@ -42,7 +42,7 @@ public class SecurityContextImpl implements SecurityContext {
 
 	@Override
 	public boolean isSecure() {
-		return "https".equalsIgnoreCase(request.getProtocol());
+		return request.isSecure();
 	}
 
 	@Override

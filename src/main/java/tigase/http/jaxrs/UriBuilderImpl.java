@@ -273,7 +273,10 @@ public class UriBuilderImpl extends UriBuilder {
 		if (host != null) {
 			sb.append(host);
 			if (port != null) {
-				sb.append(":").append(port);
+				if (scheme == null || ("https".equals(scheme) && !"443".equals(port)) ||
+						("http".equals(scheme) && !port.equals("80")) || (!scheme.startsWith("http"))) {
+					sb.append(":").append(port);
+				}
 			}
 		}
 		sb.append("/");

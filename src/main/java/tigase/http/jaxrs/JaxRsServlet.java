@@ -103,6 +103,18 @@ public class JaxRsServlet<M extends JaxRsModule>
 						return;
 					}
 				}
+				if (requestUri.isEmpty()) {
+					requestUri = "/";
+					for (RequestHandler handler : handlers) {
+						Matcher matcher = handler.test(req, requestUri);
+						if (matcher != null && matcher.matches()) {
+							if (canAccess(handler, req, resp)) {
+								handler.execute(req, resp, matcher, executorService);
+							}
+							return;
+						}
+					}
+				}
 			}
 			resp.sendError(404, "Not found");
 		} catch (ValidationException ex) {

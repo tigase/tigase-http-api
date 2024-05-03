@@ -60,6 +60,9 @@ public class DummyServletRequest
 	private int requestId;
 	private HttpServletResponse response;
 	private Map<String, Object> attributes = null;
+	private String serverName;
+	private Integer serverPort;
+	private Boolean secure;
 
 	public DummyServletRequest(int requestId, HttpExchange exchange, String contextPath, String servletPath, AuthProvider authProvider,
 							   ScheduledExecutorService timer, Integer executionTimeout, HttpServletResponse response) {
@@ -90,9 +93,18 @@ public class DummyServletRequest
 				.flatMap(entry1 -> entry1.getValue().stream())
 				.flatMap(item -> Arrays.stream(item.split(";")))
 				.map(cookie -> {
-					final String[] tokens = cookie.split("=");
-					return new Cookie(tokens[0].trim(), tokens[1].trim());
+					int idx = cookie.indexOf('=');
+					if (idx < 0) {
+						return null;
+					}
+					try {
+						return new Cookie(cookie.substring(0, idx),
+										  (idx < cookie.length() - 1) ? cookie.substring(idx + 1) : "");
+					} catch (IllegalArgumentException ex) {
+						return null;
+					}
 				})
+				.filter(Objects::nonNull)
 				.toArray(Cookie[]::new);
 
 		this.contextPath = contextPath;
@@ -213,21 +225,48 @@ public class DummyServletRequest
 	@Override
 	public String getScheme() {
 		synchronized (exchange) {
-			return exchange.getProtocol();
+			return isSecure() ? "https" : "http";
 		}
 	}
 
 	@Override
 	public String getServerName() {
 		synchronized (exchange) {
-			return exchange.getRequestHeaders().getFirst("Host");
+			if (serverName == null) {
+				prepareServerNameAndPort();
+			}
+			return serverName;
+		}
+	}
+
+	private void prepareServerNameAndPort() {
+		String host = exchange.getRequestHeaders().getFirst("X-Forwarded-Host");
+		if (host == null || host.isEmpty()) {
+			host = exchange.getRequestHeaders().getFirst("Host");
+		}
+		if (host != null && !host.endsWith("]")) {
+			int idx = host.lastIndexOf(':');
+			if (idx != -1) {
+				serverName = host.substring(0, idx);
+				serverPort = Integer.parseInt(host.substring(idx + 1));
+			} else {
+				serverName = host;
+			}
+		} else {
+			serverName = host;
+		}
+		if (serverPort == null) {
+			serverPort = isSecure() ? 443 : 80;
 		}
 	}
 
 	@Override
 	public int getServerPort() {
 		synchronized (exchange) {
-			return exchange.getLocalAddress().getPort();
+			if (serverPort == null) {
+				prepareServerNameAndPort();
+			}
+			return serverPort;
 		}
 	}
 
@@ -283,7 +322,15 @@ public class DummyServletRequest
 	@Override
 	public boolean isSecure() {
 		synchronized (exchange) {
-			return exchange.getHttpContext().getServer() instanceof HttpsServer;
+			if (secure == null) {
+				String proto = exchange.getRequestHeaders().getFirst("X-Forwarded-Proto");
+				if (proto != null) {
+					secure = "https".equalsIgnoreCase(proto) || "http2".equalsIgnoreCase(proto);
+				} else {
+					secure = exchange.getHttpContext().getServer() instanceof HttpsServer;
+				}
+			}
+			return secure;
 		}
 	}
 
@@ -507,12 +554,17 @@ public class DummyServletRequest
 				if (exchange.getRequestURI().isAbsolute()) {
 					buf.append(exchange.getRequestURI().toURL().toExternalForm());
 				} else {
-					if (isSecure()) {
+					boolean secure = isSecure();
+					if (secure) {
 						buf.append("https");
 					} else {
 						buf.append("http");
 					}
 					buf.append("://").append(getServerName());
+					int port = getServerPort();
+					if ((isSecure() && port != 443) || (!isSecure() && port != 80)) {
+						buf.append(':').append(port);
+					}
 					buf.append(exchange.getRequestURI().getPath());
 				}
 			}

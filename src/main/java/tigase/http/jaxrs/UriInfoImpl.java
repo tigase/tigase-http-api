@@ -104,7 +104,7 @@ public class UriInfoImpl implements UriInfo {
 		return UriBuilder.newInstance()
 				.scheme(request.getScheme())
 				.host(request.getServerName())
-				.port(request.getLocalPort())
+				.port(request.getServerPort())
 				.path(baseUri);
 	}
 
