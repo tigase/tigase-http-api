@@ -215,7 +215,7 @@ body {
 
 .sidebar .list-group-item {
 	background-color: transparent;
-	text-transform: uppercase;
+	/*text-transform: uppercase;*/
 	font-size: 1.1em;
 	color: #09C;
 }
@@ -265,6 +265,7 @@ body {
 
 .sidebar {
 	background-color: #1a282d;
+    flex-shrink: 0;
 
 	font-weight: 400;
 	/*color: #90ABB4;*/
