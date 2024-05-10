@@ -32,20 +32,23 @@
                 <label class="col-sm-3 col-form-label" for="virtualDomain">Your XMPP (Jabber) default domain</label>
                 <div class="col-sm-9">
                     <input class="form-control" name="virtualDomain" type="text" size="30" value="${config.getDefaultVirtualDomain()}" required/>
+                    <div class="invalid-feedback">Domain name is required</div>
                 </div>
             </div>
 
             <div class="row mb-3">
                 <label class="col-sm-3 col-form-label" for="admins">Server administrators</label>
                 <div class="col-sm-9">
-                    <input class="form-control" name="admins" type="text" size="30" value="${config.getAdmins().stream().map(BareJID::toString).collect(Collectors.joining(","))}" />
+                    <input class="form-control" name="admins" type="text" size="30" value="${config.getAdmins().stream().map(BareJID::toString).collect(Collectors.joining(","))}" required/>
+                    <div class="invalid-feedback">Admin user JID is required</div>
                 </div>
             </div>
 
             <div class="row mb-3">
                 <label class="col-sm-3 col-form-label" for="adminPwd">Admin password</label>
                 <div class="col-sm-9">
-                    <input class="form-control" name="adminPwd" type="password" size="30" value="${config.getAdminPwd()}"/>
+                    <input class="form-control" name="adminPwd" type="password" placeholder="password" aria-label="password input" aria-describedby="password-input" size="30" value="${config.getAdminPwd()}" required/>
+                    <div class="invalid-feedback">Admin password is required</div>
                 </div>
             </div>
 
