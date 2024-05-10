@@ -37,6 +37,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static tigase.db.util.DBSchemaLoader.PARAMETERS_ENUM.*;
+import static tigase.db.util.DBSchemaLoader.getSupportedTypeForName;
+import static tigase.db.util.SchemaLoader.getDefaultSupportedTypeForName;
 
 public class Config {
 
@@ -45,7 +47,8 @@ public class Config {
 	private String defaultVirtualDomain = DNSResolverFactory.getInstance().getDefaultHost();
 	private Set<BareJID> admins = new HashSet<>();
 	private String adminPwd;
-	private SchemaLoader.TypeInfo dbType = SchemaLoader.getAllSupportedTypesStream().findFirst().get();
+	private SchemaLoader.TypeInfo dbType = getSupportedTypeForName(System.getenv(("DB_TYPE"))).orElse(
+			getDefaultSupportedTypeForName().orElseThrow());
 	private Set<String> connectors = new HashSet<>();
 	private Set<String> features = new HashSet<>();
 	private boolean clusterMode = false;
@@ -54,6 +57,8 @@ public class Config {
 	private SetupHelper.HttpSecurity httpSecurity = new SetupHelper.HttpSecurity();
 	private String setupPassword;
 	private String setupUser;
+
+
 
 	public String getCompanyName() {
 		return companyName;
@@ -148,6 +153,10 @@ public class Config {
 	}
 
 	public Set<BareJID> getAdmins() {
+		if (admins.isEmpty()) {
+			// add default admin user
+			admins.add(BareJID.bareJIDInstanceNS("admin@" + defaultVirtualDomain));
+		}
 		return admins;
 	}
 
@@ -354,16 +363,19 @@ public class Config {
 		private boolean dbUseSSL = true;
 		@FormParam("dbAdditionalOptions")
 		private String dbAdditionalOptions;
+		@FormParam("useLegacyDatetimeCode")
+		private boolean useLegacyDatetimeCode;
 
 		public static DBConfig getDefaults() {
 			DBConfig config = new DBConfig();
 			config.dbName = DATABASE_NAME.getDefaultValue();
-			config.dbHost = DATABASE_HOSTNAME.getDefaultValue();
+			config.dbHost = System.getenv().getOrDefault("DB_HOST", DATABASE_HOSTNAME.getDefaultValue());
 			config.dbUserName = TIGASE_USERNAME.getDefaultValue();
 			config.dbUserPassword = TIGASE_PASSWORD.getDefaultValue();
-			config.dbRootName = ROOT_USERNAME.getDefaultValue();
-			config.dbRootPassword = ROOT_PASSWORD.getDefaultValue();
+			config.dbRootName = System.getenv().getOrDefault(("DB_ROOT_USER"), ROOT_USERNAME.getDefaultValue());
+			config.dbRootPassword = System.getenv().getOrDefault(("DB_ROOT_PASS"), ROOT_PASSWORD.getDefaultValue());
 			config.dbUseSSL = Boolean.parseBoolean(USE_SSL.getDefaultValue());
+			config.useLegacyDatetimeCode = Boolean.parseBoolean(USE_LEGACY_DATETIME_CODE.getDefaultValue());
 			return config;
 		}
 
@@ -459,6 +471,9 @@ public class Config {
 				}
 				else if (DATABASE_OPTIONS.getName().equals(param.getFullName().get())) {
 					props.put(param.getFullName().get(), dbAdditionalOptions);
+				}
+				else if (USE_LEGACY_DATETIME_CODE.getName().equals(param.getFullName().get())) {
+					props.put(param.getFullName().get(), useLegacyDatetimeCode);
 				}
 			}
 			SchemaLoader.Parameters parameters = loader.createParameters();
