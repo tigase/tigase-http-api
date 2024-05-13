@@ -35,10 +35,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 @Path("/saveConfig")
 @Bean(name = "saveConfigPage", parent = SetupModule.class, active = true)
 public class SaveConfigPage extends AbstractPage {
+
+	private final static System.Logger logger = System.getLogger(SaveConfigPage.class.getName());
 
 	@Override
 	public String getTitle() {
@@ -54,28 +58,20 @@ public class SaveConfigPage extends AbstractPage {
 
 	@POST
 	public Response processForm(HttpServletRequest request, @FormParam("config") String config) throws HttpException {
+		logger.log(System.Logger.Level.TRACE, "Saving config: \n" + config );
+		var configPath = Paths.get(ConfigHolder.TDSL_CONFIG_FILE_DEF);
 		try {
-			File f = new File(ConfigHolder.TDSL_CONFIG_FILE_DEF);
-			if (f.exists()) {
-				File bf = new File(ConfigHolder.TDSL_CONFIG_FILE_DEF);
-				if (!bf.exists()) {
-					bf.createNewFile();
-				}
-				try (FileOutputStream fos = new FileOutputStream(bf, false)) {
-					try (FileInputStream fis = new FileInputStream(f)) {
-						byte[] tmp = new byte[1024];
-						int read = 0;
-						while ((read = fis.read(tmp)) > -1) {
-							fos.write(tmp, 0, read);
-						}
-					}
-				}
+			File f = configPath.toFile();
+			if (configPath.toFile().exists()) {
+				ConfigHolder.backupOldConfigFile(configPath);
 			} else {
 				f.createNewFile();
 			}
+			Files.writeString(configPath, config);
 		} catch (IOException ex) {
 			throw new HttpException(ex, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
+
 
 		StringOutput output = new StringOutput();
 		engine.render("finished.jte", prepareContext(), output);
