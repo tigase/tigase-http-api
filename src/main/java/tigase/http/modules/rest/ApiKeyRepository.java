@@ -33,6 +33,8 @@ import tigase.xmpp.jid.BareJID;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @Bean(name = "repository", parent = AbstractModule.class, active = true)
 @ConfigType({ConfigTypeEnum.DefaultMode, ConfigTypeEnum.SessionManagerMode, ConfigTypeEnum.ConnectionManagersMode,
@@ -42,6 +44,10 @@ public class ApiKeyRepository
 
 	public static final String API_KEYS_KEY = "api-keys";
 	private static final String GEN_API_KEYS = "--api-keys";
+	private final static Logger log = Logger.getLogger(ApiKeyRepository.class.getName());
+	
+	private ApiKeyItem bootstrapApiKeyItem = null;
+
 	@ConfigField(desc = "Configure REST API to be open and avoid requirement for api-key", alias = "open-access")
 	private boolean openAccess = false;
 
@@ -98,14 +104,21 @@ public class ApiKeyRepository
 
 		ApiKeyItem item = getItem(key);
 
-		// if there is no such key as supplied key we deny access
-		if (item == null) {
-			return false;
-		}
 
-		// if item exists it will check if access for path is 
-		// allowed for supplied key
-		return item.isAllowed(key, domain, path);
+		if (item != null) {
+			// if item exists it will check if access for path is allowed for supplied
+			return item.isAllowed(key, domain, path);
+		} else {
+			// as a fallback, if there is no item configured key,
+			// we check if there is maybe an environment variable set
+			if (allItems().isEmpty() && bootstrapApiKeyItem != null) {
+				log.log(Level.INFO, "Using environment HTTP API-KEY as no other api-key is configured");
+				return bootstrapApiKeyItem.isAllowed(key, domain, path);
+			} else {
+				// if there is no configured item nor env.variable then we deny the access
+				return false;
+			}
+		}
 	}
 	
 	@Override
@@ -130,6 +143,13 @@ public class ApiKeyRepository
 	public void initialize() {
 		super.initialize();
 		eventBus.registerAll(this);
+
+		var environmentApiKey = System.getenv("HTTP_API_KEY_BOOTSTRAP");
+		if (environmentApiKey != null) {
+			bootstrapApiKeyItem = new ApiKeyItem();
+			bootstrapApiKeyItem.setKey(environmentApiKey);
+			log.log(Level.INFO, "Detected environment HTTP API-KEY");
+		}
 	}
 
 	@Override

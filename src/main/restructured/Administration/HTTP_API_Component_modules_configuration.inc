@@ -41,6 +41,10 @@ Requests made to the HTTP service must conclude with one of the API keys defined
 
 .. Note::
 
+   It's possible (for example for bootstrap configuration) to specify HTTP API-KEY as environment variable named `HTTP_API_KEY_BOOTSTRAP` - api-key set like that will be used only if there is no API-KEY configured via rest module management ("Add API key" command)
+
+.. Note::
+
    If you want to allow access to REST API without usage of any keys, it is possible. To do so, you need to add an API key with ``API key`` field value equal ``open_access``.
 
 .. Note::
