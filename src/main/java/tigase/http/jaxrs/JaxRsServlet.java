@@ -20,6 +20,7 @@ package tigase.http.jaxrs;
 import tigase.http.api.HttpException;
 import tigase.http.jaxrs.annotations.LoginForm;
 import tigase.http.modules.AbstractBareModule;
+import tigase.http.modules.rest.OldGroovyRequestHandler;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -28,18 +29,25 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.ValidationException;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 
 public class JaxRsServlet<M extends JaxRsModule>
 		extends HttpServlet {
-
+	
+	public static Comparator<RequestHandler> REQUEST_HANDLER_COMPARATOR = Comparator.comparing(requestHandler -> {
+		if (requestHandler instanceof JaxRsRequestHandler) {
+			return 1;
+		}
+		if (requestHandler instanceof OldGroovyRequestHandler) {
+			return 2;
+		}
+		return 3;
+	});
 	public static final String MODULE_KEY = "module-uuid";
 	protected ScheduledExecutorService executorService;
 	protected M module;
@@ -131,7 +139,9 @@ public class JaxRsServlet<M extends JaxRsModule>
 	}
 
 	protected void registerHandler(RequestHandler requestHandler) {
-		requestHandlers.computeIfAbsent(requestHandler.getHttpMethod(), x -> new CopyOnWriteArrayList<>()).add(requestHandler);
+		List<RequestHandler> handlers = requestHandlers.computeIfAbsent(requestHandler.getHttpMethod(), x -> new CopyOnWriteArrayList<>());
+		handlers.add(requestHandler);
+		handlers.sort(Comparator.comparing(Function.identity()));
 		if (requestHandler instanceof JaxRsRequestHandler) {
 			JaxRsRequestHandler jaxRsRequestHandler = (JaxRsRequestHandler) requestHandler;
 			if (jaxRsRequestHandler.getMethod().isAnnotationPresent(LoginForm.class)) {

@@ -71,7 +71,8 @@ public class JaxRsRequestHandler
 	private final Method method;
 	private final Pattern pattern;
 	private final HttpMethod httpMethod;
-	private final Set<String> supportedContentTypes;
+	private final Set<String> consumedContentTypes;
+	private final Set<String> producedContentTypes;
 
 	public static List<JaxRsRequestHandler> create(Handler instance) {
 		Path path = instance.getClass().getAnnotation(Path.class);
@@ -249,9 +250,15 @@ public class JaxRsRequestHandler
 		this.pattern = pattern;
 		Consumes consumes = method.getAnnotation(Consumes.class);
 		if (consumes != null) {
-			supportedContentTypes = Arrays.stream(consumes.value()).collect(Collectors.toSet());
+			consumedContentTypes = Arrays.stream(consumes.value()).collect(Collectors.toSet());
 		} else {
-			supportedContentTypes = Collections.emptySet();
+			consumedContentTypes = Collections.emptySet();
+		}
+		Produces produces = method.getAnnotation(Produces.class);
+		if (produces != null) {
+			producedContentTypes = Arrays.stream(produces.value()).collect(Collectors.toSet());
+		} else {
+			producedContentTypes = Collections.emptySet();
 		}
 	}
 
@@ -260,7 +267,16 @@ public class JaxRsRequestHandler
 	}
 	
 	public Matcher test(HttpServletRequest request, String requestUri) {
-		if (supportedContentTypes.contains(request.getContentType()) || supportedContentTypes.isEmpty()) {
+		if (consumedContentTypes.contains(request.getContentType()) || consumedContentTypes.isEmpty()) {
+			String header = request.getHeader("Accept");
+			if (header != null && !producedContentTypes.isEmpty()) {
+				if (Arrays.stream(header.split(",")).map(
+						AcceptedType::new).filter(it -> producedContentTypes.contains(it.getMimeType())).sorted(Comparator.comparing(
+						AcceptedType::getPreference).reversed()).findFirst().map(
+						AcceptedType::getMimeType).isEmpty()) {
+					return null;
+				}
+			}
 			return pattern.matcher(requestUri);
 		}
 		return null;
@@ -576,19 +592,17 @@ public class JaxRsRequestHandler
 	}
 
 	protected Optional<String> selectResponseMimeType(Method method, HttpServletRequest request) throws HttpException {
-		Produces produces = method.getAnnotation(Produces.class);
-		if (produces == null) {
+		if (producedContentTypes.isEmpty()) {
 			return Optional.empty();
 		}
 
-		Set<String> supported = Arrays.stream(produces.value()).collect(Collectors.toSet());
 		String header = request.getHeader("Accept");
 		if (header == null) {
 			return Optional.empty();
 		}
 		
 		return Arrays.stream(header.split(",")).map(
-				AcceptedType::new).filter(it -> supported.contains(it.getMimeType())).sorted(Comparator.comparing(
+				AcceptedType::new).filter(it -> producedContentTypes.contains(it.getMimeType())).sorted(Comparator.comparing(
 				AcceptedType::getPreference).reversed()).findFirst().map(
 				AcceptedType::getMimeType);
 	}
@@ -600,5 +614,23 @@ public class JaxRsRequestHandler
 			case "application/xml" -> new XmlUnmarshaller();
 			default -> throw new UnsupportedFormatException("Format '" + contentType + "' is not supported!");
 		};
+	}
+
+	@Override
+	public int compareTo(RequestHandler rh) {
+		if (rh instanceof JaxRsRequestHandler) {
+			JaxRsRequestHandler o = (JaxRsRequestHandler) rh;
+			int r = PATTERN_COMPARATOR.compare(pattern, o.pattern);
+			if (r != 0) {
+				return r;
+			}
+			r = o.consumedContentTypes.size() - consumedContentTypes.size();
+			if (r != 0) {
+				return r;
+			}
+			r = o.producedContentTypes.size() - producedContentTypes.size();
+			return r;
+		}
+		return Integer.MAX_VALUE;
 	}
 }

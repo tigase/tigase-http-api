@@ -176,18 +176,51 @@ public class UsersHandler extends DashboardHandler {
 	@Path("/{jid}/qrCode")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces("image/png")
-	public Response generateAuthQrCode(@PathParam("jid") @NotEmpty BareJID jid)
+	public Response generateAuthQrCodePng(@PathParam("jid") @NotEmpty BareJID jid)
 			throws IOException, WriterException, TigaseDBException {
 		String token = generateAuthQrCodeToken(jid);
+		return Response.ok(encodeStringToQRCode(token), "image/png").build();
+	}
 
+	@POST
+	@Path("/{jid}/qrCode")
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	@Produces(MediaType.APPLICATION_JSON)
+	public QRCode generateAuthQrCodeJson(@PathParam("jid") @NotEmpty BareJID jid)
+			throws IOException, WriterException, TigaseDBException {
+		String token = generateAuthQrCodeToken(jid);
+		byte[] qrcode = encodeStringToQRCode(token);
+		return new QRCode(token, "data:image/png;base64," + Base64.encode(qrcode));
+	}
+
+	public static class QRCode {
+		private final String token;
+		private final String png;
+
+		public QRCode(String token, String png) {
+			this.token = token;
+			this.png = png;
+		}
+
+		public String getToken() {
+			return token;
+		}
+
+		public String getPng() {
+			return png;
+		}
+	}
+
+	private byte[] encodeStringToQRCode(String token) throws IOException, WriterException {
 		QRCodeWriter qrCodeWriter = new QRCodeWriter();
 		BitMatrix bitMatrix = qrCodeWriter.encode(token.toString(), BarcodeFormat.QR_CODE, 300, 300, Map.of(
 				EncodeHintType.CHARACTER_SET, StandardCharsets.UTF_8, EncodeHintType.MARGIN, 0));
 		MatrixToImageConfig imageConfig = new MatrixToImageConfig(MatrixToImageConfig.BLACK, MatrixToImageConfig.WHITE);
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		MatrixToImageWriter.writeToStream(bitMatrix, "PNG", baos, imageConfig);
-		return Response.ok(baos.toByteArray(), "image/png").build();
+		return baos.toByteArray();
 	}
+
 
 	private String generateAuthQrCodeToken(BareJID jid) throws TigaseDBException {
 		byte[] secret = new byte[32];

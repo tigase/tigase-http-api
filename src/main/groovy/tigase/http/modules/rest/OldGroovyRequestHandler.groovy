@@ -99,7 +99,7 @@ class OldGroovyRequestHandler implements RequestHandler {
 			}
 		}
 	}
-
+	
 	@Override
 	Handler getHandler() {
 		return handler;
@@ -296,5 +296,13 @@ class OldGroovyRequestHandler implements RequestHandler {
 			output = xmlCoder.encode(result);
 		}
 		response.getWriter().write(output);
+	}
+
+	@Override
+	int compareTo(RequestHandler o) {
+		if (o instanceof OldGroovyRequestHandler) {
+			return PATTERN_COMPARATOR.compare(pattern, ((OldGroovyRequestHandler) o).pattern);
+		}
+		return Integer.MAX_VALUE;
 	}
 }

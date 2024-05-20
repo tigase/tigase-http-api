@@ -146,7 +146,7 @@
                             <div class="modal fade" id="generateAuthToken-${user.jid().toString().replace('@','-').replace('.','-')}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="#generateAuthTokenModalLabel-${user.toString().replace('@','-').replace('.','-')}" aria-hidden="true">
                                 <div class="modal-dialog">
                                     <div class="modal-content">
-                                        <form action="${uriInfo.getBaseUriBuilder().path(UsersHandler.class,"generateAuthQrCode").build(user.jid().toString()).toString()}" method="post">
+                                        <form action="${uriInfo.getBaseUriBuilder().path(UsersHandler.class,"generateAuthQrCodeJson").build(user.jid().toString()).toString()}" method="post">
                                             <div class="modal-header">
                                                 <h1 class="modal-title fs-5" id="generateAuthTokenModalLabel-${user.jid().toString().replace('@','-').replace('.','-')}">Generate new token</h1>
                                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -171,28 +171,49 @@
                 <script>
                     let generateQrCode = function (jid) {
                         let escapedJid = jid.replaceAll("@","-").replaceAll(".","-");
+                        let modal = document.querySelector("#generateAuthToken-" + escapedJid);
                         let modalBody = document.querySelector("#generateAuthToken-" + escapedJid + " div.modal-body");
+                        let modalContentOriginal = modalBody.innerHTML;
                         let generateButton = document.querySelector("#generateAuthToken-" + escapedJid + " div.modal-footer a[type='submit']");
+                        let originalGenerateButtonLabel = generateButton.textContent;
+                        let closeButton = document.querySelector("#generateAuthToken-" + escapedJid + " div.modal-footer button[type='button']");
+                        let modalFooter = generateButton.parentElement;
+                        let spinner = document.createElement("div");
+                        let closed = false;
+                        modal.addEventListener("hide.bs.modal", function () {
+                            closed = true;
+                            spinner.remove();
+                            modalBody.innerHTML = modalContentOriginal;
+                            modalFooter.innerHTML = "";
+                            modalFooter.appendChild(closeButton);
+                            modalFooter.appendChild(generateButton);
+                            generateButton.classList.remove("disabled");
+                            generateButton.innerHTML = "";
+                            generateButton.append(document.createTextNode(originalGenerateButtonLabel));
+                        });
                         // remove existing error message
                         document.querySelector("#generateAuthToken-" + escapedJid + " div.modal-body span.error-message")?.remove();
                         // update "generate" button label
-                        let originalGenerateButtonLabel = generateButton.textContent;
                         generateButton.classList.add("disabled");
                         generateButton.innerHTML = "";
-                        let spinner = document.createElement("div");
                         spinner.setAttribute("role", "status");
                         spinner.classList.add("spinner-border", "spinner-border-sm", "me-2");
                         generateButton.append(spinner);
                         generateButton.append(document.createTextNode("Processing..."));
                         // send request
                         let xhr = new XMLHttpRequest();
-                        let url = "${uriInfo.getBaseUriBuilder().path(UsersHandler.class,"generateAuthQrCode").build("@").toString()}".replace("@", jid);
+                        let url = "${uriInfo.getBaseUriBuilder().path(UsersHandler.class,"generateAuthQrCodeJson").build("@").toString()}".replace("@", jid);
                         xhr.open("POST", url, true);
                         xhr.setRequestHeader('Content-type', "application/x-www-form-urlencoded");
+                        xhr.setRequestHeader('Accept', 'application/json');
                         xhr.send("");
-                        xhr.responseType = "blob";
+                        xhr.responseType = "json";
                         let handleResult = function () {
                             // update generate button
+                            if (closed) {
+                                // modal closed, discard result...
+                                return;
+                            }
                             spinner.remove();
                             generateButton.classList.remove("disabled");
                             generateButton.innerHTML = "";
@@ -202,20 +223,25 @@
                                 modalBody.innerHTML = "";
                                 let image = new Image();
                                 image.classList.add("d-block", "mx-auto", "w-50");
-                                let qrCodeImageDataUrl = URL.createObjectURL(xhr.response);
-                                image.src = qrCodeImageDataUrl;
+                                image.src = xhr.response.png;
                                 modalBody.append(image);
                                 let p = document.createElement("p");
                                 p.classList.add("text-secondary", "small", "w-100", "text-center", "m-0", "pt-1")
                                 p.append(document.createTextNode("Scan QR code to authenticate account."))
                                 modalBody.append(p);
                                 // replace generate button with "save" button
-                                let modalFooter = generateButton.parentElement;
                                 generateButton.remove();
+                                let copyToken = document.createElement("a");
+                                copyToken.classList.add("btn", "btn-secondary");
+                                copyToken.append(document.createTextNode("Copy token"));
+                                copyToken.onclick = function () {
+                                    navigator.clipboard.writeText(xhr.response.token);
+                                }
+                                modalFooter.append(copyToken);
                                 let saveLink = document.createElement("a");
                                 saveLink.classList.add("btn", "btn-secondary");
                                 saveLink.append(document.createTextNode("Save to file"))
-                                saveLink.href = qrCodeImageDataUrl;
+                                saveLink.href = xhr.response.png.replace("image/png","image/octet-stream");
                                 saveLink.setAttribute("download", "qrcode-" + jid + ".png");
                                 modalFooter.append(saveLink);
                             } else {

@@ -22,11 +22,15 @@ import tigase.http.api.HttpException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-public interface RequestHandler {
+public interface RequestHandler extends Comparable<RequestHandler> {
 
+	public static Comparator<Pattern> PATTERN_COMPARATOR = Comparator.comparing((Pattern pattern) -> pattern.pattern().length()).reversed();
+	
 	Handler getHandler();
 
 	HttpMethod getHttpMethod();
