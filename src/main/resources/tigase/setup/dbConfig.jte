@@ -66,6 +66,13 @@
                     <input class="form-control" name="dbAdditionalOptions" type="text" size="30" value="${config.getDbConfig().getDbAdditionalOptions()}"/>
                 </div>
             </div>
+            <div class="card">
+                <div class="card-body">
+                    <div class="alert alert-warning mb-0" role="alert">
+                        Preparing the database can take some time. Please don't refresh the page nor close the tab until it finishes.
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     <div class="m-3">
