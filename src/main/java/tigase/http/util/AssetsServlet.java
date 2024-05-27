@@ -86,6 +86,7 @@ public class AssetsServlet extends HttpServlet {
 			resp.setStatus(SC_NOT_MODIFIED);
 			resp.setHeader("ETag", etag);
 			resp.setDateHeader("Expires", System.currentTimeMillis() + 60*1000);
+			return;
 		}
 		
 		long ifModifiedSince = req.getDateHeader("If-Modified-Since");

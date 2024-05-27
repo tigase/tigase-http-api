@@ -213,20 +213,20 @@ public class DummyServletResponse
 				writer.write(string);
 				writer.flush();
 			} else {
-				sendResponseHeaders(i, 0);
+				sendResponseHeaders(i, -1);
 			}
 		}
 	}
 
 	@Override
 	public void sendError(int i) throws IOException {
-		sendResponseHeaders(i, 0);
+		sendResponseHeaders(i, -1);
 	}
 
 	@Override
 	public void sendRedirect(String string) throws IOException {
 		exchange.getResponseHeaders().set("Location", string);
-		sendResponseHeaders(302, 0);
+		sendResponseHeaders(302, -1);
 	}
 
 	@Override
@@ -262,7 +262,7 @@ public class DummyServletResponse
 	@Override
 	public void setStatus(int i, String string) {
 		try {
-			sendResponseHeaders(i, 0);
+			sendResponseHeaders(i, -1);
 		} catch (IOException ex) {
 			Logger.getLogger(DummyServletResponse.class.getName()).log(Level.FINE, null, ex);
 		}
@@ -306,7 +306,7 @@ public class DummyServletResponse
 
 	private void sendResponseHeaders(int rCode, int contentLength) throws IOException {
 		synchronized (exchange) {
-			if ("HEAD".equals(exchange.getRequestMethod())) {
+			if ("HEAD".equals(exchange.getRequestMethod()) || rCode == 304 || rCode == 204) {
 				exchange.sendResponseHeaders(rCode, -1);
 			} else {
 				exchange.sendResponseHeaders(rCode, contentLength);
