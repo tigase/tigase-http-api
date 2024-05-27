@@ -262,7 +262,7 @@ public class DummyServletResponse
 	@Override
 	public void setStatus(int i, String string) {
 		try {
-			sendResponseHeaders(i, -1);
+			sendResponseHeaders(i, 0);
 		} catch (IOException ex) {
 			Logger.getLogger(DummyServletResponse.class.getName()).log(Level.FINE, null, ex);
 		}
