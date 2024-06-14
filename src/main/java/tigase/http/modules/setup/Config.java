@@ -44,7 +44,8 @@ public class Config {
 
 	private String companyName;
 	private ConfigTypeEnum configType = ConfigTypeEnum.DefaultMode;
-	private String defaultVirtualDomain = DNSResolverFactory.getInstance().getDefaultHost();
+	private String defaultVirtualDomain = System.getenv()
+			.getOrDefault(("DEFAULT_VIRTUAL_DOMAIN"), DNSResolverFactory.getInstance().getDefaultHost());
 	private Set<BareJID> admins = new HashSet<>();
 	private String adminPwd;
 	private SchemaLoader.TypeInfo dbType = getSupportedTypeForName(System.getenv(("DB_TYPE"))).orElse(
