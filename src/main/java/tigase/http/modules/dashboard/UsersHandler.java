@@ -33,14 +33,17 @@ import tigase.auth.mechanisms.SaslXTOKEN;
 import tigase.db.AuthRepository;
 import tigase.db.TigaseDBException;
 import tigase.db.UserRepository;
+import tigase.eventbus.EventBus;
 import tigase.http.jaxrs.Model;
 import tigase.http.jaxrs.Page;
 import tigase.http.jaxrs.Pageable;
 import tigase.kernel.beans.Bean;
 import tigase.kernel.beans.Inject;
+import tigase.server.xmppsession.DisconnectUserEBAction;
 import tigase.util.Base64;
 import tigase.util.stringprep.TigaseStringprepException;
 import tigase.vhosts.VHostManager;
+import tigase.xmpp.StreamError;
 import tigase.xmpp.jid.BareJID;
 import tigase.xmpp.jid.JID;
 
@@ -63,6 +66,8 @@ public class UsersHandler extends DashboardHandler {
 	private UserRepository userRepository;
 	@Inject
 	private VHostManager vHostManager;
+	@Inject
+	private EventBus eventBus;
 
 	public UsersHandler() {
 		super();
@@ -161,6 +166,9 @@ public class UsersHandler extends DashboardHandler {
 			throw new RuntimeException("Passwords do not match!");
 		}
 		authRepository.updateCredential(jid, "default", password);
+
+		logoutUser(jid);
+
 		return redirectToIndex(uriInfo);
 	}
 
@@ -234,7 +242,16 @@ public class UsersHandler extends DashboardHandler {
 
 		authRepository.removeCredential(jid, "default");
 		authRepository.updateCredential(jid, "default", SaslXTOKEN.NAME, new XTokenCredentialsEntry(secret, true).encoded());
+
+		logoutUser(jid);
+
 		return token;
+	}
+
+	private void logoutUser(BareJID jid) throws TigaseDBException {
+		eventBus.fire(new DisconnectUserEBAction(jid, StreamError.Reset,
+		                                         "Account credentials were changed, please login again with new credentials"));
+		authRepository.logout(jid);
 	}
 
 	public record User(BareJID jid, AuthRepository.AccountStatus accountStatus) {}
