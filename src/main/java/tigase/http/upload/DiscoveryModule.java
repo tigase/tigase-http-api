@@ -54,6 +54,7 @@ public class DiscoveryModule
 
 		Element formType = new Element("field");
 		formType.setAttribute("var", "FORM_TYPE");
+		formType.setAttribute("type", "hidden");
 		formType.addChild(new Element("value", XMLNS));
 
 		x.addChild(formType);
