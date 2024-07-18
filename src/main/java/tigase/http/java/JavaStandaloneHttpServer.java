@@ -18,6 +18,7 @@
 package tigase.http.java;
 
 import com.sun.net.httpserver.*;
+import tigase.annotations.TigaseDeprecated;
 import tigase.cluster.ClusterConnectionManager;
 import tigase.eventbus.EventBus;
 import tigase.eventbus.EventBusFactory;
@@ -57,6 +58,7 @@ import java.util.logging.Logger;
  *
  * @author andrzej
  */
+@TigaseDeprecated(removeIn = "9.0.0", since = "8.5.0", note = "JavaStandaloneHttpServer will be removed and should be replaced by JettyStandaloneHttpServer")
 @Bean(name = "httpServer", parent = Kernel.class, active = true, exportable = true)
 @ConfigType({ConfigTypeEnum.DefaultMode, ConfigTypeEnum.SetupMode})
 public class JavaStandaloneHttpServer
