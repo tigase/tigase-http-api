@@ -21,6 +21,7 @@ import tigase.component.exceptions.ComponentException;
 import tigase.http.api.HttpServerIfc;
 import tigase.http.modules.Module;
 import tigase.http.stats.HttpStatsCollector;
+import tigase.http.upload.DiscoveryModule;
 import tigase.kernel.beans.Bean;
 import tigase.kernel.beans.Inject;
 import tigase.kernel.beans.RegistrarBean;
@@ -169,6 +170,12 @@ public class HttpMessageReceiver
 		} else {
 			return super.getDiscoItems(node, jid, from);
 		}
+	}
+
+	@Override
+	public void updateServiceEntity() {
+		super.updateServiceEntity();
+		getServiceEntity().addFeatures(DiscoveryModule.DISCO_INFO_XMLNS, DiscoveryModule.DISCO_ITEMS_XMLNS);
 	}
 
 	@Override
