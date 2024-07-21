@@ -15,7 +15,8 @@
 <!--        <maven.compiler.release>17</maven.compiler.release>-->
         <gmavenProviderSelection>2.0</gmavenProviderSelection>
         <groovyVersion>3.0.9</groovyVersion>
-
+        <maven.javadoc.skip>true</maven.javadoc.skip>
+        <bundle-activator>tigase.http.Activator</bundle-activator>
         <license.inlineHeader>${inlineHeader_agpl3}</license.inlineHeader>
         
         <guide_name>Tigase_HTTP-API</guide_name>
@@ -30,7 +31,6 @@
     <description>Tigase HTTP API component</description>
 
     <inceptionYear>2013</inceptionYear>
-    
     <licenses>
         <license>
             <name>GNU Affero General Public License GPLv3</name>
@@ -268,6 +268,41 @@
             <groupId>tigase</groupId>
             <artifactId>tigase-server</artifactId>
             <version>8.5.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-server</artifactId>
+            <version>9.4.45.v20220203</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-servlet</artifactId>
+            <version>9.4.45.v20220203</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty.http2</groupId>
+            <artifactId>http2-server</artifactId>
+             <version>9.4.48.v20220622</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty.alpn</groupId>
+            <artifactId>alpn-api</artifactId>
+            <version>1.1.3.v20160715</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-alpn-java-server</artifactId>
+            <version>9.4.45.v20220203</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-alpn-server</artifactId>
+            <version>9.4.45.v20220203</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
