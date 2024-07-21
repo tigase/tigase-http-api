@@ -17,12 +17,16 @@
  */
 package tigase.http.java.filters;
 
+import tigase.annotations.TigaseDeprecated;
+
 import javax.servlet.*;
 import javax.servlet.http.HttpServlet;
 import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
+@TigaseDeprecated(removeIn = "9.0.0", since = "8.5.0", note = "RequestHandler will be removed")
+@Deprecated
 public class DummyFilterChain implements FilterChain {
 
 	private final HttpServlet servlet;

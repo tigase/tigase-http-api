@@ -17,6 +17,7 @@
  */
 package tigase.http.java.filters;
 
+import tigase.annotations.TigaseDeprecated;
 import tigase.http.AbstractHttpServer;
 
 import javax.servlet.Filter;
@@ -26,6 +27,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 
+@TigaseDeprecated(removeIn = "9.0.0", since = "8.5.0", note = "RequestHandler will be removed")
+@Deprecated
 public class DummyFilterConfig implements FilterConfig {
 
 	private static final Enumeration<String> parameters = Collections.enumeration(Arrays.asList("serverBeanName"));

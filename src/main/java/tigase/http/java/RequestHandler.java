@@ -19,10 +19,10 @@ package tigase.http.java;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import tigase.annotations.TigaseDeprecated;
 import tigase.http.AuthProvider;
 import tigase.http.DeploymentInfo;
 import tigase.http.ServletInfo;
-import tigase.http.api.Service;
 import tigase.http.java.filters.DummyFilterChain;
 import tigase.http.java.filters.DummyFilterConfig;
 import tigase.http.java.filters.ProtocolRedirectFilter;
@@ -45,6 +45,8 @@ import java.util.stream.Collectors;
 /**
  * @author andrzej
  */
+@TigaseDeprecated(removeIn = "9.0.0", since = "8.5.0", note = "RequestHandler will be removed")
+@Deprecated
 public class RequestHandler
 		implements HttpHandler {
 

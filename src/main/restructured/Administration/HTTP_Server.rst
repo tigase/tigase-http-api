@@ -1,20 +1,22 @@
-HTTP server
+HTTP Server
 =============
 
-HTTP server instance is provided as ``httpServer`` by default. The server will only be active and enabled if either the HTTP API component or HTTP File Upload component is enabled. This project uses the default implementation of an http server provided by `HttpServer <https://docs.oracle.com/javase/8/docs/jre/api/net/httpserver/spec/com/sun/net/httpserver/package-summary.html>`__ found embedded in Java JDK.
+Implementations
+-------------------------------
+
+Jetty HTTP Server *(default)*
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Jetty HTTP Server instance is provided as ``httpServer``. The server will only be active and enabled if either the HTTP API component or HTTP File Upload component is enabled. This project uses Jetty as default http server implementation.
+
+Embedded HTTP server *(deprecated)*
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+HTTP server instance is provided as ``httpServer``. The server will only be active if manually enabled. Implementation of an http server is provided by `HttpServer <https://docs.oracle.com/javase/8/docs/jre/api/net/httpserver/spec/com/sun/net/httpserver/package-summary.html>`__ found embedded in Java JDK.
 
 .. Note::
 
    This implementation is good only for small installations of if there is **no requirement** for a high performance HTTP server. If this is do not match your requirements, it is recommended to use Jetty as the embedded HTTP server using `Tigase HTTP API - Jetty HTTP Server<jettyHttp>` project.
-
-Dependencies
-----------------
-
-The default HTTP server implementation requires almost no dependencies as most calls are already embedded within JDK 8. However as a common API for processing HTTP requests is needed, as is the same for HTTP server from JDK and Jetty, we have decided to use HTTP Servlet API in version 3.1.
-
-The required files can be downloaded from `Tigase HTTP API project <https://projects.tigase.org/projects/tigase-http-api/files>`__ section or using following link `servlet-api-3.1.jar <https://projects.tigase.org/attachments/download/1504/servlet-api-3.1.jar>`__
-
-Please note that this file is included in dist-max, exe, and jar installer distributions of Tigase XMPP server.
 
 Configuration Properties
 -------------------------------
@@ -26,13 +28,12 @@ The HTTP server can be configured using any of all of the following properties. 
 
 **connections**
    It is used to group configurations passed to ports
-
    **{port}**
       For every ``{port}`` you can pass separate configuration. To do so you will need to replace ``{port}`` with port number, ie. ``8080``. For every port you can pass following properties:
 
       **socket**
          Sets type of socket used for handling incoming connections. Accepted values are:
-
+         
          -  ``plain`` - port will work in plain HTTP mode **(default)**
 
          -  ``ssl`` - port will work in HTTPS mode
@@ -40,8 +41,10 @@ The HTTP server can be configured using any of all of the following properties. 
       **domain**
          This property is used to configure domain name of SSL certificate which should be used by HTTP server running on this port (if ``socket`` is set to ``ssl``). If it is not set (or it will be omitted) then Tigase XMPP Server will try to use SSL certificate for the host to which client tries to connect. If there will be no SSL certificate for that domain name, then default SSL certificate of Tigase XMPP Server will be used.
 
+      **use-http2**
+        **(only Jetty)** This property is used to disable Jetty support of HTTP/2. If ``socket`` is set to ``ssl`` HTTP/2 support will be enabled by default. To disable it set ``use-http2`` to ``false``.
 
-Additional properties of embedded HTTP server
+Additional properties of embedded HTTP server *(deprecated)*
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 With embedded HTTP server, you have a few additional properties within ``executor`` section, which you can pass to adjust this HTTP server.
@@ -125,9 +128,9 @@ It’s also possible, that Tigase XMPP server handles on it’s plain socket por
 Usage of Jetty HTTP server as HTTP server
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-As mentioned before it is possible to use Jetty as HTTP server for improved performance. Jetty API can be used in one of two forms: Standalone and OSGi.
+As mentioned before Jetty as HTTP server is used by default. Jetty API can be used in one of two forms: Standalone and OSGi.
 
-Standalone
+Standalone *(default)*
 ~~~~~~~~~~~~~~~
 
 In this case the Jetty instance is created and configured internally by Tigase HTTP API. This allows for the same configuration properties used as for default HTTP server configuration.
@@ -143,7 +146,7 @@ In this case the Jetty instance is created and configured internally by Tigase H
 HTTP/2 and Jetty HTTP Server
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If Jetty HTTP server is used in standalone mode, JDK which Tigase is using is newer then JDK 8 and HTTP server is configured to serve data over encrypted (``ssl`` or ``tls``) connections then HTTP/2 will be enabled by default.
+When Jetty HTTP server is used in standalone mode *(default)* and HTTP server is configured to serve data over encrypted (``ssl`` or ``tls``) connections then HTTP/2 will be enabled by default.
 
 However it is possible to disable HTTP/2 by setting ``use-http2`` property of encrypted port to ``false``, ie. for port 8443:
 

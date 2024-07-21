@@ -59,7 +59,8 @@ import java.util.logging.Logger;
  * @author andrzej
  */
 @TigaseDeprecated(removeIn = "9.0.0", since = "8.5.0", note = "JavaStandaloneHttpServer will be removed and should be replaced by JettyStandaloneHttpServer")
-@Bean(name = "httpServer", parent = Kernel.class, active = true, exportable = true)
+@Deprecated
+@Bean(name = "httpServer", active = false, exportable = true)
 @ConfigType({ConfigTypeEnum.DefaultMode, ConfigTypeEnum.SetupMode})
 public class JavaStandaloneHttpServer
 		extends AbstractHttpServer {
@@ -73,6 +74,12 @@ public class JavaStandaloneHttpServer
 	@Inject
 	private ExecutorWithTimeout executor;
 	private boolean delayStartup = false;
+
+	@Override
+	public void initialize() {
+		log.log(Level.WARNING, "JavaStandaloneHttpServer was deprecated and will be removed in Tigase XMPP Server version 9.0.0. Please migrate to our new 'JettyStandaloneHttpServer'");
+		super.initialize();
+	}
 
 	@Override
 	public void deploy(DeploymentInfo deployment) {

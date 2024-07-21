@@ -18,6 +18,7 @@
 package tigase.http.java;
 
 import com.sun.net.httpserver.HttpExchange;
+import tigase.annotations.TigaseDeprecated;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.WriteListener;
@@ -35,6 +36,8 @@ import java.util.logging.Logger;
 /**
  * @author andrzej
  */
+@TigaseDeprecated(removeIn = "9.0.0", since = "8.5.0", note = "RequestHandler will be removed")
+@Deprecated
 public class DummyServletResponse
 		implements HttpServletResponse {
 

@@ -59,7 +59,7 @@ import static tigase.http.jetty.JettyHttpServerHelper.createServletContextHandle
  *
  * @author andrzej
  */
-@Bean(name = "httpServer", exportable = true, active = true)
+@Bean(name = "httpServer", parent = Kernel.class, exportable = true, active = true)
 public class JettyStandaloneHttpServer
 		extends AbstractHttpServer
 		implements Initializable, UnregisterAware {
