@@ -58,7 +58,7 @@ public class Config {
 	private SetupHelper.HttpSecurity httpSecurity = new SetupHelper.HttpSecurity();
 	private String setupPassword;
 	private String setupUser;
-
+	private VoipConfig voipConfig = VoipConfig.getDefaults();
 
 
 	public String getCompanyName() {
@@ -228,6 +228,14 @@ public class Config {
 
 	public void setDbConfig(DBConfig dbConfig) {
 		this.dbConfig = dbConfig;
+	}
+
+	public VoipConfig getVoipConfig() {
+		return voipConfig;
+	}
+
+	public void setVoipConfig(VoipConfig voipConfig) {
+		this.voipConfig = voipConfig;
 	}
 
 	public String getSetupUser() {
@@ -482,6 +490,99 @@ public class Config {
 			parameters.setDbRootAsk(false);
 			loader.init(parameters, Optional.empty());
 			return loader.getDBUri();
+		}
+	}
+
+	public static class VoipConfig {
+
+		public enum Type {
+			stun,
+			stuns,
+			turn,
+			turns
+		}
+
+		public enum Transport {
+			tcp,
+			udp
+		}
+
+		@FormParam("type")
+		private Type type;
+		@FormParam("host")
+		private String host;
+		@FormParam("port")
+		private Integer port;
+		@FormParam("requiresUsernameAndPassword")
+		private boolean requiresUsernameAndPassword;
+		@FormParam("username")
+		private String username;
+		@FormParam("password")
+		private String password;
+		@FormParam("transport")
+		private Transport transport;
+
+		public Type getType() {
+			return type;
+		}
+
+		public void setType(Type type) {
+			this.type = type;
+		}
+
+		public String getHost() {
+			return host;
+		}
+
+		public void setHost(String host) {
+			this.host = host;
+		}
+
+		public Integer getPort() {
+			return port;
+		}
+
+		public void setPort(Integer port) {
+			this.port = port;
+		}
+
+		public boolean isRequiresUsernameAndPassword() {
+			return requiresUsernameAndPassword;
+		}
+
+		public void setRequiresUsernameAndPassword(boolean requiresUsernameAndPassword) {
+			this.requiresUsernameAndPassword = requiresUsernameAndPassword;
+		}
+
+		public String getUsername() {
+			return username;
+		}
+
+		public void setUsername(String username) {
+			this.username = username;
+		}
+
+		public String getPassword() {
+			return password;
+		}
+
+		public void setPassword(String password) {
+			this.password = password;
+		}
+
+		public Transport getTransport() {
+			return transport;
+		}
+
+		public void setTransport(Transport transport) {
+			this.transport = transport;
+		}
+
+		public static VoipConfig getDefaults() {
+			VoipConfig config = new VoipConfig();
+			config.type = Type.turn;
+			config.port = 3478;
+			return config;
 		}
 	}
 }
