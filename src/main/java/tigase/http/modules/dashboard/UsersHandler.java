@@ -166,6 +166,7 @@ public class UsersHandler extends DashboardHandler {
 			throw new RuntimeException("Passwords do not match!");
 		}
 		authRepository.updateCredential(jid, "default", password);
+		authRepository.setAccountStatus(jid, AuthRepository.AccountStatus.active);
 
 		logoutUser(jid);
 
@@ -242,6 +243,7 @@ public class UsersHandler extends DashboardHandler {
 
 		authRepository.removeCredential(jid, "default");
 		authRepository.updateCredential(jid, "default", SaslXTOKEN.NAME, new XTokenCredentialsEntry(secret, true).encoded());
+		authRepository.setAccountStatus(jid, AuthRepository.AccountStatus.active);
 
 		logoutUser(jid);
 
