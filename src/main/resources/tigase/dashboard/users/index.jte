@@ -53,7 +53,7 @@
                         <td>${user.jid().toString()}</td>
                         <td>
                             @if(user.accountStatus() == AuthRepository.AccountStatus.active)
-                                <i class="bi bi-check me-2 text-primary"></i>Active
+                                <i class="bi bi-check-circle me-2 text-primary"></i>Active
                             @else
                                 <i class="bi bi-ban me-2"></i>Disabled
                             @endif
