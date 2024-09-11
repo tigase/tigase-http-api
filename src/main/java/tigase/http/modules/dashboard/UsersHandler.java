@@ -130,7 +130,7 @@ public class UsersHandler extends DashboardHandler {
 		if (userRepository.userExists(jid)) {
 			throw new RuntimeException("User already exist!");
 		}
-		if (password != null) {
+		if (password != null && !password.trim().isBlank()) {
 			authRepository.addUser(jid, password);
 			authRepository.setAccountStatus(jid, AuthRepository.AccountStatus.active);
 		} else {
