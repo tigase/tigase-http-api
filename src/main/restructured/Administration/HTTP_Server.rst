@@ -155,7 +155,7 @@ However it is possible to disable HTTP/2 by setting ``use-http2`` property of en
    httpServer (class: tigase.http.jetty.JettyStandaloneHttpServer) {
        ...
        '8443' () {
-           socket = ssl
+           'socket' = ssl
            'use-http2' = false
        }
    }

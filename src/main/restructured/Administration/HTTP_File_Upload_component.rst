@@ -157,24 +157,24 @@ Configuration with a separate repository for metadata to ``example.com`` pointin
 
    upload() {
        logic {
-           local-only = false
-           max-file-size = 10485760
-           upload-uri-format = '{proto}://{serverName}:{port}/upload/{userJid}/{slotId}/{filename}'
-           download-uri-format = '{proto}://{serverName}:{port}/upload/{domain}/{slotId}/{filename}'
+           'local-only' = false
+           'max-file-size' = 10485760
+           'upload-uri-format' = '{proto}://{serverName}:{port}/upload/{userJid}/{slotId}/{filename}'
+           'download-uri-format' = '{proto}://{serverName}:{port}/upload/{domain}/{slotId}/{filename}'
        }
 
        expiration {
-           period = P6H
+           'period' = P6H
        }
 
        repositoryPool {
            'example.com' () {
-               data-source = "file_upload"
+               'data-source' = "file_upload"
            }
        }
 
        store {
-           group-by-user = true
+           'group-by-user' = true
        }
    }
 
@@ -190,8 +190,8 @@ Configuration for high availability in a cluster with common storage at ``/mnt/s
 
    upload() {
        logic {
-           upload-uri-format = '{proto}://upload.example.com:{port}/upload/{userJid}/{slotId}/{filename}'
-           download-uri-format = '{proto}://upload.example.com:{port}/upload/{domain}/{slotId}/{filename}'
+           'upload-uri-format' = '{proto}://upload.example.com:{port}/upload/{userJid}/{slotId}/{filename}'
+           'download-uri-format' = '{proto}://upload.example.com:{port}/upload/{domain}/{slotId}/{filename}'
        }
 
        store {

@@ -136,7 +136,7 @@ It is possible to provide users with a mechanism for a password change in case i
 
 .. code:: text
 
-   account-email-password-resetter () {}
+   'account-email-password-resetter' () {}
    mailer (class: tigase.extras.mailer.Mailer) {
        'mailer-from-address' = 'email-address@to-send-emails-from'
        'mailer-smtp-host' = 'smtp.email.server.com'
