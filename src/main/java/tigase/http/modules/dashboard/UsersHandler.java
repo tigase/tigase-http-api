@@ -144,6 +144,7 @@ public class UsersHandler extends DashboardHandler {
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	public Response deleteUser(@PathParam("jid") @NotEmpty BareJID jid, UriInfo uriInfo) throws TigaseDBException {
 		authRepository.removeUser(jid);
+		logoutUser(jid);
 		return redirectToIndex(uriInfo);
 	}
 
@@ -153,6 +154,10 @@ public class UsersHandler extends DashboardHandler {
 										AuthRepository.AccountStatus accountStatus, UriInfo uriInfo)
 			throws TigaseDBException {
 		authRepository.setAccountStatus(jid, accountStatus);
+		switch (accountStatus) {
+			case disabled, spam, banned -> logoutUser(jid);
+			default -> {}
+		}
 		return redirectToIndex(uriInfo);
 	}
 
