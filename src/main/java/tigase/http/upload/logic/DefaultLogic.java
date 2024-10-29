@@ -56,10 +56,6 @@ public class DefaultLogic
 	}
 	@ConfigField(desc = "Download URI format", alias = "download-uri-format")
 	private UriFormat downloadUriFormat = new UriFormat("{proto}://{serverName}:{port}/upload/{slotId}/{filename}");
-	@ConfigField(desc = "Remove old uploads - expiration time", alias = "expiration")
-	private Duration expiration = Duration.ofDays(30);
-	@ConfigField(desc = "Remove old uploads - period", alias = "expiration-period")
-	private Duration expirationPeriod = Duration.ZERO;
 	@Inject
 	private HttpServerIfc httpServer;
 	@ConfigField(desc = "Allow file upload for local clients", alias = "local-only")
