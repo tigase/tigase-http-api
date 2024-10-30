@@ -126,7 +126,7 @@ public class UsersHandler extends DashboardHandler {
 		if (localpart.isBlank() || domain.isBlank()) {
 			throw new RuntimeException();
 		}
-		BareJID jid = BareJID.bareJIDInstance(localpart, domain);
+		BareJID jid = BareJID.bareJIDInstance(localpart.toLowerCase(), domain);
 		if (userRepository.userExists(jid)) {
 			throw new RuntimeException("User already exist!");
 		}
