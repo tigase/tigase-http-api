@@ -90,11 +90,9 @@ public class Field {
 	}
 
 	public String getMultilineTextValue() {
-		return Optional.ofNullable(field.getChildren(el -> el.getName() == "value"))
-				.orElse(Collections.emptyList())
-				.stream()
-				.map(Element::getCData)
-				.collect(Collectors.joining("\n"));
+		var children = field.findChildren(el -> el.getName() == "value");
+		var elements = Optional.ofNullable(children).orElse(Collections.emptyList());
+		return elements.stream().map(Element::getCData).collect(Collectors.joining("\n"));
 	}
 
 	public String getLabel() {
