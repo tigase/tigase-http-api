@@ -92,7 +92,7 @@ public class Field {
 	public String getMultilineTextValue() {
 		var children = field.findChildren(el -> el.getName() == "value");
 		var elements = Optional.ofNullable(children).orElse(Collections.emptyList());
-		return elements.stream().map(Element::getCData).collect(Collectors.joining("\n"));
+		return elements.stream().map(Element::getCData).filter(Objects::nonNull).collect(Collectors.joining("\n"));
 	}
 
 	public String getLabel() {
