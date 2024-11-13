@@ -135,7 +135,7 @@ public class Field {
 	}
 
 	public boolean isSelected(Option option) {
-		return getValues().contains(option.getValue());
+		return Optional.ofNullable(getValue()).map(value -> Objects.equals(option.getValue(), value)).orElse(false);
 	}
 
 	public static class Option {
