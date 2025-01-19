@@ -21,7 +21,7 @@ import tigase.http.HttpMessageReceiver;
 import tigase.kernel.beans.Bean;
 import tigase.stats.StatisticsList;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;

@@ -20,9 +20,9 @@ package tigase.http.java.filters;
 import tigase.annotations.TigaseDeprecated;
 import tigase.http.AbstractHttpServer;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletContext;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletContext;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;

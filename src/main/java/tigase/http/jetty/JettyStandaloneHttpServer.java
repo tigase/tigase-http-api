@@ -18,14 +18,11 @@
 package tigase.http.jetty;
 
 import org.eclipse.jetty.alpn.server.ALPNServerConnectionFactory;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
 import org.eclipse.jetty.http2.HTTP2Cipher;
 import org.eclipse.jetty.http2.server.HTTP2ServerConnectionFactory;
-import org.eclipse.jetty.server.HttpConfiguration;
-import org.eclipse.jetty.server.HttpConnectionFactory;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
-import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import tigase.cluster.ClusterConnectionManager;
 import tigase.eventbus.EventBus;
@@ -216,7 +213,7 @@ public class JettyStandaloneHttpServer
 		} else {
 			String domain = config.getDomain();
 			SSLContext context = sslContextContainer.getSSLContext("TLS", domain, false);
-			SslContextFactory contextFactory = new SslContextFactory.Server() {
+			SslContextFactory.Server contextFactory = new SslContextFactory.Server() {
 				@Override
 				public void customize(SSLEngine sslEngine) {
 					super.customize(sslEngine);
@@ -232,21 +229,21 @@ public class JettyStandaloneHttpServer
 			};
 			contextFactory.setSslContext(context);
 			if (config.useHttp2) {
-						contextFactory.setCipherComparator(HTTP2Cipher.COMPARATOR);
-						contextFactory.setUseCipherSuitesOrder(true);
+				contextFactory.setCipherComparator(HTTP2Cipher.COMPARATOR);
+				contextFactory.setUseCipherSuitesOrder(true);
 
-						HttpConfiguration httpConfig = new HttpConfiguration();
-						httpConfig.setSecureScheme("https");
-						httpConfig.setSecurePort(config.getPort());
-						httpConfig.setSendXPoweredBy(true);
-						httpConfig.setSendServerVersion(true);
+				HttpConfiguration httpConfig = new HttpConfiguration();
+				httpConfig.setSecureScheme("https");
+				httpConfig.setSecurePort(config.getPort());
+				httpConfig.setSendXPoweredBy(true);
+				httpConfig.setSendServerVersion(true);
 
-						HttpConnectionFactory http1 = new HttpConnectionFactory(httpConfig);
-						HTTP2ServerConnectionFactory http2 = new HTTP2ServerConnectionFactory(httpConfig);
+				HttpConnectionFactory http1 = new HttpConnectionFactory(httpConfig);
+				HTTP2ServerConnectionFactory http2 = new HTTP2ServerConnectionFactory(httpConfig);
 
-						ALPNServerConnectionFactory alpn = new ALPNServerConnectionFactory();
-						alpn.setDefaultProtocol(http1.getProtocol());
-						connector = new ServerConnector(server, contextFactory, alpn, http2, http1);
+				ALPNServerConnectionFactory alpn = new ALPNServerConnectionFactory();
+				alpn.setDefaultProtocol(http1.getProtocol());
+				connector = new ServerConnector(server, contextFactory, alpn, http2, http1);
 			} else {
 				connector = new ServerConnector(server, contextFactory);
 			}

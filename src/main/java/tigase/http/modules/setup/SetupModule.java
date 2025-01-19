@@ -17,6 +17,8 @@
  */
 package tigase.http.modules.setup;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import tigase.db.AuthRepository;
 import tigase.db.TigaseDBException;
 import tigase.http.AuthProvider;
@@ -33,8 +35,6 @@ import tigase.util.stringprep.TigaseStringprepException;
 import tigase.xmpp.jid.BareJID;
 
 import javax.naming.AuthenticationException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;

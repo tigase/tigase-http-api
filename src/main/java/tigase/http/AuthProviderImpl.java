@@ -17,6 +17,9 @@
  */
 package tigase.http;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import tigase.auth.credentials.Credentials;
 import tigase.db.*;
 import tigase.http.json.JsonParser;
@@ -32,9 +35,6 @@ import tigase.xmpp.jid.JID;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import javax.naming.AuthenticationException;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -170,7 +170,7 @@ public class AuthProviderImpl
 	}
 
 	public JWTPayload authenticateWithCookie(HttpServletRequest request) {
-		Cookie[] cookies = ((HttpServletRequest) request).getCookies();
+		Cookie[] cookies =  request.getCookies();
 		if (cookies != null) {
 			for (Cookie cookie : cookies) {
 				if (!cookie.getName().equals("jwtToken")) {

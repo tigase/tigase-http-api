@@ -20,10 +20,10 @@ package tigase.http.java;
 import com.sun.net.httpserver.HttpExchange;
 import tigase.annotations.TigaseDeprecated;
 
-import javax.servlet.ServletOutputStream;
-import javax.servlet.WriteListener;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.WriteListener;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
@@ -185,27 +185,28 @@ public class DummyServletResponse
 		return null;
 	}
 
-	@Override
-	public String encodeUrl(String string) {
-		try {
-			return URLEncoder.encode(string, "UTF-8");
-		} catch (UnsupportedEncodingException ex) {
-			Logger.getLogger(DummyServletResponse.class.getName())
-					.log(Level.FINE, "could not URLEncode string: " + string, ex);
-		}
-		return null;
-	}
-
-	@Override
-	public String encodeRedirectUrl(String string) {
-		try {
-			return URLEncoder.encode(string, "UTF-8");
-		} catch (UnsupportedEncodingException ex) {
-			Logger.getLogger(DummyServletResponse.class.getName())
-					.log(Level.FINE, "could not URLEncode string: " + string, ex);
-		}
-		return null;
-	}
+//
+//	@Override
+//	public String encodeUrl(String string) {
+//		try {
+//			return URLEncoder.encode(string, "UTF-8");
+//		} catch (UnsupportedEncodingException ex) {
+//			Logger.getLogger(DummyServletResponse.class.getName())
+//					.log(Level.FINE, "could not URLEncode string: " + string, ex);
+//		}
+//		return null;
+//	}
+//
+//	@Override
+//	public String encodeRedirectUrl(String string) {
+//		try {
+//			return URLEncoder.encode(string, "UTF-8");
+//		} catch (UnsupportedEncodingException ex) {
+//			Logger.getLogger(DummyServletResponse.class.getName())
+//					.log(Level.FINE, "could not URLEncode string: " + string, ex);
+//		}
+//		return null;
+//	}
 
 	@Override
 	public void sendError(int i, String string) throws IOException {
@@ -262,14 +263,14 @@ public class DummyServletResponse
 	public void addIntHeader(String string, int i) {
 	}
 
-	@Override
-	public void setStatus(int i, String string) {
-		try {
-			sendResponseHeaders(i, 0);
-		} catch (IOException ex) {
-			Logger.getLogger(DummyServletResponse.class.getName()).log(Level.FINE, null, ex);
-		}
-	}
+//	@Override
+//	public void setStatus(int i, String string) {
+//		try {
+//			sendResponseHeaders(i, 0);
+//		} catch (IOException ex) {
+//			Logger.getLogger(DummyServletResponse.class.getName()).log(Level.FINE, null, ex);
+//		}
+//	}
 
 	@Override
 	public int getStatus() {

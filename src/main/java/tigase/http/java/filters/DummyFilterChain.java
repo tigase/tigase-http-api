@@ -19,8 +19,8 @@ package tigase.http.java.filters;
 
 import tigase.annotations.TigaseDeprecated;
 
-import javax.servlet.*;
-import javax.servlet.http.HttpServlet;
+import jakarta.servlet.*;
+import jakarta.servlet.http.HttpServlet;
 import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.Deque;

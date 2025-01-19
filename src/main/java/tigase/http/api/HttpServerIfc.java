@@ -17,13 +17,13 @@
  */
 package tigase.http.api;
 
+import jakarta.servlet.http.HttpServlet;
 import tigase.http.DeploymentInfo;
 import tigase.http.ServletInfo;
 import tigase.kernel.beans.Initializable;
 import tigase.kernel.beans.RegistrarBean;
 import tigase.kernel.beans.UnregisterAware;
 
-import javax.servlet.http.HttpServlet;
 import java.util.List;
 
 /**

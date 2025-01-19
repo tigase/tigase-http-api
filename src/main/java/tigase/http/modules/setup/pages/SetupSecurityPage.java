@@ -28,7 +28,7 @@ import tigase.http.modules.setup.NextPage;
 import tigase.http.modules.setup.SetupModule;
 import tigase.kernel.beans.Bean;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 @Path("/security")
 @NextPage(SaveConfigPage.class)

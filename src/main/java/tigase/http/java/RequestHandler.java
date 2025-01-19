@@ -27,11 +27,11 @@ import tigase.http.java.filters.DummyFilterChain;
 import tigase.http.java.filters.DummyFilterConfig;
 import tigase.http.java.filters.ProtocolRedirectFilter;
 
-import javax.servlet.AsyncContext;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
+import jakarta.servlet.AsyncContext;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;

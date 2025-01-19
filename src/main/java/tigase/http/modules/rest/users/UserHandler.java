@@ -33,7 +33,7 @@ import tigase.kernel.beans.Bean;
 import tigase.kernel.beans.Inject;
 import tigase.xmpp.jid.BareJID;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotNull;
 
 @Bean(name = "user", parent = RestModule.class, active = false)

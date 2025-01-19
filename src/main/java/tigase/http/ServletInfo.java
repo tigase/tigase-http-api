@@ -17,7 +17,8 @@
  */
 package tigase.http;
 
-import javax.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServlet;
+
 import java.util.*;
 
 /**

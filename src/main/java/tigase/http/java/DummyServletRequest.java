@@ -26,8 +26,8 @@ import tigase.util.Base64;
 import tigase.util.stringprep.TigaseStringprepException;
 import tigase.xmpp.jid.BareJID;
 
-import javax.servlet.*;
-import javax.servlet.http.*;
+import jakarta.servlet.*;
+import jakarta.servlet.http.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -341,12 +341,7 @@ public class DummyServletRequest
 	public RequestDispatcher getRequestDispatcher(String string) {
 		return null;
 	}
-
-	@Override
-	public String getRealPath(String string) {
-		return null;
-	}
-
+	
 	@Override
 	public int getRemotePort() {
 		synchronized (exchange) {
@@ -410,6 +405,41 @@ public class DummyServletRequest
 	@Override
 	public DispatcherType getDispatcherType() {
 		return DispatcherType.REQUEST;
+	}
+
+	@Override
+	public String getRequestId() {
+		return String.valueOf(requestId);
+	}
+
+	@Override
+	public String getProtocolRequestId() {
+		return getRequestId();
+	}
+
+	@Override
+	public ServletConnection getServletConnection() {
+		return new ServletConnection() {
+			@Override
+			public String getConnectionId() {
+				return DummyServletRequest.this.getRequestId();
+			}
+
+			@Override
+			public String getProtocol() {
+				return DummyServletRequest.this.getProtocol();
+			}
+
+			@Override
+			public String getProtocolConnectionId() {
+				return DummyServletRequest.this.getRequestId();
+			}
+
+			@Override
+			public boolean isSecure() {
+				return DummyServletRequest.this.isSecure();
+			}
+		};
 	}
 
 	@Override
@@ -606,12 +636,7 @@ public class DummyServletRequest
 	public boolean isRequestedSessionIdFromURL() {
 		return false;
 	}
-
-	@Override
-	public boolean isRequestedSessionIdFromUrl() {
-		return false;
-	}
-
+	
 	@Override
 	public boolean authenticate(HttpServletResponse hsr) throws IOException, ServletException {
 		hsr.setHeader("WWW-Authenticate", "Basic realm=\"TigasePlain\"");

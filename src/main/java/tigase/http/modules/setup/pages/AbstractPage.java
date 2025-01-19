@@ -28,7 +28,7 @@ import tigase.http.modules.setup.SetupModule;
 import tigase.http.util.TemplateUtils;
 import tigase.kernel.beans.Inject;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;

@@ -24,7 +24,7 @@ import tigase.kernel.beans.Inject
 import tigase.util.Token
 import tigase.xmpp.jid.BareJID
 
-import javax.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletRequest
 
 @Bean(name = "password-reset-token", active = true)
 class ResetPasswordTokenHandler

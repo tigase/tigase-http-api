@@ -31,7 +31,7 @@ import tigase.kernel.beans.Bean;
 import tigase.kernel.beans.selector.ConfigTypeEnum;
 import tigase.xmpp.jid.BareJID;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;

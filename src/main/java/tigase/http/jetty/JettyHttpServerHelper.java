@@ -17,8 +17,8 @@
  */
 package tigase.http.jetty;
 
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import tigase.http.AuthProvider;
 import tigase.http.DeploymentInfo;
 import tigase.http.ServletInfo;
@@ -26,11 +26,8 @@ import tigase.http.api.HttpServerIfc;
 import tigase.http.java.filters.ProtocolRedirectFilter;
 import tigase.http.jetty.security.BasicAndJWTAuthenticator;
 
-import javax.servlet.DispatcherType;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Map;
+import jakarta.servlet.DispatcherType;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -65,7 +62,7 @@ public class JettyHttpServerHelper {
 		}
 		String[] vhosts = deployment.getVHosts();
 		if (vhosts != null && vhosts.length > 0) {
-			context.setVirtualHosts(vhosts);
+			context.setVirtualHosts(Arrays.asList(vhosts));
 		}
 		ServletInfo[] servletInfos = deployment.getServlets();
 		for (ServletInfo info : servletInfos) {

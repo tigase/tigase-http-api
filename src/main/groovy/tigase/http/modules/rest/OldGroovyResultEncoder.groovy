@@ -26,8 +26,8 @@ import tigase.http.coders.XmlCoder
 import tigase.http.rest.Handler
 import tigase.http.util.CSSHelper
 
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 import java.nio.file.Paths
 import java.util.concurrent.ConcurrentHashMap
 import java.util.logging.Level

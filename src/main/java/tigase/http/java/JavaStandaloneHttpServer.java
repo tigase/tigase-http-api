@@ -18,6 +18,7 @@
 package tigase.http.java;
 
 import com.sun.net.httpserver.*;
+import jakarta.servlet.ServletException;
 import tigase.annotations.TigaseDeprecated;
 import tigase.cluster.ClusterConnectionManager;
 import tigase.eventbus.EventBus;
@@ -41,7 +42,6 @@ import javax.net.ssl.SNIMatcher;
 import javax.net.ssl.SNIServerName;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLParameters;
-import javax.servlet.ServletException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.*;

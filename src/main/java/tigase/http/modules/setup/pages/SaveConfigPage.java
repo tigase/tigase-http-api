@@ -18,6 +18,8 @@
 package tigase.http.modules.setup.pages;
 
 import gg.jte.output.StringOutput;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.FormParam;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -29,11 +31,7 @@ import tigase.http.api.HttpException;
 import tigase.http.modules.setup.SetupModule;
 import tigase.kernel.beans.Bean;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;

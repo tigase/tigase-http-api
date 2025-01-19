@@ -21,7 +21,7 @@ import jakarta.ws.rs.FormParam;
 import jakarta.xml.bind.UnmarshalException;
 import tigase.http.jaxrs.JaxRsRequestHandler;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.lang.reflect.Field;
 
 public class WWWFormUrlEncodedUnmarshaller {

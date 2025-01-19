@@ -20,7 +20,7 @@ package tigase.http.java;
 import com.sun.net.httpserver.HttpExchange;
 import tigase.annotations.TigaseDeprecated;
 
-import javax.servlet.*;
+import jakarta.servlet.*;
 import java.io.IOException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;

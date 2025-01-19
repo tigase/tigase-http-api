@@ -29,7 +29,7 @@ import tigase.util.Algorithms
 import tigase.util.stringprep.TigaseStringprepException
 import tigase.xmpp.jid.BareJID
 
-import javax.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletRequest
 import java.security.MessageDigest
 import java.util.logging.Level
 import java.util.logging.Logger

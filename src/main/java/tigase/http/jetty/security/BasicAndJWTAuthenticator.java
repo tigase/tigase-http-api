@@ -17,28 +17,25 @@
  */
 package tigase.http.jetty.security;
 
+import org.eclipse.jetty.security.AuthenticationState;
 import org.eclipse.jetty.security.Authenticator;
 import org.eclipse.jetty.security.ServerAuthException;
-import org.eclipse.jetty.security.UserAuthentication;
+import org.eclipse.jetty.security.UserIdentity;
 import org.eclipse.jetty.security.authentication.BasicAuthenticator;
-import org.eclipse.jetty.server.Authentication;
-import org.eclipse.jetty.server.UserIdentity;
-
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.Response;
+import org.eclipse.jetty.util.Callback;
 
 public class BasicAndJWTAuthenticator extends BasicAuthenticator
 		implements Authenticator {
 
 	@Override
-	public Authentication validateRequest(ServletRequest req, ServletResponse res, boolean mandatory)
+	public AuthenticationState validateRequest(Request req, Response res, Callback callback)
 			throws ServerAuthException {
-		if (mandatory) {
-			UserIdentity userIdentity = getLoginService().login(null, null, req);
-			if (userIdentity != null) {
-			return new UserAuthentication("TOKEN", userIdentity);
-			}
+		UserIdentity userIdentity = getLoginService().login(null, null, req, x -> null);
+		if (userIdentity != null) {
+			return new UserAuthenticationSucceeded("TOKEN", userIdentity);
 		}
-		return super.validateRequest(req, res, mandatory);
+		return super.validateRequest(req, res, callback);
 	}
 }

@@ -5,7 +5,7 @@
 @import tigase.http.jaxrs.Page
 @import tigase.http.modules.dashboard.UsersHandler
 @import tigase.xmpp.jid.BareJID;
-@import javax.servlet.http.HttpServletRequest
+@import jakarta.servlet.http.HttpServletRequest
 @import java.util.List;
 @param SecurityContext securityContext
 @param UriInfo uriInfo

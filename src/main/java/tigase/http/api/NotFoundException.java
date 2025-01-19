@@ -17,7 +17,7 @@
  */
 package tigase.http.api;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 public class NotFoundException extends HttpException {
 

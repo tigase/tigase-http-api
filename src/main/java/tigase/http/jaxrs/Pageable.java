@@ -17,7 +17,7 @@
  */
 package tigase.http.jaxrs;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Optional;
 
 public record Pageable(int pageNumber, int pageSize, Sort sort) {

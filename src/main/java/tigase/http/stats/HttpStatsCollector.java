@@ -19,7 +19,7 @@ package tigase.http.stats;
 
 import tigase.stats.StatisticsList;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 public interface HttpStatsCollector {
 

@@ -2,7 +2,7 @@
 @import jakarta.ws.rs.core.SecurityContext;
 @import jakarta.ws.rs.core.UriInfo
 @import tigase.http.modules.dashboard.UsersHandler
-@import javax.servlet.http.HttpServletRequest
+@import jakarta.servlet.http.HttpServletRequest
 @param SecurityContext securityContext
 @param UriInfo uriInfo
 @param HttpServletRequest request

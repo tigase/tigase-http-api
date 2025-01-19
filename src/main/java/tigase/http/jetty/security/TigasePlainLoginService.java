@@ -17,22 +17,20 @@
  */
 package tigase.http.jetty.security;
 
-import org.eclipse.jetty.security.AbstractLoginService;
-import org.eclipse.jetty.security.DefaultIdentityService;
-import org.eclipse.jetty.security.IdentityService;
-import org.eclipse.jetty.security.LoginService;
-import org.eclipse.jetty.server.UserIdentity;
+import org.eclipse.jetty.ee10.servlet.ServletContextRequest;
+import org.eclipse.jetty.security.*;
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.Session;
 import org.eclipse.jetty.util.security.Password;
 import tigase.http.AuthProvider;
 import tigase.xmpp.jid.BareJID;
 
 import javax.security.auth.Subject;
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequest;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -53,9 +51,9 @@ public class TigasePlainLoginService
 	}
 
 	@Override
-	public UserIdentity login(String s, Object o, ServletRequest request) {
-		if (request instanceof HttpServletRequest) {
-			AuthProvider.JWTPayload payload = authProvider.authenticateWithCookie((HttpServletRequest) request);
+	public UserIdentity login(String s, Object o, Request request, Function<Boolean, Session> getOrCreateSession) {
+		if (request instanceof ServletContextRequest) {
+			AuthProvider.JWTPayload payload = authProvider.authenticateWithCookie(((ServletContextRequest) request).getServletApiRequest());
 			if (payload != null) {
 				return newUserIdentity(payload.subject());
 			}
@@ -92,7 +90,7 @@ public class TigasePlainLoginService
 	}
 
 	private UserIdentity newUserIdentity(BareJID jid) {
-		Principal p = new AbstractLoginService.UserPrincipal(jid.toString(), null);
+		Principal p = new UserPrincipal(jid.toString(), null);
 
 		Subject subject = new Subject();
 		subject.getPrincipals().add(p);

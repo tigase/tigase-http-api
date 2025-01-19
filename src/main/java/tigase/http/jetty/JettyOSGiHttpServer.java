@@ -18,7 +18,7 @@
 package tigase.http.jetty;
 
 import org.eclipse.jetty.server.handler.ContextHandler;
-import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import tigase.http.DeploymentInfo;

@@ -19,7 +19,7 @@ package tigase.http.jaxrs;
 
 import jakarta.ws.rs.core.SecurityContext;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.security.Principal;
 
 public class SecurityContextImpl implements SecurityContext {

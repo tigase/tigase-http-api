@@ -24,8 +24,8 @@ import tigase.xml.Element
 import tigase.xml.SimpleParser
 import tigase.xml.SingletonFactory
 
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 
 /**
  * Class implements ability to send packets to any JID using REST API
