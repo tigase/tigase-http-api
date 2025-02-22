@@ -55,18 +55,24 @@ public class JaxRsServlet<M extends JaxRsModule>
 	private String loginFormPath;
 
 	protected boolean canAccess(RequestHandler requestHandler, HttpServletRequest request, HttpServletResponse response) throws HttpException, IOException, ServletException {
-		Handler.Role requiredRole = requestHandler.getRequiredRole();
-		if (requiredRole.isAuthenticationRequired()) {
-			if (!request.isUserInRole(requiredRole.name().toLowerCase())) {
-				if (loginFormPath != null && Optional.ofNullable(request.getHeader("Accept"))
-						.stream()
-						.flatMap(str -> Arrays.stream(str.split(",")))
-						.anyMatch(part -> part.contains("text/html"))) {
-					// we have a login form and request is from the browser, so redirect to it...
-					response.sendRedirect(request.getContextPath() + loginFormPath);
+		if (requestHandler.isAuthenticationRequired()) {
+			if ((requestHandler.getRequiredRole() != null &&
+					!request.isUserInRole(requestHandler.getRequiredRole().name().toLowerCase())) ||
+					(requestHandler.getAllowedRoles() != null &&
+							requestHandler.getAllowedRoles().stream().noneMatch(request::isUserInRole))) {
+				if (request.getUserPrincipal() != null) {
+					response.sendError(HttpServletResponse.SC_FORBIDDEN, "You are not allowed to access this resource");
 				} else {
-					response.setHeader("WWW-Authenticate", "Basic realm=\"TigasePlain\"");
-					request.authenticate(response);
+					if (loginFormPath != null && Optional.ofNullable(request.getHeader("Accept"))
+							.stream()
+							.flatMap(str -> Arrays.stream(str.split(",")))
+							.anyMatch(part -> part.contains("text/html"))) {
+						// we have a login form and request is from the browser, so redirect to it...
+						response.sendRedirect(request.getContextPath() + loginFormPath);
+					} else {
+						response.setHeader("WWW-Authenticate", "Basic realm=\"TigasePlain\"");
+						request.authenticate(response);
+					}
 				}
 				return false;
 			}

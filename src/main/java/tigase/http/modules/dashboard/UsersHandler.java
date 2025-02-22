@@ -24,6 +24,7 @@ import com.google.zxing.client.j2se.MatrixToImageConfig;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -37,6 +38,7 @@ import tigase.eventbus.EventBus;
 import tigase.http.jaxrs.Model;
 import tigase.http.jaxrs.Page;
 import tigase.http.jaxrs.Pageable;
+import tigase.http.jaxrs.SecurityContextHolder;
 import tigase.kernel.beans.Bean;
 import tigase.kernel.beans.Inject;
 import tigase.server.xmppsession.DisconnectUserEBAction;
@@ -54,11 +56,12 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Bean(name = "users", parent = DashboardModule.class, active = true)
 @Path("/users")
 public class UsersHandler extends DashboardHandler {
-
+	
 	private final SecureRandom secureRandom = new SecureRandom();
 	@Inject
 	private AuthRepository authRepository;
@@ -68,6 +71,8 @@ public class UsersHandler extends DashboardHandler {
 	private VHostManager vHostManager;
 	@Inject
 	private EventBus eventBus;
+	@Inject(nullAllowed = true)
+	private DashboardModule dashboardModule;
 
 	public UsersHandler() {
 		super();
@@ -75,12 +80,13 @@ public class UsersHandler extends DashboardHandler {
 
 	@Override
 	public Role getRequiredRole() {
-		return Role.Admin;
+		return Role.User;
 	}
 
 	@GET
 	@Path("")
 	@Produces("text/html")
+	@RolesAllowed({"admin", "account_manager"})
 	public Response index(@QueryParam("query") String query, Pageable pageable, Model model) throws TigaseDBException {
 		List<String> domains = vHostManager.getAllVHosts()
 				.stream()
@@ -96,20 +102,17 @@ public class UsersHandler extends DashboardHandler {
 				.filter(jid -> query == null || jid.toString().contains(query))
 				.sorted(Comparator.comparing(BareJID::getLocalpart).thenComparing(BareJID::getDomain))
 				.toList();
-		List<User> users = jids.stream()
-				.skip(pageable.offset())
-				.limit(pageable.pageSize())
-				.map(jid -> {
-					try {
-						return new User(jid, authRepository.getAccountStatus(jid));
-					} catch (TigaseDBException e) {
-						throw new RuntimeException(e);
-					}
-				})
-				.toList();
+		List<User> users = jids.stream().skip(pageable.offset()).limit(pageable.pageSize()).map(jid -> {
+			try {
+				return new User(jid, authRepository.getAccountStatus(jid), getUserRoles(jid), canManageUser(jid));
+			} catch (TigaseDBException e) {
+				throw new RuntimeException(e);
+			}
+		}).toList();
 		model.put("query", query);
 		model.put("users", new Page<>(pageable, jids.size(), users));
 		model.put("domains", domains);
+		model.put("allRoles", getAllRoles());
 
 		model.put("isXTokenActive", authRepository.isMechanismSupported("default", SaslXTOKEN.NAME));
 
@@ -117,9 +120,64 @@ public class UsersHandler extends DashboardHandler {
 		return Response.ok(output, MediaType.TEXT_HTML).build();
 	}
 
+	private List<UserRole> getAllRoles() {
+		return mapRoleIdsToUserRoles(List.of("account_manager"));
+	}
+
+	private List<UserRole> getUserRoles(BareJID jid) throws TigaseDBException {
+		return mapRoleIdsToUserRoles(getUserRolesIds(jid));
+	}
+
+	private List<UserRole> mapRoleIdsToUserRoles(List<String> roleIds) {
+		return roleIds.stream().map(it -> new UserRole(it, switch (it) {
+			case "admin" -> "Administrator";
+			case "account_manager" -> "Account Manager";
+			case "user" -> "User";
+			default -> Arrays.stream(it.split("_"))
+					.map(str -> str.substring(0, 1).toUpperCase() + str.substring(1))
+					.collect(Collectors.joining(" "));
+		})).sorted().toList();
+	}
+
+	private List<String> getUserRolesIds(BareJID user) throws TigaseDBException {
+		var roles = new ArrayList<String>();
+		if (dashboardModule.isAdmin(user)) {
+			roles.add("admin");
+		}
+		String[] rolesFromRepo = userRepository.getDataList(user, "roles", "roles");
+		if (rolesFromRepo != null) {
+			roles.addAll(Arrays.asList(rolesFromRepo));
+		}
+		return roles;
+	}
+
+	private boolean canManageUser(BareJID jid) {
+		try {
+			var securityContext = SecurityContextHolder.getSecurityContext();
+			if (securityContext != null) {
+				if (securityContext.isUserInRole("admin")) {
+					return true;
+				}
+				if (securityContext.isUserInRole("account_manager")) {
+					var managedUserRoles = getUserRolesIds(jid);
+					return (!(managedUserRoles.contains("admin") || managedUserRoles.contains("account_manager"))) || securityContext.getUserPrincipal().getName().equals(jid.toString());
+				}
+			}
+		} catch (TigaseDBException e) {
+		}
+		return false;
+	}
+
+	private void checkModificationPermission(BareJID jid) {
+		if (!canManageUser(jid)) {
+			throw new RuntimeException();
+		}
+	}
+
 	@POST
 	@Path("/create")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	@RolesAllowed({"admin", "account_manager"})
 	public Response createUser(@FormParam("localpart") @NotEmpty String localpart,
 							   @FormParam("domain") @NotEmpty String domain, @FormParam("password") String password,
 							   UriInfo uriInfo) throws TigaseStringprepException, TigaseDBException {
@@ -142,22 +200,26 @@ public class UsersHandler extends DashboardHandler {
 	@POST
 	@Path("/{jid}/delete")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	@RolesAllowed({"admin", "account_manager"})
 	public Response deleteUser(@PathParam("jid") @NotEmpty BareJID jid, UriInfo uriInfo) throws TigaseDBException {
+		checkModificationPermission(jid);
 		authRepository.removeUser(jid);
-		eventBus.fire(new DisconnectUserEBAction(jid, StreamError.Reset,
-												 "Account was deleted"));
+		eventBus.fire(new DisconnectUserEBAction(jid, StreamError.Reset, "Account was deleted"));
 		return redirectToIndex(uriInfo);
 	}
 
 	@GET
 	@Path("/{jid}/accountStatus/{accountStatus}")
-	public Response changeAccountStatus(@PathParam("jid") @NotEmpty BareJID jid, @PathParam("accountStatus")
-										AuthRepository.AccountStatus accountStatus, UriInfo uriInfo)
-			throws TigaseDBException {
+	@RolesAllowed({"admin", "account_manager"})
+	public Response changeAccountStatus(@PathParam("jid") @NotEmpty BareJID jid,
+										@PathParam("accountStatus") AuthRepository.AccountStatus accountStatus,
+										UriInfo uriInfo) throws TigaseDBException {
+		checkModificationPermission(jid);
 		authRepository.setAccountStatus(jid, accountStatus);
 		switch (accountStatus) {
 			case disabled, spam, banned -> logoutUser(jid);
-			default -> {}
+			default -> {
+			}
 		}
 		return redirectToIndex(uriInfo);
 	}
@@ -165,9 +227,12 @@ public class UsersHandler extends DashboardHandler {
 	@POST
 	@Path("/{jid}/password")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public Response changePassword(@PathParam("jid") @NotEmpty BareJID jid, @FormParam("password") @NotBlank String password,
+	@RolesAllowed({"admin", "account_manager"})
+	public Response changePassword(@PathParam("jid") @NotEmpty BareJID jid,
+								   @FormParam("password") @NotBlank String password,
 								   @FormParam("password-confirm") @NotBlank String passwordConfirm, UriInfo uriInfo)
 			throws TigaseDBException {
+		checkModificationPermission(jid);
 		if (!password.equals(passwordConfirm)) {
 			throw new RuntimeException("Passwords do not match!");
 		}
@@ -176,6 +241,19 @@ public class UsersHandler extends DashboardHandler {
 
 		logoutUser(jid);
 
+		return redirectToIndex(uriInfo);
+	}
+
+	@POST
+	@Path("/{jid}/roles")
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	@RolesAllowed({"admin"})
+	public Response updateRoles(@PathParam("jid") @NotEmpty BareJID jid,
+								   @FormParam("roles") List<String> newRoles, UriInfo uriInfo)
+			throws TigaseDBException {
+		userRepository.setDataList(jid, "roles", "roles", Optional.ofNullable(newRoles)
+				.map(list -> list.toArray(String[]::new))
+				.orElse(new String[0]));
 		return redirectToIndex(uriInfo);
 	}
 
@@ -191,8 +269,10 @@ public class UsersHandler extends DashboardHandler {
 	@Path("/{jid}/qrCode")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces("image/png")
+	@RolesAllowed({"admin", "account_manager"})
 	public Response generateAuthQrCodePng(@PathParam("jid") @NotEmpty BareJID jid)
 			throws IOException, WriterException, TigaseDBException {
+		checkModificationPermission(jid);
 		String token = generateAuthQrCodeToken(jid);
 		return Response.ok(encodeStringToQRCode(token), "image/png").build();
 	}
@@ -201,8 +281,10 @@ public class UsersHandler extends DashboardHandler {
 	@Path("/{jid}/qrCode")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed({"admin", "account_manager"})
 	public QRCode generateAuthQrCodeJson(@PathParam("jid") @NotEmpty BareJID jid)
 			throws IOException, WriterException, TigaseDBException {
+		checkModificationPermission(jid);
 		String token = generateAuthQrCodeToken(jid);
 		byte[] qrcode = encodeStringToQRCode(token);
 		return new QRCode(token, "data:image/png;base64," + Base64.encode(qrcode));
@@ -262,5 +344,10 @@ public class UsersHandler extends DashboardHandler {
 		authRepository.logout(jid);
 	}
 
-	public record User(BareJID jid, AuthRepository.AccountStatus accountStatus) {}
+	public record User(BareJID jid, AuthRepository.AccountStatus accountStatus, List<UserRole> roles, boolean canManageUser) {
+		public boolean hasRole(UserRole role) {
+			return roles.stream().anyMatch(it -> it.id.equals(role.id));
+		}
+	}
+	public record UserRole(String id, String label) {}
 }

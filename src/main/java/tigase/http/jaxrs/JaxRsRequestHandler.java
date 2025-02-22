@@ -67,6 +67,7 @@ public class JaxRsRequestHandler
 	}
 
 	private final Handler.Role requiredRole;
+	private final Set<String> allowedRoles;
 	private final Handler handler;
 	private final Method method;
 	private final Pattern pattern;
@@ -100,7 +101,9 @@ public class JaxRsRequestHandler
 		if (httpMethod == null) {
 			return null;
 		}
-		
+
+		Set<String> allowedRoles = Handler.getAllowedRoles(method);
+
 		String methodPath = Optional.ofNullable(method.getAnnotation(Path.class)).map(Path::value).orElse("");
 
 		String fullPath = contextPath;
@@ -111,7 +114,7 @@ public class JaxRsRequestHandler
 		fullPath = fullPath + methodPath;
 
 		Pattern pattern = prepareMatcher(fullPath, method);
-		return new JaxRsRequestHandler(instance, method, httpMethod, pattern, instance.getRequiredRole());
+		return new JaxRsRequestHandler(instance, method, httpMethod, pattern, instance.getRequiredRole(), allowedRoles);
 	}
 
 	public static HttpMethod getHttpMethod(Method method) {
@@ -143,8 +146,18 @@ public class JaxRsRequestHandler
 	}
 
 	@Override
+	public Set<String> getAllowedRoles() {
+		return allowedRoles;
+	}
+
+	@Override
 	public Handler.Role getRequiredRole() {
 		return requiredRole;
+	}
+
+	@Override
+	public boolean isAuthenticationRequired() {
+		return RequestHandler.super.isAuthenticationRequired() || allowedRoles != null;
 	}
 
 	public static Pattern prepareMatcher(String path, Method method) {
@@ -242,12 +255,13 @@ public class JaxRsRequestHandler
 		return params;
 	}
 
-	public JaxRsRequestHandler(Handler handler, Method method, HttpMethod httpMethod, Pattern pattern, Handler.Role requiredRole) {
+	public JaxRsRequestHandler(Handler handler, Method method, HttpMethod httpMethod, Pattern pattern, Handler.Role requiredRole, Set<String> allowedRoles) {
 		this.requiredRole = requiredRole;
 		this.httpMethod = httpMethod;
 		this.handler = handler;
 		this.method = method;
 		this.pattern = pattern;
+		this.allowedRoles = allowedRoles;
 		Consumes consumes = method.getAnnotation(Consumes.class);
 		if (consumes != null) {
 			consumedContentTypes = Arrays.stream(consumes.value()).collect(Collectors.toSet());
@@ -316,7 +330,10 @@ public class JaxRsRequestHandler
 				} else if (formParam != null) {
 					String[] valuesStr = request.getParameterValues(formParam.value());
 					if (valuesStr == null) {
-						valuesStr = new String[]{getParamDefaultValue(param)};
+						String defValue = getParamDefaultValue(param);
+						if (defValue != null) {
+							valuesStr = new String[]{getParamDefaultValue(param)};
+						}
 					}
 					if (boolean.class.equals(param.getType())) {
 						value = valuesStr != null && valuesStr.length == 1 && "on".equals(valuesStr[0]);

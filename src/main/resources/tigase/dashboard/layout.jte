@@ -1,6 +1,7 @@
 @import gg.jte.Content;
 @import jakarta.ws.rs.core.SecurityContext;
 @import jakarta.ws.rs.core.UriInfo
+@import tigase.http.modules.dashboard.DashboardHandler
 @import tigase.http.modules.dashboard.UsersHandler
 @import javax.servlet.http.HttpServletRequest
 @param SecurityContext securityContext
@@ -51,10 +52,12 @@
             </a>
         </div>
         <ul class="nav nav-pills flex-column px-3">
+            @if(DashboardHandler.canAccess(securityContext, UsersHandler.class, "index"))
             <li class="nav-item">
                 !{var link = uriInfo.getBaseUriBuilder().path(UsersHandler.class,"index").build().getPath();}
                 <a class="nav-link text-white ${request.getRequestURI().equals(link) ? "active" : ""}" aria-current="page" href="${link}"><i class="bi bi-people-fill me-2"></i>Users</a>
             </li>
+            @endif
 <%--            <li class="nav-item">--%>
 <%--                <a class="nav-link text-white" href="#"><i class="bi bi-gear-fill me-2"></i>Other</a>--%>
 <%--            </li>--%>

@@ -3,6 +3,8 @@
 @import jakarta.ws.rs.core.UriInfo
 @import tigase.db.AuthRepository
 @import tigase.http.jaxrs.Page
+@import tigase.http.modules.dashboard.DashboardHandler
+@import tigase.http.modules.dashboard.DashboardModule
 @import tigase.http.modules.dashboard.UsersHandler
 @import tigase.xmpp.jid.BareJID;
 @import javax.servlet.http.HttpServletRequest
@@ -14,6 +16,7 @@
 @param String query
 @param HttpServletRequest request
 @param boolean isXTokenActive
+@param List<UsersHandler.UserRole> allRoles
 
 @template.layout(securityContext = securityContext, uriInfo = uriInfo, request = request, content = @`
     <div class="card m-3 bg-white">
@@ -44,6 +47,7 @@
                     <tr>
                         <th scope="col">JID</th>
                         <th scope="col">Account status</th>
+                        <th scope="col">Roles</th>
                         <th scope="col" style="width: 0px;">Actions</th>
                     </tr>
                 </thead>
@@ -59,11 +63,17 @@
                             @endif
                         </td>
                         <td>
+                            @for(UsersHandler.UserRole role : user.roles())
+                                <div class="badge small bg-secondary rounded-pill">${role.label()}</div>
+                            @endfor
+                        </td>
+                        <td style="width: 0px">
                             <div class="dropdown">
-                                <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <button class="btn btn-secondary btn-sm dropdown-toggle ${(!user.canManageUser()) ? "disabled" : ""}" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     <i class="bi bi-gear-fill me-2"></i>Actions
                                 </button>
                                 <ul class="dropdown-menu">
+                                    @if(user.canManageUser())
                                     <li>
                                         @if(user.accountStatus() == AuthRepository.AccountStatus.active)
                                             <a class="dropdown-item text-nowrap" href="${uriInfo.getBaseUriBuilder().path(UsersHandler.class, "changeAccountStatus").build(user.jid(), AuthRepository.AccountStatus.disabled).toString()}"><i class="bi bi-person-fill-lock me-2"></i>Disable</a>
@@ -71,6 +81,14 @@
                                             <a class="dropdown-item text-nowrap" href="${uriInfo.getBaseUriBuilder().path(UsersHandler.class, "changeAccountStatus").build(user.jid(), AuthRepository.AccountStatus.active).toString()}"><i class="bi bi-person-fill-check me-2"></i>Enable</a>
                                         @endif
                                     </li>
+                                    @if(DashboardHandler.canAccess(securityContext, UsersHandler.class, "updateRoles"))
+                                    <li>
+                                        <a class="dropdown-item text-nowrap" href="#" data-bs-toggle="modal"
+                                           data-bs-target="#manageRoles-${user.jid().toString().replace('@','-').replace('.','-')}">
+                                            <i class="bi bi-card-list me-2"></i>Manage roles
+                                        </a>
+                                    </li>
+                                    @endif
                                     <li>
                                         <a class="dropdown-item text-warning text-nowrap" href="#" data-bs-toggle="modal"
                                            data-bs-target="#changePassword-${user.jid().toString().replace('@','-').replace('.','-')}">
@@ -91,12 +109,41 @@
                                             <i class="bi bi-person-fill-dash me-2"></i>Delete
                                         </a>
                                     </li>
+                                    @endif
                                 </ul>
                             </div>
 <%--                            <button class="btn btn-sm btn-danger text-nowrap" data-bs-toggle="modal"--%>
 <%--                                    data-bs-target="#deleteUser-${user.jid().toString().replace('@','-').replace('.','-')}">--%>
 <%--                                <i class="bi bi-person-fill-dash me-2"></i>Delete--%>
 <%--                            </button>--%>
+                            @if(user.canManageUser())
+                            @if(DashboardHandler.canAccess(securityContext, UsersHandler.class, "updateRoles"))
+                            <div class="modal fade" id="manageRoles-${user.jid().toString().replace('@','-').replace('.','-')}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="#manageRolesModalLabel-${user.toString().replace('@','-').replace('.','-')}" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <form action="${uriInfo.getRequestUriBuilder().path(user.jid().toString()).path("roles").build().toString()}" method="post">
+                                            <div class="modal-header">
+                                                <h1 class="modal-title fs-5" id="manageRolesModalLabel-${user.jid().toString().replace('@','-').replace('.','-')}">Manage roles</h1>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Select roles that user should have:</p>
+                                                @for(UsersHandler.UserRole role : allRoles)
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" role="switch" name="roles" id="role-switch-${role.id()}" checked="${user.hasRole(role)}" value="${role.id()}">
+                                                    <label class="form-check-label" for="role-switch-${role.id()}">${role.label()}</label>
+                                                </div>
+                                                @endfor
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                <button type="submit" class="btn btn-primary">Change</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            @endif
                             <div class="modal fade" id="deleteUser-${user.jid().toString().replace('@','-').replace('.','-')}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="#deleteUserModalLabel-${user.toString().replace('@','-').replace('.','-')}" aria-hidden="true">
                                 <div class="modal-dialog">
                                     <div class="modal-content">
@@ -162,6 +209,7 @@
                                     </div>
                                 </div>
                             </div>
+                            @endif
                             @endif
                         </td>
                     </tr>

@@ -30,8 +30,6 @@ import javax.security.auth.Subject;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -98,12 +96,7 @@ public class TigasePlainLoginService
 		subject.getPrincipals().add(p);
 		subject.setReadOnly();
 
-		List<String> roles = new ArrayList<String>(Arrays.asList("user"));
-
-		// add admin role if user is in admins list
-		if (getAuthProvider().isAdmin(jid)) {
-			roles.add("admin");
-		}
+		List<String> roles = getAuthProvider().getRoles(jid);
 
 		return getIdentityService().newUserIdentity(subject, p, roles.toArray(new String[0]));
 	}

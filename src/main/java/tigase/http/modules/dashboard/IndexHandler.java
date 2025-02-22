@@ -30,7 +30,7 @@ import tigase.kernel.beans.Bean;
 public class IndexHandler extends DashboardHandler {
 	@Override
 	public Role getRequiredRole() {
-		return Role.Admin;
+		return Role.User;
 	}
 
 	@GET

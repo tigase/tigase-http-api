@@ -27,6 +27,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public interface AuthProvider {
 
@@ -34,6 +36,16 @@ public interface AuthProvider {
 
 	boolean checkCredentials(String user, String password)
 			throws TigaseStringprepException, TigaseDBException;
+
+	default List<String> getRoles(BareJID user) {
+		var roles = new ArrayList<>(List.of("user"));
+
+		// add admin role if user is in admins list
+		if (isAdmin(user)) {
+			roles.add("admin");
+		}
+		return roles;
+	}
 
 	String generateToken(JWTPayload token)
 			throws NoSuchAlgorithmException, InvalidKeyException;

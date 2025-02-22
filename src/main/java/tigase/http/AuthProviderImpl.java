@@ -43,6 +43,8 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -104,6 +106,20 @@ public class AuthProviderImpl
 	@Override
 	public boolean isAdmin(BareJID user) {
 		return receiver.isAdmin(JID.jidInstance(user));
+	}
+
+	@Override
+	public List<String> getRoles(BareJID user) {
+		var roles = AuthProvider.super.getRoles(user);
+		try {
+			String[] rolesFromRepo = userRepository.getDataList(user, "roles", "roles");
+			if (rolesFromRepo != null) {
+				roles.addAll(Arrays.asList(rolesFromRepo));
+			}
+		} catch (TigaseDBException ex) {
+			throw new RuntimeException("Failed to load user " + user + " roles", ex);
+		}
+		return roles;
 	}
 
 	@Override

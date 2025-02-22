@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Comparator;
+import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -37,6 +38,14 @@ public interface RequestHandler extends Comparable<RequestHandler> {
 
 	Handler.Role getRequiredRole();
 
+	default Set<String> getAllowedRoles() {
+		return null;
+	}
+
+	default boolean isAuthenticationRequired() {
+		return getRequiredRole().isAuthenticationRequired();
+	}
+	
 	Matcher test(HttpServletRequest request, String requestUri);
 
 	void execute(HttpServletRequest request, HttpServletResponse response, Matcher matcher,

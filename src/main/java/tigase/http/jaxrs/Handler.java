@@ -17,7 +17,27 @@
  */
 package tigase.http.jaxrs;
 
+import jakarta.annotation.security.RolesAllowed;
+
+import java.lang.reflect.Method;
+import java.util.Set;
+
 public interface Handler {
+
+	public static Set<String> getAllowedRoles(Method method) {
+		var allowedRoles = getAllowedRoles(method.getAnnotation(RolesAllowed.class));
+		if (allowedRoles != null) {
+			return allowedRoles;
+		}
+		return getAllowedRoles(method.getDeclaringClass().getAnnotation(RolesAllowed.class));
+	}
+
+	public static Set<String> getAllowedRoles(RolesAllowed annotation) {
+		if (annotation == null) {
+			return null;
+		}
+		return Set.of(annotation.value());
+	}
 
 	Role getRequiredRole();
 

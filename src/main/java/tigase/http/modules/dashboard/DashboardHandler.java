@@ -20,13 +20,28 @@ package tigase.http.modules.dashboard;
 import gg.jte.ContentType;
 import gg.jte.TemplateEngine;
 import gg.jte.output.StringOutput;
+import jakarta.ws.rs.core.SecurityContext;
 import tigase.http.jaxrs.Handler;
 import tigase.http.util.TemplateUtils;
 import tigase.kernel.beans.config.ConfigField;
 
+import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Map;
 
 public abstract class DashboardHandler implements Handler {
+
+	public static boolean canAccess(SecurityContext securityContext, Class<? extends DashboardHandler> clazz, String methodName) {
+		Method method = Arrays.stream(clazz.getDeclaredMethods())
+				.filter(it -> it.getName().equals(methodName))
+				.findFirst()
+				.orElseThrow();
+		var allowedRoles = Handler.getAllowedRoles(method);
+		if (allowedRoles != null) {
+			return allowedRoles.stream().anyMatch(securityContext::isUserInRole);
+		}
+		return true;
+	}
 
 	protected TemplateEngine engine;
 	@ConfigField(desc = "Path to template files", alias = "templatesPath")
