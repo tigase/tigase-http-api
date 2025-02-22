@@ -31,11 +31,11 @@
         <img class="logo mb-4" style="width: 170px">
         <h1 class="h3 mb-3 fw-normal">Tigase XMPP Server</h1>
         <div class="form-floating mb-3">
-            <input id="jid" type="email" name="jid" placeholder="user@domain.com" class="form-control">
+            <input id="jid" type="email" name="jid" placeholder="user@domain.com" class="form-control" required>
             <label for="jid">JID</label>
         </div>
         <div class="form-floating mb-3">
-            <input id="password" type="password" name="password" placeholder="*****" class="form-control">
+            <input id="password" type="password" name="password" placeholder="*****" class="form-control" required>
             <label for="password">Password</label>
         </div>
         <button type="submit" class="w-100 btn btn-lg btn-primary mb-2">Sign in</button>
