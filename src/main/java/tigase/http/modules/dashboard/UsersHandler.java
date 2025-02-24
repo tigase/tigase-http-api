@@ -33,6 +33,7 @@ import tigase.auth.credentials.entries.XTokenCredentialsEntry;
 import tigase.auth.mechanisms.SaslXTOKEN;
 import tigase.db.AuthRepository;
 import tigase.db.TigaseDBException;
+import tigase.db.UserExistsException;
 import tigase.db.UserRepository;
 import tigase.eventbus.EventBus;
 import tigase.http.jaxrs.Model;
@@ -191,6 +192,11 @@ public class UsersHandler extends DashboardHandler {
 		if (password != null && !password.trim().isBlank()) {
 			authRepository.addUser(jid, password);
 			authRepository.setAccountStatus(jid, AuthRepository.AccountStatus.active);
+			try {
+				userRepository.addUser(jid);
+			} catch (UserExistsException ex) {
+				// it ma
+			}
 		} else {
 			userRepository.addUser(jid);
 		}
