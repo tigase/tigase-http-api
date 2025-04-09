@@ -6,9 +6,9 @@
 @import tigase.http.modules.dashboard.DashboardHandler
 @import tigase.http.modules.dashboard.DashboardModule
 @import tigase.http.modules.dashboard.UsersHandler
-@import tigase.xmpp.jid.BareJID;
+@import tigase.xmpp.jid.BareJID
 @import javax.servlet.http.HttpServletRequest
-@import java.util.List;
+@import java.util.List
 @param SecurityContext securityContext
 @param UriInfo uriInfo
 @param Page<UsersHandler.User> users

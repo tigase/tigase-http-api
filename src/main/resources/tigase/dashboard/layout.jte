@@ -1,5 +1,5 @@
-@import gg.jte.Content;
-@import jakarta.ws.rs.core.SecurityContext;
+@import gg.jte.Content
+@import jakarta.ws.rs.core.SecurityContext
 @import jakarta.ws.rs.core.UriInfo
 @import tigase.http.modules.dashboard.DashboardHandler
 @import tigase.http.modules.dashboard.UsersHandler

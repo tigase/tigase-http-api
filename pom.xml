@@ -10,11 +10,7 @@
     </parent>
 
     <properties>
-<!--        <maven.compiler.source>17</maven.compiler.source>-->
-<!--        <maven.compiler.target>17</maven.compiler.target>-->
-<!--        <maven.compiler.release>17</maven.compiler.release>-->
         <gmavenProviderSelection>2.0</gmavenProviderSelection>
-        <groovyVersion>3.0.9</groovyVersion>
         <maven.javadoc.skip>true</maven.javadoc.skip>
         <bundle-activator>tigase.http.Activator</bundle-activator>
         <license.inlineHeader>${inlineHeader_agpl3}</license.inlineHeader>
@@ -86,7 +82,7 @@
                     <dependency>
                         <groupId>org.codehaus.groovy</groupId>
                         <artifactId>groovy-eclipse-batch</artifactId>
-                        <version>3.0.9-03</version>
+                        <version>4.0.26-01</version><!-- JDK 17+ -->
                     </dependency>
                 </dependencies>
                 <extensions>true</extensions>

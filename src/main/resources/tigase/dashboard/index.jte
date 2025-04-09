@@ -1,4 +1,4 @@
-@import jakarta.ws.rs.core.SecurityContext;
+@import jakarta.ws.rs.core.SecurityContext
 @import jakarta.ws.rs.core.UriInfo
 @import javax.servlet.http.HttpServletRequest
 @param SecurityContext securityContext
