@@ -13,6 +13,7 @@
 @param UriInfo uriInfo
 @param Page<UsersHandler.User> users
 @param List<String> domains
+@param Boolean accountExpirationServiceEnabled
 @param String query
 @param HttpServletRequest request
 @param boolean isXTokenActive
@@ -25,7 +26,7 @@
                 <h5 class="col">Users</h5>
                 <div class="col-auto align-items-end">
                     <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#createUserModal"><i class="bi bi-person-fill-add me-2"></i>Add user</button>
-                    @template.users.create(uriInfo = uriInfo, domains = domains)
+                    @template.users.create(uriInfo = uriInfo, domains = domains, accountExpirationServiceEnabled = accountExpirationServiceEnabled)
                 </div>
             </div>
             <div class="container-fluid">
@@ -95,6 +96,14 @@
                                             <i class="bi bi-safe2-fill me-2"></i>Change password
                                         </a>
                                     </li>
+                                    @if(accountExpirationServiceEnabled)
+                                    <li>
+                                        <a class="dropdown-item text-warning text-nowrap" href="#" data-bs-toggle="modal"
+                                           data-bs-target="#setAccountExpiration-${user.jid().toString().replace('@','-').replace('.','-')}">
+                                            <i class="bi bi-clock-history me-2"></i> Set account expiration
+                                        </a>
+                                    </li>
+                                    @endif
                                     @if(isXTokenActive)
                                     <li>
                                         <a class="dropdown-item text-warning text-nowrap" href="#" data-bs-toggle="modal"
@@ -189,6 +198,30 @@
                                     </div>
                                 </div>
                             </div>
+                            @if(accountExpirationServiceEnabled)
+                            <div class="modal fade" id="setAccountExpiration-${user.jid().toString().replace('@','-').replace('.','-')}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="#setAccountExpirationModalLabel-${user.toString().replace('@','-').replace('.','-')}" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <form action="${uriInfo.getRequestUriBuilder().path(user.jid().toString()).path("expiration").build().toString()}" method="post">
+                                            <div class="modal-header">
+                                                <h1 class="modal-title fs-5" id="setAccountExpirationModalLabel-${user.jid().toString().replace('@','-').replace('.','-')}">Set account expiration</h1>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="form-floating mb-3">
+                                                    <input type="number" class="form-control" id="expiration" name="expiration">
+                                                    <label for="expiration">Account expiration (in days; 0 disables expiration)</label>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                <button type="submit" class="btn btn-primary">Set expiration password</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            @endif
                             @if(isXTokenActive)
                             <div class="modal fade" id="generateAuthToken-${user.jid().toString().replace('@','-').replace('.','-')}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="#generateAuthTokenModalLabel-${user.toString().replace('@','-').replace('.','-')}" aria-hidden="true">
                                 <div class="modal-dialog">

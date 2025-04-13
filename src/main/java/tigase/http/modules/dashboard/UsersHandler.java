@@ -35,6 +35,7 @@ import tigase.db.AuthRepository;
 import tigase.db.TigaseDBException;
 import tigase.db.UserExistsException;
 import tigase.db.UserRepository;
+import tigase.db.services.AccountExpirationService;
 import tigase.eventbus.EventBus;
 import tigase.http.jaxrs.Model;
 import tigase.http.jaxrs.Page;
@@ -75,6 +76,9 @@ public class UsersHandler extends DashboardHandler {
 	@Inject(nullAllowed = true)
 	private DashboardModule dashboardModule;
 
+	@Inject(nullAllowed = true)
+	private AccountExpirationService accountExpirationService;
+
 	public UsersHandler() {
 		super();
 	}
@@ -114,7 +118,7 @@ public class UsersHandler extends DashboardHandler {
 		model.put("users", new Page<>(pageable, jids.size(), users));
 		model.put("domains", domains);
 		model.put("allRoles", getAllRoles());
-
+		model.put("accountExpirationServiceEnabled", accountExpirationService != null);
 		model.put("isXTokenActive", authRepository.isMechanismSupported("default", SaslXTOKEN.NAME));
 
 		String output = renderTemplate("users/index.jte", model);
@@ -179,9 +183,13 @@ public class UsersHandler extends DashboardHandler {
 	@Path("/create")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@RolesAllowed({"admin", "account_manager"})
-	public Response createUser(@FormParam("localpart") @NotEmpty String localpart,
-							   @FormParam("domain") @NotEmpty String domain, @FormParam("password") String password,
-							   UriInfo uriInfo) throws TigaseStringprepException, TigaseDBException {
+	public Response createUser(
+		@FormParam("localpart") @NotEmpty String localpart,
+		@FormParam("domain") @NotEmpty String domain,
+		@FormParam("password") String password,
+		@FormParam("expiration") Integer expiration,
+		UriInfo uriInfo
+	) throws TigaseStringprepException, TigaseDBException {
 		if (localpart.isBlank() || domain.isBlank()) {
 			throw new RuntimeException();
 		}
@@ -200,6 +208,7 @@ public class UsersHandler extends DashboardHandler {
 		} else {
 			userRepository.addUser(jid);
 		}
+		accountExpirationService.setUserExpiration(jid, expiration);
 		return redirectToIndex(uriInfo, jid.toString());
 	}
 
@@ -294,6 +303,19 @@ public class UsersHandler extends DashboardHandler {
 		String token = generateAuthQrCodeToken(jid);
 		byte[] qrcode = encodeStringToQRCode(token);
 		return new QRCode(token, "data:image/png;base64," + Base64.encode(qrcode));
+	}
+
+	@POST
+	@Path("/{jid}/expiration")
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	@RolesAllowed({"admin", "account_manager"})
+	public Response setAccountExpiration(@PathParam("jid") @NotEmpty BareJID jid,
+	                                     @FormParam("expiration") @NotBlank Integer expiration, UriInfo uriInfo)
+		throws TigaseDBException {
+		checkModificationPermission(jid);
+
+		accountExpirationService.setUserExpiration(jid,expiration);
+		return redirectToIndex(uriInfo);
 	}
 
 	public static class QRCode {
