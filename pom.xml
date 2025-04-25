@@ -90,7 +90,6 @@
             <plugin>
                 <groupId>gg.jte</groupId>
                 <artifactId>jte-maven-plugin</artifactId>
-                <version>3.1.10</version>
                 <executions>
                     <execution>
                         <id>dashboard</id>
@@ -341,7 +340,7 @@
         <dependency>
             <groupId>gg.jte</groupId>
             <artifactId>jte</artifactId>
-            <version>3.1.9</version>
+            <version>${jteVersion}</version>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
