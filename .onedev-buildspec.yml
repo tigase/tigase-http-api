@@ -1,4 +1,4 @@
-version: 35
+version: 38
 imports:
 - projectPath: Templates
   revision: 0.0.6
@@ -10,9 +10,9 @@ jobs:
     templateName: Tigase Server - Maven build & deploy
     paramMatrix:
     - name: timestamp-to-make-distinct
-      secret: false
       valuesProvider: !ScriptingValues
         scriptName: get-timestamp
+      secret: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   triggers:
   - !BranchUpdateTrigger {}
@@ -20,3 +20,7 @@ jobs:
   maxRetries: 3
   retryDelay: 30
   timeout: 3600
+  postBuildActions:
+  - !SendNotificationAction
+    condition: failed
+    receivers: group(TigaseCoreTeam)
