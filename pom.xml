@@ -94,52 +94,48 @@
                 <executions>
                     <execution>
                         <id>dashboard</id>
-                        <phase>process-classes</phase>
+                        <phase>generate-sources</phase>
                         <goals>
-                            <goal>precompile</goal>
+                            <goal>generate</goal>
                         </goals>
                         <configuration>
                             <sourceDirectory>${basedir}/src/main/resources/tigase/dashboard</sourceDirectory>
-                            <targetDirectory>${basedir}/target/jte-classes</targetDirectory>
                             <contentType>Html</contentType>
                             <packageName>tigase.dashboard</packageName>
                         </configuration>
                     </execution>
                     <execution>
                         <id>admin</id>
-                        <phase>process-classes</phase>
+                        <phase>generate-sources</phase>
                         <goals>
-                            <goal>precompile</goal>
+                            <goal>generate</goal>
                         </goals>
                         <configuration>
                             <sourceDirectory>${basedir}/src/main/resources/tigase/admin</sourceDirectory>
-                            <targetDirectory>${basedir}/target/jte-classes</targetDirectory>
                             <contentType>Html</contentType>
                             <packageName>tigase.admin</packageName>
                         </configuration>
                     </execution>
                     <execution>
                         <id>setup</id>
-                        <phase>process-classes</phase>
+                        <phase>generate-sources</phase>
                         <goals>
-                            <goal>precompile</goal>
+                            <goal>generate</goal>
                         </goals>
                         <configuration>
                             <sourceDirectory>${basedir}/src/main/resources/tigase/setup</sourceDirectory>
-                            <targetDirectory>${basedir}/target/jte-classes</targetDirectory>
                             <packageName>tigase.setup</packageName>
                             <contentType>Html</contentType>
                         </configuration>
                     </execution>
                     <execution>
                         <id>index</id>
-                        <phase>process-classes</phase>
+                        <phase>generate-sources</phase>
                         <goals>
-                            <goal>precompile</goal>
+                            <goal>generate</goal>
                         </goals>
                         <configuration>
                             <sourceDirectory>${basedir}/src/main/resources/tigase/index</sourceDirectory>
-                            <targetDirectory>${basedir}/target/jte-classes</targetDirectory>
                             <packageName>tigase.index</packageName>
                             <contentType>Html</contentType>
                         </configuration>
@@ -211,13 +207,6 @@
                 <targetPath>META-INF</targetPath>
                 <includes>
                     <include>**/*</include>
-                </includes>
-            </resource>
-            <resource>
-                <directory>target/jte-classes</directory>
-                <includes>
-                    <include>**/*.java</include>
-                    <include>**/*.class</include>
                 </includes>
             </resource>
         </resources>
