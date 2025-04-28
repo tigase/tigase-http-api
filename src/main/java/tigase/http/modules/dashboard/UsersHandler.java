@@ -118,7 +118,7 @@ public class UsersHandler extends DashboardHandler {
 		model.put("users", new Page<>(pageable, jids.size(), users));
 		model.put("domains", domains);
 		model.put("allRoles", getAllRoles());
-		model.put("accountExpirationServiceEnabled", accountExpirationService != null);
+		model.put("accountExpirationService", accountExpirationService);
 		model.put("isXTokenActive", authRepository.isMechanismSupported("default", SaslXTOKEN.NAME));
 
 		String output = renderTemplate("users/index.jte", model);

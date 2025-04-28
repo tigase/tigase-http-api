@@ -2,18 +2,21 @@
 @import jakarta.ws.rs.core.UriBuilder
 @import jakarta.ws.rs.core.UriInfo
 @import tigase.db.AuthRepository
+@import tigase.db.services.AccountExpirationService
 @import tigase.http.jaxrs.Page
 @import tigase.http.modules.dashboard.DashboardHandler
 @import tigase.http.modules.dashboard.DashboardModule
 @import tigase.http.modules.dashboard.UsersHandler
 @import tigase.xmpp.jid.BareJID
 @import javax.servlet.http.HttpServletRequest
+@import java.time.LocalDate
+@import java.time.temporal.ChronoUnit
 @import java.util.List
 @param SecurityContext securityContext
 @param UriInfo uriInfo
 @param Page<UsersHandler.User> users
 @param List<String> domains
-@param Boolean accountExpirationServiceEnabled
+@param AccountExpirationService accountExpirationService
 @param String query
 @param HttpServletRequest request
 @param boolean isXTokenActive
@@ -23,10 +26,10 @@
     <div class="card m-3 bg-white">
         <div class="card-body">
             <div class="card-title row m-0">
-                <h5 class="col">Users</h5>
+                <h5 class="col">Users sssss</h5>
                 <div class="col-auto align-items-end">
                     <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#createUserModal"><i class="bi bi-person-fill-add me-2"></i>Add user</button>
-                    @template.users.create(uriInfo = uriInfo, domains = domains, accountExpirationServiceEnabled = accountExpirationServiceEnabled)
+                    @template.users.create(uriInfo = uriInfo, domains = domains, accountExpirationService = accountExpirationService)
                 </div>
             </div>
             <div class="container-fluid">
@@ -96,7 +99,7 @@
                                             <i class="bi bi-safe2-fill me-2"></i>Change password
                                         </a>
                                     </li>
-                                    @if(accountExpirationServiceEnabled)
+                                    @if(accountExpirationService != null)
                                     <li>
                                         <a class="dropdown-item text-warning text-nowrap" href="#" data-bs-toggle="modal"
                                            data-bs-target="#setAccountExpiration-${user.jid().toString().replace('@','-').replace('.','-')}">
@@ -198,7 +201,7 @@
                                     </div>
                                 </div>
                             </div>
-                            @if(accountExpirationServiceEnabled)
+                            @if(accountExpirationService != null)
                             <div class="modal fade" id="setAccountExpiration-${user.jid().toString().replace('@','-').replace('.','-')}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="#setAccountExpirationModalLabel-${user.toString().replace('@','-').replace('.','-')}" aria-hidden="true">
                                 <div class="modal-dialog">
                                     <div class="modal-content">
@@ -209,7 +212,8 @@
                                             </div>
                                             <div class="modal-body">
                                                 <div class="form-floating mb-3">
-                                                    <input type="number" class="form-control" id="expiration" name="expiration">
+                                                    <input type="number" class="form-control" id="expiration" name="expiration"
+                                                           value="${accountExpirationService.getUserExpirationDays(user.jid())}" >
                                                     <label for="expiration">Account expiration (in days; 0 disables expiration)</label>
                                                 </div>
                                             </div>

@@ -1,8 +1,9 @@
 @import jakarta.ws.rs.core.UriInfo
+@import tigase.db.services.AccountExpirationService
 @import java.util.List
 @param UriInfo uriInfo
 @param List<String> domains
-@param Boolean accountExpirationServiceEnabled
+@param AccountExpirationService accountExpirationService
 <div class="modal fade" id="createUserModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="createUserModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -28,7 +29,7 @@
                     <input type="password" class="form-control" id="password" name="password" placeholder="*****">
                     <label for="password">Password</label>
                 </div>
-                @if(accountExpirationServiceEnabled == true)
+                @if(accountExpirationService != null)
                 <div class="form-floating mb-3">
                     <input type="number" class="form-control" id="expiration" name="expiration">
                     <label for="expiration">Account expiration (in days)</label>
