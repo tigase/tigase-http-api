@@ -389,6 +389,13 @@ form-label {
 	font-weight: bolder;
 }
 
+.dashboard-form-label {
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow: hidden;
+	width: 95%;
+}
+
 @media(min-width:768px) {
 	.sidebar {
 		width: 300px;

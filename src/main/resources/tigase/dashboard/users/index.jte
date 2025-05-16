@@ -213,8 +213,8 @@
                                             <div class="modal-body">
                                                 <div class="form-floating mb-3">
                                                     <input type="number" class="form-control" id="expiration" name="expiration"
-                                                           value="${accountExpirationService.getUserExpirationDays(user.jid())}" >
-                                                    <label for="expiration">Account expiration (in days; 0 disables expiration)</label>
+                                                           min="0" value="${accountExpirationService.getUserExpirationDays(user.jid())}" >
+                                                    <label for="expiration" class="dashboard-form-label">Account expiration (in days)</label>
                                                 </div>
                                             </div>
                                             <div class="modal-footer">
