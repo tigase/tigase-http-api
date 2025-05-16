@@ -26,7 +26,7 @@
     <div class="card m-3 bg-white">
         <div class="card-body">
             <div class="card-title row m-0">
-                <h5 class="col">Users sssss</h5>
+                <h5 class="col">Users</h5>
                 <div class="col-auto align-items-end">
                     <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#createUserModal"><i class="bi bi-person-fill-add me-2"></i>Add user</button>
                     @template.users.create(uriInfo = uriInfo, domains = domains, accountExpirationService = accountExpirationService)
