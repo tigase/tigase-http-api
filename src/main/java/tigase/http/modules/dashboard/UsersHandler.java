@@ -79,6 +79,8 @@ public class UsersHandler extends DashboardHandler {
 	@Inject(nullAllowed = true)
 	private AccountExpirationService accountExpirationService;
 
+	System.Logger logger = System.getLogger(UsersHandler.class.getName());
+
 	public UsersHandler() {
 		super();
 	}
@@ -187,7 +189,7 @@ public class UsersHandler extends DashboardHandler {
 		@FormParam("localpart") @NotEmpty String localpart,
 		@FormParam("domain") @NotEmpty String domain,
 		@FormParam("password") String password,
-		@FormParam("expiration") Integer expiration,
+		@FormParam("expiration") String expiration,
 		UriInfo uriInfo
 	) throws TigaseStringprepException, TigaseDBException {
 		if (localpart.isBlank() || domain.isBlank()) {
@@ -208,7 +210,7 @@ public class UsersHandler extends DashboardHandler {
 		} else {
 			userRepository.addUser(jid);
 		}
-		accountExpirationService.setUserExpiration(jid, expiration);
+		validateAndSetExpirationTime(jid, expiration);
 		return redirectToIndex(uriInfo, jid.toString());
 	}
 
@@ -275,7 +277,7 @@ public class UsersHandler extends DashboardHandler {
 	public static Response redirectToIndex(UriInfo uriInfo) {
 		return redirectToIndex(uriInfo, null);
 	}
-	
+
 	public static Response redirectToIndex(UriInfo uriInfo, String query) {
 		return Response.seeOther(uriInfo.getBaseUriBuilder().path(UsersHandler.class, "index").replaceQueryParam("query", query).build()).build();
 	}
@@ -310,11 +312,12 @@ public class UsersHandler extends DashboardHandler {
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@RolesAllowed({"admin", "account_manager"})
 	public Response setAccountExpiration(@PathParam("jid") @NotEmpty BareJID jid,
-	                                     @FormParam("expiration") @NotBlank Integer expiration, UriInfo uriInfo)
+	                                     @FormParam("expiration") String expiration,
+                                         UriInfo uriInfo)
 		throws TigaseDBException {
 		checkModificationPermission(jid);
 
-		accountExpirationService.setUserExpiration(jid,expiration);
+        validateAndSetExpirationTime(jid, expiration);
 		return redirectToIndex(uriInfo);
 	}
 
@@ -372,7 +375,21 @@ public class UsersHandler extends DashboardHandler {
 		authRepository.logout(jid);
 	}
 
-	public record User(BareJID jid, AuthRepository.AccountStatus accountStatus, List<UserRole> roles, boolean canManageUser) {
+    private void validateAndSetExpirationTime(BareJID jid, String expiration) throws TigaseDBException {
+        if (expiration == null || expiration.trim().isBlank()) {
+            accountExpirationService.setUserExpiration(jid, 0);
+        } else {
+            try {
+                var expirationTime = Integer.valueOf(expiration);
+                accountExpirationService.setUserExpiration(jid, expirationTime);
+            } catch (NumberFormatException ex) {
+                logger.log(System.Logger.Level.WARNING, "Invalid expiration time: " + expiration + " for account " + jid);
+            }
+        }
+    }
+
+
+    public record User(BareJID jid, AuthRepository.AccountStatus accountStatus, List<UserRole> roles, boolean canManageUser) {
 		public boolean hasRole(UserRole role) {
 			return roles.stream().anyMatch(it -> it.id.equals(role.id));
 		}

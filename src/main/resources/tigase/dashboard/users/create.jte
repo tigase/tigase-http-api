@@ -31,8 +31,8 @@
                 </div>
                 @if(accountExpirationService != null)
                 <div class="form-floating mb-3">
-                    <input type="number" class="form-control" id="expiration" name="expiration" min="0">
-                    <label for="expiration" class="dashboard-form-label">Account expiration (in days)</label>
+                    <input type="number" class="form-control" id="expiration" name="expiration" min="0" value="0">
+                    <label for="expiration" class="dashboard-form-label">Account expiration in days (0 for no expiration)</label>
                 </div>
                 @endif
             </div>
