@@ -393,7 +393,7 @@ form-label {
 	text-overflow: ellipsis;
 	white-space: nowrap;
 	overflow: hidden;
-	width: 95%;
+	width: 120%;
 }
 
 @media(min-width:768px) {
