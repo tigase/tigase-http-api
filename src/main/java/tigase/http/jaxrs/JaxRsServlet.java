@@ -113,7 +113,7 @@ public class JaxRsServlet<M extends JaxRsModule>
 					if (matcher != null && matcher.matches()) {
 						if (canAccess(handler, req, resp)) {
 							handler.execute(req, resp, matcher, executorService);
-						} 
+						}
 						return;
 					}
 				}
@@ -132,9 +132,7 @@ public class JaxRsServlet<M extends JaxRsModule>
 			}
 			resp.sendError(404, "Not found");
 		} catch (ValidationException ex) {
-			resp.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, ex.getMessage());
-		} catch (HttpException ex) {
-			resp.sendError(ex.getCode(), ex.getMessage());
+			throw new HttpException(ex.getMessage(), HttpServletResponse.SC_NOT_ACCEPTABLE, ex);
 		}
 	}
 

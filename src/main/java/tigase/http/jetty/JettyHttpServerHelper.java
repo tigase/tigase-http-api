@@ -17,6 +17,8 @@
  */
 package tigase.http.jetty;
 
+import org.eclipse.jetty.http.HttpHeader;
+import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import tigase.http.AuthProvider;
@@ -27,10 +29,8 @@ import tigase.http.java.filters.ProtocolRedirectFilter;
 import tigase.http.jetty.security.BasicAndJWTAuthenticator;
 
 import javax.servlet.DispatcherType;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -79,6 +79,26 @@ public class JettyHttpServerHelper {
 		Map<String, String> filterParams = new HashMap<>();
 		filterParams.put("serverBeanName", server.getName());
 		context.addFilter(ProtocolRedirectFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST)).setInitParameters(Collections.unmodifiableMap(filterParams));
+
+		Map<Class<? extends Throwable>, String> exceptionErrorPages = deployment.getExceptionErrorPages();
+		Map<Integer,String> errorCodePages = deployment.getErrorCodePages();
+		if (!(exceptionErrorPages.isEmpty() && errorCodePages.isEmpty() && deployment.getGlobalErrorPage() == null)) {
+			ErrorPageErrorHandler errorHandler = new ErrorPageErrorHandler() {
+				@Override
+				public String getErrorPage(HttpServletRequest request) {
+					String accept = request.getHeader(HttpHeader.ACCEPT.asString());
+					// if accept doesn't contains text/html return null so we could generate a generic json/xml error
+					if (accept == null || accept.contains("text/html")) {
+						return super.getErrorPage(request);
+					}
+					return null;
+				}
+			};
+			exceptionErrorPages.forEach(errorHandler::addErrorPage);
+			errorCodePages.forEach(errorHandler::addErrorPage);
+			Optional.ofNullable(deployment.getGlobalErrorPage()).ifPresent(uri ->errorHandler.addErrorPage("org.eclipse.jetty.server.error_page.global", uri));
+			context.setErrorHandler(errorHandler);
+		}
 
 		return context;
 	}

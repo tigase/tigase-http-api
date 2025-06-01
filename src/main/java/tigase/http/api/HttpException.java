@@ -17,27 +17,20 @@
  */
 package tigase.http.api;
 
-public class HttpException extends Exception {
+import org.eclipse.jetty.http.BadMessageException;
 
-	private final int code;
+public class HttpException extends BadMessageException {
 
 	public HttpException(String message, int code) {
-		super(message);
-		this.code = code;
+		super(code, message);
 	}
 
 	public HttpException(String message, int code, Throwable cause) {
-		super(message, cause);
-		this.code = code;
+		super(code, message, cause);
 	}
 
 	public HttpException(Throwable cause, int code) {
-		super(cause);
-		this.code = code;
+		super(code, null, cause);
 	}
-
-	public int getCode() {
-		return code;
-	}
-
+	
 }

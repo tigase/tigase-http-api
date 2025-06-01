@@ -19,15 +19,13 @@ package tigase.http.jaxrs;
 
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.container.Suspended;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.SecurityContext;
-import jakarta.ws.rs.core.UriInfo;
+import jakarta.ws.rs.core.*;
 import jakarta.xml.bind.MarshalException;
 import jakarta.xml.bind.UnmarshalException;
 import tigase.http.api.HttpException;
 import tigase.http.api.UnsupportedFormatException;
 import tigase.http.jaxrs.marshallers.*;
+import tigase.util.stringprep.TigaseStringprepException;
 import tigase.xmpp.jid.BareJID;
 import tigase.xmpp.jid.JID;
 
@@ -57,6 +55,8 @@ public class JaxRsRequestHandler
 	private static final Logger log = Logger.getLogger(JaxRsRequestHandler.class.getCanonicalName());
 	private static final Map<Class, Function<String,Object>> DESERIALIZERS = new HashMap<>();
 	static {
+		DESERIALIZERS.put(long.class, Long::parseLong);
+		DESERIALIZERS.put(int.class, Integer::parseInt);
 		DESERIALIZERS.put(Long.class, Long::parseLong);
 		DESERIALIZERS.put(Integer.class, Integer::parseInt);
 		DESERIALIZERS.put(Double.class, Double::parseDouble);
@@ -214,7 +214,7 @@ public class JaxRsRequestHandler
 	}
 
 	private static String regexForClass(Class clazz) {
-		if (Long.class.isAssignableFrom(clazz) || Integer.class.isAssignableFrom(clazz)) {
+		if (Long.class.isAssignableFrom(clazz) || Integer.class.isAssignableFrom(clazz) || int.class.isAssignableFrom(clazz) || long.class.isAssignableFrom(clazz)) {
 			return "[0-9]+";
 		}
 		if (String.class.isAssignableFrom(clazz)) {
@@ -236,8 +236,8 @@ public class JaxRsRequestHandler
 				}
 			} catch (NoSuchMethodException ex) {
 				log.log(Level.FINEST, "Method 'fromString' or 'valueOf' for conversation to object from String not found", e);
+				throw new RuntimeException(e);
 			}
-			throw new RuntimeException(e);
 			// nothing to do..
 		}
 		return null;
@@ -405,11 +405,8 @@ public class JaxRsRequestHandler
 						response.setStatus(200);
 					}
 				}
-			} catch (InvocationTargetException | IllegalAccessException ex) {
-				if (ex.getCause() instanceof HttpException) {
-					throw (HttpException) ex.getCause();
-				}
-				throw new HttpException(ex, 500);
+			} catch (InvocationTargetException|IllegalAccessException ex) {
+				unwrapInvocationTargetException(ex);
 			} finally {
 				ContainerRequestContext.resetContext();
 			}
@@ -422,8 +419,26 @@ public class JaxRsRequestHandler
 		}
 	}
 
+	private void unwrapInvocationTargetException(Throwable ex) throws HttpException {
+		if (ex instanceof InvocationTargetException) {
+			Throwable cause = ex.getCause();
+			if (cause != null) {
+				unwrapInvocationTargetException(cause);
+			}
+		} else {
+			if (ex instanceof HttpException) {
+				throw (HttpException) ex.getCause();
+			}
+			if (ex instanceof TigaseStringprepException) {
+				throw new ValidationException(ex.getMessage(), ex);
+			}
+			throw new HttpException(ex, 500);
+		}
+	}
+
 	private void validateContent(AnnotatedElement store, Object value) {
-		boolean notNull = store.isAnnotationPresent(NotNull.class);
+		boolean isPrimitive = (store instanceof Parameter) ? ((Parameter) store).getType().isPrimitive() : ((store instanceof Field) && ((Field) store).getType().isPrimitive());
+		boolean notNull = store.isAnnotationPresent(NotNull.class) || isPrimitive;
 		if (notNull && value == null) {
 			throwValidationError(store, notNull, ValidationError.notNull);
 		}
@@ -524,22 +539,26 @@ public class JaxRsRequestHandler
 	}
 
 	private static Object convertToValue(Class expectedClass, String valueStr) {
-		Function<String, Object> mapper = DESERIALIZERS.get(expectedClass);
-		if (mapper == null) {
-			try {
-				Method method = expectedClass.getDeclaredMethod("fromString", String.class);
-				return method.invoke(null, valueStr);
-			} catch (NoSuchMethodException|InvocationTargetException|IllegalAccessException e) {
+		try {
+			Function<String, Object> mapper = DESERIALIZERS.get(expectedClass);
+			if (mapper == null) {
 				try {
-					Method method = expectedClass.getDeclaredMethod("valueOf", String.class);
+					Method method = expectedClass.getDeclaredMethod("fromString", String.class);
 					return method.invoke(null, valueStr);
-				} catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException ex) {
-					// nothing to do..
+				} catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+					try {
+						Method method = expectedClass.getDeclaredMethod("valueOf", String.class);
+						return method.invoke(null, valueStr);
+					} catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException ex) {
+						// nothing to do..
+						throw new ValidationException("Value " + valueStr + " cannot be converted to " + expectedClass.getCanonicalName(), ex);
+					}
 				}
 			}
-			return null;
+			return mapper.apply(valueStr);
+		} catch (Throwable ex) {
+			throw new ValidationException("Value " + valueStr + " cannot be converted to " + expectedClass.getCanonicalName(), ex);
 		}
-		return mapper.apply(valueStr);
 	}
 
 	private Object decodeContent(Class clazz, HttpServletRequest request) throws HttpException, IOException {

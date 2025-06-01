@@ -67,6 +67,8 @@ public class DashboardModule extends AbstractJaxRsModule<Handler> {
 		servletInfo.addMapping("/assets/*");
 		httpDeployment.addServlets(servletInfo);
 
+		httpDeployment.setGlobalErrorPage("/error/global");
+
 		httpServer.deploy(httpDeployment);
 	}
 

@@ -17,10 +17,7 @@
  */
 package tigase.http;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -34,9 +31,12 @@ public class DeploymentInfo {
 	private ClassLoader classLoader = null;
 	private String contextPath = null;
 	private String description = null;
+	private String globalErrorPage;
 	private String name;
 	private AuthProvider authProvider;
 	private String[] vhosts = null;
+	private Map<Class<? extends Throwable>, String> exceptionErrorPages = new HashMap<>();
+	private Map<Integer, String> errorCodePages = new HashMap<>();
 
 	public DeploymentInfo() {
 	}
@@ -109,6 +109,33 @@ public class DeploymentInfo {
 
 	public DeploymentInfo setAuthProvider(AuthProvider authProvider) {
 		this.authProvider = authProvider;
+		return this;
+	}
+
+	public DeploymentInfo addErrorPage(Class<? extends Throwable> exception, String uri) {
+		exceptionErrorPages.put(exception, uri);
+		return this;
+	}
+
+	public DeploymentInfo addErrorPage(int code, String uri) {
+		errorCodePages.put(code, uri);
+		return this;
+	}
+
+	public Map<Class<? extends Throwable>, String> getExceptionErrorPages() {
+		return Collections.unmodifiableMap(exceptionErrorPages);
+	}
+
+	public Map<Integer, String> getErrorCodePages() {
+		return Collections.unmodifiableMap(errorCodePages);
+	}
+
+	public String getGlobalErrorPage() {
+		return globalErrorPage;
+	}
+
+	public DeploymentInfo setGlobalErrorPage(String uri) {
+		globalErrorPage = uri;
 		return this;
 	}
 

@@ -15,11 +15,10 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta charset="UTF-8"/>
     <title>Tigase XMPP Server</title>
-    <link rel="stylesheet" type="text/css" href="assets/css/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="assets/css/custom.css">
-    <link rel="stylesheet" type="text/css" href="assets/css/http-api-custom.css">
-    <link rel="stylesheet" type="text/css" href="assets/css/bootstrap-icons.min.css">
-    <script type="javascript" src="assets/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="${uriInfo.getBaseUriBuilder().path("assets/css/bootstrap.min.css").build().getPath()}">
+    <link rel="stylesheet" type="text/css" href="${uriInfo.getBaseUriBuilder().path("assets/css/custom.css").build().getPath()}">
+    <link rel="stylesheet" type="text/css" href="${uriInfo.getBaseUriBuilder().path("assets/css/http-api-custom.css").build().getPath()}">
+    <link rel="stylesheet" type="text/css" href="${uriInfo.getBaseUriBuilder().path("assets/css/bootstrap-icons.min.css").build().getPath()}">
     <style>
         body {
             font-family: var(--bs-body-font-family);
@@ -36,6 +35,75 @@
             width: 3em;
         }
     </style>
+    <style>
+        .copyable:hover > i {
+            opacity: 1.0;
+        }
+        .copyable i {
+            opacity: 0.5;
+        }
+    </style>
+    <script>
+        function copyTextToClipboard(el, isDiv) {
+            event.stopPropagation();
+
+            let source = isDiv ? el : el.querySelector("pre");
+            let text = source.textContent;
+            let i = el.querySelector("i");
+            i.classList.remove("bi-clipboard-fill");
+            i.classList.add("bi-clipboard-check-fill");
+            window.setTimeout(()=> {
+                i.classList.add("bi-clipboard-fill");
+                i.classList.remove("bi-clipboard-check-fill");
+            }, 500);
+            navigator.clipboard.writeText(text);
+        }
+
+        window.addEventListener("load", ()=> {
+            let copyableItems = document.getElementsByClassName("copyable");
+            for (let copyable of copyableItems) {
+                let isDiv = copyable.nodeName == 'DIV';
+                let copy = document.createElement("i");
+                copy.classList.add("mx-2","bi","bi-clipboard-fill");
+                if (isDiv) {
+                    copy.setAttribute("style", "font-size: 1.1em; margin-top: -0.1em; margin-bottom: -0.1em; display: block; position: absolute; top: 1em; right: 1em;")
+                } else {
+                    copy.setAttribute("style", "font-size: 1.1em; margin-top: -0.1em; margin-bottom: -0.1em; display: inline-block;")
+                }
+                copyable.append(copy);
+                copyable.addEventListener("click", ()=> {
+                    copyTextToClipboard(copyable, isDiv)
+                });
+            }
+        });
+        // function copyTextToClipboard(el) {
+        //     event.stopPropagation();
+        //     var text = $(el).text();
+        //     let iEls = $(el).find("i");
+        //     if (iEls != null) {
+        //         for (let iEl of iEls) {
+        //             $(iEl).removeClass("bi-clipboard-fill");
+        //             $(iEl).addClass("bi-clipboard-check-fill");
+        //         }
+        //         window.setTimeout(function() {
+        //             for (let iEl of iEls) {
+        //                 $(iEl).addClass("bi-clipboard-fill");
+        //                 $(iEl).removeClass("bi-clipboard-check-fill");
+        //             }
+        //         }, 500);
+        //     }
+        //     navigator.clipboard.writeText(text);
+        // }
+        //
+        // $(window).on("load", function() {
+        //     for (let copyable of $(".copyable")) {
+        //         $(copyable).append("<i class=\"mx-2 bi bi-clipboard-fill\" style=\"font-size: 1.1em; margin-top: -0.1em; margin-bottom: -0.1em; display: inline-block;\"></i>");
+        //         $(copyable).on("click", function() {
+        //             copyTextToClipboard(this);
+        //         });
+        //     }
+        // });
+    </script>
 </head>
 <body class="vh-100">
 <noscript>
@@ -86,6 +154,6 @@
         </footer>
     </div>
 </main>
-<script src="assets/js/bootstrap.bundle.min.js"></script>
+<script src="${uriInfo.getBaseUriBuilder().path("assets/js/bootstrap.bundle.min.js").build().getPath()}"></script>
 </body>
 </html>
