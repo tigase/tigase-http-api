@@ -15,29 +15,29 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://www.gnu.org/licenses/.
  */
-package tigase.http.jetty;
+package tigase.http.jaxrs.validators;
 
-import org.osgi.framework.BundleContext;
-import tigase.osgi.AbstractActivator;
+import tigase.http.jaxrs.annotations.JidLocalpart;
+import tigase.util.stringprep.TigaseStringprepException;
+import tigase.xmpp.jid.BareJID;
 
-public class Activator
-		extends AbstractActivator {
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorContext;
 
-	private static BundleContext context;
+public class JidLocalpartValidator implements ConstraintValidator<JidLocalpart, String> {
 
-	public static BundleContext getContext() {
-		return context;
+	@Override
+	public void initialize(JidLocalpart constraintAnnotation) {
+		ConstraintValidator.super.initialize(constraintAnnotation);
 	}
 
 	@Override
-	public void start(BundleContext bc) throws Exception {
-		context = bc;
-		super.start(bc);
-	}
-
-	@Override
-	public void stop(BundleContext bc) throws Exception {
-		super.stop(bc);
-		context = null;
+	public boolean isValid(String localpart, ConstraintValidatorContext constraintValidatorContext) {
+		try {
+			BareJID.bareJIDInstance(localpart, "domain.com");
+			return true;
+		} catch (TigaseStringprepException e) {
+			return false;
+		}
 	}
 }

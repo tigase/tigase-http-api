@@ -34,6 +34,7 @@ import tigase.kernel.beans.Inject;
 import tigase.xmpp.jid.BareJID;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 @Bean(name = "user", parent = RestModule.class, active = false)
@@ -64,7 +65,7 @@ public class UserHandler extends AbstractRestHandler {
 	@Path("/{userJid}")
 	@Consumes({"application/json", "application/xml"})
 	@Produces({"application/json", "application/xml"})
-	public User createUser(@NotNull @PathParam("userJid") BareJID userJid, @NotNull UserCreate form)
+	public User createUser(@NotNull @PathParam("userJid") BareJID userJid, @Valid @NotNull UserCreate form)
 			throws HttpException, TigaseDBException {
 		if (userRepository.userExists(userJid)) {
 			throw new HttpException("User already exists!", HttpServletResponse.SC_CONFLICT);
@@ -80,7 +81,7 @@ public class UserHandler extends AbstractRestHandler {
 	@Path("/{userJid}")
 	@Consumes({"application/json", "application/xml"})
 	@Produces({"application/json", "application/xml"})
-	public User changeUser(@NotNull @PathParam("userJid") BareJID userJid, @NotNull UserChange form)
+	public User changeUser(@NotNull @PathParam("userJid") BareJID userJid, @Valid @NotNull UserChange form)
 			throws NotFoundException, TigaseDBException {
 		if (!userRepository.userExists(userJid)) {
 			throw new NotFoundException("User does not exist!");

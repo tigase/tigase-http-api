@@ -1,6 +1,6 @@
 /*
- * Tigase HTTP API - Jetty - Tigase HTTP API - support for Jetty HTTP Server
- * Copyright (C) 2014 Tigase, Inc. (office@tigase.com)
+ * Tigase HTTP API component - Tigase HTTP API component
+ * Copyright (C) 2013 Tigase, Inc. (office@tigase.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by

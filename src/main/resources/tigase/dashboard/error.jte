@@ -30,7 +30,7 @@
             </div>
             @if (reason != null)
             <div class="row">
-                <h3>${reason}</h3>
+                <h4>$unsafe{reason.replaceAll("\n","<br/>")}</h4>
             </div>
             @endif
             <div class="row mt-4">

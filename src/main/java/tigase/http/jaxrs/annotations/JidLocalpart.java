@@ -15,29 +15,21 @@
  * along with this program. Look for COPYING file in the top folder.
  * If not, see http://www.gnu.org/licenses/.
  */
-package tigase.http.jetty;
+package tigase.http.jaxrs.annotations;
 
-import org.osgi.framework.BundleContext;
-import tigase.osgi.AbstractActivator;
+import tigase.http.jaxrs.validators.JidLocalpartValidator;
 
-public class Activator
-		extends AbstractActivator {
+import javax.validation.Constraint;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-	private static BundleContext context;
+@Target({ElementType.FIELD, ElementType.PARAMETER})
+@Retention(RetentionPolicy.RUNTIME)
+@Constraint(validatedBy = JidLocalpartValidator.class)
+public @interface JidLocalpart {
 
-	public static BundleContext getContext() {
-		return context;
-	}
+	String message() default "is not valid JID localpart";
 
-	@Override
-	public void start(BundleContext bc) throws Exception {
-		context = bc;
-		super.start(bc);
-	}
-
-	@Override
-	public void stop(BundleContext bc) throws Exception {
-		super.stop(bc);
-		context = null;
-	}
 }

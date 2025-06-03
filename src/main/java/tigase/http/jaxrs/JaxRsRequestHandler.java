@@ -19,18 +19,25 @@ package tigase.http.jaxrs;
 
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.container.Suspended;
-import jakarta.ws.rs.core.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.SecurityContext;
+import jakarta.ws.rs.core.UriInfo;
 import jakarta.xml.bind.MarshalException;
 import jakarta.xml.bind.UnmarshalException;
 import tigase.http.api.HttpException;
 import tigase.http.api.UnsupportedFormatException;
 import tigase.http.jaxrs.marshallers.*;
+import tigase.http.jaxrs.validators.ConstraintViolation;
 import tigase.util.stringprep.TigaseStringprepException;
 import tigase.xmpp.jid.BareJID;
 import tigase.xmpp.jid.JID;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Constraint;
+import javax.validation.ConstraintValidator;
+import javax.validation.Valid;
 import javax.validation.ValidationException;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
@@ -38,10 +45,13 @@ import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -62,8 +72,20 @@ public class JaxRsRequestHandler
 		DESERIALIZERS.put(Double.class, Double::parseDouble);
 		DESERIALIZERS.put(Float.class, Float::parseFloat);
 		DESERIALIZERS.put(String.class, s -> s);
-		DESERIALIZERS.put(BareJID.class, BareJID::bareJIDInstanceNS);
-		DESERIALIZERS.put(JID.class, JID::jidInstanceNS);
+		DESERIALIZERS.put(BareJID.class, str -> {
+			try {
+				return BareJID.bareJIDInstance(str);
+			} catch (TigaseStringprepException ex) {
+				throw new IllegalArgumentException(ex.getMessage(), ex);
+			}
+		});
+		DESERIALIZERS.put(JID.class, str -> {
+			try {
+				return JID.jidInstance(str);
+			} catch (TigaseStringprepException ex) {
+				throw new IllegalArgumentException(ex.getMessage(), ex);
+			}
+		});
 	}
 
 	private final Handler.Role requiredRole;
@@ -296,6 +318,25 @@ public class JaxRsRequestHandler
 		return null;
 	}
 
+	private String getParameterNameDescription(Parameter param) {
+		PathParam pathParam = param.getAnnotation(PathParam.class);
+		HeaderParam headerParam = param.getAnnotation(HeaderParam.class);
+		FormParam formParam = param.getAnnotation(FormParam.class);
+		QueryParam queryParam = param.getAnnotation(QueryParam.class);
+
+		if (pathParam != null) {
+			return "Parameter '" + pathParam.value() + "'";
+		} else if (headerParam != null) {
+			return "Header '" + headerParam.value() + "'";
+		} else if (formParam != null) {
+			return "Form parameter '" + formParam.value() + "'";
+		} else if (queryParam != null) {
+			return "Query parameter '" + queryParam.value() + "'";
+		} else {
+			return "Unknown " + param.getName();
+		}
+	}
+
 	public void execute(HttpServletRequest request, HttpServletResponse response, Matcher matcher, ScheduledExecutorService executorService)
 			throws HttpException, IOException {
 		ContainerRequestContext context = new ContainerRequestContext(request);
@@ -304,96 +345,105 @@ public class JaxRsRequestHandler
 		List values = new ArrayList<>();
 		AsyncResponseImpl asyncResponse = null;
 		try {
+			List<ConstraintViolation> violations = new ArrayList<>();
+			Map<Parameter, ValidationException> parsingExceptions = new HashMap<>();
 			for (Parameter param : method.getParameters()) {
 				Object value = null;
+
 				PathParam pathParam = param.getAnnotation(PathParam.class);
 				HeaderParam headerParam = param.getAnnotation(HeaderParam.class);
 				FormParam formParam = param.getAnnotation(FormParam.class);
 				QueryParam queryParam = param.getAnnotation(QueryParam.class);
-				
-				if (pathParam != null) {
-					String valueStr = matcher.group(pathParam.value());
-					if (valueStr == null) {
-						valueStr = getParamDefaultValue(param);
-					}
-					if (valueStr != null) {
-						value = convertToValue(param.getType(), valueStr);
-					}
-				} else if (headerParam != null) {
-					String valueStr = request.getHeader(headerParam.value());
-					if (valueStr == null) {
-						valueStr = getParamDefaultValue(param);
-					}
-					if (valueStr != null) {
-						value = convertToValue(param.getType(), valueStr);
-					}
-				} else if (formParam != null) {
-					String[] valuesStr = request.getParameterValues(formParam.value());
-					if (valuesStr == null) {
-						String defValue = getParamDefaultValue(param);
-						if (defValue != null) {
+
+				try {
+					if (pathParam != null) {
+						String valueStr = matcher.group(pathParam.value());
+						if (valueStr == null) {
+							valueStr = getParamDefaultValue(param);
+						}
+						if (valueStr != null) {
+							value = convertToValue(param.getType(), valueStr);
+						}
+					} else if (headerParam != null) {
+						String valueStr = request.getHeader(headerParam.value());
+						if (valueStr == null) {
+							valueStr = getParamDefaultValue(param);
+						}
+						if (valueStr != null) {
+							value = convertToValue(param.getType(), valueStr);
+						}
+					} else if (formParam != null) {
+						String[] valuesStr = request.getParameterValues(formParam.value());
+						if (valuesStr == null) {
+							String defValue = getParamDefaultValue(param);
+							if (defValue != null) {
+								valuesStr = new String[]{getParamDefaultValue(param)};
+							}
+						}
+						if (boolean.class.equals(param.getType())) {
+							value = valuesStr != null && valuesStr.length == 1 && "on".equals(valuesStr[0]);
+						} else {
+							if (valuesStr != null) {
+								value = convertToValue(param.getParameterizedType(), valuesStr);
+							}
+						}
+					} else if (queryParam != null) {
+						String[] valuesStr = request.getParameterValues(queryParam.value());
+						if (valuesStr == null) {
 							valuesStr = new String[]{getParamDefaultValue(param)};
 						}
-					}
-					if (boolean.class.equals(param.getType())) {
-						value = valuesStr != null && valuesStr.length == 1 && "on".equals(valuesStr[0]);
+						if (boolean.class.equals(param.getType())) {
+							value = valuesStr != null && valuesStr.length == 1 && "on".equals(valuesStr[0]);
+						} else {
+							if (valuesStr != null) {
+								value = convertToValue(param.getParameterizedType(), valuesStr);
+							}
+						}
+					} else if (param.getAnnotation(Suspended.class) != null) {
+						if (asyncResponse == null) {
+							asyncResponse = new AsyncResponseImpl(this, executorService, request, acceptedType);
+						}
+						value = asyncResponse;
+					} else if (param.getAnnotation(BeanParam.class) != null) {
+						try {
+							value = new WWWFormUrlEncodedUnmarshaller().unmarshal(param.getType(), request);
+						} catch (UnmarshalException ex) {
+							throw new HttpException(ex, HttpServletResponse.SC_NOT_ACCEPTABLE);
+						}
+					} else if (Pageable.class.isAssignableFrom(param.getType())) {
+						value = Pageable.from(request);
+					} else if (SecurityContext.class.isAssignableFrom(param.getType())) {
+						value = context.getSecurityContext();
+					} else if (HttpServletRequest.class.isAssignableFrom(param.getType())) {
+						value = context.getRequest();
+					} else if (HttpServletResponse.class.isAssignableFrom(param.getType())) {
+						value = response;
+					} else if (UriInfo.class.isAssignableFrom(param.getType())) {
+						value = context.getUriInfo();
+					} else if (Model.class.isAssignableFrom(param.getType())) {
+						value = new Model(context);
 					} else {
-						if (valuesStr != null) {
-							value = convertToValue(param.getParameterizedType(), valuesStr);
+						// if non on the above..
+						String contentType = request.getContentType();
+						if (contentType != null) {
+							value = decodeContent(param.getType(), request);
 						}
 					}
-				} else if (queryParam != null) {
-					String[] valuesStr = request.getParameterValues(queryParam.value());
-					if (valuesStr == null) {
-						valuesStr = new String[]{getParamDefaultValue(param)};
-					}
-					if (boolean.class.equals(param.getType())) {
-						value = valuesStr != null && valuesStr.length == 1 && "on".equals(valuesStr[0]);
-					} else {
-						if (valuesStr != null) {
-							value = convertToValue(param.getParameterizedType(), valuesStr);
-						}
-					}
-				} else if (param.getAnnotation(Suspended.class) != null) {
-					if (asyncResponse == null) {
-						asyncResponse = new AsyncResponseImpl(this, executorService, request, acceptedType);
-					}
-					value = asyncResponse;
-				} else if (param.getAnnotation(BeanParam.class) != null) {
-					try {
-						value = new WWWFormUrlEncodedUnmarshaller().unmarshal(param.getType(), request);
-					} catch (UnmarshalException ex) {
-						throw new HttpException(ex, HttpServletResponse.SC_NOT_ACCEPTABLE);
-					}
-				} else if (Pageable.class.isAssignableFrom(param.getType())) {
-					value = Pageable.from(request);
-				} else if (SecurityContext.class.isAssignableFrom(param.getType())) {
-					value = context.getSecurityContext();
-				} else if (HttpServletRequest.class.isAssignableFrom(param.getType())) {
-					value = context.getRequest();
-				} else if (HttpServletResponse.class.isAssignableFrom(param.getType())) {
-					value = response;
-				} else if (UriInfo.class.isAssignableFrom(param.getType())) {
-					value = context.getUriInfo();
-				} else if (Model.class.isAssignableFrom(param.getType())) {
-					value = new Model(context);
-				} else {
-					// if non on the above..
-					String contentType = request.getContentType();
-					if (contentType != null) {
-						value = decodeContent(param.getType(), request);
-						if (value != null) {
-							validateContent(value);
-						}
-					}
+				} catch (ValidationException ex) {
+					log.log(Level.FINER, ex, () -> "failed to parse request parameter");
+					parsingExceptions.put(param, ex);
 				}
-
-				validateContent(param, value);
 				values.add(value);
 			}
 
 			try {
 				ContainerRequestContext.setContext(context);
+				validateParameters(handler, method, values.toArray(), parsingExceptions::containsKey, violations::add);
+
+				if ((!violations.isEmpty()) || (!parsingExceptions.isEmpty())) {
+					throwValidationError(violations, parsingExceptions.values());
+				}
+
 				Object result = method.invoke(handler, values.toArray());
 				if (Void.TYPE.equals(method.getReturnType())) {
 					return;
@@ -436,64 +486,147 @@ public class JaxRsRequestHandler
 		}
 	}
 
-	private void validateContent(AnnotatedElement store, Object value) {
-		boolean isPrimitive = (store instanceof Parameter) ? ((Parameter) store).getType().isPrimitive() : ((store instanceof Field) && ((Field) store).getType().isPrimitive());
-		boolean notNull = store.isAnnotationPresent(NotNull.class) || isPrimitive;
-		if (notNull && value == null) {
-			throwValidationError(store, notNull, ValidationError.notNull);
-		}
-		boolean notEmpty = store.isAnnotationPresent(NotEmpty.class);
-		if (notEmpty) {
-			if (value instanceof String) {
-				if (((String) value).isEmpty()) {
-					throwValidationError(store, notNull, ValidationError.notNull);
-				}
-			} else if (value instanceof Collection<?>) {
-				if (((Collection<?>) value).isEmpty()) {
-					throwValidationError(store, notNull, ValidationError.notNull);
-				}
+	private void validateParameters(Object handler, Method method, Object[] values, Predicate<Parameter> skipValidation, Consumer<ConstraintViolation> consumer) throws HttpException {
+		var parameters = method.getParameters();
+		for (int i = 0; i < parameters.length; i++) {
+			Parameter parameter = parameters[i];
+			if (skipValidation.test(parameter)) {
+				continue;
 			}
+			Object value = values[i];
+			validateValue(parameter, parameter.getType(), value, null, consumer);
 		}
-		boolean notBlank = store.isAnnotationPresent(NotBlank.class);
-		if (notBlank && value instanceof String str) {
-			if (str.isBlank()) {
-				throwValidationError(store, value, ValidationError.notBlank);
-			}
-		}
-	}
-
-	enum ValidationError {
-		notNull,
-		notEmpty,
-		notBlank
 	}
 	
-	private void throwValidationError(AnnotatedElement store, Object value, ValidationError error) {
-		StringBuilder sb = new StringBuilder();
-		if (store instanceof Field field) {
-			sb.append("Field ").append(field.getName()).append(" in object ").append(field.getDeclaringClass());
-		} else if (store instanceof Parameter parameter) {
-			sb.append("Parameter ").append(parameter.getName());
-		} else {
-			sb.append("Validation failed for ").append(store).append(" = ").append(value);
+	private void validateValue(AnnotatedElement store, Class<?> type, Object value, ConstraintViolation.Path path, Consumer<ConstraintViolation> consumer) throws HttpException {
+		var annotations = store.getAnnotations();
+		for (var annotation : annotations) {
+			var validators = getValidators(annotation);
+			for (var validator : validators) {
+				if (!validator.test(value)) {
+					consumer.accept(createViolation(path, annotation, store, value));
+				}
+			}
+
+			if (annotation instanceof NotNull || type.isPrimitive()) {
+				if (!Objects.nonNull(value)) {
+					consumer.accept(createViolation(path, annotation, store, value));
+				}
+			}
+			else if (annotation instanceof NotEmpty) {
+				if (String.class.isAssignableFrom(type)) {
+					if (value == null || value.toString().isEmpty()) {
+						consumer.accept(createViolation(path, annotation, store, value));
+					}
+				}
+				if (Collection.class.isAssignableFrom(type)) {
+					if (value == null || ((Collection) value).isEmpty()) {
+						consumer.accept(createViolation(path, annotation, store, value));
+					}
+				}
+			} else if (annotation instanceof NotBlank) {
+				if (String.class.isAssignableFrom(type)) {
+					if (value == null || value.toString().isBlank()) {
+						consumer.accept(createViolation(path, annotation, store, value));
+					}
+				}
+			} else if (annotation instanceof javax.validation.constraints.Pattern) {
+				if (value == null || !Pattern.matches(((javax.validation.constraints.Pattern) annotation).regexp(), value.toString())) {
+					consumer.accept(createViolation(path, annotation, store, value));
+				}
+			} else if (annotation instanceof Valid || path != null) {
+				if (value != null) {
+					if (value instanceof Collection collection) {
+						var items = new ArrayList<>(collection);
+						for (int i = 0; i < items.size(); i++) {
+							var item = items.get(i);
+							if (item != null) {
+								ConstraintViolation.Path itemPath = (path == null
+																	 ? ConstraintViolation.Path.ROOT
+																	 : path).appendItem(i);
+								try {
+									for (Field field : value.getClass().getDeclaredFields()) {
+										field.setAccessible(true);
+										validateValue(field, field.getType(), field.get(item),
+													  itemPath.appendField(field.getName()), consumer);
+									}
+								} catch (IllegalAccessException ex) {
+									throw new HttpException(ex, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+								}
+							}
+						}
+					} else {
+						try {
+							for (Field field : value.getClass().getDeclaredFields()) {
+								field.setAccessible(true);
+								validateValue(field, field.getType(), field.get(value),
+											  (path == null ? ConstraintViolation.Path.ROOT : path).appendField(field.getName()), consumer);
+							}
+						} catch (IllegalAccessException ex) {
+							throw new HttpException(ex, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+						}
+					}
+				}
+			}
 		}
-		sb.append(" cannot be ").append(switch (error) {
-			case notNull -> "NULL";
-			case notBlank -> "BLANK";
-			case notEmpty -> "EMPTY";
-		}).append("!");
-		throw new ValidationException(sb.toString());
 	}
 
-	private void validateContent(Object object) throws HttpException {
+	private ConstraintViolation createViolation(ConstraintViolation.Path path, Annotation annotation, AnnotatedElement store, Object value) {
+		String message = null;
 		try {
-			for (Field field : object.getClass().getDeclaredFields()) {
-				field.setAccessible(true);
-				validateContent(field, field.get(object));
-			}
-		} catch (IllegalAccessException ex) {
-			throw new HttpException(ex, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			message = annotation.annotationType().getDeclaredMethod("message").invoke(annotation).toString();
+		} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ex) {
+			message = null;
 		}
+		if (message == null) {
+			message = annotation.annotationType().getName();
+		} else {
+			message = switch (message) {
+				case "{javax.validation.constraints.NotNull.message}" -> "may not be null";
+				case "{javax.validation.constraints.NotEmpty.message}" -> "may not be empty";
+				case "{javax.validation.constraints.NotBlank.message}" -> "may not be blank";
+				case "{javax.validation.constraints.Pattern.message}" -> "must match pattern '" + ((javax.validation.constraints.Pattern) annotation).regexp() + "'";
+				default -> message;
+			};
+		}
+		return new ConstraintViolation(message, path, store, value, (store instanceof Parameter) ? getParameterNameDescription((Parameter) store) : null);
+	}
+
+	private List<Predicate<Object>> getValidators(Annotation annotation) {
+		return getAnnotationValidators(annotation).map(validatorClass -> {
+			try {
+				return validatorClass.getDeclaredConstructor().newInstance();
+			} catch (NoSuchMethodException | InstantiationException | IllegalAccessException |
+					 InvocationTargetException ex) {
+				throw new HttpException(ex, 500);
+			}
+		}).map(validator -> {
+			return (Predicate<Object>) new Predicate<Object>() {
+				@Override
+				public boolean test(Object it) {
+					return validator.isValid(it, null);
+				}
+			};				
+		}).toList();
+	}
+
+	private <A extends Annotation> Stream<Class<? extends ConstraintValidator<A,Object>>> getAnnotationValidators(A annotation) {
+		Constraint constraint = annotation.annotationType().getAnnotation(Constraint.class);
+		if (constraint != null) {
+			var validatorClasses = (Class<? extends ConstraintValidator<A,Object>>[]) constraint.validatedBy();
+			if (validatorClasses.length > 0) {
+				return Stream.of(validatorClasses);
+			}
+		}
+		return Stream.empty();
+	}
+	
+
+	private void throwValidationError(Collection<ConstraintViolation> violations, Collection<ValidationException> parsingExceptions) {
+		if (violations.isEmpty() && parsingExceptions.isEmpty()) {
+			return;
+		}
+		throw new ExtendedValidationException(violations, parsingExceptions);
 	}
 
 	private String getParamDefaultValue(Parameter param) {
@@ -551,13 +684,13 @@ public class JaxRsRequestHandler
 						return method.invoke(null, valueStr);
 					} catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException ex) {
 						// nothing to do..
-						throw new ValidationException("Value " + valueStr + " cannot be converted to " + expectedClass.getCanonicalName(), ex);
+						throw new ValidationException("Value '" + valueStr + "' cannot be converted to " + expectedClass.getCanonicalName(), ex);
 					}
 				}
 			}
 			return mapper.apply(valueStr);
 		} catch (Throwable ex) {
-			throw new ValidationException("Value " + valueStr + " cannot be converted to " + expectedClass.getCanonicalName(), ex);
+			throw new ValidationException("Value '" + valueStr + "' cannot be converted to " + expectedClass.getCanonicalName(), ex);
 		}
 	}
 

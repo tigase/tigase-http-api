@@ -41,6 +41,7 @@ import tigase.http.jaxrs.Model;
 import tigase.http.jaxrs.Page;
 import tigase.http.jaxrs.Pageable;
 import tigase.http.jaxrs.SecurityContextHolder;
+import tigase.http.jaxrs.annotations.JidLocalpart;
 import tigase.kernel.beans.Bean;
 import tigase.kernel.beans.Inject;
 import tigase.server.xmppsession.DisconnectUserEBAction;
@@ -186,7 +187,7 @@ public class UsersHandler extends DashboardHandler {
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@RolesAllowed({"admin", "account_manager"})
 	public Response createUser(
-		@FormParam("localpart") @NotEmpty String localpart,
+		@FormParam("localpart") @JidLocalpart(message = "is not a valid username") @NotEmpty String localpart,
 		@FormParam("domain") @NotEmpty String domain,
 		@FormParam("password") String password,
 		@FormParam("expiration") String expiration,
