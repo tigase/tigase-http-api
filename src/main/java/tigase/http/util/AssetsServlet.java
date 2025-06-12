@@ -23,20 +23,35 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLDecoder;
+import java.net.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Optional;
 
-import static javax.servlet.http.HttpServletResponse.*;
+import static javax.servlet.http.HttpServletResponse.SC_NOT_FOUND;
+import static javax.servlet.http.HttpServletResponse.SC_NOT_MODIFIED;
 
 public class AssetsServlet extends HttpServlet {
 
+	private Path customAssetsPath;
+
 	public AssetsServlet() {}
+
+	@Override
+	public void init() throws ServletException {
+		super.init();
+		Optional.ofNullable(getInitParameter("customAssetsPath"))
+				.map(it -> "file:///" + it)
+				.map(URI::create)
+				.map(Paths::get)
+				.ifPresent(it -> customAssetsPath = it);
+	}
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -56,9 +71,7 @@ public class AssetsServlet extends HttpServlet {
 		}
 		reqFile = URLDecoder.decode(reqFile, StandardCharsets.UTF_8);
 
-		String path = "/tigase/assets" + reqFile;
-
-		URL fileUrl = AssetsServlet.class.getResource(path);
+		URL fileUrl = resolveFileUrl(reqFile);
 		if (fileUrl == null) {
 			resp.sendError(SC_NOT_FOUND);
 			return;
@@ -117,5 +130,24 @@ public class AssetsServlet extends HttpServlet {
 				is.transferTo(resp.getOutputStream());
 			}
 		}
+	}
+
+	private URL resolveFileUrl(String reqFile) throws MalformedURLException {
+		if (customAssetsPath != null) {
+			String filePath= reqFile;
+			while (filePath.startsWith("/")) {
+				filePath = filePath.substring(1);
+			}
+			Path assetsPath = customAssetsPath.resolve(filePath);
+			File file = assetsPath.toFile();
+			if (file.exists()) {
+				return file.toURI().toURL();
+			}
+		}
+
+		String path = "/tigase/assets" + reqFile;
+
+
+		return AssetsServlet.class.getResource(path);
 	}
 }

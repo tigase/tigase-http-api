@@ -25,8 +25,17 @@ import tigase.http.jaxrs.Handler;
 import tigase.http.jaxrs.JaxRsServlet;
 import tigase.http.util.AssetsServlet;
 import tigase.kernel.beans.Bean;
+import tigase.kernel.beans.config.ConfigField;
 import tigase.kernel.beans.selector.ConfigType;
 import tigase.kernel.beans.selector.ConfigTypeEnum;
+
+import java.io.File;
+import java.net.URI;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @Bean(name = "dashboard", parent = HttpMessageReceiver.class, active = true)
 @ConfigType({ConfigTypeEnum.DefaultMode, ConfigTypeEnum.SessionManagerMode, ConfigTypeEnum.ConnectionManagersMode,
@@ -35,10 +44,16 @@ public class DashboardModule extends AbstractJaxRsModule<Handler> {
 
 	private DeploymentInfo httpDeployment;
 
+	@ConfigField(desc = "Custom assets path", alias = "customAssetsPath")
+	private String customAssetsPath;
+	@ConfigField(desc = "Cache custom assets paths", alias = "customAssetsPathCached")
+	private boolean customAssetsPathCached = true;
+
 	@Override
 	public String getDescription() {
 		return "Dashboard of Tigase XMPP Server";
 	}
+	private CustomAssets customAssets;
 	
 	@Override
 	public void start() {
@@ -47,7 +62,11 @@ public class DashboardModule extends AbstractJaxRsModule<Handler> {
 		}
 
 		super.start();
-		
+
+		if (customAssetsPathCached) {
+			customAssets = resolveAssets();
+		}
+
 		httpDeployment = httpServer.deployment()
 				.setClassLoader(this.getClass().getClassLoader())
 				.setContextPath(contextPath)
@@ -64,6 +83,7 @@ public class DashboardModule extends AbstractJaxRsModule<Handler> {
 		httpDeployment.addServlets(servletInfo);
 
 		servletInfo = httpServer.servlet("AssetsServlet", AssetsServlet.class);
+		servletInfo.addInitParam("customAssetsPath", customAssetsPath);
 		servletInfo.addMapping("/assets/*");
 		httpDeployment.addServlets(servletInfo);
 
@@ -78,7 +98,34 @@ public class DashboardModule extends AbstractJaxRsModule<Handler> {
 			httpServer.undeploy(httpDeployment);
 			httpDeployment = null;
 		}
+		customAssets = null;
 		super.stop();
+	}
+
+	public CustomAssets getCustomAssets() {
+		if (customAssetsPath == null) {
+			return CustomAssets.NONE;
+		} else if (customAssets != null) {
+			return customAssets;
+		} else {
+			return resolveAssets();
+		}
+	}
+
+	private CustomAssets resolveAssets() {
+		Path root = Paths.get(URI.create("file:///" + customAssetsPath));
+		List<String> assets = new ArrayList<>();
+		for (File file : root.toFile().listFiles()) {
+			Path filePath = file.toPath();
+			String assetPath = filePath.subpath(root.getNameCount(), filePath.getNameCount()).toString();
+			assets.add(assetPath);
+		}
+		return new CustomAssets(assets.stream().filter(it -> it.endsWith(".css")).toList(),
+								assets.stream().filter(it -> it.endsWith(".js")).toList());
+	}
+
+	public record CustomAssets(List<String> cssFiles, List<String> jsFiles) {
+		public static CustomAssets NONE = new CustomAssets(Collections.emptyList(), Collections.emptyList());
 	}
 
 }

@@ -23,6 +23,7 @@ import gg.jte.output.StringOutput;
 import jakarta.ws.rs.core.SecurityContext;
 import tigase.http.jaxrs.Handler;
 import tigase.http.util.TemplateUtils;
+import tigase.kernel.beans.Inject;
 import tigase.kernel.beans.config.ConfigField;
 
 import java.lang.reflect.Method;
@@ -43,6 +44,14 @@ public abstract class DashboardHandler implements Handler {
 		return true;
 	}
 
+	public static DashboardHandler getHandler() {
+		return HANDLER.get();
+	}
+
+	private static final ThreadLocal<DashboardHandler> HANDLER = new ThreadLocal<>();
+
+	@Inject
+	private DashboardModule module;
 	protected TemplateEngine engine;
 	@ConfigField(desc = "Path to template files", alias = "templatesPath")
 	private String templatesPath;
@@ -55,15 +64,24 @@ public abstract class DashboardHandler implements Handler {
 		return templatesPath;
 	}
 
+	public DashboardModule.CustomAssets getCustomAssets() {
+		return module.getCustomAssets();
+	}
+
 	public void setTemplatesPath(String templatesPath) {
 		this.templatesPath = templatesPath;
 		this.engine = TemplateUtils.create(templatesPath, "tigase.dashboard", ContentType.Html);
 	}
 
 	protected String renderTemplate(String templateFile, Map<String, Object> model) {
-		StringOutput output = new StringOutput();
-		engine.render(templateFile, model, output);
-		return output.toString();
+		try {
+			HANDLER.set(this);
+			StringOutput output = new StringOutput();
+			engine.render(templateFile, model, output);
+			return output.toString();
+		} finally {
+			HANDLER.remove();
+		}
 	}
 
 }
