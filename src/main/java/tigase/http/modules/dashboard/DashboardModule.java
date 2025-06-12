@@ -63,7 +63,7 @@ public class DashboardModule extends AbstractJaxRsModule<Handler> {
 
 		super.start();
 
-		if (customAssetsPathCached) {
+		if (customAssetsPathCached && customAssetsPath != null) {
 			customAssets = resolveAssets();
 		}
 
@@ -113,6 +113,9 @@ public class DashboardModule extends AbstractJaxRsModule<Handler> {
 	}
 
 	private CustomAssets resolveAssets() {
+		if (customAssetsPath == null) {
+			return null;
+		}
 		Path root = Paths.get(URI.create("file:///" + customAssetsPath));
 		List<String> assets = new ArrayList<>();
 		for (File file : root.toFile().listFiles()) {
