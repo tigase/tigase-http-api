@@ -27,6 +27,7 @@ import tigase.http.coders.Coder
 import tigase.http.coders.JsonCoder
 import tigase.http.coders.XmlCoder
 import tigase.http.jaxrs.RequestHandler
+import tigase.http.util.StringUtils
 import tigase.xmpp.jid.BareJID
 
 import javax.servlet.AsyncContext
@@ -41,7 +42,8 @@ import java.util.regex.Pattern
 @CompileStatic
 class OldGroovyRequestHandler implements RequestHandler {
 
-	private final Logger log = Logger.getLogger(OldGroovyRequestHandler.class.getCanonicalName());
+	private static final Logger log = Logger.getLogger(OldGroovyRequestHandler.class.getCanonicalName());
+	private static final int logLenghtLimit = 5120
 
 	public static List<OldGroovyRequestHandler> create(Service<RestModule> service, tigase.http.rest.Handler handler, String prefix, OldGroovyResultEncoder resultEncoder) {
 		Handler.Role requiredRole = Handler.Role.None;
@@ -237,7 +239,7 @@ class OldGroovyRequestHandler implements RequestHandler {
 				String requestContent = request.getReader().getText()
 
 				if (log.isLoggable(Level.FINEST)) {
-					log.log(Level.FINEST, "${request}, received content = ${trimString(requestContent, 5120)} of type = ${type}")
+					log.log(Level.FINEST, "${request}, received content = ${StringUtils.trimString(requestContent, logLenghtLimit)} of type = ${type}")
 				}
 
 				def parsed = null;
@@ -250,7 +252,7 @@ class OldGroovyRequestHandler implements RequestHandler {
 				}
 
 				if (log.isLoggable(Level.FINEST)) {
-					log.log(Level.FINEST, "${request}, parsed received content =  ${trimString(parsed, 5120)}")
+					log.log(Level.FINEST, "${request}, parsed received content =  ${StringUtils.trimString(parsed, logLenghtLimit)}")
 				}
 
 				params.add(parsed)
@@ -264,7 +266,7 @@ class OldGroovyRequestHandler implements RequestHandler {
 		params.addAll(reqParams)
 
 		if (log.isLoggable(Level.FINEST)) {
-			log.finest("${request}, calling handlers `${route.getClass().getCanonicalName()}`, method: `${request.getMethod()}` with params = ${trimString(params, 5120)}")
+			log.finest("${request}, calling handlers `${route.getClass().getCanonicalName()}`, method: `${request.getMethod()}` with params = ${StringUtils.trimString(params, logLenghtLimit)}")
 		}
 
 		// Call exact closure
@@ -306,11 +308,6 @@ class OldGroovyRequestHandler implements RequestHandler {
 			return PATTERN_COMPARATOR.compare(pattern, ((OldGroovyRequestHandler) o).pattern);
 		}
 		return Integer.MAX_VALUE;
-	}
-
-    static def trimString(str, int limit) {
-		def logEntry = str.toString()
-		return "${logEntry.size() > limit ? logEntry[0..limit-1] + '…' : logEntry}";
 	}
 
 }

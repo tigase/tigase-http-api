@@ -18,6 +18,7 @@
 package tigase.rest.adhoc
 
 import tigase.http.rest.Service
+import tigase.http.util.StringUtils
 import tigase.server.Iq
 import tigase.server.Packet
 import tigase.xml.Element
@@ -34,6 +35,7 @@ class AdHocHandler
 		extends tigase.http.rest.Handler {
 
 	private static final Logger log = Logger.getLogger(AdHocHandler.class.getCanonicalName());
+	private static final int logLenghtLimit = 5120
 
 	def TIMEOUT = 30 * 1000;
 
@@ -127,7 +129,7 @@ In result of this operation you will receive ie. following XML:
 				command.addChild(x);
 
 				if (log.isLoggable(Level.FINEST)) {
-					log.log(Level.FINEST, "adhoc fields: ${trimString(fields, 5120)}");
+					log.log(Level.FINEST, "adhoc fields: ${StringUtils.trimString(fields, logLenghtLimit)}");
 				}
 
 
@@ -266,11 +268,4 @@ In result of this operation you will receive ie. following XML:
 			});
 		}
 	}
-
-
-	def trimString(str, int limit) {
-		def logEntry = str.toString()
-		return "${logEntry.size() > limit ? logEntry[0..limit-1] + '…' : logEntry}";
-	}
-
 }
