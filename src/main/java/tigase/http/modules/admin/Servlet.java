@@ -91,6 +91,11 @@ public class Servlet
 			}
 
 			final AsyncContext asyncCtx = request.startAsync(request, response);
+			if (log.isLoggable(Level.FINEST)) {
+				log.log(Level.FINEST,
+						"async context timeout: {1}; processing request {0}",
+						new Object[]{request.getRequestURI(), asyncCtx.getTimeout()});
+			}
 
 			CompletableFuture<List<CommandItem>> future = retrieveComponentsCommands(request.getUserPrincipal());
 

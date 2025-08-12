@@ -127,7 +127,7 @@ In result of this operation you will receive ie. following XML:
 				command.addChild(x);
 
 				if (log.isLoggable(Level.FINEST)) {
-					log.finest("adhoc fields: " + fields);
+					log.log(Level.FINEST, "adhoc fields: ${trimString(fields, 5120)}");
 				}
 
 
@@ -265,6 +265,13 @@ In result of this operation you will receive ie. following XML:
 				callback([ command: results ])
 			});
 		}
+	}
+
+
+	def trimString(str, int limit) {
+		def logEntry = str.toString()
+		println("Size: ${logEntry.size()}, limit: ${limit}, entry after cut: ${logEntry[0..<logEntry.size()-1].size()}")
+		return "${logEntry.size() > limit ? logEntry[0..limit-1] + '…' : logEntry}";
 	}
 
 }

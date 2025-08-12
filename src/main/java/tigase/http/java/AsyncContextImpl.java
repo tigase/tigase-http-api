@@ -121,6 +121,7 @@ public class AsyncContextImpl
 	@Override
 	public void setTimeout(long timeout) {
 		this.timeout = timeout;
+		log.log(Level.FINEST, "setting async context to: {0}", timeout);
 		this.future = scheduledExecutor.schedule(this::timeout, timeout, TimeUnit.MILLISECONDS);
 	}
 

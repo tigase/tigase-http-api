@@ -260,6 +260,7 @@ public class HttpMessageReceiver
 		final String key = generateKey(uuid, id);
 		CompletableFuture<Packet> future = new CompletableFuture<>();
 		// queue callback if we need result
+		log.log(Level.FINEST, "Sending packet with timeout " + timeout + " for key " + key);
 		if (timeout == null || timeout < 0) {
 			timeout = 30;
 		}
