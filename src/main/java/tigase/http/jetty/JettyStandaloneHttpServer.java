@@ -252,6 +252,14 @@ public class JettyStandaloneHttpServer
 			}
 		}
 		connector.setPort(config.getPort());
+
+
+		// WORKAROUND: for http requests timing out after 30s either way!
+		// TODO: possibly to remove in 9.0.0 after updated Jetty (and has it fixed?)
+		System.setProperty("org.eclipse.jetty.server.HttpChannelState.DEFAULT_TIMEOUT", String.valueOf(timeout));
+
+
+		log.log(Level.CONFIG, "Setting request timeout to " + timeout + " ms");
 		connector.setIdleTimeout(timeout);
 		return connector;
 	}
