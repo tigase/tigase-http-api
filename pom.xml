@@ -259,19 +259,19 @@
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
-            <version>9.4.45.v20220203</version>
+            <version>9.4.57.v20241219</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-servlet</artifactId>
-            <version>9.4.45.v20220203</version>
+            <version>9.4.57.v20241219</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty.http2</groupId>
             <artifactId>http2-server</artifactId>
-             <version>9.4.48.v20220622</version>
+             <version>9.4.57.v20241219</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -283,13 +283,13 @@
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-alpn-java-server</artifactId>
-            <version>9.4.45.v20220203</version>
+            <version>9.4.57.v20241219</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-alpn-server</artifactId>
-            <version>9.4.45.v20220203</version>
+            <version>9.4.57.v20241219</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
