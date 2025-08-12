@@ -310,7 +310,6 @@ class OldGroovyRequestHandler implements RequestHandler {
 
     static def trimString(str, int limit) {
 		def logEntry = str.toString()
-		println("Size: ${logEntry.size()}, limit: ${limit}, entry after cut: ${logEntry[0..<logEntry.size()-1].size()}")
 		return "${logEntry.size() > limit ? logEntry[0..limit-1] + '…' : logEntry}";
 	}
 
