@@ -1,7 +1,9 @@
 @import jakarta.ws.rs.core.UriInfo
+@import tigase.http.modules.dashboard.UserRegisterHandler
 @import tigase.server.XMPPServer
 @param UriInfo uriInfo
 @param String error = null
+@param boolean registrationEnabled
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/html">
 <head>
@@ -36,6 +38,10 @@
             <label for="password">Password</label>
         </div>
         <button type="submit" class="w-100 btn btn-lg btn-primary mb-2">Sign in</button>
+        @if (registrationEnabled)
+        <div class="w-100 text-center text-secondary fw-bolder">or</div>
+        <a class="btn btn-sm w-100 btn-outline-secondary mt-3" href="${uriInfo.getBaseUriBuilder().path(UserRegisterHandler.class, "register").build().getPath()}">Create account</a>
+        @endif
     </form>
 </main>
 <footer class="footer">

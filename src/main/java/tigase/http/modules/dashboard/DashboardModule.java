@@ -112,6 +112,11 @@ public class DashboardModule extends AbstractJaxRsModule<Handler> {
 		}
 	}
 
+	@Override
+	public String getComponentName() {
+		return super.getComponentName();
+	}
+
 	private CustomAssets resolveAssets() {
 		if (customAssetsPath == null) {
 			return null;

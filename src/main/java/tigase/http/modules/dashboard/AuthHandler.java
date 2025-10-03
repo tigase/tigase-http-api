@@ -43,6 +43,8 @@ public class AuthHandler extends DashboardHandler {
 
 	@Inject
 	private AuthProvider authProvider;
+	@Inject(nullAllowed = true)
+	private UserRegisterHandler userRegisterHandler;
 
 	@Override
 	public Role getRequiredRole() {
@@ -54,6 +56,7 @@ public class AuthHandler extends DashboardHandler {
 	@LoginForm
 	@Produces(MediaType.TEXT_HTML)
 	public Response loginForm(UriInfo uriInfo, Model model) {
+		model.put("registrationEnabled", userRegisterHandler != null && userRegisterHandler.isRegistrationEnabled());
 		String output = renderTemplate("login.jte", model);
 		return Response.ok(output, MediaType.TEXT_HTML).build();
 	}
