@@ -1,9 +1,11 @@
 @import jakarta.ws.rs.core.UriInfo
+@import tigase.http.modules.dashboard.UserPasswordRecovery
 @import tigase.http.modules.dashboard.UserRegisterHandler
 @import tigase.server.XMPPServer
 @param UriInfo uriInfo
 @param String error = null
 @param boolean registrationEnabled
+@param boolean passwordResetEnabled
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/html">
 <head>
@@ -37,10 +39,15 @@
             <input id="password" type="password" name="password" placeholder="*****" class="form-control" required>
             <label for="password">Password</label>
         </div>
-        <button type="submit" class="w-100 btn btn-lg btn-primary mb-2">Sign in</button>
+        <button type="submit" class="w-100 btn btn-lg btn-primary"><i class="bi bi-key me-2"></i>Sign in</button>
+        @if (passwordResetEnabled)
+        <div class="mt-2">
+        <a class="text-decoration-none text-secondary" style="font-size: 0.9em; font-weight: 500;" href="${uriInfo.getBaseUriBuilder().path(UserPasswordRecovery.class).build().getPath()}">Forgotten password?</a>
+        </div>
+        @endif
         @if (registrationEnabled)
-        <div class="w-100 text-center text-secondary fw-bolder">or</div>
-        <a class="btn btn-sm w-100 btn-outline-secondary mt-3" href="${uriInfo.getBaseUriBuilder().path(UserRegisterHandler.class, "register").build().getPath()}">Create account</a>
+        <div class="w-100 text-center text-secondary fw-bolder my-3">or</div>
+        <a class="btn w-100 btn-outline-secondary" href="${uriInfo.getBaseUriBuilder().path(UserRegisterHandler.class, "register").build().getPath()}"><i class="bi bi-plus-circle me-2"></i>Create account</a>
         @endif
     </form>
 </main>

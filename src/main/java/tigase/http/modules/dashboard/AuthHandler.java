@@ -45,6 +45,8 @@ public class AuthHandler extends DashboardHandler {
 	private AuthProvider authProvider;
 	@Inject(nullAllowed = true)
 	private UserRegisterHandler userRegisterHandler;
+	@Inject(nullAllowed = true)
+	private UserPasswordRecovery userPasswordRecovery;
 
 	@Override
 	public Role getRequiredRole() {
@@ -57,6 +59,7 @@ public class AuthHandler extends DashboardHandler {
 	@Produces(MediaType.TEXT_HTML)
 	public Response loginForm(UriInfo uriInfo, Model model) {
 		model.put("registrationEnabled", userRegisterHandler != null && userRegisterHandler.isRegistrationEnabled());
+		model.put("passwordResetEnabled", userPasswordRecovery != null && userPasswordRecovery.isPasswordResetEnabled());
 		String output = renderTemplate("login.jte", model);
 		return Response.ok(output, MediaType.TEXT_HTML).build();
 	}
