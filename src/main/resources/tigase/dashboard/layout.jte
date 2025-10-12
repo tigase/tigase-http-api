@@ -2,6 +2,8 @@
 @import jakarta.ws.rs.core.SecurityContext
 @import jakarta.ws.rs.core.UriInfo
 @import tigase.http.modules.dashboard.DashboardHandler
+@import tigase.http.modules.dashboard.DomainsHandler
+@import tigase.http.modules.dashboard.ServerInfoHandler
 @import tigase.http.modules.dashboard.UsersHandler
 @import javax.servlet.http.HttpServletRequest
 @param SecurityContext securityContext
@@ -125,11 +127,24 @@
                 <a class="nav-link text-white ${request.getRequestURI().equals(link) ? "active" : ""}" aria-current="page" href="${link}"><i class="bi bi-people-fill me-2"></i>Users</a>
             </li>
             @endif
-<%--            <li class="nav-item">--%>
+            @if(DashboardHandler.canAccess(securityContext, DomainsHandler.class, "index"))
+                <li class="nav-item">
+                    !{var link = uriInfo.getBaseUriBuilder().path(DomainsHandler.class,"index").build().getPath();}
+                    <a class="nav-link text-white ${request.getRequestURI().equals(link) ? "active" : ""}" aria-current="page" href="${link}"><i class="bi bi-server me-2"></i>Domains</a>
+                </li>
+            @endif
+            @if (DashboardHandler.canAccess(securityContext, ServerInfoHandler.class, "info"))
+                <li class="nav-item">
+                    !{var link = uriInfo.getBaseUriBuilder().path(ServerInfoHandler.class,"info").build().getPath();}
+                    <a class="nav-link text-white ${request.getRequestURI().equals(link) ? "active" : ""}" aria-current="page" href="${link}"><i class="bi bi-clipboard-data me-2"></i>Server info</a>
+                </li>
+            @endif
+            <%--            <li class="nav-item">--%>
 <%--                <a class="nav-link text-white" href="#"><i class="bi bi-gear-fill me-2"></i>Other</a>--%>
 <%--            </li>--%>
         </ul>
         <hr class="mx-2 mt-auto mb-0"/>
+        @if (securityContext.getUserPrincipal() != null)
         <div class="dropdown m-2">
             <a id="dropdownUser" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle px-2" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="bi bi-person-circle me-2" style="font-size: 1.2em"></i>
@@ -143,6 +158,7 @@
                 </li>
             </ul>
         </div>
+        @endif
     </div>
     <div class="d-flex flex-column bg-light w-100 overflow-auto">
         ${content}

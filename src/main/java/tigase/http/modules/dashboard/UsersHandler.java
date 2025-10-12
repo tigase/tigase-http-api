@@ -49,11 +49,8 @@ import tigase.kernel.beans.Inject;
 import tigase.server.xmppsession.DisconnectUserEBAction;
 import tigase.util.Base64;
 import tigase.util.stringprep.TigaseStringprepException;
-import tigase.vhosts.VHostItem;
-import tigase.vhosts.VHostManager;
 import tigase.xmpp.StreamError;
 import tigase.xmpp.jid.BareJID;
-import tigase.xmpp.jid.JID;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
@@ -75,7 +72,7 @@ public class UsersHandler extends DashboardHandler {
 	@Inject
 	private UserRepository userRepository;
 	@Inject
-	private VHostManager vHostManager;
+	private PermissionsHelper permissionsHelper;
 	@Inject
 	private EventBus eventBus;
 	@Inject(nullAllowed = true)
@@ -100,7 +97,7 @@ public class UsersHandler extends DashboardHandler {
 	@Produces("text/html")
 	@RolesAllowed({"admin", "account_manager", "user"})
 	public Response index(@QueryParam("query") String query, SecurityContext securityContext, Pageable pageable, Model model) throws TigaseDBException {
-		List<String> domains = getManagedDomains(securityContext);
+		List<String> domains = permissionsHelper.getManagedDomains(securityContext);
 		Set<String> domainsSet = new HashSet<>(domains);
 		List<BareJID> jids = getManagedUsers(securityContext, domainsSet)
 				.filter(jid -> query == null || jid.toString().contains(query))
@@ -124,23 +121,6 @@ public class UsersHandler extends DashboardHandler {
 		return Response.ok(output, MediaType.TEXT_HTML).build();
 	}
 
-	private List<String> getManagedDomains(SecurityContext securityContext) {
-		Stream<JID> domains = vHostManager.getAllVHosts()
-				.stream();
-		if (!(securityContext.isUserInRole("admin") || securityContext.isUserInRole("account_manager"))) {
-			if (securityContext.isUserInRole("user")) {
-				domains = domains.filter(domain -> canManageDomain(securityContext, domain.getDomain()));
-			} else {
-				return Collections.emptyList();
-			}
-		}
-		return domains
-				.map(JID::getDomain)
-				.filter(domain -> !"default".equals(domain))
-				.sorted()
-				.toList();
-	}
-
 	private Stream<BareJID> getManagedUsers(SecurityContext securityContext, Set<String> domains)
 			throws TigaseDBException {
 		Stream<BareJID> users = userRepository.getUsers()
@@ -154,16 +134,6 @@ public class UsersHandler extends DashboardHandler {
 			}
 		}
 		return users;
-	}
-
-	private boolean canManageDomain(SecurityContext securityContext, String domain) {
-		if (securityContext.isUserInRole("admin") || securityContext.isUserInRole("account_manager")) {
-	        return true;
-		} else {
-			VHostItem item = vHostManager.getVHostItem(domain);
-			String user = securityContext.getUserPrincipal().getName();
-			return item != null && (item.isAdmin(user) || item.isOwner(user));
-		}
 	}
 
 	private List<UserRole> getAllRoles() {
@@ -209,7 +179,7 @@ public class UsersHandler extends DashboardHandler {
 					return (!(managedUserRoles.contains("admin") || managedUserRoles.contains("account_manager"))) || securityContext.getUserPrincipal().getName().equals(jid.toString());
 				}
 				if (securityContext.isUserInRole("user")) {
-					return canManageDomain(securityContext, jid.getDomain()) || securityContext.getUserPrincipal().getName().equals(jid.toString());
+					return permissionsHelper.canManageDomain(securityContext, jid.getDomain()) || securityContext.getUserPrincipal().getName().equals(jid.toString());
 				}
 			}
 		} catch (TigaseDBException e) {
@@ -224,7 +194,7 @@ public class UsersHandler extends DashboardHandler {
 	}
 
 	private void checkModificationPermission(String domain) {
-		if (!canManageDomain(SecurityContextHolder.getSecurityContext(), domain)) {
+		if (!permissionsHelper.canManageDomain(SecurityContextHolder.getSecurityContext(), domain)) {
 			throw new HttpException("Forbidden", 403);
 		}
 	}

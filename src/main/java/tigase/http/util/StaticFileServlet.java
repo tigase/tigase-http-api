@@ -74,6 +74,9 @@ public class StaticFileServlet
 		}
 
 		Path path = Paths.get(directory.getAbsolutePath(), pathStr);
+		if (Files.isDirectory(path)) {
+			path = path.resolve("index.html");
+		}
 		if (!Files.exists(path)) {
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;

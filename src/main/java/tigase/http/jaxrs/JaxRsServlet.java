@@ -56,7 +56,7 @@ public class JaxRsServlet<M extends JaxRsModule>
 
 	protected boolean canAccess(RequestHandler requestHandler, HttpServletRequest request, HttpServletResponse response) throws HttpException, IOException, ServletException {
 		if (requestHandler.isAuthenticationRequired()) {
-			if ((requestHandler.getRequiredRole() != null &&
+			if (((requestHandler.getRequiredRole() != null && requestHandler.getRequiredRole() != Handler.Role.None) &&
 					!request.isUserInRole(requestHandler.getRequiredRole().name().toLowerCase())) ||
 					(requestHandler.getAllowedRoles() != null &&
 							requestHandler.getAllowedRoles().stream().noneMatch(request::isUserInRole))) {

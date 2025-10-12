@@ -42,7 +42,7 @@
                             <div class="input-group-text">
                                 <i class="bi bi-search"></i>
                             </div>
-                            <input type="text" class="form-control form-control-sm" id="query" name="query" value="${query}">
+                            <input type="search" class="form-control form-control-sm" id="query" name="query" value="${query}">
                             <button type="submit" class="btn btn-sm btn-primary">Search</button>
                         </div>
                     </div>
@@ -54,7 +54,7 @@
                         <th scope="col">JID</th>
                         <th scope="col">Account status</th>
                         <th scope="col">Roles</th>
-                        <th scope="col" style="width: 0px;">Actions</th>
+                        <th scope="col" style="width: 1px;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -73,7 +73,7 @@
                                 <div class="badge small bg-secondary rounded-pill">${role.label()}</div>
                             @endfor
                         </td>
-                        <td style="width: 0px">
+                        <td style="width: 1px">
                             <div class="dropdown">
                                 <button class="btn btn-secondary btn-sm dropdown-toggle ${(!user.canManageUser()) ? "disabled" : ""}" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     <i class="bi bi-gear-fill me-2"></i>Actions
