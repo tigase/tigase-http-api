@@ -306,7 +306,7 @@ public class Servlet
 
 		Packet iq = Packet.packetInstance(iqEl, JID.jidInstanceNS(principal.getName()), to);
 
-		CompletableFuture<Packet> future = module.sendPacketAndWait(iq, 1);
+		CompletableFuture<Packet> future = module.sendPacketAndWait(iq, 1).exceptionally(ex -> null);
 		return future.thenApply(result -> {
 			if (log.isLoggable(Level.FINEST)) {
 				log.log(Level.FINEST, "discovery of components took {0}ms", (System.currentTimeMillis() - start));
@@ -331,7 +331,7 @@ public class Servlet
 		
 		Packet iq = Packet.packetInstance(iqEl, JID.jidInstanceNS(principal.getName()), componentJid);
 
-		CompletableFuture<Packet> future = module.sendPacketAndWait(iq, 1);
+		CompletableFuture<Packet> future = module.sendPacketAndWait(iq, 1).exceptionally(ex -> null);
 		return future.thenApply(result -> {
 			if (log.isLoggable(Level.FINEST)) {
 				log.log(Level.FINEST, "discovery of commands of component {0} took {1}ms",
