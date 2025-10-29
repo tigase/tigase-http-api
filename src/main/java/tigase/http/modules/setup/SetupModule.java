@@ -37,6 +37,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -162,6 +163,11 @@ public class SetupModule extends AbstractJaxRsModule<SetupHandler> {
 					@Override
 					public JWTPayload authenticateWithCookie(HttpServletRequest request) {
 						return null;
+					}
+
+					@Override
+					public Duration getAuthenticationTokenValidityDuration() {
+						return Duration.ofMinutes(15);
 					}
 
 					@Override

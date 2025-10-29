@@ -24,6 +24,7 @@ import tigase.http.json.JsonSerializer;
 import tigase.kernel.beans.Bean;
 import tigase.kernel.beans.Initializable;
 import tigase.kernel.beans.Inject;
+import tigase.kernel.beans.config.ConfigField;
 import tigase.util.Base64;
 import tigase.util.stringprep.TigaseStringprepException;
 import tigase.xmpp.jid.BareJID;
@@ -39,6 +40,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -59,11 +61,17 @@ public class AuthProviderImpl
 	private AuthRepository authRepository;
 	@Inject(bean = "service")
 	private HttpMessageReceiver receiver;
+	@ConfigField(desc = "Authentication token validity time", alias = "auth-expiration")
+	private Duration authenticationTokenValidityDuration = Duration.ofMinutes(30);
 
 	private SecretKeySpec secretKey;
 	private final JsonSerializer jsonSerializer = new JsonSerializer();
 
 	public AuthProviderImpl() {
+	}
+
+	public Duration getAuthenticationTokenValidityDuration() {
+		return authenticationTokenValidityDuration;
 	}
 
 	@Override
@@ -178,7 +186,7 @@ public class AuthProviderImpl
 			try {
 				System.out.println("refreshing JWT token for " + payload.subject());
 				setAuthenticationCookie(response, new JWTPayload(payload.subject(), payload.issuer(),
-																 LocalDateTime.now().plusMinutes(15)),
+																 LocalDateTime.now().plus(authenticationTokenValidityDuration)),
 										request.getServerName(), request.getContextPath());
 			} catch (Throwable ignored) {
 			}

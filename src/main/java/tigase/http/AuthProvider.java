@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,6 +57,8 @@ public interface AuthProvider {
 	}
 
 	JWTPayload authenticateWithCookie(HttpServletRequest request);
+
+	Duration getAuthenticationTokenValidityDuration();
 
 	void setAuthenticationCookie(HttpServletResponse response, JWTPayload payload, String domain, String path)
 			throws NoSuchAlgorithmException, InvalidKeyException;

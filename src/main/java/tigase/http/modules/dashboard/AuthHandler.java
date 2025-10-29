@@ -74,7 +74,7 @@ public class AuthHandler extends DashboardHandler {
 			return loginForm(uriInfo, model);
 		}
 		authProvider.setAuthenticationCookie(response, new AuthProvider.JWTPayload(jid, request.getServerName(),
-																				   LocalDateTime.now().plusMinutes(5)),
+																				   LocalDateTime.now().plus(authProvider.getAuthenticationTokenValidityDuration())),
 											 request.getServerName(), request.getContextPath());
 		return IndexHandler.redirectToIndex(uriInfo);
 	}
