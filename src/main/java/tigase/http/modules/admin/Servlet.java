@@ -49,6 +49,7 @@ import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.TemporalAccessor;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -118,7 +119,9 @@ public class Servlet
 //						model.put("formFields", result.getFields());
 						futureResult.complete(model);
 					}).exceptionally(ex -> {
-						futureResult.completeExceptionally(ex);
+						model.put("error", (ex instanceof CompletionException ? ex.getCause() : ex).getMessage());
+						futureResult.complete(model);
+						//futureResult.completeExceptionally(ex);
 						return null;
 					});
 				} else {
@@ -262,7 +265,15 @@ public class Servlet
 
 		Packet iq = Packet.packetInstance(iqEl, JID.jidInstanceNS(principal.getName()), command.getJid());
 		CompletableFuture<Packet> future = module.sendPacketAndWait(iq);
-		return future.thenApply(result -> {
+		return future.thenCompose(result -> {
+			if (result.getType() == StanzaType.error) {
+				String errorMessage = Optional.ofNullable(result.getElemChild("error"))
+						.flatMap(errorEl -> Optional.ofNullable(errorEl.getChild("text"))
+								.map(Element::getCData)
+								.map(XMLUtils::unescape))
+						.or(() -> Optional.ofNullable(result.getErrorCondition())).orElse("Unknown error");
+				return CompletableFuture.failedFuture(new RuntimeException(errorMessage));
+			}
 			Element xEl = result.getElement().findChildStaticStr(new String[]{"iq", "command", "x"});
 			List<Element> fields = xEl == null ? null : xEl.getChildren();
 			if (fields == null) {
@@ -282,7 +293,7 @@ public class Servlet
 			if (fields.isEmpty()) {
 				fields.add(new Element("title", "Execution completed"));
 			}
-			return new ExecutionResult(formType, fields);
+			return CompletableFuture.completedFuture(new ExecutionResult(formType, fields));
 		});
 	}
 

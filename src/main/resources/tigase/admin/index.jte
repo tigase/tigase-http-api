@@ -13,6 +13,7 @@
 @param List<String> commandGroups
 @param List<CommandItem> defaultCommands
 @param Form form
+@param String error
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/html">
 <head>
@@ -64,7 +65,25 @@
 	</div>
 	<div class="flex-grow-1 d-flex flex-column">
 		<div class="ps-4 pe-4">
-			@if(form != null)
+            @if(error != null)
+                <div class="m-3">
+                <div class="card">
+                @if(currentCommand != null)
+                    <h5 class="card-header p-3">${currentCommand.getName()}</h5>
+                @endif
+                <div class="card-body">
+                    <h5 class="text-danger d-block">Error occurred</h5>
+                    <p class="p-2 text-danger d-block">${error}</p>
+                </div>
+                </div>
+
+                @if(currentCommand != null)
+                <div class="m-3">
+                    <a class="btn btn-secondary" href="?_group=${java.net.URLEncoder.encode(currentCommand.getGroup(),StandardCharsets.UTF_8)}&_jid=${java.net.URLEncoder.encode(currentCommand.getJid().toString(),StandardCharsets.UTF_8)}&_node=${java.net.URLEncoder.encode(currentCommand.getNode(),StandardCharsets.UTF_8)}">Back</a>
+                </div>
+                @endif
+                </div>
+            @elseif(form != null)
 				<form method="POST" class="form-horizontal m-3">
 					<div class="card">
 						@if(form.getTitle() != null)
