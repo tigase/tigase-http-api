@@ -52,3 +52,7 @@ User Status Endpoint module
 
 This module is designed as an endpoint required for REST API User Status to work properly. It is not accessible using HTTP/REST API, so it can (and in most cases should) be active.
 
+Static Page module
+^^^^^^^^^^^^^^^^^^^
+
+This module is designed to server static web page from a directory which is provided to the module.

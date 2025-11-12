@@ -127,6 +127,27 @@ This module is activated by default. However, if you are operating in a test env
        'dns-webservice' (active: false) {}
    }
 
+Static Page module
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+This module is disabled by default and requires to be enabled in the configuration as it requires additional configuration to work properly, ie. requires path to the directory which content should be served.
+
+Available properties:
+
+-  ``filesPath`` - Configures path to the directory on the filesystem from which files should be served as a web page.
+
+To enable this module and allow it to server files at ``/`` that are provided in directory ``/path/to/static/website`` you should add following configuration (disabling of ``index`` module is required in this case):
+
+.. code:: text
+
+   http () {
+       index (active: false) {}
+       staticPage () {
+           filesPath = '/path/to/static/website'
+           contextPath = '/'
+       }
+   }
+
 Enabling password reset mechanism
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
