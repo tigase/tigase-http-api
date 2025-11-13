@@ -71,7 +71,13 @@ public class JaxRsRequestHandler
 		DESERIALIZERS.put(Integer.class, Integer::parseInt);
 		DESERIALIZERS.put(Double.class, Double::parseDouble);
 		DESERIALIZERS.put(Float.class, Float::parseFloat);
-		DESERIALIZERS.put(String.class, s -> s);
+		DESERIALIZERS.put(String.class, s -> {
+			if (s.isEmpty()) {
+				return null;
+			} else {
+				return s;
+			}
+		});
 		DESERIALIZERS.put(BareJID.class, str -> {
 			try {
 				return BareJID.bareJIDInstance(str);
@@ -683,6 +689,9 @@ public class JaxRsRequestHandler
 						Method method = expectedClass.getDeclaredMethod("valueOf", String.class);
 						return method.invoke(null, valueStr);
 					} catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException ex) {
+						if (valueStr != null && valueStr.isEmpty()) {
+							return null;
+						}
 						// nothing to do..
 						throw new ValidationException("Value '" + valueStr + "' cannot be converted to " + expectedClass.getCanonicalName(), ex);
 					}

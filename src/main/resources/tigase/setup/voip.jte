@@ -14,6 +14,8 @@
                 <p>By default Tigase XMPP Server is allows VoIP communication over XMPP.</p>
                 <p>To improve connectivity and reliability of VoIP connections, it is suggested to provide Tigase XMPP Server with TURN server connectivity details.</p>
                 <p>Those details will be shared with XMPP clients that will have accounts on your server, allowing them to use TURN server for VoIP connections</p>
+                <p></p>
+                <p>Do not fill out the form if you want to skip VoIP configuration.</p>
             </div>
             <div class="row mb-3">
                 <label class="col-sm-3 col-form-label" for="type">Type</label>
@@ -29,7 +31,7 @@
             <div class="row mb-3">
                 <label class="col-sm-3 col-form-label" for="host">Host</label>
                 <div class="col-sm-9">
-                    <input id="host" class="form-control" name="host" type="text" required size="6s0" value="${config.getVoipConfig().getHost()}" />
+                    <input id="host" class="form-control" name="host" type="text" size="6s0" value="${config.getVoipConfig().getHost()}" />
                 </div>
             </div>
             <div class="row mb-3">

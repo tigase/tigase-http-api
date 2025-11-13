@@ -24,6 +24,7 @@ import tigase.db.util.SchemaLoader;
 import tigase.kernel.beans.selector.ConfigType;
 import tigase.kernel.beans.selector.ConfigTypeEnum;
 import tigase.server.ConnectionManager;
+import tigase.server.extdisco.ExtServiceDiscoItem;
 import tigase.server.xmppsession.SessionManager;
 import tigase.util.dns.DNSResolverFactory;
 import tigase.util.setup.SetupHelper;
@@ -576,6 +577,15 @@ public class Config {
 
 		public void setTransport(Transport transport) {
 			this.transport = transport;
+		}
+
+		public List<ExtServiceDiscoItem> toItems() {
+			if (host == null || host.isEmpty() || port == null || port <= 0 || type == null) {
+				return Collections.emptyList();
+			}
+			ExtServiceDiscoItem item = new ExtServiceDiscoItem();
+			item.init("default", "default", host, port, type.name(), transport != null ? transport.name() : null, requiresUsernameAndPassword, username, password);
+			return List.of(item);
 		}
 
 		public static VoipConfig getDefaults() {

@@ -33,7 +33,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Path("/connectivity")
-@NextPage(FeaturesPage.class)
+@NextPage(VoipPage.class)
 @Bean(name = "connectivityPage", parent = SetupModule.class, active = true)
 public class ConnectivityPage
 		extends AbstractPage {

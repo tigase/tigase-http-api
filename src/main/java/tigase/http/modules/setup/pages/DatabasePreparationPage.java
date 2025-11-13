@@ -79,6 +79,7 @@ public class DatabasePreparationPage
 		if (!getConfig().getAdmins().isEmpty()) {
 			schemaManager.setAdmins(getConfig().getAdmins().stream().toList(), getConfig().getAdminPwd());
 		}
+		schemaManager.setExternalServices(getConfig().getVoipConfig().toItems());
 
 		return schemaManager.loadSchemas();
 	}

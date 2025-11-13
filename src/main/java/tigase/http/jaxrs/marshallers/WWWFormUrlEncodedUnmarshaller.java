@@ -47,7 +47,7 @@ public class WWWFormUrlEncodedUnmarshaller {
 			}
 			return object;
 		} catch (Throwable ex) {
-			throw new UnmarshalException("Could not decode " + clazz.getCanonicalName() + " from submitted form");
+			throw new UnmarshalException("Could not decode " + clazz.getCanonicalName() + " from submitted form", ex);
 		}
 	}
 
