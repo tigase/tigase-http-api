@@ -72,7 +72,7 @@ public class JaxRsRequestHandler
 		DESERIALIZERS.put(Double.class, Double::parseDouble);
 		DESERIALIZERS.put(Float.class, Float::parseFloat);
 		DESERIALIZERS.put(String.class, s -> {
-			if (s.isEmpty()) {
+			if (s == null || s.isEmpty()) {
 				return null;
 			} else {
 				return s;
