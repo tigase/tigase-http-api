@@ -4,8 +4,9 @@
 @import tigase.db.AuthRepository
 @import tigase.db.services.AccountExpirationService
 @import tigase.http.jaxrs.Page
-@import tigase.http.modules.dashboard.DashboardHandler
+@import tigase.http.modules.dashboard.*
 @import tigase.http.modules.dashboard.DashboardModule
+@import tigase.http.modules.dashboard.UserAvatarHandler
 @import tigase.http.modules.dashboard.UsersHandler
 @import tigase.xmpp.jid.BareJID
 @import javax.servlet.http.HttpServletRequest
@@ -21,6 +22,7 @@
 @param HttpServletRequest request
 @param boolean isXTokenActive
 @param List<UsersHandler.UserRole> allRoles
+@param UserAvatarPool userAvatarPool
 
 @template.layout(securityContext = securityContext, uriInfo = uriInfo, request = request, content = @`
     <div class="card m-3 bg-white">
@@ -35,8 +37,8 @@
                 @endif
             </div>
             <div class="container-fluid">
-                <form class="row row-cols-sm-auto g-3 align-items-center">
-                    <div class="col-12">
+                <form class="row  g-3 align-items-center">
+                    <div class="col-8 col-sm-auto">
                         <label class="visually-hidden" for="query">Search</label>
                         <div class="input-group input-group-sm">
                             <div class="input-group-text">
@@ -46,11 +48,19 @@
                             <button type="submit" class="btn btn-sm btn-primary">Search</button>
                         </div>
                     </div>
+                    @if(userAvatarPool.isEnabled() && DashboardHandler.canAccess(securityContext, UserAvatarPoolHandler.class, "index"))
+                    <div class="col align-items-end d-flex flex-row justify-content-end">
+                        <div class="align-self-end align-content-end">
+                            <a class="btn btn-sm btn-outline-secondary" href="${uriInfo.getBaseUriBuilder().path(UserAvatarPoolHandler.class, "index").build().toString()}">Manage avatars pool</a>
+                        </div>
+                    </div>
+                    @endif
                 </form>
             </div>
             <table class="table table-hover">
                 <thead>
                     <tr>
+                        <th scope="col"></th>
                         <th scope="col">JID</th>
                         <th scope="col">Account status</th>
                         <th scope="col">Roles</th>
@@ -60,6 +70,16 @@
                 <tbody>
                 @for(UsersHandler.User user : users.items())
                     <tr>
+                        <td style="width: 2em">
+                            @if(user.avatarId() != null)
+                                <img style="width: 2em; height: 2em;" class="rounded-circle" src="${uriInfo.getRequestUriBuilder().path(user.jid().toString()).path("avatar").path(user.avatarId()).build().toString()}">
+                            @else
+                                <i class="bi bi-person-circle d-block" style="font-size: 2em; margin: 0px; padding: 0px; line-height: 1em"></i>
+<%--                                <div class="rounded-circle bg-gradient d-flex justify-content-center align-items-center" style="width: 2em; height: 2em; line-height: 0.75; --bs-gradient: linear-gradient(180deg, rgba(255,255,255,0.1), rgba(0,0,0,0.1)); background-color: #85898c;">--%>
+<%--                                    <span class="text-capitalize" style="font-size: 1.25em; color: white">${user.jid().toString().charAt(0)}</span>--%>
+<%--                                </div>--%>
+                            @endif
+                        </td>
                         <td>${user.jid().toString()}</td>
                         <td>
                             @if(user.accountStatus() == AuthRepository.AccountStatus.active)
@@ -80,6 +100,19 @@
                                 </button>
                                 <ul class="dropdown-menu">
                                     @if(user.canManageUser())
+                                    <li>
+                                        <a class="dropdown-item text-nowrap" href="#" data-bs-toggle="modal"
+                                           data-bs-target="#avatarUpload-${user.jid().toString().replace('@','-').replace('.','-')}">
+                                            <i class="bi bi-card-image me-2"></i>Set avatar
+                                        </a>
+                                    </li>
+                                    @if(userAvatarPool.isEnabled() && DashboardHandler.canAccess(securityContext, UserAvatarPoolHandler.class, "assignRandom"))
+                                        <li>
+                                            <a class="dropdown-item text-nowrap" onclick="assignRandomAvatar('${uriInfo.getBaseUriBuilder().path(tigase.http.modules.dashboard.UserAvatarPoolHandler.class, "assignRandom").build(user.jid()).toString()}')">
+                                                <i class="bi bi-file-image me-2"></i>Set random avatar
+                                            </a>
+                                        </li>
+                                    @endif
                                     <li>
                                         @if(user.accountStatus() == AuthRepository.AccountStatus.active)
                                             <a class="dropdown-item text-nowrap" href="${uriInfo.getBaseUriBuilder().path(UsersHandler.class, "changeAccountStatus").build(user.jid(), AuthRepository.AccountStatus.disabled).toString()}"><i class="bi bi-person-fill-lock me-2"></i>Disable</a>
@@ -131,6 +164,9 @@
 <%--                                <i class="bi bi-person-fill-dash me-2"></i>Delete--%>
 <%--                            </button>--%>
                             @if(user.canManageUser())
+                            @template.imageUpload(modalId = "avatarUpload-" + user.jid().toString().replace('@','-').replace('.','-'),
+                                url = uriInfo.getRequestUriBuilder().path(user.jid().toString()).path("avatar").build().toString(),
+                                title = "Set avatar", message = "Select image to upload as avatar for user " + user.jid().toString())
                             @if(DashboardHandler.canAccess(securityContext, UsersHandler.class, "updateRoles"))
                             <div class="modal fade" id="manageRoles-${user.jid().toString().replace('@','-').replace('.','-')}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="#manageRolesModalLabel-${user.toString().replace('@','-').replace('.','-')}" aria-hidden="true">
                                 <div class="modal-dialog">
@@ -347,5 +383,20 @@
             </table>
             @template.pagination(uriInfo = uriInfo, page = users)
         </div>
+        <script>
+            function assignRandomAvatar(url) {
+                fetch(url, {
+                    method: 'GET'
+                }).then(result => {
+                    if (result.ok) {
+                        document.location.reload();
+                    } else {
+                        alert('Setting random avatar failed. Please try again.');
+                    }
+                }).catch(error => {
+                    console.error("Uncaught error:", error.message);
+                })
+            }
+        </script>
     </div>
 `)

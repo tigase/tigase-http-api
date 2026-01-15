@@ -32,10 +32,7 @@ import jakarta.ws.rs.core.SecurityContext;
 import jakarta.ws.rs.core.UriInfo;
 import tigase.auth.credentials.entries.XTokenCredentialsEntry;
 import tigase.auth.mechanisms.SaslXTOKEN;
-import tigase.db.AuthRepository;
-import tigase.db.TigaseDBException;
-import tigase.db.UserExistsException;
-import tigase.db.UserRepository;
+import tigase.db.*;
 import tigase.db.services.AccountExpirationService;
 import tigase.eventbus.EventBus;
 import tigase.http.api.HttpException;
@@ -59,6 +56,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -80,6 +79,10 @@ public class UsersHandler extends DashboardHandler {
 
 	@Inject(nullAllowed = true)
 	private AccountExpirationService accountExpirationService;
+	@Inject
+	private UserAvatarRepository userAvatarRepository;
+	@Inject
+	private UserAvatarPool userAvatarPool;
 
 	System.Logger logger = System.getLogger(UsersHandler.class.getName());
 
@@ -103,17 +106,30 @@ public class UsersHandler extends DashboardHandler {
 				.filter(jid -> query == null || jid.toString().contains(query))
 				.sorted(Comparator.comparing(BareJID::getLocalpart).thenComparing(BareJID::getDomain))
 				.toList();
-		List<User> users = jids.stream().skip(pageable.offset()).limit(pageable.pageSize()).map(jid -> {
+
+		List<BareJID> userJids = jids.stream().skip(pageable.offset()).limit(pageable.pageSize()).toList();
+		Map<BareJID, CompletableFuture<UserAvatarRepository.AvatarMetadata>> avatars = userJids.stream()
+				.collect(Collectors.toMap(Function.identity(), userAvatarRepository::getMetadata));
+
+		List<User> users = userJids.stream().map(jid -> {
+			String avatarId = null;
 			try {
-				return new User(jid, authRepository.getAccountStatus(jid), getUserRoles(jid), canManageUser(jid));
-			} catch (TigaseDBException e) {
-				throw new RuntimeException(e);
+				avatarId = avatars.get(jid).get().id();
+			} catch (Throwable ex) {
+				// ignoring...
+			}
+			try {
+				return new User(jid, avatarId, authRepository.getAccountStatus(jid), getUserRoles(jid),
+								permissionsHelper.canManageUser(jid));
+			} catch (TigaseDBException ex) {
+				throw new RuntimeException(ex);
 			}
 		}).toList();
 		model.put("query", query);
 		model.put("users", new Page<>(pageable, jids.size(), users));
 		model.put("domains", domains);
 		model.put("allRoles", getAllRoles());
+		model.put("userAvatarPool", userAvatarPool);
 		model.put("accountExpirationService", accountExpirationService);
 		model.put("isXTokenActive", authRepository.isMechanismSupported("default", SaslXTOKEN.NAME));
 
@@ -141,7 +157,7 @@ public class UsersHandler extends DashboardHandler {
 	}
 
 	private List<UserRole> getUserRoles(BareJID jid) throws TigaseDBException {
-		return mapRoleIdsToUserRoles(getUserRolesIds(jid));
+		return mapRoleIdsToUserRoles(permissionsHelper.getUserRolesIds(jid));
 	}
 
 	private List<UserRole> mapRoleIdsToUserRoles(List<String> roleIds) {
@@ -154,41 +170,9 @@ public class UsersHandler extends DashboardHandler {
 					.collect(Collectors.joining(" "));
 		})).sorted().toList();
 	}
-
-	private List<String> getUserRolesIds(BareJID user) throws TigaseDBException {
-		var roles = new ArrayList<String>();
-		if (dashboardModule.isAdmin(user)) {
-			roles.add("admin");
-		}
-		String[] rolesFromRepo = userRepository.getDataList(user, "roles", "roles");
-		if (rolesFromRepo != null) {
-			roles.addAll(Arrays.asList(rolesFromRepo));
-		}
-		return roles;
-	}
-
-	private boolean canManageUser(BareJID jid) {
-		try {
-			var securityContext = SecurityContextHolder.getSecurityContext();
-			if (securityContext != null) {
-				if (securityContext.isUserInRole("admin")) {
-					return true;
-				}
-				if (securityContext.isUserInRole("account_manager")) {
-					var managedUserRoles = getUserRolesIds(jid);
-					return (!(managedUserRoles.contains("admin") || managedUserRoles.contains("account_manager"))) || securityContext.getUserPrincipal().getName().equals(jid.toString());
-				}
-				if (securityContext.isUserInRole("user")) {
-					return permissionsHelper.canManageDomain(securityContext, jid.getDomain()) || securityContext.getUserPrincipal().getName().equals(jid.toString());
-				}
-			}
-		} catch (TigaseDBException e) {
-		}
-		return false;
-	}
-
+	
 	private void checkModificationPermission(BareJID jid) {
-		if (!canManageUser(jid)) {
+		if (!permissionsHelper.canManageUser(jid)) {
 			throw new HttpException("Forbidden", 403);
 		}
 	}
@@ -240,6 +224,13 @@ public class UsersHandler extends DashboardHandler {
 	public Response deleteUser(@PathParam("jid") @NotEmpty BareJID jid, UriInfo uriInfo) throws TigaseDBException {
 		checkModificationPermission(jid);
 		authRepository.removeUser(jid);
+		try {
+			userRepository.removeUser(jid);
+		} catch (UserNotFoundException ex) {
+			// We ignore this error here. If auth_repo and user_repo are in fact
+			// the same database, then user has been already removed with the auth_repo.removeUser(...)
+			// then the second call to user_repo may throw the exception which is fine.
+		}
 		eventBus.fire(new DisconnectUserEBAction(jid, StreamError.Reset, "Account was deleted"));
 		return redirectToIndex(uriInfo);
 	}
@@ -410,7 +401,7 @@ public class UsersHandler extends DashboardHandler {
     }
 
 
-    public record User(BareJID jid, AuthRepository.AccountStatus accountStatus, List<UserRole> roles, boolean canManageUser) {
+    public record User(BareJID jid, String avatarId, AuthRepository.AccountStatus accountStatus, List<UserRole> roles, boolean canManageUser) {
 		public boolean hasRole(UserRole role) {
 			return roles.stream().anyMatch(it -> it.id.equals(role.id));
 		}

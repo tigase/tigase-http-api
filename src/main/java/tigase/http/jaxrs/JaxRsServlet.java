@@ -24,6 +24,7 @@ import tigase.http.modules.rest.OldGroovyRequestHandler;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -36,6 +37,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 
+@MultipartConfig
 public class JaxRsServlet<M extends JaxRsModule>
 		extends HttpServlet {
 	

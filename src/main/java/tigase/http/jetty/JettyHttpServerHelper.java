@@ -29,6 +29,8 @@ import tigase.http.java.filters.ProtocolRedirectFilter;
 import tigase.http.jetty.security.BasicAndJWTAuthenticator;
 
 import javax.servlet.DispatcherType;
+import javax.servlet.MultipartConfigElement;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.logging.Level;
@@ -72,6 +74,10 @@ public class JettyHttpServerHelper {
 			for (String mapping : info.getMappings()) {
 				ServletHolder holder = new ServletHolder(mapping, info.getServletClass());
 				holder.setInitParameters(info.getInitParams());
+				MultipartConfig annotation = info.getServletClass().getDeclaredAnnotation(MultipartConfig.class);
+				if (annotation != null) {
+					holder.getRegistration().setMultipartConfig(new MultipartConfigElement(annotation));
+				}
 				context.addServlet(holder, mapping);
 			}
 		}

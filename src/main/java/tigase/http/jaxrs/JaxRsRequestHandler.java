@@ -33,8 +33,10 @@ import tigase.util.stringprep.TigaseStringprepException;
 import tigase.xmpp.jid.BareJID;
 import tigase.xmpp.jid.JID;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Part;
 import javax.validation.Constraint;
 import javax.validation.ConstraintValidator;
 import javax.validation.Valid;
@@ -388,6 +390,21 @@ public class JaxRsRequestHandler
 						}
 						if (boolean.class.equals(param.getType())) {
 							value = valuesStr != null && valuesStr.length == 1 && "on".equals(valuesStr[0]);
+						} else if (InputStream.class.isAssignableFrom(param.getType())) {
+							try {
+								Part part = request.getPart(formParam.value());
+								if (part != null) {
+									value = part.getInputStream();
+								}
+							} catch (ServletException e) {
+								throw new RuntimeException(e);
+							}
+						} else if (Part.class.equals(param.getType())) {
+							try {
+								value = request.getPart(formParam.value());
+							} catch (ServletException e) {
+								throw new RuntimeException(e);
+							}
 						} else {
 							if (valuesStr != null) {
 								value = convertToValue(param.getParameterizedType(), valuesStr);
