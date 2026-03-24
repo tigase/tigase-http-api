@@ -25,6 +25,7 @@ import jakarta.ws.rs.core.SecurityContext;
 import jakarta.ws.rs.core.UriInfo;
 import jakarta.xml.bind.MarshalException;
 import jakarta.xml.bind.UnmarshalException;
+import org.jspecify.annotations.Nullable;
 import tigase.http.api.HttpException;
 import tigase.http.api.UnsupportedFormatException;
 import tigase.http.jaxrs.marshallers.*;
@@ -66,6 +67,7 @@ public class JaxRsRequestHandler
 
 	private static final Logger log = Logger.getLogger(JaxRsRequestHandler.class.getCanonicalName());
 	private static final Map<Class, Function<String,Object>> DESERIALIZERS = new HashMap<>();
+	public static final Pattern PATH_VARIABLE_PATTERN = Pattern.compile("\\{[^}]+\\}?|[^{]+");
 	static {
 		DESERIALIZERS.put(long.class, Long::parseLong);
 		DESERIALIZERS.put(int.class, Integer::parseInt);
@@ -190,43 +192,79 @@ public class JaxRsRequestHandler
 		return RequestHandler.super.isAuthenticationRequired() || allowedRoles != null;
 	}
 
+	record PathSegment(String value, String regex, boolean isParam) {
+        /**
+		 * Handles escaping of wildcards in string literal and insert properly formatted path parameter regexp.
+		 *
+         * @return properly escaped regex string
+         */
+		@Override
+		public String toString() {
+			if (isParam()) {
+				return "(?<" + value + ">" + regex + ")";
+			} else {
+				return value.replace(".", "\\.").replace("+", "\\+");
+			}
+		}
+	}
+
 	public static Pattern prepareMatcher(String path, Method method) {
 		Map<String, Class> paramClasses = methodsPathParams(method);
 
-		int idx = -1;
+		StringBuilder resultPattern = new StringBuilder();
 
-		List<Param> params = new ArrayList<>();
-
-		while ((idx = path.indexOf('{', idx + 1)) > -1) {
-			int startIdx = idx;
-			int endIdx = idx;
-			while ((endIdx = path.indexOf('}', endIdx) ) > -1 && path.charAt(endIdx) == '\\') {
-			}
-			if (endIdx == -1) {
-				// this will not work
+		Matcher m = PATH_VARIABLE_PATTERN.matcher(path);
+		while (m.find()) {
+			var p = parseMatchedPartToPathSegment(m.group(), paramClasses);
+			if (p == null) {
 				return null;
 			}
+			resultPattern.append(p);
+		}
+		return Pattern.compile(resultPattern.toString());
+	}
 
-			String paramName = path.substring(idx+1, endIdx).trim();
-			String paramRegex = regexForClass(paramClasses.get(paramName));
+	/**
+	 * Parses a matched part of a URL into a {@code PathSegment} object.
+	 *
+	 * @param group the match result containing the matched part of the URL. It is expected
+	 *          to provide a valid group representation of the URL segment.
+	 * @param paramClasses a map of parameter names to their corresponding classes,
+	 *                     used to determine if a matched part is a parameter and what
+	 *                     data type it represents.
+	 * @return a {@code PathSegment} object representing the parsed segment if successful,
+	 *         or {@code null} if the matched part is invalid, unbalanced, or references an
+	 *         undefined parameter.
+	 */
+	private static @Nullable PathSegment parseMatchedPartToPathSegment(String group, Map<String, Class> paramClasses) {
+		var isParam = group.startsWith("{");
 
-			if (paramRegex == null) {
-				return null;
-			}
-
-			params.add(new Param(paramName, paramRegex, startIdx, endIdx+1));
+		// check if the parameter is correct/balanced
+		if (isParam  && !group.endsWith("}")) {
+			 return null;
 		}
 
-		String regex = path;
+		// drop braces if this is indeed the correct path parameter
+		var value = isParam ? group.substring(1, group.length() - 1) : group;
 
-		for (int i=params.size() - 1; i >= 0; i--) {
-			Param param = params.get(i);
-			String prefix = regex.substring(0, param.startIdx);
-			String suffix = regex.substring(param.endIdx);
-			regex = prefix + "(?<" + param.name + ">" + param.regex + ")" + suffix;
+		String regex = null;
+		// if it has custom regex defined - extract it
+		if (value.indexOf(':') > -1) {
+			regex = value.substring(value.indexOf(':') + 1).trim();
+			value = value.substring(0, value.indexOf(':')).trim();
 		}
 
-		return Pattern.compile(regex);
+		// check if the parameter is defined for the method
+		if (isParam && !paramClasses.containsKey(value)) {
+			return null;
+		}
+
+		// if we don't have a custom regex defined - use default regex for the type
+		if (regex == null && paramClasses.get(value) != null) {
+			regex = regexForClass(paramClasses.get(value));
+		}
+
+		return new PathSegment(value, regex, isParam);
 	}
 
 	private static class Param {
