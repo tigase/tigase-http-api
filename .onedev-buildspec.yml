@@ -1,7 +1,7 @@
 version: 40
 imports:
 - projectPath: Templates
-  revision: 0.0.7
+  revision: 0.0.8
 jobs:
 - name: Maven CI
   jobExecutor: linux
