@@ -1,7 +1,7 @@
-version: 38
+version: 40
 imports:
 - projectPath: Templates
-  revision: 0.0.6
+  revision: 0.0.7
 jobs:
 - name: Maven CI
   steps:
@@ -13,7 +13,8 @@ jobs:
       valuesProvider: !ScriptingValues
         scriptName: get-timestamp
       secret: false
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+    condition: SUCCESSFUL
+    optional: false
   triggers:
   - !BranchUpdateTrigger {}
   retryCondition: never
