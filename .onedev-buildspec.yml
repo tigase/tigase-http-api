@@ -4,6 +4,7 @@ imports:
   revision: 0.0.7
 jobs:
 - name: Maven CI
+  jobExecutor: linux
   steps:
   - !UseTemplateStep
     name: maven build & deploy
