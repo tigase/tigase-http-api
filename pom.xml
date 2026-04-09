@@ -78,12 +78,12 @@
                     <dependency>
                         <groupId>org.codehaus.groovy</groupId>
                         <artifactId>groovy-eclipse-compiler</artifactId>
-                        <version>3.9.0</version>
+                        <version>3.9.1</version>
                     </dependency>
                     <dependency>
                         <groupId>org.codehaus.groovy</groupId>
                         <artifactId>groovy-eclipse-batch</artifactId>
-                        <version>4.0.26-01</version><!-- JDK 17+ -->
+                        <version>5.0.5-01</version> <!-- Java 17+ -->
                     </dependency>
                 </dependencies>
                 <extensions>true</extensions>
