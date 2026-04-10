@@ -41,6 +41,8 @@ TIP: If you have Admin UI enabled, you may log in using admin credentials to thi
 
 Requests made to the HTTP service must conclude with one of the API keys defined using ad-hoc commands: `http://localhost:8080/rest/adhoc/sess-man@domain.com?api-key=test1`
 
+NOTE: It's possible (for example for bootstrap configuration) to specify HTTP API-KEY as environment variable named `HTTP_API_KEY_BOOTSTRAP` - api-key set like that will be used only if there is no API-KEY configured via rest module management ("Add API key" command)
+
 NOTE: If you want to allow access to REST API without usage of any keys, it is possible. To do so, you need to add an API key with `API key` field value equal `open_access`.
 
 NOTE: You can also completely disable api-keys by adding `'open-access' = true` to the TDSL configuration file, either in `http` bean or any of the modules of that bean, e.g. `rest`, `admin, etc
@@ -77,7 +79,7 @@ location  /.well-known/ {
 
 If we want to know connectivity options for `sure.im` we should send HTTP GET request to `http://our-xmpp-server:8080/dns-webservice/?domain=sure.im&version=2`. We will receive following response:
 
-[source,java]
+[source,tdsl]
 ----
 {
   domain: 'sure.im',
@@ -112,6 +114,28 @@ rest {
 }
 ----
 
+
+==== Static Page module
+
+This module is disabled by default and requires to be enabled in the configuration as it requires additional configuration to work properly, ie. requires path to the directory which content should be served.
+
+Available properties:
+
+-  `filesPath` - Configures path to the directory on the filesystem from which files should be served as a web page.
+
+To enable this module and allow it to server files at `/` that are provided in directory `/path/to/static/website` you should add following configuration (disabling of `index` module is required in this case):
+
+[source,tdsl]
+----
+http () {
+   index (active: false) {}
+   staticPage () {
+       filesPath = '/path/to/static/website'
+       contextPath = '/'
+   }
+}
+----
+
 == Enabling password reset mechanism
 It is possible to provide users with a mechanism for a password change in case if they forgot their password to the XMPP account.
 To do that you need to have `tigase-extras.jar` in your classpath (it is part of `-dist-max` distribution package), enable `mailer` and `account-email-password-resetter`.
@@ -119,7 +143,7 @@ To do that you need to have `tigase-extras.jar` in your classpath (it is part of
 .Example configuration
 [source,tdsl]
 ----
-account-email-password-resetter () {}
+'account-email-password-resetter' () {}
 mailer (class: tigase.extras.mailer.Mailer) {
     'mailer-from-address' = 'email-address@to-send-emails-from'
     'mailer-smtp-host' = 'smtp.email.server.com'
