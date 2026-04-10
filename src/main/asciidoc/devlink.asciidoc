@@ -1,0 +1,4 @@
+// documents linking to development guide
+
+include::text/REST_API.asciidoc[]
+
