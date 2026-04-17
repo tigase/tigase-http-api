@@ -50,6 +50,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Consumer;
@@ -89,6 +90,7 @@ public class JaxRsRequestHandler
 				throw new IllegalArgumentException(ex.getMessage(), ex);
 			}
 		});
+		DESERIALIZERS.put(LocalDate.class, str -> str == null || str.isEmpty() ? null : LocalDate.parse(str));
 		DESERIALIZERS.put(JID.class, str -> {
 			try {
 				return JID.jidInstance(str);
