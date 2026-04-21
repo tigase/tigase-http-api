@@ -26,13 +26,17 @@ import java.io.IOException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 class JsonMarshallerTest
 		extends AbstractMarshallerTest {
 
 
 	@Test
-	public void test1() throws MarshalException, IOException {
+	public void testSerializeObject() throws MarshalException, IOException {
 
 		TestObject data = new TestObject("root");
 		data.getItems().add(new TestObject("item 1"));
@@ -46,6 +50,35 @@ class JsonMarshallerTest
 
 		assertMarshalling(expected, data);
 	}
+
+	@Test
+	public void testList() throws MarshalException, IOException {
+		List<String> list = new ArrayList<>();
+		list.add("item 1");
+		list.add("item 2");
+		list.add("item 3");
+		list.add("item 4");
+
+		String expected ="[\"item 1\",\"item 2\",\"item 3\",\"item 4\"]";
+
+		assertMarshalling(expected, list);
+	}
+
+
+
+	@Test
+	public void testMap() throws MarshalException, IOException {
+		Map<String, Integer> map = new HashMap<>();
+		map.put("2026-01-01", 100);
+		map.put("2026-01-02", 200);
+		map.put("2026-01-03", 300);
+
+		String expected = "{\"2026-01-03\":300,\"2026-01-02\":200,\"2026-01-01\":100}";
+
+		assertMarshalling(expected, map);
+	}
+
+
 
 	@Override
 	Marshaller createMarshaller() {

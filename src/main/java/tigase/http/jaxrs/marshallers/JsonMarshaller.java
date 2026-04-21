@@ -64,6 +64,10 @@ public class JsonMarshaller extends AbstractMarshaller implements Marshaller {
 
 	@Override
 	public void marshall(Object object, Writer writer) throws IOException, MarshalException {
+		if (object instanceof Collection || object instanceof Map) {
+			serializeValue(object, writer);
+			return;
+		}
 		writer.write("{");
 		Class clazz = object.getClass();
 		try {
@@ -89,7 +93,21 @@ public class JsonMarshaller extends AbstractMarshaller implements Marshaller {
 	}
 
 	public void serializeValue(Object value, Writer writer) throws IOException, MarshalException {
-		if (value instanceof Collection) {
+		if (value instanceof Map) {
+			writer.write("{");
+			boolean first = true;
+			for (Map.Entry<?, ?> entry : ((Map<?, ?>) value).entrySet()) {
+				if (!first) {
+					writer.write(",");
+				} else {
+					first = false;
+				}
+				writer.write(JsonSerializer.escapeString(entry.getKey().toString()));
+				writer.write(":");
+				serializeValue(entry.getValue(), writer);
+			}
+			writer.write("}");
+		} else if (value instanceof Collection) {
 			writer.write("[");
 			boolean first = true;
 			for (Object item : (Collection) value) {
