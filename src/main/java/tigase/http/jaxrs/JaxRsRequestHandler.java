@@ -675,13 +675,11 @@ public class JaxRsRequestHandler
 	 * @see jakarta.ws.rs.Produces
 	 */
 	public Matcher test(HttpServletRequest request, String requestUri) {
-		if (consumedContentTypes.contains(request.getContentType()) || consumedContentTypes.isEmpty()) {
+		if (consumedContentTypes.isEmpty() || request.getContentType() == null || consumedContentTypes.contains(request.getContentType())) {
 			String header = request.getHeader("Accept");
 			if (header != null && !producedContentTypes.isEmpty()) {
-				if (Arrays.stream(header.split(",")).map(
-						AcceptedType::new).filter(it -> producedContentTypes.contains(it.getMimeType())).sorted(Comparator.comparing(
-						AcceptedType::getPreference).reversed()).findFirst().map(
-						AcceptedType::getMimeType).isEmpty()) {
+				if (Arrays.stream(header.split(",")).map(AcceptedType::new)
+						.noneMatch(it -> producedContentTypes.stream().anyMatch(it::matches))) {
 					return null;
 				}
 			}
@@ -1324,10 +1322,13 @@ public class JaxRsRequestHandler
 			return Optional.empty();
 		}
 		
-		return Arrays.stream(header.split(",")).map(
-				AcceptedType::new).filter(it -> producedContentTypes.contains(it.getMimeType())).sorted(Comparator.comparing(
-				AcceptedType::getPreference).reversed()).findFirst().map(
-				AcceptedType::getMimeType);
+		return Arrays.stream(header.split(","))
+				.map(AcceptedType::new)
+				.sorted(Comparator.comparing(AcceptedType::getPreference).reversed())
+				.flatMap(it -> producedContentTypes.stream()
+						.filter(it::matches)
+						.sorted(Comparator.comparingInt(p -> p.contains("*") ? 1 : 0)))
+				.findFirst();
 	}
 
 

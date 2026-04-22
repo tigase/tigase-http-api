@@ -76,4 +76,40 @@ public class AcceptedType {
 	public double getPreference() {
 		return preference;
 	}
+
+	/**
+	 * Determines whether this accepted MIME type is compatible with the given produced type.
+	 *
+	 * <p>Compatibility is evaluated as follows:
+	 * <ul>
+	 *   <li>If either side is {@code *}{@code /*}, it matches unconditionally — the client accepts
+	 *       anything, or the server can produce anything.</li>
+	 *   <li>If this accepted type has a wildcard subtype (e.g. {@code text/*}), it matches any
+	 *       produced type sharing the same main type (e.g. {@code text/html}, {@code text/plain}).</li>
+	 *   <li>If the produced type has a wildcard subtype (e.g. {@code image/*}), the match is
+	 *       evaluated symmetrically — the server's broad capability is matched against this type's
+	 *       main type.</li>
+	 *   <li>Otherwise, an exact string match is required.</li>
+	 * </ul>
+	 *
+	 * @param producedType the MIME type produced by the server (e.g. {@code application/json})
+	 * @return {@code true} if this accepted type is satisfied by {@code producedType},
+	 *         {@code false} otherwise
+	 */
+	public boolean matches(String producedType) {
+		if ("*/*".equals(mimeType) || "*/*".equals(producedType)) {
+			return true;
+		}
+		if (mimeType.endsWith("/*")) {
+			String clientMain = mimeType.substring(0, mimeType.indexOf('/'));
+			int slash = producedType.indexOf('/');
+			return slash >= 0 && clientMain.equals(producedType.substring(0, slash));
+		}
+		if (producedType.endsWith("/*")) {
+			String serverMain = producedType.substring(0, producedType.indexOf('/'));
+			int slash = mimeType.indexOf('/');
+			return slash >= 0 && serverMain.equals(mimeType.substring(0, slash));
+		}
+		return mimeType.equals(producedType);
+	}
 }
