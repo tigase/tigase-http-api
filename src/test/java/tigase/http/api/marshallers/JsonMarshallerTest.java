@@ -79,6 +79,22 @@ class JsonMarshallerTest
 	}
 
 
+	public record TestItem(String value) {}
+
+	@Test
+	public void testRecordMarshalling() throws MarshalException, IOException {
+
+		List<TestItem> list = new ArrayList<>();
+		list.add(new TestItem("item 1"));
+		list.add(new TestItem("item 2"));
+		list.add(new TestItem("item 3"));
+		list.add(new TestItem("item 4"));
+
+		String expected ="[{\"value\":\"item 1\"},{\"value\":\"item 2\"},{\"value\":\"item 3\"},{\"value\":\"item 4\"}]";
+
+		assertMarshalling(expected, list);
+	}
+
 
 	@Override
 	Marshaller createMarshaller() {
