@@ -28,6 +28,31 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Represents a handler for processing HTTP requests in the JAX-RS framework.
+ *
+ * <p>This interface defines the contract for HTTP request handlers that route requests,
+ * perform authentication checks, and execute request processing logic. Implementations
+ * of this interface are used by {@link JaxRsServlet} to match incoming HTTP requests
+ * against registered handlers and delegate execution to the appropriate handler.</p>
+ *
+ * <p>Each handler is associated with:
+ * <ul>
+ *   <li>A specific HTTP method (GET, POST, PUT, DELETE, etc.)</li>
+ *   <li>A URL pattern for request matching</li>
+ *   <li>Authentication and authorization requirements</li>
+ *   <li>Execution logic for processing matched requests</li>
+ * </ul>
+ * </p>
+ *
+ * <p>The interface extends {@link Comparable} to enable natural ordering of handlers,
+ * which is used during request matching to ensure handlers are evaluated in the correct
+ * priority order. This allows more specific patterns to be matched before general ones.</p>
+ *
+ * @see JaxRsServlet
+ * @see Handler
+ * @see HttpMethod
+ */
 public interface RequestHandler extends Comparable<RequestHandler> {
 
 	public static Comparator<Pattern> PATTERN_COMPARATOR = Comparator.comparing((Pattern pattern) -> pattern.pattern().length()).reversed();
