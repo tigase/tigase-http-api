@@ -334,6 +334,7 @@ public class JaxRsRequestHandler
 		fullPath = fullPath + methodPath;
 
 		Pattern pattern = prepareMatcher(fullPath, method);
+		log.log(Level.CONFIG, "Creating JaxRsRequestHandler for method: " + method.getName() + "; path: " + fullPath + "; httpMethod: " + httpMethod + "; methodPath = " + methodPath + "; allowedRoles = " + allowedRoles + "; pattern = " + pattern);
 		return new JaxRsRequestHandler(instance, method, httpMethod, pattern, instance.getRequiredRole(), allowedRoles);
 	}
 
@@ -1356,5 +1357,21 @@ public class JaxRsRequestHandler
 			return r;
 		}
 		return Integer.MAX_VALUE;
+	}
+
+	@Override
+	public String toString() {
+		final StringBuilder sb = new StringBuilder("JaxRsRequestHandler{");
+		sb.append("requiredRole=").append(getRequiredRole());
+		sb.append(", allowedRoles=").append(getAllowedRoles());
+		sb.append(", handler=").append(getHandler());
+		sb.append(", method=").append(getMethod().getName());
+		sb.append(", pattern=").append(getPattern());
+		sb.append(", httpMethod=").append(getHttpMethod());
+		sb.append(", authenticationRequired=").append(isAuthenticationRequired());
+		sb.append(", consumedContentTypes=").append(consumedContentTypes);
+		sb.append(", producedContentTypes=").append(producedContentTypes);
+		sb.append('}');
+		return sb.toString();
 	}
 }

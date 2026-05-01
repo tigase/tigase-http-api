@@ -35,11 +35,15 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 
 @MultipartConfig
 public class JaxRsServlet<M extends JaxRsModule>
 		extends HttpServlet {
+
+	public static final Logger log = Logger.getLogger(JaxRsServlet.class.getName());
 	
 	public static Comparator<RequestHandler> REQUEST_HANDLER_COMPARATOR = Comparator.comparing(requestHandler -> {
 		if (requestHandler instanceof JaxRsRequestHandler) {
@@ -57,6 +61,9 @@ public class JaxRsServlet<M extends JaxRsModule>
 	private String loginFormPath;
 
 	protected boolean canAccess(RequestHandler requestHandler, HttpServletRequest request, HttpServletResponse response) throws HttpException, IOException, ServletException {
+		if (log.isLoggable(Level.FINEST)) {
+			log.log(Level.FINEST, "Checking authentication for request: " + requestHandler + " :: " + request.getRequestURI() + "; contextPath: " + request.getContextPath());
+		}
 		if (requestHandler.isAuthenticationRequired()) {
 			if (((requestHandler.getRequiredRole() != null && requestHandler.getRequiredRole() != Handler.Role.None) &&
 					!request.isUserInRole(requestHandler.getRequiredRole().name().toLowerCase())) ||
@@ -70,7 +77,11 @@ public class JaxRsServlet<M extends JaxRsModule>
 							.flatMap(str -> Arrays.stream(str.split(",")))
 							.anyMatch(part -> part.contains("text/html"))) {
 						// we have a login form and request is from the browser, so redirect to it...
-						response.sendRedirect(request.getContextPath() + loginFormPath);
+						var redirectLocation = request.getContextPath() + loginFormPath;
+						if (log.isLoggable(Level.FINEST)) {
+							log.log(Level.FINEST, "Redirecting to login form: " + redirectLocation);
+						}
+						response.sendRedirect(redirectLocation);
 					} else {
 						response.setHeader("WWW-Authenticate", "Basic realm=\"TigasePlain\"");
 						request.authenticate(response);
@@ -100,6 +111,9 @@ public class JaxRsServlet<M extends JaxRsModule>
 
 	@Override
 	protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		if (log.isLoggable(Level.FINE)) {
+			log.log(Level.FINE, "Handling request: " + req.getMethod() + " :: " + req.getRequestURI() + "; contextPath: " + req.getContextPath() + ", request: " + req);
+		}
 		try {
 			HttpMethod httpMethod = HttpMethod.valueOf(req.getMethod());
 			List<RequestHandler> handlers = requestHandlers.get(httpMethod);
@@ -108,6 +122,9 @@ public class JaxRsServlet<M extends JaxRsModule>
 				if (!req.getContextPath().equals("/")) {
 					if (!req.getContextPath().isEmpty()) {
 						requestUri = requestUri.substring(req.getContextPath().length());
+						if (log.isLoggable(Level.FINEST)) {
+							log.log(Level.FINEST, "Setting request URI from: " + req.getRequestURI() + " to: " + requestUri);
+						}
 					}
 				}
 				for (RequestHandler handler : handlers) {
@@ -120,6 +137,7 @@ public class JaxRsServlet<M extends JaxRsModule>
 					}
 				}
 				if (requestUri.isEmpty()) {
+					log.finest("Request URI is empty, setting to root path");
 					requestUri = "/";
 					for (RequestHandler handler : handlers) {
 						Matcher matcher = handler.test(req, requestUri);
@@ -153,6 +171,7 @@ public class JaxRsServlet<M extends JaxRsModule>
 			if (jaxRsRequestHandler.getMethod().isAnnotationPresent(LoginForm.class)) {
 				// this is default login URL to which we should redirect for authentication with forms
 				loginFormPath = jaxRsRequestHandler.getPattern().pattern();
+				log.log(Level.CONFIG, "Registering login form for " + loginFormPath);
 			}
 		}
 	}

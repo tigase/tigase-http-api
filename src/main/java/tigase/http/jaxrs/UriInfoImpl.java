@@ -152,4 +152,14 @@ public class UriInfoImpl implements UriInfo {
 	public URI relativize(URI uri) {
 		throw new RuntimeException("Relativize is not supported!");
 	}
+
+	@Override
+	public String toString() {
+		final StringBuilder sb = new StringBuilder("UriInfoImpl{");
+		sb.append("baseUri='").append(getBaseUri()).append('\'');
+		sb.append(", requestUri='").append(getRequestUri()).append('\'');
+		sb.append(", absolutePath='").append(getAbsolutePath()).append('\'');
+		sb.append('}');
+		return sb.toString();
+	}
 }
