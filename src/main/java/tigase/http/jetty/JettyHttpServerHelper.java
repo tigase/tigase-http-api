@@ -25,6 +25,7 @@ import tigase.http.AuthProvider;
 import tigase.http.DeploymentInfo;
 import tigase.http.ServletInfo;
 import tigase.http.api.HttpServerIfc;
+import tigase.http.java.filters.ForwardedPrefixFilter;
 import tigase.http.java.filters.ProtocolRedirectFilter;
 import tigase.http.jetty.security.BasicAndJWTAuthenticator;
 
@@ -85,6 +86,7 @@ public class JettyHttpServerHelper {
 		Map<String, String> filterParams = new HashMap<>();
 		filterParams.put("serverBeanName", server.getName());
 		context.addFilter(ProtocolRedirectFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST)).setInitParameters(Collections.unmodifiableMap(filterParams));
+		context.addFilter(ForwardedPrefixFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
 
 		Map<Class<? extends Throwable>, String> exceptionErrorPages = deployment.getExceptionErrorPages();
 		Map<Integer,String> errorCodePages = deployment.getErrorCodePages();

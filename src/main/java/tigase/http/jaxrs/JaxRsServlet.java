@@ -18,6 +18,7 @@
 package tigase.http.jaxrs;
 
 import tigase.http.api.HttpException;
+import tigase.http.java.filters.ForwardedPrefixFilter;
 import tigase.http.jaxrs.annotations.LoginForm;
 import tigase.http.modules.AbstractBareModule;
 import tigase.http.modules.rest.OldGroovyRequestHandler;
@@ -119,9 +120,17 @@ public class JaxRsServlet<M extends JaxRsModule>
 			List<RequestHandler> handlers = requestHandlers.get(httpMethod);
 			if (handlers != null) {
 				String requestUri = req.getRequestURI();
-				if (!req.getContextPath().equals("/")) {
-					if (!req.getContextPath().isEmpty()) {
-						requestUri = requestUri.substring(req.getContextPath().length());
+				String contextPath = req.getContextPath();
+				if (req instanceof ForwardedPrefixFilter.PrefixedContextPathRequest forwardedRequest) {
+					contextPath = forwardedRequest.getOriginalContextPath();
+				}
+				if (log.isLoggable(Level.FINE)) {
+					log.log(Level.FINE, "Handling request: " + req.getMethod() + " :: " + requestUri + "; contextPath: "
+							+ contextPath + ", request.contextPath" + req.getContextPath() + ", request: " + req);
+				}
+				if (!contextPath.equals("/")) {
+					if (!contextPath.isEmpty()) {
+						requestUri = requestUri.substring(contextPath.length());
 						if (log.isLoggable(Level.FINEST)) {
 							log.log(Level.FINEST, "Setting request URI from: " + req.getRequestURI() + " to: " + requestUri);
 						}

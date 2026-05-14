@@ -20,11 +20,16 @@ package tigase.http.jaxrs;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.SecurityContext;
 import jakarta.ws.rs.core.UriInfo;
+import tigase.http.java.filters.ForwardedPrefixFilter;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Enumeration;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ContainerRequestContext {
+
+	public static final Logger LOGGER = Logger.getLogger(ContainerRequestContext.class.getName());
 
 	private static ThreadLocal<ContainerRequestContext> contexts = new ThreadLocal<>();
 
@@ -84,6 +89,9 @@ public class ContainerRequestContext {
 		if (uriInfo == null) {
 			String basePath = request.getContextPath();
 			String servletPath = request.getServletPath();
+			if (LOGGER.isLoggable(Level.FINEST)) {
+				LOGGER.finest("Creating UriInfo for request: " + request + ", basePath: " + basePath + ", servletPath: " + servletPath);
+			}
 			if (!servletPath.isEmpty()) {
 				if (basePath.endsWith("/") && servletPath.startsWith("/")) {
 					basePath += servletPath.substring(1);
