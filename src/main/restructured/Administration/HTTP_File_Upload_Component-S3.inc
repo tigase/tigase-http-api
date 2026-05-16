@@ -1,12 +1,7 @@
 S3 support for HTTP File Upload
 -------------------------------------
 
-By default HTTP File Upload component shipped with Tigase XMPP Server stores uploaded files locally in the directory structure. If you are using AWS it may be better to store data using external service like S3 which are better suited for this task and are more resilient.
-
-.. Note::
-
-   For this feature to work please make sure that you are using all required dependencies (either by using ``-dist-max`` package or obtaining them from `tigase-extras aws module <https://github.com/tigase/tigase-extras/tree/master/aws>`__)
-
+By default HTTP File Upload component shipped with Tigase XMPP Server stores uploaded files locally in the directory structure. If you are using AWS or S3 it may be better to store data using external service like S3 which are better suited for this task and are more resilient.
 
 Enabling storage in S3
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -16,12 +11,16 @@ To enable storage in S3, you need to add following lines to your configuration f
 .. code:: text
 
    upload () {
-       store (class: tigase.extras.http.upload.S3Store, active: true, exportable: true) {
+       store (class: tigase.http.upload.store.S3Store, active: true, exportable: true) {
            bucket = 'bucket-name'
        }
    }
 
 This will enable HTTP File Upload component and configure it to be used with S3 bucket named ``bucket-name`` in the same region as your EC2 instance on which Tigase XMPP Server is running.
+
+.. Warning::
+
+   If the location when your are running Tigase XMPP Server does not have AWS S3 environments variables set, you will need to set them or use S3 storage configuration explained below.
 
 .. Warning::
 
@@ -32,9 +31,23 @@ If you wish to use S3 bucket from another AWS region, you can do that by adding 
 .. code:: text
 
    upload () {
-       store (class: tigase.extras.http.upload.S3Store, active: true, exportable: true) {
+       store (class: tigase.http.upload.store.S3Store, active: true, exportable: true) {
            bucket = 'bucket-name'
            region = 'us-west-2'
+       }
+   }
+
+If you wish to use non-AWS S3 storage (or AWS S3 without setting environment variables), you can do that by setting ``region``, ``accessKeyId``, ``secretKey`` (and ``endpointUrl`` if non-AWS S3 storage is used) properties.
+
+.. code:: text
+
+   upload () {
+       store (class: tigase.http.upload.store.S3Store, active: true, exportable: true) {
+           bucket = 'bucket-name'
+           region = 'us-west-2'
+           accessKeyId = 'XXXXX'
+           secretKey = 'YYYYYY'
+           endpointUrl = 'https://s3.example.com:6443/'
        }
    }
 
@@ -43,7 +56,7 @@ If you wish to share the same S3 bucket between different installations of Tigas
 .. code:: text
 
    upload () {
-       store (class: tigase.extras.http.upload.S3Store, active: true, exportable: true) {
+       store (class: tigase.http.upload.store.S3Store, active: true, exportable: true) {
            bucket = 'bucket-name'
            bucketKeyPrefix = '45252AF'
        }

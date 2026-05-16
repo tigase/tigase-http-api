@@ -104,6 +104,9 @@ public class JaxRsServlet<M extends JaxRsModule>
 		executorService = module.getExecutorService();
 		List<Handler> handlers = module.getHandlers();
 		if (handlers != null) {
+			log.info("for module " + module.getName() + " / " + module.getClass().getSimpleName() +
+					         " registering handlers " +
+					         handlers.stream().map(Object::getClass).map(Class::getSimpleName).toList());
 			for (Handler handler : handlers) {
 				registerHandlers(JaxRsRequestHandler.create(handler));
 			}

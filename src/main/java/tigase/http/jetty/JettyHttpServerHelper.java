@@ -91,9 +91,11 @@ public class JettyHttpServerHelper {
 		Map<Class<? extends Throwable>, String> exceptionErrorPages = deployment.getExceptionErrorPages();
 		Map<Integer,String> errorCodePages = deployment.getErrorCodePages();
 		if (!(exceptionErrorPages.isEmpty() && errorCodePages.isEmpty() && deployment.getGlobalErrorPage() == null)) {
+			log.info("setting error handler for path " + deployment.getContextPath() + " with global error page " + deployment.getGlobalErrorPage());
 			ErrorPageErrorHandler errorHandler = new ErrorPageErrorHandler() {
 				@Override
 				public String getErrorPage(HttpServletRequest request) {
+					log.info("processing error page request for context " + deployment.getContextPath());
 					String accept = request.getHeader(HttpHeader.ACCEPT.asString());
 					// if accept doesn't contains text/html return null so we could generate a generic json/xml error
 					if (accept == null || accept.contains("text/html")) {

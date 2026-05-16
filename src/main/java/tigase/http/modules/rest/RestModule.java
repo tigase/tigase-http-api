@@ -84,6 +84,7 @@ public class RestModule extends AbstractModule
 		if (handlers == null) {
 			this.handlers = new ArrayList<>();
 		} else {
+			log.info("settings handlers: " + handlers.stream().map(it -> it.getClass().getSimpleName()).toList());
 			this.handlers = handlers;
 		}
 	}
