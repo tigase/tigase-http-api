@@ -55,18 +55,12 @@
             <div class="row mb-3">
                 <label class="col-sm-3 col-form-label" for="dbType">Select database</label>
                 <div class="col-sm-9">
-                    <select class="form-select" id="dbType" name="dbType" required onchange="
-	var select = document.getElementById('dbType');
-	for (var i=0; i<select.children.length; i++) {
-    var it = select.children[i];
-    if (it.value == select.value) {
-		var warn = document.getElementById('dbTypeWarning');
-		warn.innerHTML = it.getAttribute('warning') || '';
-	}
-}
-">
+                    <select class="form-select" id="dbType" name="dbType" required onchange="onDbTypeChange()">
                         @for(TypeInfo type : tigase.db.util.SchemaLoader.getAllSupportedTypes())
-                            <option value='${type.getName()}' selected="${type.isAvailable() && type == config.getDbType()}" disabled="${!type.isAvailable()}" warning="${type.getWarning()}" >${type.getLabel()}</option>
+                            <option value='${type.getName()}'
+                                    selected="${type.isAvailable() && type == config.getDbType()}"
+                                    disabled="${!type.isAvailable()}"
+                                    warning="${type.getWarning()}">${type.getLabel()}</option>
                         @endfor
                     </select>
                     <div id='dbTypeWarning' class="dbTypeWarning"></div>
@@ -79,4 +73,17 @@
     </div>
 
 </form>
+
+    <script>
+        function onDbTypeChange() {
+            var select = document.getElementById('dbType');
+            for (var i=0; i<select.children.length; i++) {
+                var it = select.children[i];
+                if (it.value === select.value) {
+                    var warn = document.getElementById('dbTypeWarning');
+                    warn.innerHTML = it.getAttribute('warning') || '';
+                }
+            }
+        }
+    </script>
 `)
