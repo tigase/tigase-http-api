@@ -42,7 +42,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Created by andrzej on 28.05.2016.
  */
-@Bean(name = "index", parent = HttpMessageReceiver.class, active = true)
+@Bean(name = "index", parent = HttpMessageReceiver.class, active = false)
 @ConfigType({ConfigTypeEnum.DefaultMode, ConfigTypeEnum.SessionManagerMode, ConfigTypeEnum.ConnectionManagersMode,
 			 ConfigTypeEnum.ComponentMode})
 public class IndexModule
