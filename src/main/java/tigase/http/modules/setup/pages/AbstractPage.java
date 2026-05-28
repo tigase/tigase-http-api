@@ -58,7 +58,7 @@ public abstract class AbstractPage implements SetupHandler {
 
 	public Map<String,Object> prepareContext() {
 		Map<String,Object> context = new HashMap<>();
-		context.put("pages", setupModule.getHandlers());
+		context.put("pages", setupModule.getPagesHandlers());
 		context.put("currentPage", this);
 		context.put("config", getConfig());
 		return context;

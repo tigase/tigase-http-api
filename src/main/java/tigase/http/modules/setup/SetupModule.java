@@ -19,10 +19,7 @@ package tigase.http.modules.setup;
 
 import tigase.db.AuthRepository;
 import tigase.db.TigaseDBException;
-import tigase.http.AuthProvider;
-import tigase.http.DeploymentInfo;
-import tigase.http.HttpMessageReceiver;
-import tigase.http.ServletInfo;
+import tigase.http.*;
 import tigase.http.jaxrs.AbstractJaxRsModule;
 import tigase.http.jaxrs.JaxRsServlet;
 import tigase.http.util.AssetsServlet;
@@ -32,11 +29,8 @@ import tigase.kernel.beans.config.ConfigField;
 import tigase.util.stringprep.TigaseStringprepException;
 import tigase.xmpp.jid.BareJID;
 
-import javax.naming.AuthenticationException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
+import javax.crypto.spec.SecretKeySpec;
+import java.security.SecureRandom;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.Executors;
@@ -58,9 +52,47 @@ public class SetupModule extends AbstractJaxRsModule<SetupHandler> {
 
 	@Inject(nullAllowed = true)
 	private List<SetupHandler> handlersAll;
-	private List<SetupHandler> handlers = new ArrayList<>();
+	private List<SetupHandler> pagesHandlers = new ArrayList<>();
 	@Inject(nullAllowed = true)
 	private AuthRepository authRepository;
+	private final AuthProvider setupAuthProvider = new AbstractAuthProvider() {
+
+		private SecretKeySpec secretKey;
+
+		@Override
+		public Duration getAuthenticationTokenValidityDuration() {
+			return Duration.ofMinutes(30);
+		}
+
+		@Override
+		protected synchronized SecretKeySpec getSecretKey() {
+			if (secretKey == null) {
+				SecureRandom random = new SecureRandom();
+				byte[] secret = new byte[32];
+				random.nextBytes(secret);
+				secretKey = new SecretKeySpec(secret, "HmacSHA256");
+			}
+			return secretKey;
+		}
+
+		@Override
+		public boolean isAdmin(BareJID user) {
+			return Optional.ofNullable(user)
+					.map(BareJID::toString)
+					.filter(userStr -> Objects.equals(userStr, adminUser))
+					.isPresent() || getAuthProvider().isAdmin(user);
+		}
+
+		@Override
+		public boolean checkCredentials(String user, String password)
+				throws TigaseStringprepException, TigaseDBException {
+			if (Objects.equals(user, adminUser) && Objects.equals(password, adminPassword)) {
+				return true;
+			}
+			return getAuthProvider().checkCredentials(user, password);
+		}
+
+	};
 
 	private DeploymentInfo httpDeployment;
 
@@ -84,6 +116,11 @@ public class SetupModule extends AbstractJaxRsModule<SetupHandler> {
 				.filter(h -> h.getClass().getAnnotation(InitialPage.class) != null)
 				.findFirst();
 
+		handlersAll.stream()
+				.filter(LoginPage.class::isInstance)
+				.map(LoginPage.class::cast)
+				.forEach(loginPage -> loginPage.setAuthProvider(setupAuthProvider));
+
 		if (handlerOptional.isPresent()) {
 			List<SetupHandler> value = new ArrayList<>();
 			SetupHandler handler = handlerOptional.get();
@@ -102,9 +139,9 @@ public class SetupModule extends AbstractJaxRsModule<SetupHandler> {
 
 				value.add(handler);
 			}
-			this.handlers = value;
+			this.pagesHandlers = value;
 		} else {
-			this.handlers = Collections.EMPTY_LIST;
+			this.pagesHandlers = Collections.EMPTY_LIST;
 		}
 
 	}
@@ -114,7 +151,11 @@ public class SetupModule extends AbstractJaxRsModule<SetupHandler> {
 	}
 
 	public List<SetupHandler> getHandlers() {
-		return handlers;
+		return handlersAll;
+	}
+
+	public List<SetupHandler> getPagesHandlers() {
+		return pagesHandlers;
 	}
 
 	@Override
@@ -132,61 +173,7 @@ public class SetupModule extends AbstractJaxRsModule<SetupHandler> {
 		httpDeployment = httpServer.deployment()
 				.setClassLoader(this.getClass().getClassLoader())
 				.setContextPath(contextPath)
-				.setAuthProvider(new AuthProvider() {
-					@Override
-					public boolean isAdmin(BareJID user) {
-						return Optional.ofNullable(user)
-								.map(BareJID::toString)
-								.filter(userStr -> Objects.equals(userStr, adminUser))
-								.isPresent() || getAuthProvider().isAdmin(user);
-					}
-
-					@Override
-					public boolean checkCredentials(String user, String password)
-							throws TigaseStringprepException, TigaseDBException {
-						if (Objects.equals(user, adminUser) && Objects.equals(password, adminPassword)) {
-							return true;
-						}
-						return getAuthProvider().checkCredentials(user, password);
-					}
-
-					@Override
-					public String generateToken(JWTPayload token) throws NoSuchAlgorithmException, InvalidKeyException {
-						throw new RuntimeException("Feature not implemented!");
-					}
-
-					@Override
-					public JWTPayload parseToken(String token) throws AuthenticationException {
-						throw new RuntimeException("Feature not implemented!");
-					}
-
-					@Override
-					public JWTPayload authenticateWithCookie(HttpServletRequest request) {
-						return null;
-					}
-
-					@Override
-					public Duration getAuthenticationTokenValidityDuration() {
-						return Duration.ofMinutes(15);
-					}
-
-					@Override
-					public void setAuthenticationCookie(HttpServletResponse response, JWTPayload payload, String domain,
-														String path)
-							throws NoSuchAlgorithmException, InvalidKeyException {
-						throw new RuntimeException("Feature not implemented!");
-					}
-
-					@Override
-					public void resetAuthenticationCookie(HttpServletResponse response, String domain, String path) {
-						throw new RuntimeException("Feature not implemented!");
-					}
-
-					@Override
-					public void refreshJwtToken(HttpServletRequest request, HttpServletResponse response) {
-						// nothing to do...
-					}
-				})
+				.setAuthProvider(setupAuthProvider)
 				.setDeploymentName("Setup")
 				.setDeploymentDescription(getDescription());
 		if (vhosts != null) {
