@@ -26,6 +26,7 @@ import jakarta.ws.rs.core.UriInfo;
 import jakarta.xml.bind.MarshalException;
 import jakarta.xml.bind.UnmarshalException;
 import org.jspecify.annotations.Nullable;
+import tigase.annotations.TigaseDeprecated;
 import tigase.http.api.HttpException;
 import tigase.http.api.UnsupportedFormatException;
 import tigase.http.jaxrs.marshallers.*;
@@ -675,6 +676,8 @@ public class JaxRsRequestHandler
 	 * @see jakarta.ws.rs.Consumes
 	 * @see jakarta.ws.rs.Produces
 	 */
+	@Deprecated
+	@TigaseDeprecated(since = "8.5.0", removeIn = "9.0.0", note = "Use match(HttpServletRequest, String)")
 	public Matcher test(HttpServletRequest request, String requestUri) {
 		if (consumedContentTypes.isEmpty() || request.getContentType() == null || consumedContentTypes.contains(request.getContentType())) {
 			String header = request.getHeader("Accept");
@@ -685,6 +688,92 @@ public class JaxRsRequestHandler
 				}
 			}
 			return pattern.matcher(requestUri);
+		}
+		return null;
+	}
+
+	/**
+	 * Tests if a given HTTP request matches certain criteria based on its content type,
+	 * Accept header, and URI pattern.
+	 *
+	 * <p>This method evaluates whether the incoming HTTP request can be handled by this
+	 * {@code JaxRsRequestHandler} by performing the following checks:</p>
+	 *
+	 * <ol>
+	 *   <li><strong>Content Type Negotiation:</strong> Verifies that the request's content type
+	 * 	   is either empty or matches one of the content types that this handler consumes
+	 * 	   (as defined by the {@code @Consumes} annotation on the handler method).</li>
+	 *   <li><strong>Accept Header Validation:</strong> If the request includes an {@code Accept}
+	 * 	   header and this handler produces specific content types (as defined by the
+	 *       {@code @Produces} annotation), the method checks if any of the accepted types
+	 * 	   match the produced types. The matching is done by parsing the Accept header,
+	 * 	   creating {@code AcceptedType} objects with preference values, and selecting
+	 * 	   the best match based on quality factors (q-values).</li>
+	 *   <li><strong>URI Pattern Matching:</strong> If the content type and Accept header
+	 * 	   validations pass, the method attempts to match the request URI against this
+	 * 	   handler's predefined URI pattern (which may include path parameters).</li>
+	 * </ol>
+	 *
+	 * <p><strong>Return Value:</strong></p>
+	 * <ul>
+	 *   <li>Returns a {@link tigase.http.jaxrs.RequestHandler.RequestHandlerMatcher} object if all
+	 *     validation criteria are satisfied and the URI pattern matches the request URI. This
+	 *     {@code tigase.http.jaxrs.RequestHandler.RequestHandlerMatcher} can be used to extract path
+	 *     parameters from the matched URI in addition to extraction of preference of selected
+	 *     content type.</li>
+	 *   <li>Returns {@code null} if any of the following conditions occur:
+	 * 	 <ul>
+	 * 	   <li>The request's content type does not match any consumed content types</li>
+	 * 	   <li>The Accept header is present but none of its values match the produced content types</li>
+	 * 	   <li>The request URI does not match the handler's pattern</li>
+	 * 	 </ul>
+	 *   </li>
+	 * </ul>
+	 *
+	 * <p><strong>Example Usage:</strong></p>
+	 * <pre>
+	 * // Handler method annotated with @Consumes("application/json") and @Produces("application/json")
+	 * RequestHandlerMatcher matcher = requestHandler.match(request, "/api/users/123");
+	 * if (matcher != null)) {
+	 * 	 String userId = matcher.matcher().group("id"); // Extract path parameter
+	 * 	 // Process request...
+	 * }
+	 * </pre>
+	 *
+	 * @param request    the {@code HttpServletRequest} object containing the client's request information,
+	 *                   including headers (Content-Type, Accept) and the request URI. Must not be {@code null}.
+	 * @param requestUri the URI string of the request to be matched against this handler's predefined
+	 *                   URI pattern. This should be the normalized path without query parameters.
+	 *                   Must not be {@code null}.
+	 * @return a {@code Matcher} object if the request URI matches the pattern and all criteria
+	 * for content type and Accept header are satisfied; {@code null} otherwise, indicating
+	 * that this handler cannot process the request.
+	 * @see tigase.http.jaxrs.RequestHandler.RequestHandlerMatcher
+	 * @see Matcher
+	 * @see #getPattern()
+	 * @see AcceptedType
+	 * @see jakarta.ws.rs.Consumes
+	 * @see jakarta.ws.rs.Produces
+	 */
+	@Override
+	public RequestHandlerMatcher match(HttpServletRequest request, String requestUri) {
+		if (consumedContentTypes.isEmpty() || request.getContentType() == null || consumedContentTypes.contains(request.getContentType())) {
+			String header = request.getHeader("Accept");
+			Optional<AcceptedType> acceptedType = Optional.empty();
+			if (header != null && !producedContentTypes.isEmpty()) {
+				acceptedType = Arrays.stream(header.split(",")).map(AcceptedType::new)
+						.sorted(Comparator.comparing(AcceptedType::getPreference).reversed())
+						.filter(it -> producedContentTypes.stream().anyMatch(it::matches)).findFirst();
+				if (acceptedType.isEmpty()) {
+					return null;
+				}
+			}
+			Matcher matcher = pattern.matcher(requestUri);
+			if (matcher.matches()) {
+				return new RequestHandlerMatcher(this, acceptedType.map(AcceptedType::getPreference).orElse(0.0),
+				                                 acceptedType.flatMap(this::selectResponseMimeType).orElse(null),
+				                                 matcher);
+			}
 		}
 		return null;
 	}
@@ -708,6 +797,24 @@ public class JaxRsRequestHandler
 		}
 	}
 
+	@Deprecated
+	@TigaseDeprecated(since = "8.5.0", removeIn = "9.0.0", note = "Use execute(HttpServletRequest, HttpServletResponse, Matcher, AcceptedType, ScheduledExecutorService)")
+	public void execute(HttpServletRequest request, HttpServletResponse response, Matcher matcher, ScheduledExecutorService executorService)
+			throws HttpException, IOException {
+		String header = request.getHeader("Accept");
+		String acceptedType = null;
+		if (header != null && !producedContentTypes.isEmpty()) {
+			acceptedType = Arrays.stream(header.split(","))
+					.map(AcceptedType::new)
+					.sorted(Comparator.comparing(AcceptedType::getPreference).reversed())
+					.filter(it -> producedContentTypes.stream().anyMatch(it::matches))
+					.findFirst()
+					.flatMap(this::selectResponseMimeType)
+					.orElse(null);
+		}
+		execute(request, response, matcher, acceptedType, executorService);
+	}
+
 	/**
 	 * Executes a complex HTTP request-processing pipeline. This method is the core entry point
 	 * for handling all incoming HTTP requests that match this handler's pattern and HTTP method.
@@ -717,11 +824,7 @@ public class JaxRsRequestHandler
 	 * <ol>
 	 *   <li><strong>Context Initialization:</strong> Creates a {@link ContainerRequestContext}
 	 * 	   wrapping the servlet request to provide JAX-RS-style access to request metadata.</li>
-	 *
-	 *   <li><strong>Content Negotiation:</strong> Determines the response MIME type by analyzing
-	 * 	   the client's {@code Accept} header against the handler's {@code @Produces} annotations,
-	 * 	   selecting the best match based on quality factors (q-values).</li>
-	 *
+	 **
 	 *   <li><strong>Parameter Extraction:</strong> Iterates through the handler method's parameters
 	 * 	   and extracts values from various sources:
 	 * 	   <ul>
@@ -849,6 +952,9 @@ public class JaxRsRequestHandler
 	 *                        against this handler's path pattern. Used to extract path parameter values
 	 *                        via named capturing groups (e.g., {@code matcher.group("id")}).
 	 *                        Must not be {@code null} and must be in a matched state.
+	 * @param acceptedType    A {@link AcceptedType} instance extracted from "Accept" header matching content type
+	 *                        produced by this request handler. (may be null is "Accept' header is missing or request
+	 *                        handler had no "@Produced" specified.
 	 * @param executorService The {@link ScheduledExecutorService} used for scheduling asynchronous
 	 *                        request processing tasks and timeout handlers when
 	 *                        {@link AsyncResponseImpl} is used. Must not be {@code null}.
@@ -863,7 +969,7 @@ public class JaxRsRequestHandler
 	 *                       (via {@link HttpServletRequest#getInputStream()}) or writing the
 	 *                       response body (via {@link HttpServletResponse#getOutputStream()}).
 	 *                       This typically indicates network issues or client disconnection.
-	 * @see #test(HttpServletRequest, String)
+	 * @see #match(HttpServletRequest, String)
 	 * @see #selectResponseMimeType(Method, HttpServletRequest)
 	 * @see #convertToValue(Type, String[])
 	 * @see #validateParameters(Object, Method, Object[], Predicate, Consumer)
@@ -872,11 +978,11 @@ public class JaxRsRequestHandler
 	 * @see AsyncResponseImpl
 	 * @see ExtendedValidationException
 	 */
-	public void execute(HttpServletRequest request, HttpServletResponse response, Matcher matcher, ScheduledExecutorService executorService)
+	public void execute(HttpServletRequest request, HttpServletResponse response, Matcher matcher, String acceptedType, ScheduledExecutorService executorService)
 			throws HttpException, IOException {
 		ContainerRequestContext context = new ContainerRequestContext(request);
 
-		Optional<String> acceptedType = selectResponseMimeType(method, request);
+		Optional<String> acceptedMimeType = Optional.ofNullable(acceptedType);
 		List values = new ArrayList<>();
 		AsyncResponseImpl asyncResponse = null;
 		try {
@@ -951,7 +1057,7 @@ public class JaxRsRequestHandler
 						}
 					} else if (param.getAnnotation(Suspended.class) != null) {
 						if (asyncResponse == null) {
-							asyncResponse = new AsyncResponseImpl(this, executorService, request, acceptedType);
+							asyncResponse = new AsyncResponseImpl(this, executorService, request, acceptedMimeType);
 						}
 						value = asyncResponse;
 					} else if (param.getAnnotation(BeanParam.class) != null) {
@@ -1000,7 +1106,7 @@ public class JaxRsRequestHandler
 				} else {
 
 					if (result != null) {
-						sendEncodedContent(result, acceptedType, response);
+						sendEncodedContent(result, acceptedMimeType, response);
 					} else {
 						response.setStatus(200);
 					}
@@ -1313,6 +1419,18 @@ public class JaxRsRequestHandler
 		};
 	}
 
+	protected Optional<String> selectResponseMimeType(AcceptedType acceptedType) {
+		if (acceptedType == null) {
+			return Optional.empty();
+		}
+		return producedContentTypes.stream()
+				.filter(acceptedType::matches)
+				.sorted(Comparator.comparingInt(p -> p.contains("*") ? 1 : 0))
+				.findFirst();
+	}
+
+	@Deprecated
+	@TigaseDeprecated(since = "8.5.0", removeIn = "9.0.0", note = "Use selectResponseMimeType(AcceptedType)")
 	protected Optional<String> selectResponseMimeType(Method method, HttpServletRequest request) throws HttpException {
 		if (producedContentTypes.isEmpty()) {
 			return Optional.empty();

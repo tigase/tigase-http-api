@@ -17,6 +17,9 @@
  */
 package tigase.http.jaxrs;
 
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+import tigase.annotations.TigaseDeprecated;
 import tigase.http.api.HttpException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -70,9 +73,29 @@ public interface RequestHandler extends Comparable<RequestHandler> {
 	default boolean isAuthenticationRequired() {
 		return getRequiredRole().isAuthenticationRequired();
 	}
-	
+
+	@Deprecated
+	@TigaseDeprecated(since = "8.5.0", removeIn = "9.0.0", note = "Use match(HttpServletRequest, String)")
 	Matcher test(HttpServletRequest request, String requestUri);
 
+	default RequestHandlerMatcher match(HttpServletRequest request, String requestUri) {
+		Matcher matcher = test(request, requestUri);
+		if (matcher.matches()) {
+			return new RequestHandlerMatcher(this, 1.0d, null, matcher);
+		}
+		return null;
+	}
+
+	@Deprecated
+	@TigaseDeprecated(since = "8.5.0", removeIn = "9.0.0", note = "Use execute(HttpServletRequest, HttpServletResponse, Matcher, AcceptedType, ScheduledExecutorService)")
 	void execute(HttpServletRequest request, HttpServletResponse response, Matcher matcher,
 						ScheduledExecutorService executorService) throws HttpException, IOException;
+
+	default void execute(HttpServletRequest request, HttpServletResponse response, Matcher matcher, @Nullable String acceptedType,
+	             ScheduledExecutorService executorService) throws HttpException, IOException {
+		execute(request, response, matcher, executorService);
+	}
+
+	record RequestHandlerMatcher(@NonNull RequestHandler requestHandler, double preference, @Nullable String acceptedType, @NonNull Matcher matcher) {
+	}
 }

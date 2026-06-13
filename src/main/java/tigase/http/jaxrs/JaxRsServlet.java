@@ -38,7 +38,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
 
 @MultipartConfig
 public class JaxRsServlet<M extends JaxRsModule>
@@ -139,26 +138,24 @@ public class JaxRsServlet<M extends JaxRsModule>
 						}
 					}
 				}
-				for (RequestHandler handler : handlers) {
-					Matcher matcher = handler.test(req, requestUri);
-					if (matcher != null && matcher.matches()) {
-						if (canAccess(handler, req, resp)) {
-							handler.execute(req, resp, matcher, executorService);
-						}
-						return;
+
+				RequestHandler.RequestHandlerMatcher matcher = findRequestHandler(handlers, req, requestUri);
+				if (matcher != null) {
+					if (canAccess(matcher.requestHandler(), req, resp)) {
+						matcher.requestHandler().execute(req, resp, matcher.matcher(), executorService);
 					}
+					return;
 				}
+
 				if (requestUri.isEmpty()) {
 					log.finest("Request URI is empty, setting to root path");
 					requestUri = "/";
-					for (RequestHandler handler : handlers) {
-						Matcher matcher = handler.test(req, requestUri);
-						if (matcher != null && matcher.matches()) {
-							if (canAccess(handler, req, resp)) {
-								handler.execute(req, resp, matcher, executorService);
-							}
-							return;
+					matcher = findRequestHandler(handlers, req, requestUri);
+					if (matcher != null) {
+						if (canAccess(matcher.requestHandler(), req, resp)) {
+							matcher.requestHandler().execute(req, resp, matcher.matcher(), executorService);
 						}
+						return;
 					}
 				}
 			}
@@ -166,6 +163,15 @@ public class JaxRsServlet<M extends JaxRsModule>
 		} catch (ValidationException ex) {
 			throw new HttpException(ex.getMessage(), HttpServletResponse.SC_NOT_ACCEPTABLE, ex);
 		}
+	}
+
+	protected RequestHandler.RequestHandlerMatcher findRequestHandler(List<RequestHandler> handlers, HttpServletRequest request, String requestUri) {
+		return handlers.stream()
+				.map(it -> it.match(request, requestUri))
+				.filter(Objects::nonNull)
+				.filter(it -> it.matcher().matches())
+				.max(Comparator.comparing(RequestHandler.RequestHandlerMatcher::preference))
+				.orElse(null);
 	}
 
 	protected void registerHandlers(Collection<? extends RequestHandler> requestHandlers) {

@@ -139,6 +139,12 @@
                     <a class="nav-link text-white ${request.getRequestURI().equals(link) ? "active" : ""}" aria-current="page" href="${link}"><i class="bi bi-clipboard-data me-2"></i>Server info</a>
                 </li>
             @endif
+            <%-- Added to check admin permission --%>
+            @if (DashboardHandler.canAccess(securityContext, ServerInfoHandler.class, "info"))
+                <li class="nav-item">
+                    <a class="nav-link text-white" aria-current="page" target="_blank" href="/index"><i class="bi bi-plugin me-2"></i>Endpoints</a>
+                </li>
+            @endif
             <%--            <li class="nav-item">--%>
 <%--                <a class="nav-link text-white" href="#"><i class="bi bi-gear-fill me-2"></i>Other</a>--%>
 <%--            </li>--%>

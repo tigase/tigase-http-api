@@ -42,7 +42,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Created by andrzej on 28.05.2016.
  */
-@Bean(name = "index", parent = HttpMessageReceiver.class, active = false)
+@Bean(name = "index", parent = HttpMessageReceiver.class, active = true)
 @ConfigType({ConfigTypeEnum.DefaultMode, ConfigTypeEnum.SessionManagerMode, ConfigTypeEnum.ConnectionManagersMode,
 			 ConfigTypeEnum.ComponentMode})
 public class IndexModule
@@ -61,12 +61,12 @@ public class IndexModule
 	private TemplateEngine templateEngine;
 
 	public IndexModule() {
-		contextPath = "/";
+		contextPath = "/index";
 	}
 
 	public void setName(String name) {
 		this.name = name;
-		contextPath = "/";
+		contextPath = "/index";
 	}
 
 	@Override
