@@ -44,9 +44,9 @@
 			@for(String group : commandGroups)
 				<div class="accordion-item">
 					<h2 class="accordion-header" id="${group}-headers">
-						<button class="accordion-button align-items-center ps-3 pe-3 @if(!group.equals(currentGroup))collapsed@endif" data-bs-toggle="collapse" data-bs-target="#${group}-collapse" aria-expanded="false" aria-controls="${group}-collapse">${group}</button>
+						<button class="accordion-button align-items-center ps-3 pe-3 @if(!group.equals(currentGroup))collapsed@endif" data-bs-toggle="collapse" data-bs-target="#${group.replace(" ", "-")}-collapse" aria-expanded="false" aria-controls="${group}-collapse">${group}</button>
 					</h2>
-					<div id="${group}-collapse" class="accordion-collapse collapse ps-3 pe-3 @if(group.equals(currentGroup))show@endif" aria-labelledby="${group}-headers" data-bs-parent="#accordion-commands">
+					<div id="${group.replace(" ", "-")}-collapse" class="accordion-collapse collapse ps-3 pe-3 @if(group.equals(currentGroup))show@endif" aria-labelledby="${group}-headers" data-bs-parent="#accordion-commands">
 						<div class="accordion-body ps-3">
 							<ul class="btn-toggle-nav list-unstyled fw-normal pb-1">
 								@for(CommandItem command : commands.get(group))
@@ -71,7 +71,7 @@
 							<h5 class="card-header p-3">${form.getTitle()}</h5>
 						@endif
 						<div class="card-body">
-							@if(form.getInstructions() != null)
+							@if(form.getInstructions() != null && !form.getInstructions().equals(form.getTitle()))
 								<h5>${form.getInstructions()}</h5>
 							@endif
 							@for(Reported reported : form.getReported())
