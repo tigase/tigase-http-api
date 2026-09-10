@@ -69,12 +69,14 @@ public class FileServlet
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		try {
+			log.fine("Processing GET request: " + req.getPathInfo());
 			resp.setHeader("Access-Control-Allow-Origin", "*");
 			UriFormat uriFormat = context.logic.getDownloadURIFormat();
 
 			Matcher m = uriFormat.parsePath(req.getPathInfo().substring(1));
 
 			if (!m.matches()) {
+				log.finest("Invalid URI format: " + req.getPathInfo());
 				resp.sendError(404);
 				return;
 			}
@@ -94,6 +96,7 @@ public class FileServlet
 
 			FileUploadRepository.Slot slot = context.repo.getSlot(uploader, slotId);
 			if (slot == null) {
+				log.finest("Slot not found: uploader=" + uploader + ", slotId=" + slotId);
 				resp.sendError(404);
 				return;
 			}
@@ -124,6 +127,7 @@ public class FileServlet
 	@Override
 	protected void doHead(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		try {
+			log.fine("Processing HEAD request: " + req.getPathInfo());
 			resp.setHeader("Access-Control-Allow-Origin", "*");
 			UriFormat uriFormat = context.logic.getDownloadURIFormat();
 
@@ -131,6 +135,7 @@ public class FileServlet
 
 			if (!m.matches()) {
 				resp.sendError(404);
+				log.finest("Invalid URI format: " + req.getPathInfo());
 				return;
 			}
 
@@ -148,6 +153,7 @@ public class FileServlet
 
 			FileUploadRepository.Slot slot = context.repo.getSlot(uploader, slotId);
 			if (slot == null) {
+				log.finest("Slot not found: uploader=" + uploader + ", slotId=" + slotId);
 				resp.sendError(404);
 				return;
 			}
@@ -166,6 +172,7 @@ public class FileServlet
 
 	@Override
 	protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		log.fine("Processing OPTIONS request: " + req.getPathInfo());
 		super.doOptions(req, resp);
 		resp.setHeader("Access-Control-Allow-Origin", "*");
 		resp.setHeader("Access-Control-Allow-Methods", "PUT, GET, OPTIONS");
@@ -177,12 +184,14 @@ public class FileServlet
 	@Override
 	protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		try {
+			log.fine("Processing PUT request: " + req.getPathInfo());
 			resp.setHeader("Access-Control-Allow-Origin", "*");
 			UriFormat uriFormat = context.logic.getUploadURIFormat();
 
 			Matcher m = uriFormat.parsePath(req.getPathInfo().substring(1));
 
 			if (!m.matches()) {
+				log.finest("Request path: " + req.getPathInfo() + " doesn't match the " + uriFormat);
 				resp.sendError(404);
 				return;
 			}
@@ -212,6 +221,7 @@ public class FileServlet
 				context.repo.updateSlot(slot.uploader, slotId);
 				resp.setStatus(201);
 			} else {
+				log.finest("Request upload failed (404), no matching slot: " + slotId);
 				resp.sendError(404);
 			}
 		} catch (Throwable ex) {
@@ -221,6 +231,7 @@ public class FileServlet
 	}
 
 	protected void transferData(ReadableByteChannel in, WritableByteChannel out) throws IOException {
+		log.fine("Processing transferData request");
 		if (in instanceof FileChannel) {
 			FileChannel fin = (FileChannel) in;
 			long size = fin.size();

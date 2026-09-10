@@ -102,6 +102,7 @@ public class S3Store implements Store, ConfigurationChangedAware {
 	@Override
 	public ReadableByteChannel getContent(BareJID uploader, String slotId, String filename) throws IOException {
 		try {
+			log.finest("Downloading file: uploader=" + uploader + ", slotId=" + slotId + ", filename=" + filename);
 			// encode filename to make GET request URI
 			return Channels.newChannel(s3.path(bucket, createKey(slotId, URLEncoder.encode(filename, StandardCharsets.UTF_8)))
 											   .responseInputStream());
@@ -115,6 +116,7 @@ public class S3Store implements Store, ConfigurationChangedAware {
 			throws IOException {
 		var data = Channels.newInputStream(source).readAllBytes();
 		try {
+			log.finest("Uploading file: uploader=" + uploader + ", slotId=" + slotId + ", filename=" + filename);
 			// encode filename to make PUT request URI
 			s3.path(bucket, createKey(slotId, URLEncoder.encode(filename, StandardCharsets.UTF_8))).method(HttpMethod.PUT).requestBody(data).execute();;
 		} catch (RuntimeException ex) {
@@ -125,6 +127,7 @@ public class S3Store implements Store, ConfigurationChangedAware {
 	@Override
 	public void remove(BareJID uploader, String slotId) throws IOException {
 		try {
+			log.finest("Removing file: uploader=" + uploader + ", slotId=" + slotId);
 			List<String> toRemove = s3.path(bucket)
 					.query("list-type", "2")
 					.query("prefix", createKeyPrefix(slotId))
@@ -178,7 +181,7 @@ public class S3Store implements Store, ConfigurationChangedAware {
 				}
 			}
 		} catch (ServiceException ex) {
-			log.warning("Failed to checked if S3 bucket exist, skipping bucket " + bucket + " automatic creation - possible misconfiguration or issue with accessing S3 storage!");
+			log.log(Level.WARNING,"Failed to checked if S3 bucket exist, skipping bucket " + bucket + " automatic creation - possible misconfiguration or issue with accessing S3 storage!", ex);
 		}
 	}
 
@@ -198,8 +201,10 @@ public class S3Store implements Store, ConfigurationChangedAware {
 
 	private Client.Builder4 configureCredentials(Client.Builder2 builder2) {
 		if (accessKeyId != null && secretKey != null) {
+			log.fine("Using accessKeyId: " + accessKeyId + " and secretKey for S3 authentication");
 			return builder2.accessKey(accessKeyId).secretKey(secretKey);
 		} else {
+			log.fine("Using credentials from environment for S3 authentication");
 			return builder2.credentialsFromEnvironment();
 		}
 	}

@@ -135,5 +135,16 @@ public interface FileUploadRepository<DS extends DataSource>
 					(this.contentType == null || this.contentType.equals(contentType));
 		}
 
+		@Override
+		public String toString() {
+			final StringBuilder sb = new StringBuilder("Slot{");
+			sb.append("uploader=").append(uploader);
+			sb.append(", slotId='").append(slotId).append('\'');
+			sb.append(", filename='").append(filename).append('\'');
+			sb.append(", timestamp=").append(timestamp);
+			sb.append(", filesize=").append(filesize);
+			sb.append('}');
+			return sb.toString();
+		}
 	}
 }
